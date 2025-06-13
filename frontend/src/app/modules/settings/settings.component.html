@@ -46,50 +46,22 @@
       <div class="tab-content">
         <!-- Players Tab -->
         <div *ngIf="activeTab === 'players'">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Players Management</h5>
-            </div>
-            <div class="card-body">
-              <p>Players management functionality will be implemented here.</p>
-            </div>
-          </div>
+          <app-players-settings></app-players-settings>
         </div>
 
         <!-- Seasons Tab -->
         <div *ngIf="activeTab === 'seasons'">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Seasons Management</h5>
-            </div>
-            <div class="card-body">
-              <p>Seasons management functionality will be implemented here.</p>
-            </div>
-          </div>
+          <app-seasons-settings></app-seasons-settings>
         </div>
 
         <!-- Scoring Tab -->
         <div *ngIf="activeTab === 'scoring'">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Scoring Systems</h5>
-            </div>
-            <div class="card-body">
-              <p>Scoring systems management functionality will be implemented here.</p>
-            </div>
-          </div>
+          <app-scoring-settings></app-scoring-settings>
         </div>
 
         <!-- Schedule Tab -->
         <div *ngIf="activeTab === 'schedule'">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="mb-0">Schedule Management</h5>
-            </div>
-            <div class="card-body">
-              <p>Schedule management functionality will be implemented here.</p>
-            </div>
-          </div>
+          <app-schedule-settings></app-schedule-settings>
         </div>
       </div>
     </div>
