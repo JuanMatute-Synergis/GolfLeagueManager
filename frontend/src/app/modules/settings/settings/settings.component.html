@@ -1,0 +1,69 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="mb-4">
+        <h1 class="display-4">League Settings</h1>
+        <p class="lead text-muted">Manage players, seasons, scoring systems, and schedules</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <ul class="nav nav-tabs mb-4" id="settingsTabs">
+        <li class="nav-item">
+          <button 
+            class="nav-link"
+            [class.active]="activeTab === 'players'"
+            (click)="setActiveTab('players')">
+            <i class="fas fa-users me-2"></i>Players
+          </button>
+        </li>
+        <li class="nav-item">
+          <button 
+            class="nav-link"
+            [class.active]="activeTab === 'seasons'"
+            (click)="setActiveTab('seasons')">
+            <i class="fas fa-calendar-alt me-2"></i>Seasons
+          </button>
+        </li>
+        <li class="nav-item">
+          <button 
+            class="nav-link"
+            [class.active]="activeTab === 'scoring'"
+            (click)="setActiveTab('scoring')">
+            <i class="fas fa-trophy me-2"></i>Scoring
+          </button>
+        </li>
+        <li class="nav-item">
+          <button 
+            class="nav-link"
+            [class.active]="activeTab === 'schedule'"
+            (click)="setActiveTab('schedule')">
+            <i class="fas fa-clock me-2"></i>Schedule
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Players Tab -->
+        <div *ngIf="activeTab === 'players'">
+          <app-players-settings></app-players-settings>
+        </div>
+
+        <!-- Seasons Tab -->
+        <div *ngIf="activeTab === 'seasons'">
+          <app-seasons-settings></app-seasons-settings>
+        </div>
+
+        <!-- Scoring Tab -->
+        <div *ngIf="activeTab === 'scoring'">
+          <app-scoring-settings></app-scoring-settings>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div *ngIf="activeTab === 'schedule'">
+          <app-schedule-settings></app-schedule-settings>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

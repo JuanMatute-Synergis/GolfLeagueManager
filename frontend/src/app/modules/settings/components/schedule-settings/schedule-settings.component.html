@@ -1,0 +1,297 @@
+<div class="schedule-settings">
+  <!-- Schedule Settings Section -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h4 class="mb-0">Schedule Settings</h4>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="defaultStartTime" class="form-label">Default Start Time *</label>
+            <input
+              type="time"
+              class="form-control"
+              id="defaultStartTime"
+              formControlName="defaultStartTime"
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="rescheduleDeadlineHours" class="form-label">Reschedule Deadline (Hours) *</label>
+            <input
+              type="number"
+              class="form-control"
+              id="rescheduleDeadlineHours"
+              formControlName="rescheduleDeadlineHours"
+              min="1"
+            />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Default Play Days *</label>
+          <div class="row">
+            <div class="col-md-6">
+              <div *ngFor="let day of daysOfWeek.slice(0, 4)" class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [id]="'defaultPlayDay' + day"
+                  [checked]="isDefaultPlayDaySelected(day)"
+                  (change)="onDefaultPlayDayChange(day, $event)"
+                />
+                <label class="form-check-label" [for]="'defaultPlayDay' + day">
+                  {{ day }}
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div *ngFor="let day of daysOfWeek.slice(4)" class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [id]="'defaultPlayDay' + day"
+                  [checked]="isDefaultPlayDaySelected(day)"
+                  (change)="onDefaultPlayDayChange(day, $event)"
+                />
+                <label class="form-check-label" [for]="'defaultPlayDay' + day">
+                  {{ day }}
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="autoGenerateSchedule"
+                formControlName="autoGenerateSchedule"
+              />
+              <label class="form-check-label" for="autoGenerateSchedule">
+                Auto-generate Schedule
+              </label>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <div class="form-check form-switch">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="allowPlayerRescheduling"
+                formControlName="allowPlayerRescheduling"
+              />
+              <label class="form-check-label" for="allowPlayerRescheduling">
+                Allow Player Rescheduling
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success" [disabled]="settingsForm.invalid || loading">
+          <i class="fas fa-save"></i> Save Settings
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Schedule Templates Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4>Schedule Templates</h4>
+    <button class="btn btn-primary" (click)="showAddTemplateForm()">
+      <i class="fas fa-plus"></i> Add Template
+    </button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center py-3">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <!-- Template Form -->
+  <div *ngIf="showTemplateForm" class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">{{ editingTemplateId ? 'Edit' : 'Add' }} Schedule Template</h5>
+    </div>
+    <div class="card-body">
+      <form [formGroup]="templateForm" (ngSubmit)="saveTemplate()">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="templateName" class="form-label">Template Name *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="templateName"
+              formControlName="name"
+              placeholder="Enter template name"
+            />
+            <div *ngIf="templateForm.get('name')?.invalid && templateForm.get('name')?.touched" class="invalid-feedback d-block">
+              Template name is required
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="numberOfRounds" class="form-label">Number of Rounds *</label>
+            <input
+              type="number"
+              class="form-control"
+              id="numberOfRounds"
+              formControlName="numberOfRounds"
+              min="1"
+            />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="templateDescription" class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            id="templateDescription"
+            formControlName="description"
+            rows="3"
+            placeholder="Enter template description"
+          ></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="startDate" class="form-label">Start Date *</label>
+            <input
+              type="date"
+              class="form-control"
+              id="startDate"
+              formControlName="startDate"
+            />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="endDate" class="form-label">End Date *</label>
+            <input
+              type="date"
+              class="form-control"
+              id="endDate"
+              formControlName="endDate"
+            />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="startTime" class="form-label">Start Time *</label>
+            <input
+              type="time"
+              class="form-control"
+              id="startTime"
+              formControlName="startTime"
+            />
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Play Days *</label>
+          <div class="row">
+            <div class="col-md-6">
+              <div *ngFor="let day of daysOfWeek.slice(0, 4)" class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [id]="'playDay' + day"
+                  [checked]="isPlayDaySelected(day)"
+                  (change)="onPlayDayChange(day, $event)"
+                />
+                <label class="form-check-label" [for]="'playDay' + day">
+                  {{ day }}
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div *ngFor="let day of daysOfWeek.slice(4)" class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [id]="'playDay' + day"
+                  [checked]="isPlayDaySelected(day)"
+                  (change)="onPlayDayChange(day, $event)"
+                />
+                <label class="form-check-label" [for]="'playDay' + day">
+                  {{ day }}
+                </label>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="templateForm.get('playDays')?.invalid && templateForm.get('playDays')?.touched" class="invalid-feedback d-block">
+            At least one play day must be selected
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-success" [disabled]="templateForm.invalid || loading">
+            <i class="fas fa-save"></i> {{ editingTemplateId ? 'Update' : 'Save' }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="resetTemplateForms()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Templates List -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Schedule Templates</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="scheduleTemplates.length === 0 && !loading" class="text-center py-4">
+            <p class="text-muted">No schedule templates configured</p>
+          </div>
+          
+          <div *ngIf="scheduleTemplates.length > 0" class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Rounds</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Play Days</th>
+                  <th>Start Time</th>
+                  <th width="150">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let template of scheduleTemplates">
+                  <td>{{ template.name }}</td>
+                  <td>{{ template.description || '-' }}</td>
+                  <td>{{ template.numberOfRounds }}</td>
+                  <td>{{ template.startDate | date:'shortDate' }}</td>
+                  <td>{{ template.endDate | date:'shortDate' }}</td>
+                  <td>{{ template.playDays.join(', ') }}</td>
+                  <td>{{ template.startTime }}</td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button class="btn btn-outline-primary" (click)="editTemplate(template)" [disabled]="loading">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="btn btn-outline-danger" (click)="deleteTemplate(template.id!)" [disabled]="loading">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

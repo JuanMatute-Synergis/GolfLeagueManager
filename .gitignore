@@ -1,0 +1,311 @@
+# =============================================================================
+# GOLF LEAGUE MANAGER - .gitignore
+# Full-stack application with .NET Core backend and Angular frontend
+# =============================================================================
+
+# =============================================================================
+# .NET CORE / C# BACKEND
+# =============================================================================
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+msbuild.log
+msbuild.err
+msbuild.wrn
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# CodeRush
+.cr/
+
+# Python Tools for Visual Studio (PTVS)
+__pycache__/
+*.pyc
+
+# Entity Framework
+*.edmx.diagram
+*.edmx.sql
+*.pfx
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Dotnet
+*.dll
+*.exe
+*.pdb
+*.cache
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.tlog
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# =============================================================================
+# ANGULAR FRONTEND
+# =============================================================================
+
+# Dependencies
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Angular
+frontend/dist/
+frontend/.angular/
+frontend/.angular/cache/
+frontend/coverage/
+frontend/karma.conf.js.coverage
+frontend/tmp/
+frontend/out-tsc/
+frontend/e2e/
+frontend-old/dist/
+frontend-old/.angular/
+frontend-old/coverage/
+
+# Angular build outputs
+/dist
+/.angular
+/tmp
+/out-tsc
+
+# Angular cache
+.angular/cache
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+*.coverage
+*.nyc_output
+/libpeerconnection.log
+testem.log
+/typings
+
+# Angular CLI
+.angular-cli.json
+
+# Angular Universal
+.angular/
+/dist/
+
+# =============================================================================
+# DEVELOPMENT TOOLS & ENVIRONMENT
+# =============================================================================
+
+# Environment variables
+.env
+.env.*
+!.env.example
+*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# =============================================================================
+# OPERATING SYSTEM
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# DEVELOPMENT & MISC
+# =============================================================================
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.tgz
+
+# IDEs and editors
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.code-workspace
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Certificates
+*.p12
+*.p7b
+*.p7c
+*.p7r
+*.p7s
+*.crt
+*.cer
+*.key
+*.pfx
+
+# Configuration files with sensitive data
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# Deployment
+publish/
+*.publish.xml
+*.pubxml
+*.pubxml.user
+*.publishproj
+PublishScripts/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+project.json
+project.lock.json
+
+# =============================================================================
+# PROJECT SPECIFIC
+# =============================================================================
+
+# Golf League Manager specific
+/uploads
+/logs
+/temp
+golf-league-data/
+backup/
+
+# Deprecated frontend (legacy version)
+frontend-old/
+
+# End of .gitignore

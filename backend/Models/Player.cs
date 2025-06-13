@@ -1,0 +1,21 @@
+namespace GolfLeagueManager
+{
+    public class Player
+    {
+        public Guid Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        
+        // Navigation properties for matchups where this player is involved
+        public List<Matchup> MatchupsAsPlayerA { get; set; } = new List<Matchup>();
+        public List<Matchup> MatchupsAsPlayerB { get; set; } = new List<Matchup>();
+        
+        // Navigation properties for flight assignments
+        public List<PlayerFlightAssignment> FlightAssignments { get; set; } = new List<PlayerFlightAssignment>();
+        
+        // Navigation properties for score entries
+        public List<ScoreEntry> ScoreEntries { get; set; } = new List<ScoreEntry>();
+    }
+}

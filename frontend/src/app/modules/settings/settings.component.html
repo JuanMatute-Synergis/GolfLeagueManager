@@ -1,0 +1,97 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="mb-4">
+        <h1 class="display-4">League Settings</h1>
+        <p class="lead text-muted">Manage players, seasons, scoring systems, and schedules</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <ul class="nav nav-tabs mb-4" id="settingsTabs">
+        <li class="nav-item">
+          <button 
+            class="nav-link"
+            [class.active]="activeTab === 'players'"
+            (click)="setActiveTab('players')">
+            <i class="fas fa-users me-2"></i>Players
+          </button>
+        </li>
+        <li class="nav-item">
+          <button 
+            class="nav-link"
+            [class.active]="activeTab === 'seasons'"
+            (click)="setActiveTab('seasons')">
+            <i class="fas fa-calendar-alt me-2"></i>Seasons
+          </button>
+        </li>
+        <li class="nav-item">
+          <button 
+            class="nav-link"
+            [class.active]="activeTab === 'scoring'"
+            (click)="setActiveTab('scoring')">
+            <i class="fas fa-trophy me-2"></i>Scoring
+          </button>
+        </li>
+        <li class="nav-item">
+          <button 
+            class="nav-link"
+            [class.active]="activeTab === 'schedule'"
+            (click)="setActiveTab('schedule')">
+            <i class="fas fa-clock me-2"></i>Schedule
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Players Tab -->
+        <div *ngIf="activeTab === 'players'">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Players Management</h5>
+            </div>
+            <div class="card-body">
+              <p>Players management functionality will be implemented here.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seasons Tab -->
+        <div *ngIf="activeTab === 'seasons'">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Seasons Management</h5>
+            </div>
+            <div class="card-body">
+              <p>Seasons management functionality will be implemented here.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scoring Tab -->
+        <div *ngIf="activeTab === 'scoring'">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Scoring Systems</h5>
+            </div>
+            <div class="card-body">
+              <p>Scoring systems management functionality will be implemented here.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schedule Tab -->
+        <div *ngIf="activeTab === 'schedule'">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Schedule Management</h5>
+            </div>
+            <div class="card-body">
+              <p>Schedule management functionality will be implemented here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

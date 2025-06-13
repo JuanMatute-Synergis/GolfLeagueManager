@@ -1,0 +1,62 @@
+# Flight API Test Requests
+
+### Get all flights
+GET http://localhost:5274/api/flights
+
+### Get active flights only
+GET http://localhost:5274/api/flights/active
+
+### Get upcoming flights
+GET http://localhost:5274/api/flights/upcoming
+
+### Create a new flight
+POST http://localhost:5274/api/flights
+Content-Type: application/json
+
+{
+  "name": "Morning Flight",
+  "date": "2025-06-15T00:00:00Z",
+  "startTime": "08:00:00",
+  "course": "Pine Valley Golf Club",
+  "maxPlayers": 16,
+  "description": "Early morning flight for experienced players",
+  "isActive": true
+}
+
+### Create another flight
+POST http://localhost:5274/api/flights
+Content-Type: application/json
+
+{
+  "name": "Weekend Tournament",
+  "date": "2025-06-21T00:00:00Z",
+  "startTime": "10:30:00",
+  "course": "Augusta National",
+  "maxPlayers": 20,
+  "description": "Weekend tournament flight for all skill levels",
+  "isActive": true
+}
+
+### Get flights by date range
+GET http://localhost:5274/api/flights/date-range?startDate=2025-06-01&endDate=2025-06-30
+
+### Get flight by ID (replace {id} with actual ID)
+GET http://localhost:5274/api/flights/1
+
+### Update flight (replace {id} with actual ID)
+PUT http://localhost:5274/api/flights/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Morning Flight - Updated",
+  "date": "2025-06-15T00:00:00Z",
+  "startTime": "07:30:00",
+  "course": "Pine Valley Golf Club",
+  "maxPlayers": 18,
+  "description": "Early morning flight for experienced players - Updated time",
+  "isActive": true
+}
+
+### Delete flight (replace {id} with actual ID)
+DELETE http://localhost:5274/api/flights/1
