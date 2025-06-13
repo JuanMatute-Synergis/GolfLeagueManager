@@ -7,6 +7,7 @@ import { ScheduleSettingsComponent } from '../components/schedule-settings/sched
 
 @Component({
   selector: 'app-settings',
+  standalone: true,
   imports: [
     CommonModule, 
     PlayersSettingsComponent, 
@@ -15,7 +16,7 @@ import { ScheduleSettingsComponent } from '../components/schedule-settings/sched
     ScheduleSettingsComponent
   ],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css'
+  styleUrls: ['./settings.component.css']
 })
 export class SettingsComponent {
   activeTab: string = 'players';

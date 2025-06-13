@@ -1,49 +1,41 @@
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-12">
-      <div class="mb-4">
-        <h1 class="display-4">League Settings</h1>
-        <p class="lead text-muted">Manage players, seasons, scoring systems, and schedules</p>
-      </div>
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-900">League Settings</h1>
+    <p class="mt-2 text-lg text-gray-600">Manage players, seasons, scoring systems, and schedules</p>
+  </div>
 
       <!-- Tab Navigation -->
-      <ul class="nav nav-tabs mb-4" id="settingsTabs">
-        <li class="nav-item">
+      <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-8">
           <button 
-            class="nav-link"
-            [class.active]="activeTab === 'players'"
+            class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+            [class]="activeTab === 'players' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
             (click)="setActiveTab('players')">
-            <i class="fas fa-users me-2"></i>Players
+            <i class="fas fa-users mr-2"></i>Players
           </button>
-        </li>
-        <li class="nav-item">
           <button 
-            class="nav-link"
-            [class.active]="activeTab === 'seasons'"
+            class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+            [class]="activeTab === 'seasons' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
             (click)="setActiveTab('seasons')">
-            <i class="fas fa-calendar-alt me-2"></i>Seasons
+            <i class="fas fa-calendar-alt mr-2"></i>Seasons
           </button>
-        </li>
-        <li class="nav-item">
           <button 
-            class="nav-link"
-            [class.active]="activeTab === 'scoring'"
+            class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+            [class]="activeTab === 'scoring' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
             (click)="setActiveTab('scoring')">
-            <i class="fas fa-trophy me-2"></i>Scoring
+            <i class="fas fa-trophy mr-2"></i>Scoring
           </button>
-        </li>
-        <li class="nav-item">
           <button 
-            class="nav-link"
-            [class.active]="activeTab === 'schedule'"
+            class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+            [class]="activeTab === 'schedule' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
             (click)="setActiveTab('schedule')">
-            <i class="fas fa-clock me-2"></i>Schedule
+            <i class="fas fa-clock mr-2"></i>Schedule
           </button>
-        </li>
-      </ul>
+        </nav>
+      </div>
 
       <!-- Tab Content -->
-      <div class="tab-content">
+      <div class="mt-6">
         <!-- Players Tab -->
         <div *ngIf="activeTab === 'players'">
           <app-players-settings></app-players-settings>
@@ -64,6 +56,4 @@
           <app-schedule-settings></app-schedule-settings>
         </div>
       </div>
-    </div>
-  </div>
 </div>
