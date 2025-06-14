@@ -13,9 +13,6 @@ namespace GolfLeagueManager
         public Guid SeasonId { get; set; }
         public Season Season { get; set; } = null!;
         
-        // Navigation property for flights in this week
-        public List<Flight> Flights { get; set; } = new List<Flight>();
-        
         // Navigation property for matchups in this week
         public List<Matchup> Matchups { get; set; } = new List<Matchup>();
 

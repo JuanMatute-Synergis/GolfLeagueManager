@@ -1,0 +1,50 @@
+# Season API Test Requests
+
+### Get all seasons
+GET http://localhost:5274/api/seasons
+
+### Get active seasons only
+GET http://localhost:5274/api/seasons/active
+
+### Create a new season
+POST http://localhost:5274/api/seasons
+Content-Type: application/json
+
+{
+  "name": "Spring 2025",
+  "year": 2025,
+  "seasonNumber": 1,
+  "startDate": "2025-03-01T00:00:00Z",
+  "endDate": "2025-06-01T00:00:00Z"
+}
+
+### Create another season
+POST http://localhost:5274/api/seasons
+Content-Type: application/json
+
+{
+  "name": "Summer 2025",
+  "year": 2025,
+  "seasonNumber": 2,
+  "startDate": "2025-06-15T00:00:00Z",
+  "endDate": "2025-09-01T00:00:00Z"
+}
+
+### Get season by ID (replace {id} with actual ID)
+GET http://localhost:5274/api/seasons/{id}
+
+### Update season (replace {id} with actual ID)
+PUT http://localhost:5274/api/seasons/{id}
+Content-Type: application/json
+
+{
+  "id": "{id}",
+  "name": "Spring 2025 - Updated",
+  "year": 2025,
+  "seasonNumber": 1,
+  "startDate": "2025-03-01T00:00:00Z",
+  "endDate": "2025-06-01T00:00:00Z"
+}
+
+### Delete season (replace {id} with actual ID)
+DELETE http://localhost:5274/api/seasons/{id}

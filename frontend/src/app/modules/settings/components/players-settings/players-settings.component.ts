@@ -22,7 +22,7 @@ export class PlayersSettingsComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
   isEditMode = false;
-  editingPlayerId: number | null = null;
+  editingPlayerId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -109,7 +109,7 @@ export class PlayersSettingsComponent implements OnInit {
     }
   }
 
-  deletePlayer(id: number) {
+  deletePlayer(id: string) {
     if (confirm('Are you sure you want to delete this player?')) {
       this.isLoading = true;
       this.error = null;

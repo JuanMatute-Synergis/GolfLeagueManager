@@ -10,7 +10,7 @@ namespace GolfLeagueManager
         bool DeleteFlight(Guid id);
         bool UpdateFlight(Flight flight);
         IEnumerable<Flight> GetActiveFlights();
-        IEnumerable<Flight> GetFlightsByDateRange(DateTime startDate, DateTime endDate);
+        IEnumerable<Flight> GetFlightsBySeason(Guid seasonId);
     }
 
     public class FlightRepository : IFlightRepository
@@ -24,16 +24,6 @@ namespace GolfLeagueManager
 
         public void AddFlight(Flight flight)
         {
-            // Ensure the Date is in UTC
-            if (flight.Date.Kind == DateTimeKind.Unspecified)
-            {
-                flight.Date = DateTime.SpecifyKind(flight.Date, DateTimeKind.Utc);
-            }
-            else if (flight.Date.Kind == DateTimeKind.Local)
-            {
-                flight.Date = flight.Date.ToUniversalTime();
-            }
-
             flight.CreatedAt = DateTime.UtcNow;
             flight.UpdatedAt = DateTime.UtcNow;
             _context.Flights.Add(flight);
@@ -42,7 +32,7 @@ namespace GolfLeagueManager
 
         public IEnumerable<Flight> GetFlights()
         {
-            return _context.Flights.OrderBy(f => f.Date).ThenBy(f => f.StartTime).ToList();
+            return _context.Flights.OrderBy(f => f.Name).ToList();
         }
 
         public Flight? GetFlightById(Guid id)
@@ -67,21 +57,7 @@ namespace GolfLeagueManager
             if (existingFlight == null)
                 return false;
 
-            // Ensure the Date is in UTC
-            var updatedDate = flight.Date;
-            if (updatedDate.Kind == DateTimeKind.Unspecified)
-            {
-                updatedDate = DateTime.SpecifyKind(updatedDate, DateTimeKind.Utc);
-            }
-            else if (updatedDate.Kind == DateTimeKind.Local)
-            {
-                updatedDate = updatedDate.ToUniversalTime();
-            }
-
             existingFlight.Name = flight.Name;
-            existingFlight.Date = updatedDate;
-            existingFlight.StartTime = flight.StartTime;
-            existingFlight.Course = flight.Course;
             existingFlight.MaxPlayers = flight.MaxPlayers;
             existingFlight.Description = flight.Description;
             existingFlight.IsActive = flight.IsActive;
@@ -95,17 +71,15 @@ namespace GolfLeagueManager
         {
             return _context.Flights
                 .Where(f => f.IsActive)
-                .OrderBy(f => f.Date)
-                .ThenBy(f => f.StartTime)
+                .OrderBy(f => f.Name)
                 .ToList();
         }
 
-        public IEnumerable<Flight> GetFlightsByDateRange(DateTime startDate, DateTime endDate)
+        public IEnumerable<Flight> GetFlightsBySeason(Guid seasonId)
         {
             return _context.Flights
-                .Where(f => f.Date >= startDate && f.Date <= endDate)
-                .OrderBy(f => f.Date)
-                .ThenBy(f => f.StartTime)
+                .Where(f => f.SeasonId == seasonId)
+                .OrderBy(f => f.Name)
                 .ToList();
         }
     }

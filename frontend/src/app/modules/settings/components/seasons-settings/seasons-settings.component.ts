@@ -4,15 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { FlightService, Flight } from '../../services/flight.service';
 import { PlayerService, Player } from '../../services/player.service';
 import { PlayerFlightAssignmentService, PlayerFlightAssignment } from '../../services/player-flight-assignment.service';
-
-interface Season {
-  id: number;
-  name: string;
-  year: number;
-  seasonNumber: number;
-  startDate: string;
-  endDate: string;
-}
+import { SeasonService, Season } from '../../services/season.service';
 
 @Component({
   selector: 'app-seasons-settings',
@@ -27,33 +19,16 @@ export class SeasonsSettingsComponent implements OnInit {
   flightForm: FormGroup;
   
   // Data
-  seasons: Season[] = [
-    {
-      id: 1,
-      name: 'Spring 2025',
-      year: 2025,
-      seasonNumber: 1,
-      startDate: '2025-03-01',
-      endDate: '2025-06-01'
-    },
-    {
-      id: 2,
-      name: 'Summer 2025',
-      year: 2025,
-      seasonNumber: 2,
-      startDate: '2025-06-15',
-      endDate: '2025-09-01'
-    }
-  ];
+  seasons: Season[] = [];
   seasonFlights: Flight[] = [];
   flightAssignments: PlayerFlightAssignment[] = [];
   players: Player[] = [];
   playersWithHandicap: (Player & { handicap?: number })[] = [];
   
   // Selected data
-  selectedSeasonId: number | null = null;
-  selectedFlightId: number | null = null;
-  selectedPlayerId: number | null = null;
+  selectedSeasonId: string | null = null;
+  selectedFlightId: string | null = null;
+  selectedPlayerId: string | null = null;
   
   // UI state
   showSeasonForm = false;
@@ -62,8 +37,13 @@ export class SeasonsSettingsComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
   isEditMode = false;
-  editingSeasonId: number | null = null;
-  editingFlightId: number | null = null;
+  
+  // Mobile state
+  mobileActiveTab: 'seasons' | 'flights' | 'players' = 'seasons';
+
+  // Editing state
+  editingSeasonId: string | null = null;
+  editingFlightId: string | null = null;
   isFlightLeader: boolean = false;
   playerHandicap: number | null = null;
 
@@ -75,7 +55,8 @@ export class SeasonsSettingsComponent implements OnInit {
     private fb: FormBuilder,
     private flightService: FlightService,
     private playerService: PlayerService,
-    private playerFlightAssignmentService: PlayerFlightAssignmentService
+    private playerFlightAssignmentService: PlayerFlightAssignmentService,
+    private seasonService: SeasonService
   ) {
     this.seasonForm = this.fb.group({
       name: ['', Validators.required],
@@ -87,9 +68,6 @@ export class SeasonsSettingsComponent implements OnInit {
 
     this.flightForm = this.fb.group({
       name: ['', Validators.required],
-      date: ['', Validators.required],
-      startTime: ['08:00', Validators.required],
-      course: ['', Validators.required],
       maxPlayers: [16, [Validators.required, Validators.min(1)]],
       description: [''],
       isActive: [true]
@@ -98,6 +76,7 @@ export class SeasonsSettingsComponent implements OnInit {
 
   ngOnInit() {
     this.loadPlayers();
+    this.loadSeasons();
   }
 
   loadPlayers() {
@@ -107,6 +86,18 @@ export class SeasonsSettingsComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Error loading players:', error);
+      }
+    });
+  }
+
+  loadSeasons() {
+    this.seasonService.getSeasons().subscribe({
+      next: (seasons: Season[]) => {
+        this.seasons = seasons;
+      },
+      error: (error: any) => {
+        console.error('Error loading seasons:', error);
+        this.error = 'Failed to load seasons. Please try again.';
       }
     });
   }
@@ -130,26 +121,70 @@ export class SeasonsSettingsComponent implements OnInit {
   saveSeason() {
     if (this.seasonForm.valid) {
       const formValue = this.seasonForm.value;
+      this.isLoading = true;
+
       if (this.editingSeasonId) {
-        const idx = this.seasons.findIndex(s => s.id === this.editingSeasonId);
-        if (idx !== -1) {
-          this.seasons[idx] = { ...formValue, id: this.editingSeasonId };
-        }
+        // Update existing season
+        const seasonToUpdate: Season = { 
+          ...formValue, 
+          id: this.editingSeasonId 
+        };
+        
+        this.seasonService.updateSeason(seasonToUpdate).subscribe({
+          next: () => {
+            // Update local array
+            const idx = this.seasons.findIndex(s => s.id === this.editingSeasonId);
+            if (idx !== -1) {
+              this.seasons[idx] = seasonToUpdate;
+            }
+            this.resetSeasonForm();
+            this.isLoading = false;
+          },
+          error: (error: any) => {
+            console.error('Error updating season:', error);
+            this.error = 'Failed to update season. Please try again.';
+            this.isLoading = false;
+          }
+        });
       } else {
-        const newId = Math.max(...this.seasons.map(s => s.id), 0) + 1;
-        this.seasons.push({ ...formValue, id: newId });
+        // Create new season
+        const newSeason: Omit<Season, 'id'> = formValue;
+        
+        this.seasonService.addSeason(newSeason as Season).subscribe({
+          next: (savedSeason: Season) => {
+            this.seasons.push(savedSeason);
+            this.resetSeasonForm();
+            this.isLoading = false;
+          },
+          error: (error: any) => {
+            console.error('Error creating season:', error);
+            this.error = 'Failed to create season. Please try again.';
+            this.isLoading = false;
+          }
+        });
       }
-      this.resetSeasonForm();
     }
   }
 
   deleteSeason(season: Season) {
     if (confirm('Are you sure you want to delete this season?')) {
-      this.seasons = this.seasons.filter(s => s.id !== season.id);
-      if (this.selectedSeasonId === season.id) {
-        this.selectedSeasonId = null;
-        this.seasonFlights = [];
-      }
+      this.isLoading = true;
+      
+      this.seasonService.deleteSeason(season.id).subscribe({
+        next: () => {
+          this.seasons = this.seasons.filter(s => s.id !== season.id);
+          if (this.selectedSeasonId === season.id) {
+            this.selectedSeasonId = null;
+            this.seasonFlights = [];
+          }
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          console.error('Error deleting season:', error);
+          this.error = 'Failed to delete season. Please try again.';
+          this.isLoading = false;
+        }
+      });
     }
   }
 
@@ -165,44 +200,24 @@ export class SeasonsSettingsComponent implements OnInit {
   }
 
   // Flight Management
-  loadSeasonFlights(seasonId: number) {
+  loadSeasonFlights(seasonId: string) {
     if (!seasonId) return;
     
     this.isLoading = true;
     this.error = null;
     
-    // Mock implementation - creates example flights for the selected season
-    setTimeout(() => {
-      const selectedSeason = this.selectedSeason;
-      if (selectedSeason) {
-        const mockFlights: Flight[] = [
-          {
-            id: 101,
-            name: 'Morning Flight - ' + selectedSeason.name,
-            date: selectedSeason.startDate,
-            startTime: '08:00:00',
-            course: 'Pine Valley Golf Club',
-            maxPlayers: 16,
-            description: 'Early morning flight for the ' + selectedSeason.name + ' season',
-            isActive: true,
-            seasonId: seasonId
-          },
-          {
-            id: 102,
-            name: 'Afternoon Flight - ' + selectedSeason.name,
-            date: selectedSeason.startDate,
-            startTime: '13:00:00', 
-            course: 'Augusta National',
-            maxPlayers: 20,
-            description: 'Afternoon flight for the ' + selectedSeason.name + ' season',
-            isActive: true,
-            seasonId: seasonId
-          }
-        ];
-        this.seasonFlights = mockFlights;
+    // Use the actual API to load flights for the selected season
+    this.flightService.getFlightsBySeason(seasonId).subscribe({
+      next: (flights: Flight[]) => {
+        this.seasonFlights = flights;
+        this.isLoading = false;
+      },
+      error: (error: any) => {
+        console.error('Error loading season flights:', error);
+        this.error = 'Failed to load flights for this season. Please try again.';
+        this.isLoading = false;
       }
-      this.isLoading = false;
-    }, 500);
+    });
   }
 
   showAddFlightForm() {
@@ -214,7 +229,6 @@ export class SeasonsSettingsComponent implements OnInit {
     this.editingFlightId = null;
     this.flightForm.reset({ 
       maxPlayers: 16, 
-      startTime: '08:00',
       isActive: true
     });
   }
@@ -223,13 +237,8 @@ export class SeasonsSettingsComponent implements OnInit {
     this.showFlightForm = true;
     this.editingFlightId = flight.id!;
     
-    const formattedDate = flight.date ? flight.date.split('T')[0] : '';
-    const formattedTime = flight.startTime ? flight.startTime.substring(0, 5) : '08:00';
-    
     this.flightForm.patchValue({
-      ...flight,
-      date: formattedDate,
-      startTime: formattedTime
+      ...flight
     });
   }
 
@@ -240,45 +249,63 @@ export class SeasonsSettingsComponent implements OnInit {
       
       const flightPayload: Flight = {
         ...flightData,
-        date: flightData.date,
-        startTime: flightData.startTime + ':00',
         seasonId: this.selectedSeasonId
       };
       
-      setTimeout(() => {
-        if (this.editingFlightId) {
-          const seasonFlightIndex = this.seasonFlights.findIndex(f => f.id === this.editingFlightId);
-          if (seasonFlightIndex !== -1) {
-            this.seasonFlights[seasonFlightIndex] = { 
-              ...flightPayload, 
-              id: this.editingFlightId,
-              updatedAt: new Date().toISOString() 
-            };
+      if (this.editingFlightId) {
+        // Update existing flight
+        flightPayload.id = this.editingFlightId;
+        this.flightService.updateFlight(flightPayload).subscribe({
+          next: () => {
+            const flightIndex = this.seasonFlights.findIndex(f => f.id === this.editingFlightId);
+            if (flightIndex !== -1) {
+              this.seasonFlights[flightIndex] = { 
+                ...flightPayload, 
+                updatedAt: new Date().toISOString() 
+              };
+            }
+            this.resetFlightForm();
+            this.isLoading = false;
+          },
+          error: (error: any) => {
+            console.error('Error updating flight:', error);
+            this.error = 'Failed to update flight. Please try again.';
+            this.isLoading = false;
           }
-        } else {
-          const newId = Math.max(...this.seasonFlights.map(f => f.id || 0)) + 1;
-          const newFlight: Flight = {
-            ...flightPayload,
-            id: newId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          };
-          this.seasonFlights.push(newFlight);
-        }
-        
-        this.resetFlightForm();
-        this.isLoading = false;
-      }, 500);
+        });
+      } else {
+        // Create new flight
+        this.flightService.addFlight(flightPayload).subscribe({
+          next: (savedFlight: Flight) => {
+            this.seasonFlights.push(savedFlight);
+            this.resetFlightForm();
+            this.isLoading = false;
+          },
+          error: (error: any) => {
+            console.error('Error creating flight:', error);
+            this.error = 'Failed to create flight. Please try again.';
+            this.isLoading = false;
+          }
+        });
+      }
     }
   }
 
-  deleteFlight(id: number) {
+  deleteFlight(id: string) {
     if (confirm('Are you sure you want to delete this flight?')) {
-      this.seasonFlights = this.seasonFlights.filter(f => f.id !== id);
-      if (this.selectedFlightId === id) {
-        this.selectedFlightId = null;
-        this.flightAssignments = [];
-      }
+      this.flightService.deleteFlight(id).subscribe({
+        next: () => {
+          this.seasonFlights = this.seasonFlights.filter(f => f.id !== id);
+          if (this.selectedFlightId === id) {
+            this.selectedFlightId = null;
+            this.flightAssignments = [];
+          }
+        },
+        error: (error: any) => {
+          console.error('Error deleting flight:', error);
+          this.error = 'Failed to delete flight. Please try again.';
+        }
+      });
     }
   }
 
@@ -287,7 +314,6 @@ export class SeasonsSettingsComponent implements OnInit {
     this.editingFlightId = null;
     this.flightForm.reset({
       maxPlayers: 16,
-      startTime: '08:00',
       isActive: true
     });
   }
@@ -298,7 +324,7 @@ export class SeasonsSettingsComponent implements OnInit {
     this.loadFlightAssignments(flight.id!);
   }
 
-  loadFlightAssignments(flightId: number) {
+  loadFlightAssignments(flightId: string) {
     this.isLoading = true;
     this.error = null;
     
@@ -319,7 +345,7 @@ export class SeasonsSettingsComponent implements OnInit {
     });
   }
 
-  loadPlayersWithHandicap(flightId: number) {
+  loadPlayersWithHandicap(flightId: string) {
     this.playerFlightAssignmentService.getPlayersWithHandicap(flightId, this.players).subscribe({
       next: (players) => {
         this.playersWithHandicap = players;
@@ -354,7 +380,7 @@ export class SeasonsSettingsComponent implements OnInit {
     return this.players.filter(p => !assignedPlayerIds.includes(p.id!));
   }
 
-  getPlayerNameById(playerId: number): string {
+  getPlayerNameById(playerId: string): string {
     const player = this.players.find(p => p.id === playerId);
     return player ? `${player.firstName} ${player.lastName}` : 'Unknown Player';
   }
@@ -412,7 +438,7 @@ export class SeasonsSettingsComponent implements OnInit {
     });
   }
 
-  removeAssignment(assignmentId: number) {
+  removeAssignment(assignmentId: string) {
     this.isLoading = true;
     
     this.playerFlightAssignmentService.removeAssignment(assignmentId).subscribe({
@@ -426,5 +452,24 @@ export class SeasonsSettingsComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  // Mobile navigation methods
+  setMobileActiveTab(tab: 'seasons' | 'flights' | 'players') {
+    this.mobileActiveTab = tab;
+  }
+
+  selectSeasonMobile(season: Season) {
+    this.selectSeason(season);
+    this.setMobileActiveTab('flights');
+  }
+
+  selectFlightMobile(flight: Flight) {
+    this.selectFlight(flight);
+    this.setMobileActiveTab('players');
+  }
+
+  getFlightAssignmentCount(flightId: string): number {
+    return this.flightAssignments.filter(assignment => assignment.flightId === flightId).length;
   }
 }

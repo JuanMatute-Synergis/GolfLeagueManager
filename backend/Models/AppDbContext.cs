@@ -104,18 +104,12 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()");
-                // Configure relationship with Week (optional)
-                entity.HasOne(f => f.Week)
-                    .WithMany(w => w.Flights)
-                    .HasForeignKey(f => f.WeekId)
+                // Configure relationship with Season (optional)
+                entity.HasOne(f => f.Season)
+                    .WithMany(s => s.Flights)
+                    .HasForeignKey(f => f.SeasonId)
                     .OnDelete(DeleteBehavior.SetNull);
                     
-                // Ensure DateTime properties are stored as UTC
-                entity.Property(e => e.Date)
-                    .HasConversion(
-                        v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
-                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
-
                 entity.Property(e => e.CreatedAt)
                     .HasConversion(
                         v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),

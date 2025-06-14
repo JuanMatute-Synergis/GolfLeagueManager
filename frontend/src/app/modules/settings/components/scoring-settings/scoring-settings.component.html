@@ -1,5 +1,5 @@
-<div class="scoring-settings">
-  <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="scoring-settings h-100 d-flex flex-column">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-shrink-0">
     <h4>Scoring Systems</h4>
     <button class="btn btn-primary" (click)="showAddScoringForm()">
       <i class="fas fa-plus"></i> Add Scoring System
@@ -7,19 +7,19 @@
   </div>
 
   <!-- Loading Spinner -->
-  <div *ngIf="loading" class="text-center py-3">
+  <div *ngIf="loading" class="text-center py-3 flex-shrink-0">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
 
   <!-- Error Message -->
-  <div *ngIf="error" class="alert alert-danger">
+  <div *ngIf="error" class="alert alert-danger flex-shrink-0">
     {{ error }}
   </div>
 
   <!-- Scoring Form -->
-  <div *ngIf="showScoringForm" class="card mb-4">
+  <div *ngIf="showScoringForm" class="card mb-4 flex-shrink-0">
     <div class="card-header">
       <h5 class="mb-0">{{ editingScoringId ? 'Edit' : 'Add' }} Scoring System</h5>
     </div>
@@ -108,39 +108,48 @@
         <div class="card-body">
           <div *ngIf="scoringSystems.length === 0 && !loading" class="text-center py-4">
             <p class="text-muted">No scoring systems configured</p>
-          </div>
-          
-          <div *ngIf="scoringSystems.length > 0" class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Win Points</th>
-                  <th>Loss Points</th>
-                  <th>Tie Points</th>
-                  <th width="150">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let scoring of scoringSystems">
-                  <td>{{ scoring.name }}</td>
-                  <td>{{ scoring.pointsForWin }}</td>
-                  <td>{{ scoring.pointsForLoss }}</td>
-                  <td>{{ scoring.pointsForTie }}</td>
-                  <td>
-                    <div class="btn-group btn-group-sm">
-                      <button class="btn btn-outline-primary" (click)="editScoring(scoring)" [disabled]="loading">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn btn-outline-danger" (click)="deleteScoring(scoring.id!)" [disabled]="loading">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+    <!-- Scoring Systems List -->
+  <div class="card flex-fill d-flex flex-column" *ngIf="!loading">
+    <div class="card-header">
+      <h5 class="mb-0">Scoring Systems</h5>
+    </div>
+    <div class="card-body flex-fill d-flex flex-column p-0">
+      <div class="flex-fill overflow-auto" style="min-height: 200px; max-height: 400px;">
+        <div *ngIf="scoringSystems.length > 0" class="table-responsive h-100">
+          <table class="table table-striped mb-0">
+            <thead class="sticky-top bg-white">
+              <tr>
+                <th>Name</th>
+                <th>Win Points</th>
+                <th>Loss Points</th>
+                <th>Tie Points</th>
+                <th width="150">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let scoring of scoringSystems">
+                <td>{{ scoring.name }}</td>
+                <td>{{ scoring.pointsForWin }}</td>
+                <td>{{ scoring.pointsForLoss }}</td>
+                <td>{{ scoring.pointsForTie }}</td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" (click)="editScoring(scoring)" [disabled]="loading">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger" (click)="deleteScoring(scoring.id!)" [disabled]="loading">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Empty state -->
+        <div *ngIf="scoringSystems.length === 0" class="text-center p-4 text-muted">
+          <p>No scoring systems found. Add your first scoring system to get started.</p>
         </div>
       </div>
     </div>

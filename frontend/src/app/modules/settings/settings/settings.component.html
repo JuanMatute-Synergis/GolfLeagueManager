@@ -1,58 +1,74 @@
-<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-  <div class="mb-8">
-    <h1 class="text-4xl font-bold text-gray-900">League Settings</h1>
-    <p class="mt-2 text-lg text-gray-600">Manage players, seasons, scoring systems, and schedules</p>
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col">
+  <div class="mb-4 flex-shrink-0">
+    <h1 class="text-2xl sm:text-3xl font-bold text-foreground">League Settings</h1>
+    <p class="mt-1 text-sm sm:text-base text-muted-foreground">Manage players, seasons, scoring systems, and schedules</p>
   </div>
 
       <!-- Tab Navigation -->
-      <div class="border-b border-gray-200 mb-6">
-        <nav class="-mb-px flex space-x-8">
-          <button 
-            class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-            [class]="activeTab === 'players' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-            (click)="setActiveTab('players')">
-            <i class="fas fa-users mr-2"></i>Players
-          </button>
-          <button 
-            class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-            [class]="activeTab === 'seasons' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-            (click)="setActiveTab('seasons')">
-            <i class="fas fa-calendar-alt mr-2"></i>Seasons
-          </button>
-          <button 
-            class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-            [class]="activeTab === 'scoring' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-            (click)="setActiveTab('scoring')">
-            <i class="fas fa-trophy mr-2"></i>Scoring
-          </button>
-          <button 
-            class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-            [class]="activeTab === 'schedule' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-            (click)="setActiveTab('schedule')">
-            <i class="fas fa-clock mr-2"></i>Schedule
-          </button>
-        </nav>
+      <div class="mb-4 flex-shrink-0">
+        <!-- Mobile Dropdown Navigation - Visible only on mobile -->
+        <div class="sm:hidden">
+          <select 
+            [value]="activeTab" 
+            (change)="setActiveTab($any($event.target).value)"
+            class="w-full p-3 border border-border rounded-md text-foreground bg-background focus:border-primary focus:ring-2 focus:ring-primary/20">
+            <option value="players">👥 Players</option>
+            <option value="seasons">📅 Seasons</option>
+            <option value="scoring">🏆 Scoring</option>
+            <option value="schedule">⏰ Schedule</option>
+          </select>
+        </div>
+
+        <!-- Desktop Tab Navigation - Hidden on mobile -->
+        <div class="hidden sm:block border-b border-border">
+          <nav class="-mb-px flex space-x-8">
+            <button 
+              class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+              [class]="activeTab === 'players' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
+              (click)="setActiveTab('players')">
+              <i class="fas fa-users mr-2"></i>Players
+            </button>
+            <button 
+              class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+              [class]="activeTab === 'seasons' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
+              (click)="setActiveTab('seasons')">
+              <i class="fas fa-calendar-alt mr-2"></i>Seasons
+            </button>
+            <button 
+              class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+              [class]="activeTab === 'scoring' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
+              (click)="setActiveTab('scoring')">
+              <i class="fas fa-trophy mr-2"></i>Scoring
+            </button>
+            <button 
+              class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+              [class]="activeTab === 'schedule' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
+              (click)="setActiveTab('schedule')">
+              <i class="fas fa-clock mr-2"></i>Schedule
+            </button>
+          </nav>
+        </div>
       </div>
 
       <!-- Tab Content -->
-      <div class="mt-6">
+      <div class="flex-1 overflow-hidden">
         <!-- Players Tab -->
-        <div *ngIf="activeTab === 'players'">
+        <div class="h-full" *ngIf="activeTab === 'players'">
           <app-players-settings></app-players-settings>
         </div>
 
         <!-- Seasons Tab -->
-        <div *ngIf="activeTab === 'seasons'">
+        <div class="h-full" *ngIf="activeTab === 'seasons'">
           <app-seasons-settings></app-seasons-settings>
         </div>
 
         <!-- Scoring Tab -->
-        <div *ngIf="activeTab === 'scoring'">
+        <div class="h-full" *ngIf="activeTab === 'scoring'">
           <app-scoring-settings></app-scoring-settings>
         </div>
 
         <!-- Schedule Tab -->
-        <div *ngIf="activeTab === 'schedule'">
+        <div class="h-full" *ngIf="activeTab === 'schedule'">
           <app-schedule-settings></app-schedule-settings>
         </div>
       </div>

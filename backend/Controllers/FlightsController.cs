@@ -51,19 +51,10 @@ namespace GolfLeagueManager
             return Ok(flights);
         }
 
-        [HttpGet("upcoming")]
-        public ActionResult<IEnumerable<Flight>> GetUpcomingFlights()
+        [HttpGet("season/{seasonId}")]
+        public ActionResult<IEnumerable<Flight>> GetFlightsBySeason(Guid seasonId)
         {
-            var flights = _flightService.GetUpcomingFlights();
-            return Ok(flights);
-        }
-
-        [HttpGet("date-range")]
-        public ActionResult<IEnumerable<Flight>> GetFlightsByDateRange(
-            [FromQuery] DateTime startDate, 
-            [FromQuery] DateTime endDate)
-        {
-            var flights = _flightService.GetFlightsByDateRange(startDate, endDate);
+            var flights = _flightService.GetFlightsBySeason(seasonId);
             return Ok(flights);
         }
 

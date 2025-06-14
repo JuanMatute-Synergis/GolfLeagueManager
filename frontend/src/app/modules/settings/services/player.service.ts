@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 
 export interface Player {
-  id?: number;
+  id?: string;  // Changed from number to string for GUID compatibility
   firstName: string;
   lastName: string;
   email: string;
@@ -18,11 +18,11 @@ export class PlayerService {
   
   // Mock data for development until backend is ready
   private mockPlayers: Player[] = [
-    { id: 1, firstName: 'John', lastName: 'Smith', email: 'john.smith@example.com', phone: '555-123-4567' },
-    { id: 2, firstName: 'Emma', lastName: 'Johnson', email: 'emma.j@example.com', phone: '555-234-5678' },
-    { id: 3, firstName: 'Michael', lastName: 'Williams', email: 'mwilliams@example.com', phone: '555-345-6789' },
-    { id: 4, firstName: 'Olivia', lastName: 'Brown', email: 'obrown@example.com', phone: '555-456-7890' },
-    { id: 5, firstName: 'James', lastName: 'Davis', email: 'james.davis@example.com', phone: '555-567-8901' }
+    { id: '1', firstName: 'John', lastName: 'Smith', email: 'john.smith@example.com', phone: '555-123-4567' },
+    { id: '2', firstName: 'Emma', lastName: 'Johnson', email: 'emma.j@example.com', phone: '555-234-5678' },
+    { id: '3', firstName: 'Michael', lastName: 'Williams', email: 'mwilliams@example.com', phone: '555-345-6789' },
+    { id: '4', firstName: 'Olivia', lastName: 'Brown', email: 'obrown@example.com', phone: '555-456-7890' },
+    { id: '5', firstName: 'James', lastName: 'Davis', email: 'james.davis@example.com', phone: '555-567-8901' }
   ];
 
   constructor(private http: HttpClient) {}
@@ -37,8 +37,10 @@ export class PlayerService {
 
   addPlayer(player: Player): Observable<Player> {
     // Mock implementation
-    const newId = Math.max(...this.mockPlayers.map(p => p.id || 0)) + 1;
-    const newPlayer = { ...player, id: newId };
+    const newId = this.mockPlayers.length > 0 
+      ? Math.max(...this.mockPlayers.map(p => parseInt(p.id || '0'))) + 1 
+      : 1;
+    const newPlayer = { ...player, id: newId.toString() };
     this.mockPlayers.push(newPlayer);
     return of(newPlayer);
     
@@ -58,7 +60,7 @@ export class PlayerService {
     // return this.http.put<void>(`${this.apiUrl}/${player.id}`, player);
   }
 
-  deletePlayer(id: number): Observable<void> {
+  deletePlayer(id: string): Observable<void> {
     // Mock implementation
     this.mockPlayers = this.mockPlayers.filter(p => p.id !== id);
     return of(void 0);

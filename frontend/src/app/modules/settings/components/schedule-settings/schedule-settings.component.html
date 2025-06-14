@@ -1,6 +1,6 @@
-<div class="schedule-settings">
+<div class="schedule-settings h-100 d-flex flex-column">
   <!-- Schedule Settings Section -->
-  <div class="card mb-4">
+  <div class="card mb-4 flex-shrink-0">
     <div class="card-header">
       <h4 class="mb-0">Schedule Settings</h4>
     </div>
@@ -98,28 +98,8 @@
     </div>
   </div>
 
-  <!-- Schedule Templates Section -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4>Schedule Templates</h4>
-    <button class="btn btn-primary" (click)="showAddTemplateForm()">
-      <i class="fas fa-plus"></i> Add Template
-    </button>
-  </div>
-
-  <!-- Loading Spinner -->
-  <div *ngIf="loading" class="text-center py-3">
-    <div class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-  </div>
-
-  <!-- Error Message -->
-  <div *ngIf="error" class="alert alert-danger">
-    {{ error }}
-  </div>
-
   <!-- Template Form -->
-  <div *ngIf="showTemplateForm" class="card mb-4">
+  <div *ngIf="showTemplateForm" class="card mb-4 flex-shrink-0">
     <div class="card-header">
       <h5 class="mb-0">{{ editingTemplateId ? 'Edit' : 'Add' }} Schedule Template</h5>
     </div>
@@ -248,48 +228,58 @@
         <div class="card-header">
           <h5 class="mb-0">Schedule Templates</h5>
         </div>
-        <div class="card-body">
-          <div *ngIf="scheduleTemplates.length === 0 && !loading" class="text-center py-4">
-            <p class="text-muted">No schedule templates configured</p>
-          </div>
-          
-          <div *ngIf="scheduleTemplates.length > 0" class="table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Rounds</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
-                  <th>Play Days</th>
-                  <th>Start Time</th>
-                  <th width="150">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let template of scheduleTemplates">
-                  <td>{{ template.name }}</td>
-                  <td>{{ template.description || '-' }}</td>
-                  <td>{{ template.numberOfRounds }}</td>
-                  <td>{{ template.startDate | date:'shortDate' }}</td>
-                  <td>{{ template.endDate | date:'shortDate' }}</td>
-                  <td>{{ template.playDays.join(', ') }}</td>
-                  <td>{{ template.startTime }}</td>
-                  <td>
-                    <div class="btn-group btn-group-sm">
-                      <button class="btn btn-outline-primary" (click)="editTemplate(template)" [disabled]="loading">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <button class="btn btn-outline-danger" (click)="deleteTemplate(template.id!)" [disabled]="loading">
-                        <i class="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+  <!-- Schedule Templates List -->
+  <div class="card flex-fill d-flex flex-column">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Schedule Templates</h4>
+        <button class="btn btn-primary" (click)="showAddTemplateForm()">
+          <i class="fas fa-plus"></i> Add Template
+        </button>
+      </div>
+    </div>
+    <div class="card-body flex-fill d-flex flex-column p-0">
+      <div class="flex-fill overflow-auto" style="min-height: 200px; max-height: 400px;">
+        <div *ngIf="scheduleTemplates.length === 0 && !loading" class="text-center py-4">
+          <p class="text-muted">No schedule templates configured</p>
+        </div>
+        
+        <div *ngIf="scheduleTemplates.length > 0" class="table-responsive h-100">
+          <table class="table table-striped mb-0">
+            <thead class="sticky-top bg-white">
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Rounds</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Play Days</th>
+                <th>Start Time</th>
+                <th width="150">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let template of scheduleTemplates">
+                <td>{{ template.name }}</td>
+                <td>{{ template.description || '-' }}</td>
+                <td>{{ template.numberOfRounds }}</td>
+                <td>{{ template.startDate | date:'shortDate' }}</td>
+                <td>{{ template.endDate | date:'shortDate' }}</td>
+                <td>{{ template.playDays.join(', ') }}</td>
+                <td>{{ template.startTime }}</td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" (click)="editTemplate(template)" [disabled]="loading">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger" (click)="deleteTemplate(template.id!)" [disabled]="loading">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

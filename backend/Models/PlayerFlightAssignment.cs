@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace GolfLeagueManager
 {
     public class PlayerFlightAssignment
@@ -9,7 +11,9 @@ namespace GolfLeagueManager
         public double HandicapAtAssignment { get; set; }
         
         // Navigation properties
+        [JsonIgnore]
         public Player Player { get; set; } = null!;
+        [JsonIgnore]
         public Flight Flight { get; set; } = null!;
     }
 }

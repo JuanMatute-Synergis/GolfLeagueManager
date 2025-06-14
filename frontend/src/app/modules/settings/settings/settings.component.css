@@ -1,6 +1,12 @@
 /* Settings component specific styles */
 /* Using Tailwind CSS utility classes, minimal custom CSS needed */
 
+/* Ensure the settings component takes full height */
+:host {
+  display: block;
+  height: 100%;
+}
+
 /* Focus styles for accessibility */
 button:focus {
   outline: 2px solid theme('colors.blue.500');

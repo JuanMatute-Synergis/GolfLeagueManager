@@ -29,14 +29,7 @@ namespace backend.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<string>("Course")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
@@ -53,18 +46,15 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("interval");
+                    b.Property<Guid?>("SeasonId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("WeekId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("WeekId");
+                    b.HasIndex("SeasonId");
 
                     b.ToTable("Flights");
                 });
@@ -257,12 +247,12 @@ namespace backend.Migrations
 
             modelBuilder.Entity("GolfLeagueManager.Flight", b =>
                 {
-                    b.HasOne("GolfLeagueManager.Week", "Week")
+                    b.HasOne("GolfLeagueManager.Season", "Season")
                         .WithMany("Flights")
-                        .HasForeignKey("WeekId")
+                        .HasForeignKey("SeasonId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Week");
+                    b.Navigation("Season");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Matchup", b =>
@@ -354,13 +344,13 @@ namespace backend.Migrations
 
             modelBuilder.Entity("GolfLeagueManager.Season", b =>
                 {
+                    b.Navigation("Flights");
+
                     b.Navigation("Weeks");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Week", b =>
                 {
-                    b.Navigation("Flights");
-
                     b.Navigation("Matchups");
 
                     b.Navigation("ScoreEntries");

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250612180655_AddMatchupTable")]
-    partial class AddMatchupTable
+    [Migration("20250614130308_InitialCreateWithGuids")]
+    partial class InitialCreateWithGuids
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,20 +27,12 @@ namespace backend.Migrations
 
             modelBuilder.Entity("GolfLeagueManager.Flight", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Course")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
@@ -57,18 +49,15 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<TimeSpan>("StartTime")
-                        .HasColumnType("interval");
+                    b.Property<Guid?>("SeasonId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("WeekId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("WeekId");
+                    b.HasIndex("SeasonId");
 
                     b.ToTable("Flights");
                 });
@@ -140,6 +129,62 @@ namespace backend.Migrations
                     b.ToTable("Players");
                 });
 
+            modelBuilder.Entity("GolfLeagueManager.PlayerFlightAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("FlightId")
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("HandicapAtAssignment")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsFlightLeader")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlightId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("PlayerFlightAssignments");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.ScoreEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PointsEarned")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("WeekId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("WeekId");
+
+                    b.ToTable("ScoreEntries");
+                });
+
             modelBuilder.Entity("GolfLeagueManager.Season", b =>
                 {
                     b.Property<Guid>("Id")
@@ -205,12 +250,12 @@ namespace backend.Migrations
 
             modelBuilder.Entity("GolfLeagueManager.Flight", b =>
                 {
-                    b.HasOne("GolfLeagueManager.Week", "Week")
+                    b.HasOne("GolfLeagueManager.Season", "Season")
                         .WithMany("Flights")
-                        .HasForeignKey("WeekId")
+                        .HasForeignKey("SeasonId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("Week");
+                    b.Navigation("Season");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Matchup", b =>
@@ -240,6 +285,44 @@ namespace backend.Migrations
                     b.Navigation("Week");
                 });
 
+            modelBuilder.Entity("GolfLeagueManager.PlayerFlightAssignment", b =>
+                {
+                    b.HasOne("GolfLeagueManager.Flight", "Flight")
+                        .WithMany()
+                        .HasForeignKey("FlightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GolfLeagueManager.Player", "Player")
+                        .WithMany("FlightAssignments")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Flight");
+
+                    b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.ScoreEntry", b =>
+                {
+                    b.HasOne("GolfLeagueManager.Player", "Player")
+                        .WithMany("ScoreEntries")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GolfLeagueManager.Week", "Week")
+                        .WithMany("ScoreEntries")
+                        .HasForeignKey("WeekId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Week");
+                });
+
             modelBuilder.Entity("GolfLeagueManager.Week", b =>
                 {
                     b.HasOne("GolfLeagueManager.Season", "Season")
@@ -253,21 +336,27 @@ namespace backend.Migrations
 
             modelBuilder.Entity("GolfLeagueManager.Player", b =>
                 {
+                    b.Navigation("FlightAssignments");
+
                     b.Navigation("MatchupsAsPlayerA");
 
                     b.Navigation("MatchupsAsPlayerB");
+
+                    b.Navigation("ScoreEntries");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Season", b =>
                 {
+                    b.Navigation("Flights");
+
                     b.Navigation("Weeks");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Week", b =>
                 {
-                    b.Navigation("Flights");
-
                     b.Navigation("Matchups");
+
+                    b.Navigation("ScoreEntries");
                 });
 #pragma warning restore 612, 618
         }

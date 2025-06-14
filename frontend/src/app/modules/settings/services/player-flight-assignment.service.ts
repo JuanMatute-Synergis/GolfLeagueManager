@@ -4,9 +4,9 @@ import { Observable, of } from 'rxjs';
 import { Player } from './player.service';
 
 export interface PlayerFlightAssignment {
-  id?: number;
-  playerId: number;
-  flightId: number;
+  id?: string;  // Changed from number to string for GUID compatibility
+  playerId: string;  // Changed from number to string for GUID compatibility
+  flightId: string;  // Changed from number to string for GUID compatibility
   isFlightLeader: boolean;
   handicapAtAssignment?: number;
   player?: Player; // For joined data
@@ -21,16 +21,16 @@ export class PlayerFlightAssignmentService {
   // Mock data for development until backend is ready
   private mockAssignments: PlayerFlightAssignment[] = [
     // Sample mock assignments for initial testing
-    { id: 1, playerId: 1, flightId: 101, isFlightLeader: true, handicapAtAssignment: 12 },
-    { id: 2, playerId: 2, flightId: 101, isFlightLeader: false, handicapAtAssignment: 15 },
-    { id: 3, playerId: 3, flightId: 101, isFlightLeader: false, handicapAtAssignment: 8 },
-    { id: 4, playerId: 1, flightId: 102, isFlightLeader: false, handicapAtAssignment: 12 },
-    { id: 5, playerId: 4, flightId: 102, isFlightLeader: true, handicapAtAssignment: 10 }
+    { id: '1', playerId: '1', flightId: '101', isFlightLeader: true, handicapAtAssignment: 12 },
+    { id: '2', playerId: '2', flightId: '101', isFlightLeader: false, handicapAtAssignment: 15 },
+    { id: '3', playerId: '3', flightId: '101', isFlightLeader: false, handicapAtAssignment: 8 },
+    { id: '4', playerId: '1', flightId: '102', isFlightLeader: false, handicapAtAssignment: 12 },
+    { id: '5', playerId: '4', flightId: '102', isFlightLeader: true, handicapAtAssignment: 10 }
   ];
 
   constructor(private http: HttpClient) {}
 
-  getAssignmentsByFlight(flightId: number): Observable<PlayerFlightAssignment[]> {
+  getAssignmentsByFlight(flightId: string): Observable<PlayerFlightAssignment[]> {
     // Later, when API is ready:
     // return this.http.get<PlayerFlightAssignment[]>(`${this.apiUrl}/flight/${flightId}`);
     
@@ -48,7 +48,7 @@ export class PlayerFlightAssignmentService {
     return of(newAssignment);
   }
 
-  removeAssignment(assignmentId: number): Observable<void> {
+  removeAssignment(assignmentId: string): Observable<void> {
     // Later, when API is ready:
     // return this.http.delete<void>(`${this.apiUrl}/${assignmentId}`);
     
@@ -69,10 +69,11 @@ export class PlayerFlightAssignmentService {
     return of(void 0);
   }
 
-  private getNextId(): number {
-    return this.mockAssignments.length > 0 
-      ? Math.max(...this.mockAssignments.map(a => a.id || 0)) + 1 
-      : 1;
+  private getNextId(): string {
+    const maxNumericId = this.mockAssignments.length > 0 
+      ? Math.max(...this.mockAssignments.map(a => parseInt(a.id || '0'))) 
+      : 0;
+    return (maxNumericId + 1).toString();
   }
   
   /**
@@ -80,7 +81,7 @@ export class PlayerFlightAssignmentService {
    * @param flightId The flight ID to get handicaps for
    * @param players The list of all players
    */
-  getPlayersWithHandicap(flightId: number, players: Player[]): Observable<(Player & { handicap?: number })[]> {
+  getPlayersWithHandicap(flightId: string, players: Player[]): Observable<(Player & { handicap?: number })[]> {
     // In a real implementation, we would fetch this from the backend
     // For now, return some mock handicap data for existing players
     

@@ -3,17 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Flight {
-  id?: number;
+  id?: string;  // Changed from number to string for GUID compatibility
   name: string;
-  date: string; // ISO date string
-  startTime: string; // TimeSpan as string (e.g., "08:00:00")
-  course: string;
   maxPlayers: number;
   description: string;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
-  seasonId?: number; // Reference to the season this flight belongs to
+  seasonId?: string; // Changed from number to string for GUID compatibility
 }
 
 @Injectable({
@@ -28,24 +25,16 @@ export class FlightService {
     return this.http.get<Flight[]>(this.apiUrl);
   }
 
-  getFlightById(id: number): Observable<Flight> {
+  getFlightById(id: string): Observable<Flight> {
     return this.http.get<Flight>(`${this.apiUrl}/${id}`);
   }
   
-  getFlightsBySeason(seasonId: number): Observable<Flight[]> {
+  getFlightsBySeason(seasonId: string): Observable<Flight[]> {
     return this.http.get<Flight[]>(`${this.apiUrl}/season/${seasonId}`);
   }
 
   getActiveFlights(): Observable<Flight[]> {
     return this.http.get<Flight[]>(`${this.apiUrl}/active`);
-  }
-
-  getUpcomingFlights(): Observable<Flight[]> {
-    return this.http.get<Flight[]>(`${this.apiUrl}/upcoming`);
-  }
-
-  getFlightsByDateRange(startDate: string, endDate: string): Observable<Flight[]> {
-    return this.http.get<Flight[]>(`${this.apiUrl}/date-range?startDate=${startDate}&endDate=${endDate}`);
   }
 
   addFlight(flight: Flight): Observable<Flight> {
@@ -56,7 +45,7 @@ export class FlightService {
     return this.http.put<void>(`${this.apiUrl}/${flight.id}`, flight);
   }
 
-  deleteFlight(id: number): Observable<void> {
+  deleteFlight(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

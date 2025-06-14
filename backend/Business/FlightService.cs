@@ -42,16 +42,9 @@ namespace GolfLeagueManager
             return _flightRepository.GetActiveFlights();
         }
 
-        public IEnumerable<Flight> GetUpcomingFlights()
+        public IEnumerable<Flight> GetFlightsBySeason(Guid seasonId)
         {
-            var today = DateTime.Today;
-            return _flightRepository.GetFlightsByDateRange(today, today.AddMonths(3))
-                .Where(f => f.IsActive);
-        }
-
-        public IEnumerable<Flight> GetFlightsByDateRange(DateTime startDate, DateTime endDate)
-        {
-            return _flightRepository.GetFlightsByDateRange(startDate, endDate);
+            return _flightRepository.GetFlightsBySeason(seasonId);
         }
 
         private void ValidateFlight(Flight flight)
@@ -59,14 +52,8 @@ namespace GolfLeagueManager
             if (string.IsNullOrWhiteSpace(flight.Name))
                 throw new ArgumentException("Flight name is required.");
 
-            if (string.IsNullOrWhiteSpace(flight.Course))
-                throw new ArgumentException("Course is required.");
-
             if (flight.MaxPlayers <= 0)
                 throw new ArgumentException("Max players must be greater than 0.");
-
-            if (flight.Date < DateTime.Today)
-                throw new ArgumentException("Flight date cannot be in the past.");
         }
     }
 }
