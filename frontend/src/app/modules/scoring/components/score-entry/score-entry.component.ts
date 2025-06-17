@@ -9,6 +9,7 @@ import { Season, Week, ScoreEntry, Player, PlayerWithFlight } from '../../models
 import { Matchup } from '../../../settings/services/matchup.service';
 import { ScorecardModalComponent } from '../scorecard-modal/scorecard-modal.component';
 import { ScorecardData } from '../../models/scorecard.model';
+import { HoleScoreBackend } from '../../services/scorecard.service';
 
 interface MatchupWithDetails extends Matchup {
   playerAName?: string;
@@ -17,6 +18,7 @@ interface MatchupWithDetails extends Matchup {
   hasChanged?: boolean;
   originalPlayerAScore?: number;
   originalPlayerBScore?: number;
+  holeScores?: HoleScoreBackend[];
 }
 
 @Component({
@@ -42,6 +44,7 @@ export class ScoreEntryComponent implements OnInit {
 
   constructor(
     private scoringService: ScoringService,
+    private scorecardService: ScorecardService,
     private matchupService: MatchupService,
     private route: ActivatedRoute,
     private router: Router
@@ -177,6 +180,7 @@ export class ScoreEntryComponent implements OnInit {
     this.matchupService.getMatchupsByWeek(this.selectedWeekId).subscribe({
       next: (matchups) => {
         this.matchups = matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
+        this.loadHoleScoresForMatchups();
         this.isLoading = false;
         // If players aren't loaded yet, re-enrich after players are loaded
         if (this.players.length === 0) {
@@ -186,6 +190,23 @@ export class ScoreEntryComponent implements OnInit {
       error: (error) => {
         console.error('Error loading matchups:', error);
         this.isLoading = false;
+      }
+    });
+  }
+
+  loadHoleScoresForMatchups() {
+    // Load hole scores for all matchups
+    this.matchups.forEach(matchup => {
+      if (matchup.id) {
+        this.scorecardService.getScorecard(matchup.id).subscribe({
+          next: (holeScores) => {
+            matchup.holeScores = holeScores;
+          },
+          error: (error) => {
+            // Silently handle errors - matchup may not have hole scores yet
+            matchup.holeScores = [];
+          }
+        });
       }
     });
   }
@@ -238,13 +259,60 @@ export class ScoreEntryComponent implements OnInit {
   }
 
   getMatchupStatus(matchup: MatchupWithDetails): string {
-    if (matchup.playerAScore && matchup.playerBScore) {
-      return 'Completed';
-    } else if (matchup.playerAScore || matchup.playerBScore) {
-      return 'Partial';
-    } else {
-      return 'Pending';
+    // If no hole scores are loaded yet, fall back to simple total score check
+    if (!matchup.holeScores || matchup.holeScores.length === 0) {
+      if (matchup.playerAScore && matchup.playerBScore) {
+        return 'Completed';
+      } else if (matchup.playerAScore || matchup.playerBScore) {
+        return 'Partial';
+      } else {
+        return 'Pending';
+      }
     }
+
+    // Check hole-by-hole completion status
+    const front9Holes = matchup.holeScores.filter(h => h.holeNumber >= 1 && h.holeNumber <= 9);
+    const back9Holes = matchup.holeScores.filter(h => h.holeNumber >= 10 && h.holeNumber <= 18);
+
+    // Count completed holes for each 9
+    const front9Completed = front9Holes.filter(h => 
+      (h.playerAScore !== null && h.playerAScore !== undefined) && 
+      (h.playerBScore !== null && h.playerBScore !== undefined)
+    ).length;
+    
+    const back9Completed = back9Holes.filter(h => 
+      (h.playerAScore !== null && h.playerAScore !== undefined) && 
+      (h.playerBScore !== null && h.playerBScore !== undefined)
+    ).length;
+
+    // Count any partial entries in each 9
+    const front9Partial = front9Holes.filter(h => 
+      (h.playerAScore !== null && h.playerAScore !== undefined) || 
+      (h.playerBScore !== null && h.playerBScore !== undefined)
+    ).length;
+    
+    const back9Partial = back9Holes.filter(h => 
+      (h.playerAScore !== null && h.playerAScore !== undefined) || 
+      (h.playerBScore !== null && h.playerBScore !== undefined)
+    ).length;
+
+    // Logic: Completed if exactly one 9-hole set is complete (9 holes) and the other has no entries
+    const front9IsComplete = front9Completed === 9;
+    const back9IsComplete = back9Completed === 9;
+    const front9HasNoEntries = front9Partial === 0;
+    const back9HasNoEntries = back9Partial === 0;
+
+    if ((front9IsComplete && back9HasNoEntries) || (back9IsComplete && front9HasNoEntries)) {
+      return 'Completed';
+    }
+
+    // If any holes have been started, it's partial
+    if (front9Partial > 0 || back9Partial > 0) {
+      return 'Partial';
+    }
+
+    // No holes entered
+    return 'Pending';
   }
 
   getMatchupStatusClass(matchup: MatchupWithDetails): string {
@@ -317,16 +385,84 @@ export class ScoreEntryComponent implements OnInit {
   }
 
   clearMatchupScores(matchup: MatchupWithDetails) {
-    matchup.playerAScore = undefined;
-    matchup.playerBScore = undefined;
-    this.onScoreChange(matchup);
+    if (!matchup.id) return;
+
+    this.isLoading = true;
+    
+    // Clear scorecard data from backend
+    this.scorecardService.deleteScorecard(matchup.id).subscribe({
+      next: () => {
+        // Clear cached hole scores
+        matchup.holeScores = [];
+        // Clear total scores
+        matchup.playerAScore = undefined;
+        matchup.playerBScore = undefined;
+        this.onScoreChange(matchup);
+        this.isLoading = false;
+        console.log('Scorecard cleared successfully');
+      },
+      error: (error) => {
+        // Even if backend delete fails, clear the frontend data
+        console.warn('Failed to clear scorecard from backend, clearing frontend data only:', error);
+        matchup.holeScores = [];
+        matchup.playerAScore = undefined;
+        matchup.playerBScore = undefined;
+        this.onScoreChange(matchup);
+        this.isLoading = false;
+      }
+    });
   }
 
   clearAllScores() {
+    if (this.matchups.length === 0) return;
+
+    this.isLoading = true;
+    let clearedCount = 0;
+    const totalMatchups = this.matchups.length;
+
     this.matchups.forEach(matchup => {
-      matchup.playerAScore = undefined;
-      matchup.playerBScore = undefined;
-      this.onScoreChange(matchup);
+      if (matchup.id) {
+        // Clear scorecard data from backend
+        this.scorecardService.deleteScorecard(matchup.id).subscribe({
+          next: () => {
+            // Clear cached hole scores and total scores
+            matchup.holeScores = [];
+            matchup.playerAScore = undefined;
+            matchup.playerBScore = undefined;
+            this.onScoreChange(matchup);
+            
+            clearedCount++;
+            if (clearedCount === totalMatchups) {
+              this.isLoading = false;
+              console.log('All scorecards cleared successfully');
+            }
+          },
+          error: (error) => {
+            // Even if backend delete fails, clear the frontend data
+            console.warn(`Failed to clear scorecard for matchup ${matchup.id}, clearing frontend data only:`, error);
+            matchup.holeScores = [];
+            matchup.playerAScore = undefined;
+            matchup.playerBScore = undefined;
+            this.onScoreChange(matchup);
+            
+            clearedCount++;
+            if (clearedCount === totalMatchups) {
+              this.isLoading = false;
+            }
+          }
+        });
+      } else {
+        // If no matchup ID, just clear frontend data
+        matchup.holeScores = [];
+        matchup.playerAScore = undefined;
+        matchup.playerBScore = undefined;
+        this.onScoreChange(matchup);
+        
+        clearedCount++;
+        if (clearedCount === totalMatchups) {
+          this.isLoading = false;
+        }
+      }
     });
   }
 
@@ -372,6 +508,14 @@ export class ScoreEntryComponent implements OnInit {
       matchup.playerAScore = scorecardData.playerATotalScore;
       matchup.playerBScore = scorecardData.playerBTotalScore;
       this.onScoreChange(matchup);
+      
+      // Reload hole scores for this matchup to update status
+      this.scorecardService.getScorecard(scorecardData.matchupId).subscribe({
+        next: (holeScores) => {
+          matchup.holeScores = holeScores;
+        },
+        error: (error) => console.error('Error reloading hole scores:', error)
+      });
     }
 
     // Show success message - the scorecard has been saved to the backend
