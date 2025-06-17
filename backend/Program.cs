@@ -6,6 +6,7 @@ using Scalar.AspNetCore;
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using GolfLeagueManager.Business;
 
 namespace GolfLeagueManager
 {
@@ -36,8 +37,7 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<IPlayerFlightAssignmentRepository, PlayerFlightAssignmentRepository>();
             builder.Services.AddScoped<IWeekRepository, WeekRepository>();
             builder.Services.AddScoped<IScoreEntryRepository, ScoreEntryRepository>();
-            builder.Services.AddScoped<IMatchupRepository, MatchupRepository>();
-              // Register business services
+            builder.Services.AddScoped<IMatchupRepository, MatchupRepository>();              // Register business services
             builder.Services.AddScoped<PlayerService>();
             builder.Services.AddScoped<FlightService>();
             builder.Services.AddScoped<SeasonService>();
@@ -47,6 +47,9 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<MatchupService>();
             builder.Services.AddScoped<ScorecardService>();
             builder.Services.AddScoped<MatchPlayService>();
+            builder.Services.AddScoped<ScoreImportService>();
+            builder.Services.AddScoped<JsonImportService>();
+            builder.Services.AddScoped<DatabaseCleanupService>();
 
             // Add controllers with JSON options
             builder.Services.AddControllers()

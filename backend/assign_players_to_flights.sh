@@ -63,14 +63,14 @@ echo ""
 echo "=== Assigning Flight 1 Players ==="
 
 players_flight1=(
-    "Frank,Frankenfield"
-    "Kenny,Palladino"
-    "Lou,Gabrielle"
-    "Steve,Bedek"
-    "Curt,Saeger"
-    "Jay,Sullivan"
-    "Stu,Silfies"
-    "Carl,Hardner"
+    "John,Perry"
+    "Kevin,Kelhart"
+    "Joe,Mahachanh"
+    "Alex,Peck"
+    "Tim,Seyler"
+    "Jeff,Dilcher"
+    "Bill,Stein"
+    "George,Hutson"
 )
 
 for player in "${players_flight1[@]}"; do
@@ -88,14 +88,14 @@ echo ""
 echo "=== Assigning Flight 2 Players ==="
 
 players_flight2=(
-    "John,Perry"
-    "Kevin,Kelhart"
-    "Joe,Mahachanh"
-    "Alex,Peck"
-    "Tim,Seyler"
-    "Jeff,Dilcher"
-    "Bill,Stein"
-    "George,Hutson"
+    "Frank,Frankenfield"
+    "Kenny,Palladino"
+    "Lou,Gabrielle"
+    "Steve,Bedek"
+    "Curt,Saeger"
+    "Jay,Sullivan"
+    "Stu,Silfies"
+    "Carl,Hardner"
 )
 
 for player in "${players_flight2[@]}"; do

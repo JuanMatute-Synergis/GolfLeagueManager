@@ -496,9 +496,8 @@ export class SchedulingSettingsComponent implements OnInit {
   }
 
   getWeekDisplayName(week: Week): string {
-    const startDate = new Date(week.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const endDate = new Date(week.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return `${week.name} (${startDate} - ${endDate})`;
+    const weekDate = new Date(week.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return `${week.name} (${weekDate})`;
   }
 
   trackByMatchupId(index: number, matchup: Matchup): string {

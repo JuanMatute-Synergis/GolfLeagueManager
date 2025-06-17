@@ -17,6 +17,11 @@ export const layoutRoutes: Routes = [
     loadChildren: () => import('../settings/settings.routes').then((m) => m.settingsRoutes),
   },
   {
+    path: 'matchups',
+    loadComponent: () => import('./layout.component').then(m => m.LayoutComponent),
+    loadChildren: () => import('../matchups/matchups.routes').then((m) => m.matchupsRoutes),
+  },
+  {
     path: 'components',
     loadComponent: () => import('./layout.component').then(m => m.LayoutComponent),
     loadChildren: () => import('../uikit/uikit.routes').then((m) => m.uikitRoutes),

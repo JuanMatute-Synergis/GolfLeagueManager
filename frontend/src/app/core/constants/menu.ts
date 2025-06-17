@@ -22,6 +22,11 @@ export class Menu {
           route: '/players',
         },
         {
+          icon: 'assets/icons/tablericons/arrows-shuffle-2.svg',
+          label: 'Matchups',
+          route: '/matchups',
+        },
+        {
           icon: 'assets/icons/heroicons/outline/cog-6-tooth.svg',
           label: 'Settings',
           route: '/settings',

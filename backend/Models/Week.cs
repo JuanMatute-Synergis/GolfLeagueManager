@@ -7,8 +7,7 @@ namespace GolfLeagueManager
     {
         public Guid Id { get; set; }
         public int WeekNumber { get; set; } // e.g. 1, 2, 3, etc.
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime Date { get; set; } // The Wednesday date when the week is played
         public string Name { get; set; } = string.Empty; // e.g. "Week 1", "Championship Week"
         public bool IsActive { get; set; } = true;
         

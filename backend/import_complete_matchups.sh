@@ -37,8 +37,8 @@ get_week_id_by_date() {
     
     local full_date="$year-$month-$day"
     
-    # Find week that contains this date
-    curl -s -X GET "$API_BASE/weeks" | jq -r ".[] | select(.startDate <= \"${full_date}T00:00:00Z\" and .endDate >= \"${full_date}T23:59:59Z\") | .id"
+    # Find week that contains this date (now using single date field)
+    curl -s -X GET "$API_BASE/weeks" | jq -r ".[] | select(.date | startswith(\"${full_date}\")) | .id"
 }
 
 # Function to create a matchup

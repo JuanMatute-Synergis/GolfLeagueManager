@@ -72,14 +72,21 @@ namespace GolfLeagueManager
         public async Task<Week?> GetCurrentWeekAsync(Guid seasonId)
         {
             var weeks = await GetWeeksBySeasonIdAsync(seasonId);
-            return weeks.FirstOrDefault(w => w.IsActive && w.StartDate <= DateTime.UtcNow && w.EndDate >= DateTime.UtcNow);
+            var today = DateTime.UtcNow.Date;
+            
+            // Find the week that matches today's date, or the closest past week
+            return weeks.Where(w => w.IsActive && w.Date.Date <= today)
+                       .OrderByDescending(w => w.Date)
+                       .FirstOrDefault();
         }
 
         public async Task<Week?> GetNextWeekAsync(Guid seasonId)
         {
             var weeks = await GetWeeksBySeasonIdAsync(seasonId);
-            return weeks.Where(w => w.StartDate > DateTime.UtcNow)
-                       .OrderBy(w => w.StartDate)
+            var today = DateTime.UtcNow.Date;
+            
+            return weeks.Where(w => w.Date.Date > today)
+                       .OrderBy(w => w.Date)
                        .FirstOrDefault();
         }
 
@@ -98,35 +105,29 @@ namespace GolfLeagueManager
                 return; // Don't generate if weeks already exist
             }
 
-            var startDate = season.StartDate;
-            var endDate = season.EndDate;
-            var currentWeekStart = startDate;
+            var startDate = season.StartDate.Date; // Ensure we're working with dates only
+            var endDate = season.EndDate.Date;
             var weekNumber = 1;
 
-            while (currentWeekStart < endDate)
-            {
-                var currentWeekEnd = currentWeekStart.AddDays(6); // 7-day weeks
-                
-                // Don't go past the season end date
-                if (currentWeekEnd > endDate)
-                {
-                    currentWeekEnd = endDate;
-                }
+            // Find the first Wednesday on or after the start date
+            var currentDay = startDate;
 
+            // Generate a week for each Wednesday within the season date range
+            while (currentDay <= endDate)
+            {
                 var week = new Week
                 {
                     Id = Guid.NewGuid(),
                     SeasonId = seasonId,
                     WeekNumber = weekNumber,
                     Name = $"Week {weekNumber}",
-                    StartDate = currentWeekStart,
-                    EndDate = currentWeekEnd,
+                    Date = DateTime.SpecifyKind(currentDay, DateTimeKind.Utc),
                     IsActive = true
                 };
 
                 await _weekRepository.CreateAsync(week);
                 
-                currentWeekStart = currentWeekEnd.AddDays(1); // Start next week the day after current week ends
+                currentDay = currentDay.AddDays(7); // Move to next Wednesday
                 weekNumber++;
             }
         }

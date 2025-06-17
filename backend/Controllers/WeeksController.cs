@@ -103,5 +103,19 @@ namespace GolfLeagueManager.Controllers
             }
             return NoContent();
         }
+
+        [HttpPost("generate/{seasonId}")]
+        public async Task<IActionResult> GenerateWeeksForSeason(Guid seasonId)
+        {
+            try
+            {
+                await _weekService.GenerateWeeksForSeasonAsync(seasonId);
+                return Ok(new { message = "Weeks generated successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -1,14 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace GolfLeagueManager
 {
     public class MatchupService
     {
         private readonly IMatchupRepository _matchupRepository;
         private readonly PlayerFlightAssignmentService _playerFlightAssignmentService;
+        private readonly AppDbContext _context;
 
-        public MatchupService(IMatchupRepository matchupRepository, PlayerFlightAssignmentService playerFlightAssignmentService)
+        public MatchupService(IMatchupRepository matchupRepository, PlayerFlightAssignmentService playerFlightAssignmentService, AppDbContext context)
         {
             _matchupRepository = matchupRepository;
             _playerFlightAssignmentService = playerFlightAssignmentService;
+            _context = context;
         }
 
         public async Task<IEnumerable<Matchup>> GetAllMatchupsAsync()
@@ -23,7 +27,15 @@ namespace GolfLeagueManager
 
         public async Task<IEnumerable<Matchup>> GetMatchupsByWeekIdAsync(Guid weekId)
         {
-            return await _matchupRepository.GetByWeekIdAsync(weekId);
+            var matchups = await _matchupRepository.GetByWeekIdAsync(weekId);
+            
+            // Calculate total scores for each matchup
+            foreach (var matchup in matchups)
+            {
+                await CalculateMatchupTotalsAsync(matchup);
+            }
+            
+            return matchups;
         }
 
         public async Task<IEnumerable<Matchup>> GetMatchupsBySeasonIdAsync(Guid seasonId)
@@ -183,6 +195,24 @@ namespace GolfLeagueManager
             }
 
             return matchups;
+        }
+
+        private async Task CalculateMatchupTotalsAsync(Matchup matchup)
+        {
+            // Get all hole scores for this matchup
+            var holeScores = await _context.HoleScores
+                .Where(hs => hs.MatchupId == matchup.Id)
+                .ToListAsync();
+
+            if (holeScores.Any())
+            {
+                // Calculate total scores
+                matchup.PlayerAScore = holeScores
+                    .Sum(hs => hs.PlayerAScore ?? 0);
+
+                matchup.PlayerBScore = holeScores
+                    .Sum(hs => hs.PlayerBScore ?? 0);
+            }
         }
     }
 }

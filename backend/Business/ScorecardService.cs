@@ -201,6 +201,12 @@ namespace GolfLeagueManager
                 .OrderBy(hs => hs.HoleNumber)
                 .ToListAsync();
 
+            // If no hole scores exist, initialize them with default values
+            if (!holeScores.Any())
+            {
+                holeScores = await InitializeDefaultHoleScoresAsync(matchupId);
+            }
+
             return new ScorecardResponse
             {
                 MatchupId = matchupId,
@@ -245,6 +251,48 @@ namespace GolfLeagueManager
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        /// <summary>
+        /// Initialize hole scores with default hole handicaps and pars for a matchup
+        /// </summary>
+        private async Task<List<HoleScore>> InitializeDefaultHoleScoresAsync(Guid matchupId)
+        {
+            // Standard 9-hole stroke index (1 = hardest, 9 = easiest)
+            var defaultHoleHandicaps = new Dictionary<int, int>
+            {
+                { 1, 1 }, { 2, 5 }, { 3, 3 }, { 4, 7 }, { 5, 2 },
+                { 6, 8 }, { 7, 4 }, { 8, 6 }, { 9, 9 }
+            };
+
+            // Standard 9-hole pars
+            var defaultPars = new Dictionary<int, int>
+            {
+                { 1, 4 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 4 },
+                { 6, 3 }, { 7, 4 }, { 8, 4 }, { 9, 5 }
+            };
+
+            var holeScores = new List<HoleScore>();
+
+            for (int holeNumber = 1; holeNumber <= 9; holeNumber++)
+            {
+                var holeScore = new HoleScore
+                {
+                    Id = Guid.NewGuid(),
+                    MatchupId = matchupId,
+                    HoleNumber = holeNumber,
+                    Par = defaultPars[holeNumber],
+                    HoleHandicap = defaultHoleHandicaps[holeNumber],
+                    PlayerAMatchPoints = 0,
+                    PlayerBMatchPoints = 0
+                };
+
+                holeScores.Add(holeScore);
+                _context.HoleScores.Add(holeScore);
+            }
+
+            await _context.SaveChangesAsync();
+            return holeScores;
         }
     }
 }

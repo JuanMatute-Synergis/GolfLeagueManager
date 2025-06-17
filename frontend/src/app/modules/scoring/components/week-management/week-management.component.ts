@@ -55,21 +55,11 @@ import { Season, Week } from '../../models/week.model';
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-foreground mb-2">Start Date</label>
+              <label class="block text-sm font-medium text-foreground mb-2">Date (Wednesday)</label>
               <input 
                 type="date"
-                [(ngModel)]="weekForm_startDate"
-                name="startDate"
-                required
-                class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-foreground mb-2">End Date</label>
-              <input 
-                type="date"
-                [(ngModel)]="weekForm_endDate"
-                name="endDate"
+                [(ngModel)]="weekForm_date"
+                name="date"
                 required
                 class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
             </div>
@@ -115,7 +105,7 @@ import { Season, Week } from '../../models/week.model';
                   <tr>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Week</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Name</th>
-                    <th class="text-left font-semibold text-foreground p-4 border-b border-border">Date Range</th>
+                    <th class="text-left font-semibold text-foreground p-4 border-b border-border">Date</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Status</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Scores</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Actions</th>
@@ -128,8 +118,7 @@ import { Season, Week } from '../../models/week.model';
                       <div class="font-semibold text-foreground">{{ week.name }}</div>
                     </td>
                     <td class="p-4 border-b border-border text-foreground">
-                      <div>{{ week.startDate | date:'mediumDate' }}</div>
-                      <div class="text-muted-foreground">{{ week.endDate | date:'mediumDate' }}</div>
+                      <div>{{ week.date | date:'fullDate' }}</div>
                     </td>
                     <td class="p-4 border-b border-border">
                       <span [class]="'px-2 py-1 text-xs rounded-full ' + getWeekStatusClass(week)">
@@ -197,8 +186,7 @@ export class WeekManagementComponent implements OnInit {
   // Form fields
   weekForm_weekNumber: number = 1;
   weekForm_name: string = '';
-  weekForm_startDate: string = '';
-  weekForm_endDate: string = '';
+  weekForm_date: string = '';
 
   constructor(
     private scoringService: ScoringService,
@@ -248,8 +236,7 @@ export class WeekManagementComponent implements OnInit {
       seasonId: this.selectedSeasonId,
       weekNumber: this.weekForm_weekNumber,
       name: this.weekForm_name,
-      startDate: this.weekForm_startDate,
-      endDate: this.weekForm_endDate,
+      date: this.weekForm_date,
       isActive: true
     };
 
@@ -274,8 +261,7 @@ export class WeekManagementComponent implements OnInit {
     this.editingWeek = week;
     this.weekForm_weekNumber = week.weekNumber;
     this.weekForm_name = week.name;
-    this.weekForm_startDate = week.startDate;
-    this.weekForm_endDate = week.endDate;
+    this.weekForm_date = this.formatDateForInput(week.date);
     this.showCreateForm = false;
   }
 
@@ -302,18 +288,23 @@ export class WeekManagementComponent implements OnInit {
     this.editingWeek = null;
     this.weekForm_weekNumber = this.weeks.length + 1;
     this.weekForm_name = `Week ${this.weeks.length + 1}`;
-    this.weekForm_startDate = '';
-    this.weekForm_endDate = '';
+    this.weekForm_date = '';
   }
 
   getWeekStatus(week: Week): string {
     const now = new Date();
-    const start = new Date(week.startDate);
-    const end = new Date(week.endDate);
+    const weekDate = new Date(week.date);
 
-    if (now < start) return 'Upcoming';
-    if (now > end) return 'Completed';
-    return 'Active';
+    // Consider week active if it's the current Wednesday or within the same week
+    const today = new Date();
+    const currentWeekStart = new Date(today);
+    currentWeekStart.setDate(today.getDate() - today.getDay()); // Start of current week (Sunday)
+    const currentWeekEnd = new Date(currentWeekStart);
+    currentWeekEnd.setDate(currentWeekStart.getDate() + 6); // End of current week (Saturday)
+
+    if (weekDate > currentWeekEnd) return 'Upcoming';
+    if (weekDate >= currentWeekStart && weekDate <= currentWeekEnd) return 'Active';
+    return 'Completed';
   }
 
   getWeekStatusClass(week: Week): string {

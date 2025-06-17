@@ -42,7 +42,7 @@ import { Season, Week, ScoreEntry, Player } from '../../models/week.model';
           <div class="flex items-center justify-between">
             <div>
               <h2 class="text-2xl font-bold mb-2">{{ selectedWeek.name }}</h2>
-              <p class="opacity-90">{{ selectedWeek.startDate | date:'mediumDate' }} - {{ selectedWeek.endDate | date:'mediumDate' }}</p>
+              <p class="opacity-90">{{ selectedWeek.date | date:'fullDate' }}</p>
             </div>
             <div class="text-right">
               <div class="text-3xl font-bold">{{ leaderboard.length }}</div>
@@ -348,9 +348,12 @@ export class LeaderboardComponent implements OnInit {
   }
 
   getWeekDisplayName(week: Week): string {
-    const startDate = new Date(week.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const endDate = new Date(week.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    return `${week.name} (${startDate} - ${endDate})`;
+    const weekDate = new Date(week.date).toLocaleDateString('en-US', { 
+      weekday: 'long',
+      month: 'short', 
+      day: 'numeric' 
+    });
+    return `${week.name} (${weekDate})`;
   }
 
   navigateToScoreEntry() {

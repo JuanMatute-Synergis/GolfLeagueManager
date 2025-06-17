@@ -1,8 +1,7 @@
 export interface Week {
   id: string;
   weekNumber: number;
-  startDate: string;
-  endDate: string;
+  date: string; // The Wednesday date when the week is played
   name: string;
   isActive: boolean;
   seasonId: string;

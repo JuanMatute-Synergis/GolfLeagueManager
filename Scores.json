@@ -1,0 +1,2830 @@
+{
+  "players": [
+    {
+      "firstName": "George",
+      "lastName": "Hutson",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 4,
+            "hole4": 4,
+            "hole5": 6,
+            "hole6": 2,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 5
+          },
+          "total": 39
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 2,
+            "hole12": 6,
+            "hole13": 7,
+            "hole14": 6,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 4,
+            "hole18": 4
+          },
+          "total": 42
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 4,
+            "hole3": 7,
+            "hole4": 3,
+            "hole5": 3,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 39
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 6,
+            "hole13": 5,
+            "hole14": 4,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 4,
+            "hole18": 5
+          },
+          "total": 41
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 4,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 6,
+            "hole8": 4,
+            "hole9": 3
+          },
+          "total": 41
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 6,
+            "hole13": 5,
+            "hole14": 4,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 4,
+            "hole18": 5
+          },
+          "total": 41
+        }
+      ]
+    },
+    {
+      "firstName": "Jeff",
+      "lastName": "Dilcher",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 4,
+            "hole4": 6,
+            "hole5": 6,
+            "hole6": 3,
+            "hole7": 6,
+            "hole8": 3,
+            "hole9": 7
+          },
+          "total": 44
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 3,
+            "hole12": 6,
+            "hole13": 6,
+            "hole14": 4,
+            "hole15": 6,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 47
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 5,
+            "hole6": 6,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 3
+          },
+          "total": 46
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 5,
+            "hole12": 4,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 47
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 5,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 4,
+            "hole9": 5
+          },
+          "total": 44
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 5,
+            "hole12": 4,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 47
+        }
+      ]
+    },
+    {
+      "firstName": "Bill",
+      "lastName": "Stein",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 6,
+            "hole5": 7,
+            "hole6": 4,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 3
+          },
+          "total": 43
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 8,
+            "hole11": 3,
+            "hole12": 4,
+            "hole13": 7,
+            "hole14": 4,
+            "hole15": 5,
+            "hole16": 3,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 45
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 4,
+            "hole2": 4,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 4,
+            "hole9": 5
+          },
+          "total": 40
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 6,
+            "hole13": 5,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 44
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 4,
+            "hole3": 5,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 44
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 6,
+            "hole13": 5,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 44
+        }
+      ]
+    },
+    {
+      "firstName": "John",
+      "lastName": "Perry",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 4,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 42
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 5,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 3,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 44
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 4,
+            "hole3": 5,
+            "hole4": 3,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 6,
+            "hole9": 3
+          },
+          "total": 43
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 43
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 4,
+            "hole4": 5,
+            "hole5": 3,
+            "hole6": 5,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 40
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 43
+        }
+      ]
+    },
+    {
+      "firstName": "Alex",
+      "lastName": "Peck",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 4,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 5,
+            "hole6": 5,
+            "hole7": 5,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 47
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 5,
+            "hole14": 6,
+            "hole15": 3,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 7
+          },
+          "total": 44
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 4,
+            "hole3": 4,
+            "hole4": 4,
+            "hole5": 3,
+            "hole6": 6,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 40
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 4,
+            "hole18": 7
+          },
+          "total": 44
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 4,
+            "hole5": 3,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 6,
+            "hole9": 5
+          },
+          "total": 45
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 4,
+            "hole18": 7
+          },
+          "total": 44
+        }
+      ]
+    },
+    {
+      "firstName": "Joe",
+      "lastName": "Mahachanh",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 4,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 3,
+            "hole6": 8,
+            "hole7": 7,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 47
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 4
+          },
+          "total": 45
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 7,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 49
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 5,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 45
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 5,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 45
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 5,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 45
+        }
+      ]
+    },
+    {
+      "firstName": "Tim",
+      "lastName": "Seyler",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 6,
+            "hole6": 6,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 48
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 6,
+            "hole13": 6,
+            "hole14": 6,
+            "hole15": 4,
+            "hole16": 6,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 47
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 4,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 7,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 45
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 4,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 4,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 42
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 6,
+            "hole3": 7,
+            "hole4": 6,
+            "hole5": 5,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 50
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 4,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 4,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 42
+        }
+      ]
+    },
+    {
+      "firstName": "Kevin",
+      "lastName": "Kelhart",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 5,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 52
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 2,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 4,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 43
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 49
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 3,
+            "hole12": 4,
+            "hole13": 5,
+            "hole14": 6,
+            "hole15": 4,
+            "hole16": 5,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 43
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 4,
+            "hole3": 4,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 6
+          },
+          "total": 45
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 3,
+            "hole12": 4,
+            "hole13": 5,
+            "hole14": 6,
+            "hole15": 4,
+            "hole16": 5,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 43
+        }
+      ]
+    },
+    {
+      "firstName": "Carl",
+      "lastName": "Hardner",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 4,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 6,
+            "hole8": 6,
+            "hole9": 6
+          },
+          "total": 49
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 8,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 51
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 4,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 44
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 5,
+            "hole14": 6,
+            "hole15": 5,
+            "hole16": 3,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 42
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 5,
+            "hole14": 6,
+            "hole15": 5,
+            "hole16": 3,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 42
+        }
+      ]
+    },
+    {
+      "firstName": "Stu",
+      "lastName": "Silfies",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 3,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 45
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 2,
+            "hole12": 4,
+            "hole13": 8,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 3,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 43
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 5,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 49
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 5,
+            "hole3": 7,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 5,
+            "hole8": 6,
+            "hole9": 3
+          },
+          "total": 47
+        }
+      ]
+    },
+    {
+      "firstName": "Kenny",
+      "lastName": "Palladino",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 7,
+            "hole4": 6,
+            "hole5": 3,
+            "hole6": 6,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 46
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 8,
+            "hole11": 3,
+            "hole12": 8,
+            "hole13": 10,
+            "hole14": 5,
+            "hole15": 7,
+            "hole16": 5,
+            "hole17": 5,
+            "hole18": 6
+          },
+          "total": 57
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 6,
+            "hole5": 5,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 47
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 6,
+            "hole3": 5,
+            "hole4": 4,
+            "hole5": 5,
+            "hole6": 4,
+            "hole7": 4,
+            "hole8": 4,
+            "hole9": 3
+          },
+          "total": 42
+        }
+      ]
+    },
+    {
+      "firstName": "Steve",
+      "lastName": "Bedek",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 4,
+            "hole3": 7,
+            "hole4": 5,
+            "hole5": 2,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 3
+          },
+          "total": 43
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 6,
+            "hole8": 4,
+            "hole9": 3
+          },
+          "total": 44
+        }
+      ]
+    },
+    {
+      "firstName": "Frank",
+      "lastName": "Frankenfield",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 45
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 8,
+            "hole13": 7,
+            "hole14": 6,
+            "hole15": 6,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 6
+          },
+          "total": 52
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 43
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 5,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 47
+        }
+      ]
+    },
+    {
+      "firstName": "Curt",
+      "lastName": "Saeger",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 4,
+            "hole3": 5,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 44
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 3,
+            "hole12": 4,
+            "hole13": 5,
+            "hole14": 4,
+            "hole15": 6,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 6
+          },
+          "total": 43
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 42
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 4,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 43
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 3,
+            "hole6": 5,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 43
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 4,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 43
+        }
+      ]
+    },
+    {
+      "firstName": "Lou",
+      "lastName": "Gabrielle",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 4,
+            "hole3": 7,
+            "hole4": 5,
+            "hole5": 3,
+            "hole6": 5,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 45
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 6,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 47
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 46
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 7,
+            "hole15": 4,
+            "hole16": 5,
+            "hole17": 5,
+            "hole18": 6
+          },
+          "total": 48
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 46
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 7,
+            "hole15": 4,
+            "hole16": 5,
+            "hole17": 5,
+            "hole18": 6
+          },
+          "total": 48
+        }
+      ]
+    },
+    {
+      "firstName": "Matt",
+      "lastName": "Speth",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 4,
+            "hole8": 4,
+            "hole9": 5
+          },
+          "total": 46
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 6,
+            "hole13": 7,
+            "hole14": 7,
+            "hole15": 5,
+            "hole16": 2,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 50
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 46
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 4,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 3,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 43
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 7,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 46
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 4,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 3,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 43
+        }
+      ]
+    },
+    {
+      "firstName": "Jim",
+      "lastName": "Eck",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 7,
+            "hole3": 4,
+            "hole4": 4,
+            "hole5": 5,
+            "hole6": 7,
+            "hole7": 6,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 48
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 8,
+            "hole11": 6,
+            "hole12": 6,
+            "hole13": 5,
+            "hole14": 7,
+            "hole15": 6,
+            "hole16": 4,
+            "hole17": 7,
+            "hole18": 7
+          },
+          "total": 56
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 6,
+            "hole6": 6,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 48
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 5,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 6,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 47
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 5,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 6,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 47
+        }
+      ]
+    },
+    {
+      "firstName": "Kevin",
+      "lastName": "Kelhart JR",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 5,
+            "hole6": 4,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 47
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 4,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 4,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 43
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 7,
+            "hole13": 8,
+            "hole14": 7,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 8,
+            "hole18": 7
+          },
+          "total": 57
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 7,
+            "hole13": 8,
+            "hole14": 7,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 8,
+            "hole18": 7
+          },
+          "total": 57
+        }
+      ]
+    },
+    {
+      "firstName": "Danny",
+      "lastName": "Washurn",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 4,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 4,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 6,
+            "hole8": 7,
+            "hole9": 4
+          },
+          "total": 44
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 3,
+            "hole12": 5,
+            "hole13": 6,
+            "hole14": 7,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 46
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 4,
+            "hole3": 5,
+            "hole4": 4,
+            "hole5": 5,
+            "hole6": 6,
+            "hole7": 7,
+            "hole8": 6,
+            "hole9": 7
+          },
+          "total": 50
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 3,
+            "hole12": 6,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 6,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 50
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 48
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 3,
+            "hole12": 6,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 6,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 50
+        }
+      ]
+    },
+    {
+      "firstName": "Steve",
+      "lastName": "Hampton",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 7,
+            "hole3": 8,
+            "hole4": 7,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 4,
+            "hole9": 5
+          },
+          "total": 49
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 7,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 7
+          },
+          "total": 49
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 4,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 3,
+            "hole6": 6,
+            "hole7": 5,
+            "hole8": 3,
+            "hole9": 4
+          },
+          "total": 42
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 7,
+            "hole12": 4,
+            "hole13": 5,
+            "hole14": 6,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 8
+          },
+          "total": 51
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 6,
+            "hole5": 2,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 3
+          },
+          "total": 46
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 7,
+            "hole12": 4,
+            "hole13": 5,
+            "hole14": 6,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 8
+          },
+          "total": 51
+        }
+      ]
+    },
+    {
+      "firstName": "Matt",
+      "lastName": "Donahue",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 8,
+            "hole2": 6,
+            "hole3": 7,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 9,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 55
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 3,
+            "hole12": 8,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 3,
+            "hole17": 5,
+            "hole18": 6
+          },
+          "total": 48
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 6,
+            "hole3": 5,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 6
+          },
+          "total": 46
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 6,
+            "hole12": 7,
+            "hole13": 6,
+            "hole14": 4,
+            "hole15": 5,
+            "hole16": 7,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 52
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 8,
+            "hole2": 4,
+            "hole3": 6,
+            "hole4": 4,
+            "hole5": 5,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 46
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 6,
+            "hole12": 7,
+            "hole13": 6,
+            "hole14": 4,
+            "hole15": 5,
+            "hole16": 7,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 52
+        }
+      ]
+    },
+    {
+      "firstName": "Bob",
+      "lastName": "Gross",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 3,
+            "hole6": 5,
+            "hole7": 4,
+            "hole8": 4,
+            "hole9": 4
+          },
+          "total": 42
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 8,
+            "hole14": 6,
+            "hole15": 6,
+            "hole16": 6,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 53
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 5,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 5,
+            "hole8": 3,
+            "hole9": 3
+          },
+          "total": 43
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 4,
+            "hole3": 5,
+            "hole4": 7,
+            "hole5": 5,
+            "hole6": 8,
+            "hole7": 5,
+            "hole8": 4,
+            "hole9": 5
+          },
+          "total": 48
+        }
+      ]
+    },
+    {
+      "firstName": "Juan",
+      "lastName": "Matute",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 8,
+            "hole3": 7,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 52
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 5,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 6,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 50
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 7,
+            "hole4": 7,
+            "hole5": 5,
+            "hole6": 7,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 6
+          },
+          "total": 52
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 4,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 6,
+            "hole16": 5,
+            "hole17": 7,
+            "hole18": 6
+          },
+          "total": 50
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 4,
+            "hole5": 5,
+            "hole6": 5,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 3
+          },
+          "total": 45
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 4,
+            "hole12": 4,
+            "hole13": 6,
+            "hole14": 5,
+            "hole15": 6,
+            "hole16": 5,
+            "hole17": 7,
+            "hole18": 6
+          },
+          "total": 50
+        }
+      ]
+    },
+    {
+      "firstName": "Ray",
+      "lastName": "Ballinger",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 9,
+            "hole2": 6,
+            "hole3": 8,
+            "hole4": 6,
+            "hole5": 3,
+            "hole6": 7,
+            "hole7": 7,
+            "hole8": 8,
+            "hole9": 3
+          },
+          "total": 57
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 4,
+            "hole2": 6,
+            "hole3": 5,
+            "hole4": 5,
+            "hole5": 6,
+            "hole6": 5,
+            "hole7": 6,
+            "hole8": 5,
+            "hole9": 6
+          },
+          "total": 48
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 4,
+            "hole13": 5,
+            "hole14": 8,
+            "hole15": 4,
+            "hole16": 3,
+            "hole17": 5,
+            "hole18": 8
+          },
+          "total": 48
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 4,
+            "hole2": 4,
+            "hole3": 5,
+            "hole4": 6,
+            "hole5": 3,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 43
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 4,
+            "hole13": 5,
+            "hole14": 8,
+            "hole15": 4,
+            "hole16": 3,
+            "hole17": 5,
+            "hole18": 8
+          },
+          "total": 48
+        }
+      ]
+    },
+    {
+      "firstName": "Rich",
+      "lastName": "Hart",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 9,
+            "hole2": 6,
+            "hole3": 9,
+            "hole4": 7,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 4,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 56
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 11,
+            "hole11": 3,
+            "hole12": 4,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 5,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 50
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 6,
+            "hole3": 7,
+            "hole4": 7,
+            "hole5": 3,
+            "hole6": 6,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 48
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 3,
+            "hole12": 6,
+            "hole13": 6,
+            "hole14": 6,
+            "hole15": 5,
+            "hole16": 6,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 51
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 8,
+            "hole2": 6,
+            "hole3": 7,
+            "hole4": 6,
+            "hole5": 3,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 5,
+            "hole9": 3
+          },
+          "total": 50
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 3,
+            "hole12": 6,
+            "hole13": 6,
+            "hole14": 6,
+            "hole15": 5,
+            "hole16": 6,
+            "hole17": 6,
+            "hole18": 6
+          },
+          "total": 51
+        }
+      ]
+    },
+    {
+      "firstName": "Mike",
+      "lastName": "Schaefer",
+      "rounds": [
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 3,
+            "hole12": 7,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 4,
+            "hole16": 4,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 48
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 5,
+            "hole2": 4,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 5,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 5,
+            "hole9": 4
+          },
+          "total": 46
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 8,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 6,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 4
+          },
+          "total": 50
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 5,
+            "hole3": 7,
+            "hole4": 5,
+            "hole5": 3,
+            "hole6": 8,
+            "hole7": 4,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 49
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 8,
+            "hole13": 7,
+            "hole14": 5,
+            "hole15": 6,
+            "hole16": 4,
+            "hole17": 5,
+            "hole18": 4
+          },
+          "total": 50
+        }
+      ]
+    },
+    {
+      "firstName": "Steve",
+      "lastName": "Kerns",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 6,
+            "hole3": 9,
+            "hole4": 8,
+            "hole5": 4,
+            "hole6": 8,
+            "hole7": 6,
+            "hole8": 7,
+            "hole9": 6
+          },
+          "total": 60
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 6,
+            "hole3": 6,
+            "hole4": 7,
+            "hole5": 4,
+            "hole6": 5,
+            "hole7": 7,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 51
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 7,
+            "hole13": 8,
+            "hole14": 6,
+            "hole15": 6,
+            "hole16": 5,
+            "hole17": 8,
+            "hole18": 6
+          },
+          "total": 55
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 8,
+            "hole5": 6,
+            "hole6": 7,
+            "hole7": 3,
+            "hole8": 7,
+            "hole9": 5
+          },
+          "total": 53
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 5,
+            "hole11": 4,
+            "hole12": 7,
+            "hole13": 8,
+            "hole14": 6,
+            "hole15": 6,
+            "hole16": 5,
+            "hole17": 8,
+            "hole18": 6
+          },
+          "total": 55
+        }
+      ]
+    },
+    {
+      "firstName": "Tom",
+      "lastName": "Haeusler",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 7,
+            "hole3": 9,
+            "hole4": 4,
+            "hole5": 5,
+            "hole6": 10,
+            "hole7": 6,
+            "hole8": 7,
+            "hole9": 3
+          },
+          "total": 58
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 7,
+            "hole11": 5,
+            "hole12": 7,
+            "hole13": 8,
+            "hole14": 7,
+            "hole15": 7,
+            "hole16": 4,
+            "hole17": 8,
+            "hole18": 8
+          },
+          "total": 61
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 6,
+            "hole4": 5,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 6,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 49
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 6,
+            "hole12": 7,
+            "hole13": 6,
+            "hole14": 8,
+            "hole15": 7,
+            "hole16": 5,
+            "hole17": 8,
+            "hole18": 8
+          },
+          "total": 61
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 6,
+            "hole3": 7,
+            "hole4": 6,
+            "hole5": 5,
+            "hole6": 4,
+            "hole7": 5,
+            "hole8": 6,
+            "hole9": 3
+          },
+          "total": 48
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 6,
+            "hole12": 7,
+            "hole13": 6,
+            "hole14": 8,
+            "hole15": 7,
+            "hole16": 5,
+            "hole17": 8,
+            "hole18": 8
+          },
+          "total": 61
+        }
+      ]
+    },
+    {
+      "firstName": "Steve",
+      "lastName": "Filipovits",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 5,
+            "hole3": 9,
+            "hole4": 8,
+            "hole5": 5,
+            "hole6": 7,
+            "hole7": 6,
+            "hole8": 6,
+            "hole9": 5
+          },
+          "total": 57
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 7,
+            "hole3": 5,
+            "hole4": 7,
+            "hole5": 3,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 3,
+            "hole9": 4
+          },
+          "total": 48
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 8,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 8,
+            "hole14": 6,
+            "hole15": 5,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 52
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 4,
+            "hole3": 7,
+            "hole4": 8,
+            "hole5": 5,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 52
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 8,
+            "hole11": 4,
+            "hole12": 5,
+            "hole13": 8,
+            "hole14": 6,
+            "hole15": 5,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 5
+          },
+          "total": 52
+        }
+      ]
+    },
+    {
+      "firstName": "Andrew",
+      "lastName": "Kerns",
+      "rounds": [
+        {
+          "week": 1,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 8,
+            "hole2": 7,
+            "hole3": 7,
+            "hole4": 6,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 6,
+            "hole8": 7,
+            "hole9": 3
+          },
+          "total": 55
+        },
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 8,
+            "hole11": 6,
+            "hole12": 7,
+            "hole13": 8,
+            "hole14": 6,
+            "hole15": 7,
+            "hole16": 6,
+            "hole17": 7,
+            "hole18": 4
+          },
+          "total": 59
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 7,
+            "hole2": 8,
+            "hole3": 7,
+            "hole4": 5,
+            "hole5": 5,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 5,
+            "hole9": 5
+          },
+          "total": 54
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 8,
+            "hole11": 6,
+            "hole12": 5,
+            "hole13": 7,
+            "hole14": 7,
+            "hole15": 6,
+            "hole16": 5,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 54
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 8,
+            "hole2": 5,
+            "hole3": 10,
+            "hole4": 8,
+            "hole5": 4,
+            "hole6": 7,
+            "hole7": 5,
+            "hole8": 6,
+            "hole9": 4
+          },
+          "total": 57
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 8,
+            "hole11": 6,
+            "hole12": 5,
+            "hole13": 7,
+            "hole14": 7,
+            "hole15": 6,
+            "hole16": 5,
+            "hole17": 5,
+            "hole18": 5
+          },
+          "total": 54
+        }
+      ]
+    },
+    {
+      "firstName": "Jax",
+      "lastName": "Haeusler",
+      "rounds": [
+        {
+          "week": 2,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 8,
+            "hole13": 8,
+            "hole14": 6,
+            "hole15": 6,
+            "hole16": 6,
+            "hole17": 8,
+            "hole18": 6
+          },
+          "total": 59
+        },
+        {
+          "week": 3,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 7,
+            "hole3": 8,
+            "hole4": 5,
+            "hole5": 5,
+            "hole6": 9,
+            "hole7": 5,
+            "hole8": 6,
+            "hole9": 5
+          },
+          "total": 56
+        },
+        {
+          "week": 4,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 4,
+            "hole13": 8,
+            "hole14": 5,
+            "hole15": 7,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 50
+        },
+        {
+          "week": 5,
+          "frontOrBack": "Front",
+          "scores": {
+            "hole1": 6,
+            "hole2": 7,
+            "hole3": 6,
+            "hole4": 8,
+            "hole5": 4,
+            "hole6": 6,
+            "hole7": 6,
+            "hole8": 5,
+            "hole9": 3
+          },
+          "total": 51
+        },
+        {
+          "week": 9,
+          "frontOrBack": "Back",
+          "scores": {
+            "hole10": 6,
+            "hole11": 5,
+            "hole12": 4,
+            "hole13": 8,
+            "hole14": 5,
+            "hole15": 7,
+            "hole16": 5,
+            "hole17": 6,
+            "hole18": 4
+          },
+          "total": 50
+        }
+      ]
+    }
+  ]
+}

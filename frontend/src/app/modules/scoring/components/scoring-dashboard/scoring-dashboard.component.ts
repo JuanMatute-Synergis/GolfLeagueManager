@@ -37,7 +37,7 @@ import { Season, Week, PlayerSeasonStats } from '../../models/week.model';
               <h3 class="text-lg font-semibold text-foreground mb-2">Current Week</h3>
               <p class="text-2xl font-bold text-foreground mb-1">{{ currentWeek?.name || 'No Active Week' }}</p>
               <p class="text-sm text-muted-foreground">
-                {{ currentWeek ? (currentWeek.startDate | date:'shortDate') + ' - ' + (currentWeek.endDate | date:'shortDate') : '' }}
+                {{ currentWeek ? (currentWeek.date | date:'fullDate') : '' }}
               </p>
             </div>
           </div>
@@ -127,7 +127,7 @@ import { Season, Week, PlayerSeasonStats } from '../../models/week.model';
                       <tr *ngFor="let week of weeks" class="hover:bg-muted/20 transition-colors">
                         <td class="p-4 border-b border-border text-foreground">{{ week.weekNumber }}</td>
                         <td class="p-4 border-b border-border text-foreground font-medium">{{ week.name }}</td>
-                        <td class="p-4 border-b border-border text-foreground">{{ week.startDate | date:'shortDate' }} - {{ week.endDate | date:'shortDate' }}</td>
+                        <td class="p-4 border-b border-border text-foreground">{{ week.date | date:'fullDate' }}</td>
                         <td class="p-4 border-b border-border">
                           <span [class]="'px-2 py-1 text-xs rounded-full ' + getWeekStatusClass(week)">
                             {{ getWeekStatus(week) }}
@@ -253,11 +253,11 @@ export class ScoringDashboardComponent implements OnInit {
 
   getWeekStatus(week: Week): string {
     const now = new Date();
-    const start = new Date(week.startDate);
-    const end = new Date(week.endDate);
+    const weekDate = new Date(week.date);
+    const daysDiff = (now.getTime() - weekDate.getTime()) / (1000 * 3600 * 24);
 
-    if (now < start) return 'Upcoming';
-    if (now > end) return 'Completed';
+    if (daysDiff < -3) return 'Upcoming';
+    if (daysDiff > 3) return 'Completed';
     return 'Active';
   }
 

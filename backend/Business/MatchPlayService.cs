@@ -97,6 +97,7 @@ namespace GolfLeagueManager
             // Determine overall match winner and assign bonus points
             bool playerAWinsMatch = playerAHolePoints > playerBHolePoints;
             bool playerBWinsMatch = playerBHolePoints > playerAHolePoints;
+            bool isTie = playerAHolePoints == playerBHolePoints;
 
             // Update matchup with results
             matchup.PlayerAHolePoints = playerAHolePoints;
@@ -104,9 +105,25 @@ namespace GolfLeagueManager
             matchup.PlayerAMatchWin = playerAWinsMatch;
             matchup.PlayerBMatchWin = playerBWinsMatch;
 
-            // Calculate total points (hole points + match bonus)
-            matchup.PlayerAPoints = playerAHolePoints + (playerAWinsMatch ? 2 : 0);
-            matchup.PlayerBPoints = playerBHolePoints + (playerBWinsMatch ? 2 : 0);
+            // Calculate total points - ALWAYS distributes exactly 20 points
+            if (isTie)
+            {
+                // In case of tie, each player gets their hole points + 1 point each (splitting the 2-point bonus)
+                matchup.PlayerAPoints = playerAHolePoints + 1;
+                matchup.PlayerBPoints = playerBHolePoints + 1;
+            }
+            else if (playerAWinsMatch)
+            {
+                // Player A gets hole points + 2 point match bonus, Player B gets just hole points
+                matchup.PlayerAPoints = playerAHolePoints + 2;
+                matchup.PlayerBPoints = playerBHolePoints;
+            }
+            else
+            {
+                // Player B gets hole points + 2 point match bonus, Player A gets just hole points
+                matchup.PlayerAPoints = playerAHolePoints;
+                matchup.PlayerBPoints = playerBHolePoints + 2;
+            }
 
             await _context.SaveChangesAsync();
             return true;
@@ -119,9 +136,34 @@ namespace GolfLeagueManager
         {
             if (matchup.PlayerAAbsent && matchup.PlayerBAbsent)
             {
-                // Both absent - no points awarded
-                matchup.PlayerAPoints = 0;
-                matchup.PlayerBPoints = 0;
+                // Both absent - distribute points based on notice
+                if (matchup.PlayerAAbsentWithNotice && matchup.PlayerBAbsentWithNotice)
+                {
+                    // Both gave notice - split points evenly
+                    matchup.PlayerAPoints = 10;
+                    matchup.PlayerBPoints = 10;
+                }
+                else if (matchup.PlayerAAbsentWithNotice)
+                {
+                    // Only A gave notice
+                    matchup.PlayerAPoints = 4;
+                    matchup.PlayerBPoints = 0;
+                    // Remaining 16 points are forfeited
+                }
+                else if (matchup.PlayerBAbsentWithNotice)
+                {
+                    // Only B gave notice
+                    matchup.PlayerAPoints = 0;
+                    matchup.PlayerBPoints = 4;
+                    // Remaining 16 points are forfeited
+                }
+                else
+                {
+                    // Neither gave notice
+                    matchup.PlayerAPoints = 0;
+                    matchup.PlayerBPoints = 0;
+                    // All 20 points are forfeited
+                }
                 matchup.PlayerAHolePoints = 0;
                 matchup.PlayerBHolePoints = 0;
                 matchup.PlayerAMatchWin = false;
@@ -130,34 +172,46 @@ namespace GolfLeagueManager
             else if (matchup.PlayerAAbsent)
             {
                 // Player A absent, Player B present
-                if (matchup.PlayerAAbsentWithNotice)
-                {
-                    matchup.PlayerAPoints = 4; // Unable to play with notice
-                }
-                else
-                {
-                    matchup.PlayerAPoints = 0; // No notice
-                }
-
-                // Player B gets points based on performance vs handicap
+                var playerAPoints = matchup.PlayerAAbsentWithNotice ? 4 : 0;
                 var playerBHandicap = await GetPlayerHandicapAsync(matchup.PlayerBId);
-                await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerBId, playerBHandicap, false);
+                var playerBPoints = await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerBId, playerBHandicap);
+                
+                // Ensure total equals 20
+                var totalPoints = playerAPoints + playerBPoints;
+                if (totalPoints != 20)
+                {
+                    // Adjust player B's points to make total = 20
+                    playerBPoints = 20 - playerAPoints;
+                }
+                
+                matchup.PlayerAPoints = playerAPoints;
+                matchup.PlayerBPoints = playerBPoints;
+                matchup.PlayerAHolePoints = 0;
+                matchup.PlayerBHolePoints = playerBPoints - 2; // Simulate hole points (total - match bonus)
+                matchup.PlayerAMatchWin = false;
+                matchup.PlayerBMatchWin = playerBPoints > playerAPoints;
             }
             else if (matchup.PlayerBAbsent)
             {
                 // Player B absent, Player A present
-                if (matchup.PlayerBAbsentWithNotice)
-                {
-                    matchup.PlayerBPoints = 4; // Unable to play with notice
-                }
-                else
-                {
-                    matchup.PlayerBPoints = 0; // No notice
-                }
-
-                // Player A gets points based on performance vs handicap
+                var playerBPoints = matchup.PlayerBAbsentWithNotice ? 4 : 0;
                 var playerAHandicap = await GetPlayerHandicapAsync(matchup.PlayerAId);
-                await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerAId, playerAHandicap, true);
+                var playerAPoints = await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerAId, playerAHandicap);
+                
+                // Ensure total equals 20
+                var totalPoints = playerAPoints + playerBPoints;
+                if (totalPoints != 20)
+                {
+                    // Adjust player A's points to make total = 20
+                    playerAPoints = 20 - playerBPoints;
+                }
+                
+                matchup.PlayerAPoints = playerAPoints;
+                matchup.PlayerBPoints = playerBPoints;
+                matchup.PlayerAHolePoints = playerAPoints - 2; // Simulate hole points (total - match bonus)
+                matchup.PlayerBHolePoints = 0;
+                matchup.PlayerAMatchWin = playerAPoints > playerBPoints;
+                matchup.PlayerBMatchWin = false;
             }
 
             await _context.SaveChangesAsync();
@@ -165,66 +219,61 @@ namespace GolfLeagueManager
         }
 
         /// <summary>
-        /// Calculate points when player has no opponent (beat handicap scenario)
+        /// Calculate points when player has no opponent (playing against their handicap hole by hole)
         /// </summary>
-        private async Task<bool> CalculateNoOpponentScoringAsync(Matchup matchup, Guid playerId, double handicap, bool isPlayerA)
+        private async Task<int> CalculateNoOpponentScoringAsync(Matchup matchup, Guid playerId, double handicap)
         {
-            var playerScore = isPlayerA ? matchup.PlayerAScore : matchup.PlayerBScore;
+            // Get hole scores for this matchup
+            var holeScores = await _context.HoleScores
+                .Where(hs => hs.MatchupId == matchup.Id)
+                .OrderBy(hs => hs.HoleNumber)
+                .ToListAsync();
+
+            if (!holeScores.Any())
+            {
+                // No hole scores available, award 0 points
+                return 0;
+            }
+
+            // Calculate handicap strokes to allocate
+            var totalStrokes = (int)Math.Round(handicap);
             
-            if (!playerScore.HasValue)
-            {
-                // No score recorded, award 0 points
-                if (isPlayerA)
-                {
-                    matchup.PlayerAPoints = 0;
-                    matchup.PlayerAHolePoints = 0;
-                    matchup.PlayerAMatchWin = false;
-                }
-                else
-                {
-                    matchup.PlayerBPoints = 0;
-                    matchup.PlayerBHolePoints = 0;
-                    matchup.PlayerBMatchWin = false;
-                }
-                return true;
-            }
-
-            // Calculate expected score based on handicap (assuming par 36 for 9 holes)
-            const int standardPar = 36;
-            var expectedScore = standardPar + (int)Math.Round(handicap);
+            int holePoints = 0;
             
-            // Determine points based on performance vs handicap
-            int pointsAwarded;
-            if (playerScore.Value < expectedScore)
+            foreach (var holeScore in holeScores)
             {
-                // Beat handicap
-                pointsAwarded = 16;
+                // Get the player's actual score for this hole
+                var actualScore = playerId == matchup.PlayerAId ? holeScore.PlayerAScore : holeScore.PlayerBScore;
+                
+                if (!actualScore.HasValue)
+                {
+                    // No score for this hole, skip it
+                    continue;
+                }
+                
+                // Calculate net score (apply handicap stroke if this hole gets one)
+                var netScore = actualScore.Value;
+                if (totalStrokes > 0 && holeScore.HoleHandicap <= totalStrokes)
+                {
+                    netScore -= 1;
+                }
+                
+                // Compare net score to par for this hole
+                if (netScore < holeScore.Par)
+                {
+                    // Beat par on this hole - award 2 points
+                    holePoints += 2;
+                }
+                else if (netScore == holeScore.Par)
+                {
+                    // Tied par on this hole - award 1 point
+                    holePoints += 1;
+                }
+                // If over par, award 0 points (no need to explicitly add 0)
             }
-            else if (playerScore.Value == expectedScore)
-            {
-                // Tied handicap
-                pointsAwarded = 8;
-            }
-            else
-            {
-                // Didn't beat handicap
-                pointsAwarded = 8;
-            }
-
-            if (isPlayerA)
-            {
-                matchup.PlayerAPoints = pointsAwarded;
-                matchup.PlayerAHolePoints = pointsAwarded - 2; // Simulate hole points
-                matchup.PlayerAMatchWin = pointsAwarded > 10; // Simulate match win
-            }
-            else
-            {
-                matchup.PlayerBPoints = pointsAwarded;
-                matchup.PlayerBHolePoints = pointsAwarded - 2; // Simulate hole points
-                matchup.PlayerBMatchWin = pointsAwarded > 10; // Simulate match win
-            }
-
-            return true;
+            
+            // Add 2-point match bonus (since they're playing alone, they "win" the match)
+            return holePoints + 2;
         }
 
         /// <summary>

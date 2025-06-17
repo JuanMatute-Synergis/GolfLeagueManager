@@ -57,13 +57,8 @@ namespace GolfLeagueManager
                     .IsRequired()
                     .HasMaxLength(100);
                     
-                // Configure DateTime properties as UTC
-                entity.Property(e => e.StartDate)
-                    .HasConversion(
-                        v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
-                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
-
-                entity.Property(e => e.EndDate)
+                // Configure DateTime property as UTC
+                entity.Property(e => e.Date)
                     .HasConversion(
                         v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
                         v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
