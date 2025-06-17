@@ -22,6 +22,7 @@ export class SeasonsSettingsComponent implements OnInit {
   seasons: Season[] = [];
   seasonFlights: Flight[] = [];
   flightAssignments: PlayerFlightAssignment[] = [];
+  allSeasonAssignments: PlayerFlightAssignment[] = []; // All assignments for the current season
   players: Player[] = [];
   
   // Selected data
@@ -210,6 +211,8 @@ export class SeasonsSettingsComponent implements OnInit {
       next: (flights: Flight[]) => {
         this.seasonFlights = flights;
         this.isLoading = false;
+        // Load all season assignments after flights are loaded
+        this.loadAllSeasonAssignments(seasonId);
       },
       error: (error: any) => {
         console.error('Error loading season flights:', error);
@@ -344,6 +347,23 @@ export class SeasonsSettingsComponent implements OnInit {
     });
   }
 
+  loadAllSeasonAssignments(seasonId: string) {
+    // Get all assignments and filter by season flights
+    this.playerFlightAssignmentService.getAllAssignments().subscribe({
+      next: (allAssignments: PlayerFlightAssignment[]) => {
+        // Filter assignments to only include those for flights in the current season
+        const seasonFlightIds = this.seasonFlights.map(flight => flight.id!);
+        this.allSeasonAssignments = allAssignments.filter(assignment => 
+          seasonFlightIds.includes(assignment.flightId)
+        );
+      },
+      error: (error: any) => {
+        console.error('Error loading season assignments:', error);
+        this.error = 'Failed to load season assignments. Please try again.';
+      }
+    });
+  }
+
   onPlayerSelected() {
     if (!this.selectedPlayerId) {
       this.playerHandicap = null;
@@ -360,7 +380,8 @@ export class SeasonsSettingsComponent implements OnInit {
   getAvailablePlayers(): Player[] {
     if (!this.selectedFlightId) return [];
     
-    const assignedPlayerIds = this.flightAssignments.map(a => a.playerId);
+    // Filter out players already assigned to ANY flight in the current season
+    const assignedPlayerIds = this.allSeasonAssignments.map(a => a.playerId);
     return this.players.filter(p => !assignedPlayerIds.includes(p.id!));
   }
 
@@ -384,6 +405,8 @@ export class SeasonsSettingsComponent implements OnInit {
     this.playerFlightAssignmentService.addAssignment(assignment).subscribe({
       next: (savedAssignment: PlayerFlightAssignment) => {
         this.flightAssignments.push(savedAssignment);
+        // Also add to season-wide assignments
+        this.allSeasonAssignments.push(savedAssignment);
         
         this.selectedPlayerId = null;
         this.isFlightLeader = false;
@@ -412,6 +435,11 @@ export class SeasonsSettingsComponent implements OnInit {
         if (index !== -1) {
           this.flightAssignments[index] = updatedAssignment;
         }
+        // Also update in season-wide assignments
+        const seasonIndex = this.allSeasonAssignments.findIndex(a => a.id === assignment.id);
+        if (seasonIndex !== -1) {
+          this.allSeasonAssignments[seasonIndex] = updatedAssignment;
+        }
         this.isLoading = false;
       },
       error: (error: any) => {
@@ -428,6 +456,8 @@ export class SeasonsSettingsComponent implements OnInit {
     this.playerFlightAssignmentService.removeAssignment(assignmentId).subscribe({
       next: () => {
         this.flightAssignments = this.flightAssignments.filter(a => a.id !== assignmentId);
+        // Also remove from season-wide assignments
+        this.allSeasonAssignments = this.allSeasonAssignments.filter(a => a.id !== assignmentId);
         this.isLoading = false;
       },
       error: (error: any) => {
