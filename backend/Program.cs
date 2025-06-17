@@ -7,6 +7,7 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using GolfLeagueManager.Business;
+using GolfLeagueManager.Converters;
 
 namespace GolfLeagueManager
 {
@@ -17,13 +18,13 @@ namespace GolfLeagueManager
             var builder = WebApplication.CreateBuilder(args);
               // Register OpenAPI services
             builder.Services.AddOpenApi();
-            
-            // Configure JSON serialization to handle circular references
+              // Configure JSON serialization to handle circular references
             builder.Services.ConfigureHttpJsonOptions(options =>
             {
                 options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                 options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.SerializerOptions.Converters.Add(new DateOnlyJsonConverter());
             });
             
             // Register EF Core with PostgreSQL
@@ -49,16 +50,15 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<MatchPlayService>();
             builder.Services.AddScoped<ScoreImportService>();
             builder.Services.AddScoped<JsonImportService>();
-            builder.Services.AddScoped<DatabaseCleanupService>();
-
-            // Add controllers with JSON options
+            builder.Services.AddScoped<DatabaseCleanupService>();            // Add controllers with JSON options
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                });            // Add CORS
+                    options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+                });// Add CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngularApp", policy =>

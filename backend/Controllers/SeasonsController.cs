@@ -7,10 +7,12 @@ namespace GolfLeagueManager
     public class SeasonsController : ControllerBase
     {
         private readonly SeasonService _seasonService;
+        private readonly WeekService _weekService;
 
-        public SeasonsController(SeasonService seasonService)
+        public SeasonsController(SeasonService seasonService, WeekService weekService)
         {
             _seasonService = seasonService;
+            _weekService = weekService;
         }
 
         [HttpPost]
@@ -79,6 +81,33 @@ namespace GolfLeagueManager
                 return NotFound();
             
             return NoContent();
+        }
+
+        [HttpPost("{id}/regenerate-weeks")]
+        public async Task<IActionResult> RegenerateWeeks(Guid id)
+        {
+            try
+            {
+                // First, delete all existing weeks for this season
+                var existingWeeks = await _weekService.GetWeeksBySeasonIdAsync(id);
+                foreach (var week in existingWeeks)
+                {
+                    await _weekService.DeleteWeekAsync(week.Id);
+                }
+
+                // Then regenerate weeks using the updated logic
+                await _weekService.GenerateWeeksForSeasonAsync(id);
+                
+                return Ok(new { message = "Weeks regenerated successfully" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error regenerating weeks", error = ex.Message });
+            }
         }
     }
 }

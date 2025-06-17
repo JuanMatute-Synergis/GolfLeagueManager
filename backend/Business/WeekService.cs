@@ -66,7 +66,43 @@ namespace GolfLeagueManager
 
         public async Task<bool> DeleteWeekAsync(Guid id)
         {
-            return await _weekRepository.DeleteAsync(id);
+            var weekToDelete = await _weekRepository.GetByIdAsync(id);
+            if (weekToDelete == null)
+            {
+                return false;
+            }
+
+            var seasonId = weekToDelete.SeasonId;
+            var deletedWeekNumber = weekToDelete.WeekNumber;
+
+            // Delete the week
+            var deleted = await _weekRepository.DeleteAsync(id);
+            if (!deleted)
+            {
+                return false;
+            }
+
+            // Renumber all subsequent weeks in the same season
+            await RenumberWeeksAfterDeletion(seasonId, deletedWeekNumber);
+
+            return true;
+        }
+
+        private async Task RenumberWeeksAfterDeletion(Guid seasonId, int deletedWeekNumber)
+        {
+            // Get all weeks in the season that come after the deleted week
+            var weeksToRenumber = await _weekRepository.GetWeeksBySeasonIdAsync(seasonId);
+            var subsequentWeeks = weeksToRenumber
+                .Where(w => w.WeekNumber > deletedWeekNumber)
+                .OrderBy(w => w.WeekNumber)
+                .ToList();
+
+            // Renumber each subsequent week (shift down by 1)
+            foreach (var week in subsequentWeeks)
+            {
+                week.WeekNumber -= 1;
+                await _weekRepository.UpdateAsync(week);
+            }
         }
 
         public async Task<Week?> GetCurrentWeekAsync(Guid seasonId)
@@ -109,10 +145,11 @@ namespace GolfLeagueManager
             var endDate = season.EndDate.Date;
             var weekNumber = 1;
 
-            // Find the first Wednesday on or after the start date
+            // Use the season start date as the first week date
+            // This allows flexibility for different days of the week across leagues
             var currentDay = startDate;
 
-            // Generate a week for each Wednesday within the season date range
+            // Generate weeks using the same day of the week as the start date
             while (currentDay <= endDate)
             {
                 var week = new Week
@@ -127,7 +164,8 @@ namespace GolfLeagueManager
 
                 await _weekRepository.CreateAsync(week);
                 
-                currentDay = currentDay.AddDays(7); // Move to next Wednesday
+                // Move to the same day of the week next week (7 days later)
+                currentDay = currentDay.AddDays(7);
                 weekNumber++;
             }
         }
