@@ -141,12 +141,26 @@ namespace GolfLeagueManager
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
+                // Reload the matchup to get the calculated match play results
+                var updatedMatchup = await _context.Matchups.FindAsync(request.MatchupId);
+
                 return new ScorecardResponse
                 {
                     MatchupId = request.MatchupId,
                     Success = true,
                     Message = "Scorecard saved successfully",
-                    HoleScores = holeScores
+                    HoleScores = holeScores,
+                    // Include match play results
+                    PlayerAMatchPoints = updatedMatchup?.PlayerAPoints,
+                    PlayerBMatchPoints = updatedMatchup?.PlayerBPoints,
+                    PlayerAHolePoints = updatedMatchup?.PlayerAHolePoints ?? 0,
+                    PlayerBHolePoints = updatedMatchup?.PlayerBHolePoints ?? 0,
+                    PlayerAMatchWin = updatedMatchup?.PlayerAMatchWin ?? false,
+                    PlayerBMatchWin = updatedMatchup?.PlayerBMatchWin ?? false,
+                    PlayerAAbsent = updatedMatchup?.PlayerAAbsent ?? false,
+                    PlayerBAbsent = updatedMatchup?.PlayerBAbsent ?? false,
+                    PlayerAAbsentWithNotice = updatedMatchup?.PlayerAAbsentWithNotice ?? false,
+                    PlayerBAbsentWithNotice = updatedMatchup?.PlayerBAbsentWithNotice ?? false
                 };
             }
             catch (Exception ex)
@@ -167,6 +181,44 @@ namespace GolfLeagueManager
                 .Where(hs => hs.MatchupId == matchupId)
                 .OrderBy(hs => hs.HoleNumber)
                 .ToListAsync();
+        }
+
+        public async Task<ScorecardResponse> GetCompleteScorecardAsync(Guid matchupId)
+        {
+            var matchup = await _context.Matchups.FindAsync(matchupId);
+            if (matchup == null)
+            {
+                return new ScorecardResponse
+                {
+                    MatchupId = matchupId,
+                    Success = false,
+                    Message = "Matchup not found"
+                };
+            }
+
+            var holeScores = await _context.HoleScores
+                .Where(hs => hs.MatchupId == matchupId)
+                .OrderBy(hs => hs.HoleNumber)
+                .ToListAsync();
+
+            return new ScorecardResponse
+            {
+                MatchupId = matchupId,
+                Success = true,
+                Message = "Scorecard retrieved successfully",
+                HoleScores = holeScores,
+                // Include match play results
+                PlayerAMatchPoints = matchup.PlayerAPoints,
+                PlayerBMatchPoints = matchup.PlayerBPoints,
+                PlayerAHolePoints = matchup.PlayerAHolePoints,
+                PlayerBHolePoints = matchup.PlayerBHolePoints,
+                PlayerAMatchWin = matchup.PlayerAMatchWin,
+                PlayerBMatchWin = matchup.PlayerBMatchWin,
+                PlayerAAbsent = matchup.PlayerAAbsent,
+                PlayerBAbsent = matchup.PlayerBAbsent,
+                PlayerAAbsentWithNotice = matchup.PlayerAAbsentWithNotice,
+                PlayerBAbsentWithNotice = matchup.PlayerBAbsentWithNotice
+            };
         }
 
         public async Task<bool> DeleteScorecardAsync(Guid matchupId)

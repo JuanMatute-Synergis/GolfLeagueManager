@@ -45,6 +45,26 @@ namespace GolfLeagueManager.Controllers
             return Ok(holeScores);
         }
 
+        [HttpGet("{matchupId}/complete")]
+        public async Task<ActionResult<ScorecardResponse>> GetCompleteScorecard(Guid matchupId)
+        {
+            if (matchupId == Guid.Empty)
+            {
+                return BadRequest("Invalid matchup ID");
+            }
+
+            var response = await _scorecardService.GetCompleteScorecardAsync(matchupId);
+            
+            if (response.Success)
+            {
+                return Ok(response);
+            }
+            else
+            {
+                return NotFound(response);
+            }
+        }
+
         [HttpDelete("{matchupId}")]
         public async Task<IActionResult> DeleteScorecard(Guid matchupId)
         {

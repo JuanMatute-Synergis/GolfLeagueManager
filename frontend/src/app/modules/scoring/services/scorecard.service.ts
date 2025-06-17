@@ -27,6 +27,18 @@ export interface ScorecardResponse {
   success: boolean;
   message: string;
   holeScores?: any[];
+  // Match play results
+  playerAMatchPoints?: number;
+  playerBMatchPoints?: number;
+  playerAHolePoints?: number;
+  playerBHolePoints?: number;
+  playerAMatchWin?: boolean;
+  playerBMatchWin?: boolean;
+  // Absence status
+  playerAAbsent?: boolean;
+  playerBAbsent?: boolean;
+  playerAAbsentWithNotice?: boolean;
+  playerBAbsentWithNotice?: boolean;
 }
 
 export interface HoleScoreBackend {
@@ -68,6 +80,10 @@ export class ScorecardService {
 
   getScorecard(matchupId: string): Observable<HoleScoreBackend[]> {
     return this.http.get<HoleScoreBackend[]>(`${this.apiUrl}/${matchupId}`);
+  }
+
+  getCompleteScorecard(matchupId: string): Observable<ScorecardResponse> {
+    return this.http.get<ScorecardResponse>(`${this.apiUrl}/${matchupId}/complete`);
   }
 
   deleteScorecard(matchupId: string): Observable<void> {

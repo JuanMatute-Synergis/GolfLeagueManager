@@ -27,5 +27,19 @@ namespace GolfLeagueManager
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
         public List<HoleScore> HoleScores { get; set; } = new List<HoleScore>();
+        
+        // Match play results
+        public int? PlayerAMatchPoints { get; set; }
+        public int? PlayerBMatchPoints { get; set; }
+        public int PlayerAHolePoints { get; set; }
+        public int PlayerBHolePoints { get; set; }
+        public bool PlayerAMatchWin { get; set; }
+        public bool PlayerBMatchWin { get; set; }
+        
+        // Absence status
+        public bool PlayerAAbsent { get; set; }
+        public bool PlayerBAbsent { get; set; }
+        public bool PlayerAAbsentWithNotice { get; set; }
+        public bool PlayerBAbsentWithNotice { get; set; }
     }
 }

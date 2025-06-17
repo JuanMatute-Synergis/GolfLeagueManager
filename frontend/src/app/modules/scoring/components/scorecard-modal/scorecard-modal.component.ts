@@ -65,25 +65,35 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
     }
 
     this.isLoading = true;
-    this.scorecardService.getScorecard(this.scorecardData.matchupId).subscribe({
-      next: (holeScores) => {
+    this.scorecardService.getCompleteScorecard(this.scorecardData.matchupId).subscribe({
+      next: (response) => {
         this.isLoading = false;
-        if (holeScores && holeScores.length > 0) {
-          // Convert backend data to frontend format
-          const convertedData = this.scorecardService.convertToScorecardData(
-            holeScores,
-            this.scorecardData.matchupId,
-            this.scorecardData.playerAId,
-            this.scorecardData.playerBId,
-            this.scorecardData.playerAName,
-            this.scorecardData.playerBName,
-            this.scorecardData.flightName
-          );
+        if (response.success && response.holeScores && response.holeScores.length > 0) {
+          // Convert backend hole scores to frontend format
+          this.scorecardData.holes = response.holeScores.map(hs => ({
+            hole: hs.holeNumber,
+            par: hs.par,
+            playerAScore: hs.playerAScore,
+            playerBScore: hs.playerBScore,
+            holeHandicap: hs.holeHandicap,
+            playerAMatchPoints: hs.playerAMatchPoints,
+            playerBMatchPoints: hs.playerBMatchPoints
+          }));
           
-          // Update the scorecard data with loaded scores
-          this.scorecardData.holes = convertedData.holes;
-          this.scorecardData.playerATotalScore = convertedData.playerATotalScore;
-          this.scorecardData.playerBTotalScore = convertedData.playerBTotalScore;
+          // Calculate total scores
+          this.calculateTotals();
+          
+          // Update match play data
+          this.scorecardData.playerAMatchPoints = response.playerAMatchPoints;
+          this.scorecardData.playerBMatchPoints = response.playerBMatchPoints;
+          this.scorecardData.playerAHolePoints = response.playerAHolePoints;
+          this.scorecardData.playerBHolePoints = response.playerBHolePoints;
+          this.scorecardData.playerAMatchWin = response.playerAMatchWin;
+          this.scorecardData.playerBMatchWin = response.playerBMatchWin;
+          this.scorecardData.playerAAbsent = response.playerAAbsent;
+          this.scorecardData.playerBAbsent = response.playerBAbsent;
+          this.scorecardData.playerAAbsentWithNotice = response.playerAAbsentWithNotice;
+          this.scorecardData.playerBAbsentWithNotice = response.playerBAbsentWithNotice;
         } else {
           // No existing scorecard, initialize with empty holes
           this.initializeHoles();
@@ -270,6 +280,18 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
       next: (response) => {
         this.isLoading = false;
         if (response.success) {
+          // Update scorecard data with match play results from backend
+          this.scorecardData.playerAMatchPoints = response.playerAMatchPoints;
+          this.scorecardData.playerBMatchPoints = response.playerBMatchPoints;
+          this.scorecardData.playerAHolePoints = response.playerAHolePoints;
+          this.scorecardData.playerBHolePoints = response.playerBHolePoints;
+          this.scorecardData.playerAMatchWin = response.playerAMatchWin;
+          this.scorecardData.playerBMatchWin = response.playerBMatchWin;
+          this.scorecardData.playerAAbsent = response.playerAAbsent;
+          this.scorecardData.playerBAbsent = response.playerBAbsent;
+          this.scorecardData.playerAAbsentWithNotice = response.playerAAbsentWithNotice;
+          this.scorecardData.playerBAbsentWithNotice = response.playerBAbsentWithNotice;
+          
           this.save.emit(this.scorecardData);
         } else {
           this.saveError = response.message || 'Failed to save scorecard';
