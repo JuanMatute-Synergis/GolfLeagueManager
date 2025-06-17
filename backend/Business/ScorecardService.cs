@@ -7,12 +7,14 @@ namespace GolfLeagueManager
         private readonly AppDbContext _context;
         private readonly MatchupService _matchupService;
         private readonly ScoreEntryService _scoreEntryService;
+        private readonly MatchPlayService _matchPlayService;
 
-        public ScorecardService(AppDbContext context, MatchupService matchupService, ScoreEntryService scoreEntryService)
+        public ScorecardService(AppDbContext context, MatchupService matchupService, ScoreEntryService scoreEntryService, MatchPlayService matchPlayService)
         {
             _context = context;
             _matchupService = matchupService;
             _scoreEntryService = scoreEntryService;
+            _matchPlayService = matchPlayService;
         }
 
         public async Task<ScorecardResponse> SaveScorecardAsync(ScorecardSaveRequest request)
@@ -43,51 +45,64 @@ namespace GolfLeagueManager
                 
                 _context.HoleScores.RemoveRange(existingHoleScores);
 
-                // Create new hole scores
+                // Create new hole scores with handicap information
                 var holeScores = new List<HoleScore>();
+                
+                // Initialize hole scores with default handicaps if not provided
+                await _matchPlayService.InitializeHoleScoresAsync(request.MatchupId);
+                
+                // Get the initialized hole scores and update them with actual scores
+                var initializedHoleScores = await _context.HoleScores
+                    .Where(hs => hs.MatchupId == request.MatchupId)
+                    .OrderBy(hs => hs.HoleNumber)
+                    .ToListAsync();
+
                 foreach (var holeScoreDto in request.HoleScores)
                 {
-                    var holeScore = new HoleScore
-                    {
-                        Id = Guid.NewGuid(),
-                        MatchupId = request.MatchupId,
-                        HoleNumber = holeScoreDto.HoleNumber,
-                        Par = holeScoreDto.Par,
-                        PlayerAScore = holeScoreDto.PlayerAScore,
-                        PlayerBScore = holeScoreDto.PlayerBScore
-                    };
+                    var existingHoleScore = initializedHoleScores
+                        .FirstOrDefault(hs => hs.HoleNumber == holeScoreDto.HoleNumber);
                     
-                    holeScores.Add(holeScore);
+                    if (existingHoleScore != null)
+                    {
+                        // Update existing hole score with actual scores
+                        existingHoleScore.PlayerAScore = holeScoreDto.PlayerAScore;
+                        existingHoleScore.PlayerBScore = holeScoreDto.PlayerBScore;
+                        existingHoleScore.Par = holeScoreDto.Par;
+                    }
+                    else
+                    {
+                        // Create new hole score if it doesn't exist
+                        var holeScore = new HoleScore
+                        {
+                            Id = Guid.NewGuid(),
+                            MatchupId = request.MatchupId,
+                            HoleNumber = holeScoreDto.HoleNumber,
+                            Par = holeScoreDto.Par,
+                            HoleHandicap = holeScoreDto.HoleNumber, // Default handicap, will be overridden by service
+                            PlayerAScore = holeScoreDto.PlayerAScore,
+                            PlayerBScore = holeScoreDto.PlayerBScore,
+                            PlayerAMatchPoints = 0,
+                            PlayerBMatchPoints = 0
+                        };
+                        
+                        holeScores.Add(holeScore);
+                    }
                 }
 
-                await _context.HoleScores.AddRangeAsync(holeScores);
+                if (holeScores.Any())
+                {
+                    await _context.HoleScores.AddRangeAsync(holeScores);
+                }
 
                 // Update the matchup with total scores
                 matchup.PlayerAScore = request.PlayerATotalScore > 0 ? request.PlayerATotalScore : null;
                 matchup.PlayerBScore = request.PlayerBTotalScore > 0 ? request.PlayerBTotalScore : null;
 
-                // Calculate points based on total scores (if both players have scores)
-                if (matchup.PlayerAScore.HasValue && matchup.PlayerBScore.HasValue)
-                {
-                    if (matchup.PlayerAScore < matchup.PlayerBScore)
-                    {
-                        matchup.PlayerAPoints = 2;
-                        matchup.PlayerBPoints = 0;
-                    }
-                    else if (matchup.PlayerBScore < matchup.PlayerAScore)
-                    {
-                        matchup.PlayerAPoints = 0;
-                        matchup.PlayerBPoints = 2;
-                    }
-                    else
-                    {
-                        // Tie
-                        matchup.PlayerAPoints = 1;
-                        matchup.PlayerBPoints = 1;
-                    }
-                }
+                // Save changes to get hole scores in database
+                await _context.SaveChangesAsync();
 
-                _context.Matchups.Update(matchup);
+                // Calculate match play results using the new scoring system
+                await _matchPlayService.CalculateMatchPlayResultsAsync(request.MatchupId);
 
                 // Create or update score entries
                 if (matchup.Week != null)

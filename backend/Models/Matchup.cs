@@ -18,8 +18,14 @@ namespace GolfLeagueManager
         
         public int? PlayerAScore { get; set; }
         public int? PlayerBScore { get; set; }
-        public int? PlayerAPoints { get; set; }
-        public int? PlayerBPoints { get; set; }
+        public int? PlayerAPoints { get; set; } // Total match play points (0-20)
+        public int? PlayerBPoints { get; set; } // Total match play points (0-20)
+        
+        // Match play breakdown
+        public int PlayerAHolePoints { get; set; } // Points from individual holes (0-18)
+        public int PlayerBHolePoints { get; set; } // Points from individual holes (0-18)
+        public bool PlayerAMatchWin { get; set; } // Gets the 2-point match bonus
+        public bool PlayerBMatchWin { get; set; } // Gets the 2-point match bonus
         
         // Navigation properties - nullable for JSON serialization
         [JsonIgnore]

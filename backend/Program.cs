@@ -37,8 +37,7 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<IWeekRepository, WeekRepository>();
             builder.Services.AddScoped<IScoreEntryRepository, ScoreEntryRepository>();
             builder.Services.AddScoped<IMatchupRepository, MatchupRepository>();
-            
-            // Register business services
+              // Register business services
             builder.Services.AddScoped<PlayerService>();
             builder.Services.AddScoped<FlightService>();
             builder.Services.AddScoped<SeasonService>();
@@ -47,6 +46,7 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<ScoreEntryService>();
             builder.Services.AddScoped<MatchupService>();
             builder.Services.AddScoped<ScorecardService>();
+            builder.Services.AddScoped<MatchPlayService>();
 
             // Add controllers with JSON options
             builder.Services.AddControllers()
