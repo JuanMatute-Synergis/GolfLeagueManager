@@ -6,6 +6,11 @@ namespace GolfLeagueManager
         public List<HoleScoreDto> HoleScores { get; set; } = new List<HoleScoreDto>();
         public int PlayerATotalScore { get; set; }
         public int PlayerBTotalScore { get; set; }
+        // Absence scenario fields
+        public bool PlayerAAbsent { get; set; }
+        public bool PlayerBAbsent { get; set; }
+        public bool PlayerAAbsentWithNotice { get; set; }
+        public bool PlayerBAbsentWithNotice { get; set; }
     }
 
     public class HoleScoreDto

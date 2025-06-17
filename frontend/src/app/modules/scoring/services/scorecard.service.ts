@@ -8,6 +8,11 @@ export interface ScorecardSaveRequest {
   holeScores: HoleScoreDto[];
   playerATotalScore: number;
   playerBTotalScore: number;
+  // Absence scenario fields
+  playerAAbsent?: boolean;
+  playerBAbsent?: boolean;
+  playerAAbsentWithNotice?: boolean;
+  playerBAbsentWithNotice?: boolean;
 }
 
 export interface HoleScoreDto {
@@ -46,6 +51,10 @@ export class ScorecardService {
       matchupId: scorecardData.matchupId,
       playerATotalScore: scorecardData.playerATotalScore || 0,
       playerBTotalScore: scorecardData.playerBTotalScore || 0,
+      playerAAbsent: scorecardData.playerAAbsent || false,
+      playerBAbsent: scorecardData.playerBAbsent || false,
+      playerAAbsentWithNotice: scorecardData.playerAAbsentWithNotice || false,
+      playerBAbsentWithNotice: scorecardData.playerBAbsentWithNotice || false,
       holeScores: scorecardData.holes.map(hole => ({
         holeNumber: hole.hole,
         par: hole.par,

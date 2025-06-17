@@ -154,6 +154,32 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
     }, 0);
   }
 
+  onPlayerAbsenceChange(player: 'A' | 'B') {
+    if (player === 'A') {
+      if (this.scorecardData.playerAAbsent) {
+        // Initialize absence notice option to false (no notice)
+        this.scorecardData.playerAAbsentWithNotice = false;
+        // Clear player A scores when marked as absent
+        this.scorecardData.holes.forEach(hole => hole.playerAScore = undefined);
+        this.scorecardData.playerATotalScore = 0;
+      } else {
+        // Clear absence flags when player is no longer marked as absent
+        this.scorecardData.playerAAbsentWithNotice = false;
+      }
+    } else {
+      if (this.scorecardData.playerBAbsent) {
+        // Initialize absence notice option to false (no notice)
+        this.scorecardData.playerBAbsentWithNotice = false;
+        // Clear player B scores when marked as absent
+        this.scorecardData.holes.forEach(hole => hole.playerBScore = undefined);
+        this.scorecardData.playerBTotalScore = 0;
+      } else {
+        // Clear absence flags when player is no longer marked as absent
+        this.scorecardData.playerBAbsentWithNotice = false;
+      }
+    }
+  }
+
   getScoreClass(score: number | undefined, par: number): string {
     if (!score) return '';
     
@@ -181,6 +207,35 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
     }
   }
 
+  getMatchPlayResult(): string {
+    // Handle absence scenarios
+    if (this.scorecardData.playerAAbsent && this.scorecardData.playerBAbsent) {
+      return 'Both Absent';
+    }
+    if (this.scorecardData.playerAAbsent) {
+      return `${this.scorecardData.playerBName} Wins`;
+    }
+    if (this.scorecardData.playerBAbsent) {
+      return `${this.scorecardData.playerAName} Wins`;
+    }
+
+    // Standard match play result
+    const playerAPoints = this.scorecardData.playerAMatchPoints || 0;
+    const playerBPoints = this.scorecardData.playerBMatchPoints || 0;
+
+    if (playerAPoints === 0 && playerBPoints === 0) {
+      return 'Not Yet Calculated';
+    }
+
+    if (playerAPoints > playerBPoints) {
+      return `${this.scorecardData.playerAName} Wins`;
+    } else if (playerBPoints > playerAPoints) {
+      return `${this.scorecardData.playerBName} Wins`;
+    } else {
+      return 'Tie';
+    }
+  }
+
   getScoreDifference(): string {
     if (!this.scorecardData.playerATotalScore || !this.scorecardData.playerBTotalScore) {
       return '';
@@ -188,6 +243,17 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
 
     const diff = Math.abs(this.scorecardData.playerATotalScore - this.scorecardData.playerBTotalScore);
     return diff > 0 ? `by ${diff} strokes` : 'All Square';
+  }
+
+  getMatchPlayScore(): string {
+    const playerAPoints = this.scorecardData.playerAMatchPoints || 0;
+    const playerBPoints = this.scorecardData.playerBMatchPoints || 0;
+    
+    if (playerAPoints === 0 && playerBPoints === 0) {
+      return 'Scores pending calculation';
+    }
+    
+    return `${playerAPoints} - ${playerBPoints}`;
   }
 
   isValidScorecard(): boolean {

@@ -24,6 +24,12 @@ namespace GolfLeagueManager
 
             if (matchup == null) return false;
 
+            // Handle absence scenarios first
+            if (matchup.PlayerAAbsent || matchup.PlayerBAbsent)
+            {
+                return await CalculateAbsenceScenarioAsync(matchup);
+            }
+
             var holeScores = await _context.HoleScores
                 .Where(hs => hs.MatchupId == matchupId)
                 .OrderBy(hs => hs.HoleNumber)
@@ -103,6 +109,121 @@ namespace GolfLeagueManager
             matchup.PlayerBPoints = playerBHolePoints + (playerBWinsMatch ? 2 : 0);
 
             await _context.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Calculate points for absence scenarios
+        /// </summary>
+        private async Task<bool> CalculateAbsenceScenarioAsync(Matchup matchup)
+        {
+            if (matchup.PlayerAAbsent && matchup.PlayerBAbsent)
+            {
+                // Both absent - no points awarded
+                matchup.PlayerAPoints = 0;
+                matchup.PlayerBPoints = 0;
+                matchup.PlayerAHolePoints = 0;
+                matchup.PlayerBHolePoints = 0;
+                matchup.PlayerAMatchWin = false;
+                matchup.PlayerBMatchWin = false;
+            }
+            else if (matchup.PlayerAAbsent)
+            {
+                // Player A absent, Player B present
+                if (matchup.PlayerAAbsentWithNotice)
+                {
+                    matchup.PlayerAPoints = 4; // Unable to play with notice
+                }
+                else
+                {
+                    matchup.PlayerAPoints = 0; // No notice
+                }
+
+                // Player B gets points based on performance vs handicap
+                var playerBHandicap = await GetPlayerHandicapAsync(matchup.PlayerBId);
+                await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerBId, playerBHandicap, false);
+            }
+            else if (matchup.PlayerBAbsent)
+            {
+                // Player B absent, Player A present
+                if (matchup.PlayerBAbsentWithNotice)
+                {
+                    matchup.PlayerBPoints = 4; // Unable to play with notice
+                }
+                else
+                {
+                    matchup.PlayerBPoints = 0; // No notice
+                }
+
+                // Player A gets points based on performance vs handicap
+                var playerAHandicap = await GetPlayerHandicapAsync(matchup.PlayerAId);
+                await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerAId, playerAHandicap, true);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Calculate points when player has no opponent (beat handicap scenario)
+        /// </summary>
+        private async Task<bool> CalculateNoOpponentScoringAsync(Matchup matchup, Guid playerId, double handicap, bool isPlayerA)
+        {
+            var playerScore = isPlayerA ? matchup.PlayerAScore : matchup.PlayerBScore;
+            
+            if (!playerScore.HasValue)
+            {
+                // No score recorded, award 0 points
+                if (isPlayerA)
+                {
+                    matchup.PlayerAPoints = 0;
+                    matchup.PlayerAHolePoints = 0;
+                    matchup.PlayerAMatchWin = false;
+                }
+                else
+                {
+                    matchup.PlayerBPoints = 0;
+                    matchup.PlayerBHolePoints = 0;
+                    matchup.PlayerBMatchWin = false;
+                }
+                return true;
+            }
+
+            // Calculate expected score based on handicap (assuming par 36 for 9 holes)
+            const int standardPar = 36;
+            var expectedScore = standardPar + (int)Math.Round(handicap);
+            
+            // Determine points based on performance vs handicap
+            int pointsAwarded;
+            if (playerScore.Value < expectedScore)
+            {
+                // Beat handicap
+                pointsAwarded = 16;
+            }
+            else if (playerScore.Value == expectedScore)
+            {
+                // Tied handicap
+                pointsAwarded = 8;
+            }
+            else
+            {
+                // Didn't beat handicap
+                pointsAwarded = 8;
+            }
+
+            if (isPlayerA)
+            {
+                matchup.PlayerAPoints = pointsAwarded;
+                matchup.PlayerAHolePoints = pointsAwarded - 2; // Simulate hole points
+                matchup.PlayerAMatchWin = pointsAwarded > 10; // Simulate match win
+            }
+            else
+            {
+                matchup.PlayerBPoints = pointsAwarded;
+                matchup.PlayerBHolePoints = pointsAwarded - 2; // Simulate hole points
+                matchup.PlayerBMatchWin = pointsAwarded > 10; // Simulate match win
+            }
+
             return true;
         }
 

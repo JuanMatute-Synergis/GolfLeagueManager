@@ -27,6 +27,12 @@ namespace GolfLeagueManager
         public bool PlayerAMatchWin { get; set; } // Gets the 2-point match bonus
         public bool PlayerBMatchWin { get; set; } // Gets the 2-point match bonus
         
+        // Absence scenarios
+        public bool PlayerAAbsent { get; set; } // Player A was absent
+        public bool PlayerBAbsent { get; set; } // Player B was absent
+        public bool PlayerAAbsentWithNotice { get; set; } // Player A absent but gave notice
+        public bool PlayerBAbsentWithNotice { get; set; } // Player B absent but gave notice
+        
         // Navigation properties - nullable for JSON serialization
         [JsonIgnore]
         public Week? Week { get; set; }

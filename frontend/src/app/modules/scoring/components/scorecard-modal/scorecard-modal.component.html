@@ -19,13 +19,80 @@
     <!-- Players Header -->
     <div class="bg-muted/20 border-b border-border p-4 flex-shrink-0">
       <div class="grid grid-cols-2 gap-4">
+        <!-- Player A Section -->
         <div class="text-center">
           <h3 class="font-bold text-lg text-foreground">{{ scorecardData.playerAName }}</h3>
-          <div class="text-sm text-muted-foreground">Player A</div>
+          <div class="text-sm text-muted-foreground mb-3">Player A</div>
+          
+          <!-- Player A Absence Options -->
+          <div class="text-left space-y-2 text-sm">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="scorecardData.playerAAbsent"
+                (change)="onPlayerAbsenceChange('A')"
+                class="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2">
+              <span class="text-foreground">Player Absent</span>
+            </label>
+            <div *ngIf="scorecardData.playerAAbsent" class="ml-6 space-y-1">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="playerAAbsenceType"
+                  [value]="true"
+                  [(ngModel)]="scorecardData.playerAAbsentWithNotice"
+                  class="w-3 h-3 text-primary bg-background border-border focus:ring-primary focus:ring-2">
+                <span class="text-muted-foreground">With Notice (4 pts)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="playerAAbsenceType"
+                  [value]="false"
+                  [(ngModel)]="scorecardData.playerAAbsentWithNotice"
+                  class="w-3 h-3 text-primary bg-background border-border focus:ring-primary focus:ring-2">
+                <span class="text-muted-foreground">No Notice (0 pts)</span>
+              </label>
+            </div>
+          </div>
         </div>
+        
+        <!-- Player B Section -->
         <div class="text-center">
           <h3 class="font-bold text-lg text-foreground">{{ scorecardData.playerBName }}</h3>
-          <div class="text-sm text-muted-foreground">Player B</div>
+          <div class="text-sm text-muted-foreground mb-3">Player B</div>
+          
+          <!-- Player B Absence Options -->
+          <div class="text-left space-y-2 text-sm">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="scorecardData.playerBAbsent"
+                (change)="onPlayerAbsenceChange('B')"
+                class="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2">
+              <span class="text-foreground">Player Absent</span>
+            </label>
+            <div *ngIf="scorecardData.playerBAbsent" class="ml-6 space-y-1">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="playerBAbsenceType"
+                  [value]="true"
+                  [(ngModel)]="scorecardData.playerBAbsentWithNotice"
+                  class="w-3 h-3 text-primary bg-background border-border focus:ring-primary focus:ring-2">
+                <span class="text-muted-foreground">With Notice (4 pts)</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="playerBAbsenceType"
+                  [value]="false"
+                  [(ngModel)]="scorecardData.playerBAbsentWithNotice"
+                  class="w-3 h-3 text-primary bg-background border-border focus:ring-primary focus:ring-2">
+                <span class="text-muted-foreground">No Notice (0 pts)</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -169,17 +236,60 @@
         <div class="player-summary-a p-3 rounded-lg">
           <div class="font-bold text-lg text-foreground">{{ scorecardData.playerAName }}</div>
           <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ scorecardData.playerATotalScore || 0 }}</div>
-          <div class="text-sm text-muted-foreground">Total Score</div>
+          <div class="text-sm text-muted-foreground">Stroke Play Score</div>
+          
+          <!-- Match Play Points -->
+          <div *ngIf="scorecardData.playerAMatchPoints !== undefined" class="mt-2 p-2 bg-blue-100 dark:bg-blue-900 rounded">
+            <div class="text-xl font-bold text-blue-800 dark:text-blue-200">{{ scorecardData.playerAMatchPoints }}</div>
+            <div class="text-xs text-blue-600 dark:text-blue-300">Match Play Points</div>
+            <div class="text-xs text-blue-600 dark:text-blue-300" *ngIf="scorecardData.playerAHolePoints !== undefined">
+              ({{ scorecardData.playerAHolePoints }} holes + {{ scorecardData.playerAMatchWin ? 2 : 0 }} bonus)
+            </div>
+          </div>
+          
+          <!-- Absence Status -->
+          <div *ngIf="scorecardData.playerAAbsent" class="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded">
+            <div class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+              Absent {{ scorecardData.playerAAbsentWithNotice ? '(Notice)' : '(No Notice)' }}
+            </div>
+          </div>
         </div>
+        
         <div class="bg-gray-100 dark:bg-gray-600 p-3 rounded-lg border border-gray-200 dark:border-gray-500">
-          <div class="font-bold text-lg text-foreground">Match Status</div>
-          <div class="text-xl font-bold text-foreground">{{ getMatchResult() }}</div>
-          <div class="text-sm text-muted-foreground">{{ getScoreDifference() }}</div>
+          <div class="font-bold text-lg text-foreground">Match Play (20 pts)</div>
+          <div class="text-xl font-bold text-foreground">
+            {{ getMatchPlayResult() }}
+          </div>
+          <div class="text-sm text-muted-foreground">{{ getMatchPlayScore() }}</div>
+          
+          <!-- Traditional Result -->
+          <div class="mt-2 pt-2 border-t border-gray-300 dark:border-gray-500">
+            <div class="text-sm font-medium text-foreground">Stroke Play</div>
+            <div class="text-lg font-bold text-foreground">{{ getMatchResult() }}</div>
+            <div class="text-xs text-muted-foreground">{{ getScoreDifference() }}</div>
+          </div>
         </div>
+        
         <div class="player-summary-b p-3 rounded-lg">
           <div class="font-bold text-lg text-foreground">{{ scorecardData.playerBName }}</div>
           <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ scorecardData.playerBTotalScore || 0 }}</div>
-          <div class="text-sm text-muted-foreground">Total Score</div>
+          <div class="text-sm text-muted-foreground">Stroke Play Score</div>
+          
+          <!-- Match Play Points -->
+          <div *ngIf="scorecardData.playerBMatchPoints !== undefined" class="mt-2 p-2 bg-red-100 dark:bg-red-900 rounded">
+            <div class="text-xl font-bold text-red-800 dark:text-red-200">{{ scorecardData.playerBMatchPoints }}</div>
+            <div class="text-xs text-red-600 dark:text-red-300">Match Play Points</div>
+            <div class="text-xs text-red-600 dark:text-red-300" *ngIf="scorecardData.playerBHolePoints !== undefined">
+              ({{ scorecardData.playerBHolePoints }} holes + {{ scorecardData.playerBMatchWin ? 2 : 0 }} bonus)
+            </div>
+          </div>
+          
+          <!-- Absence Status -->
+          <div *ngIf="scorecardData.playerBAbsent" class="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900 rounded">
+            <div class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+              Absent {{ scorecardData.playerBAbsentWithNotice ? '(Notice)' : '(No Notice)' }}
+            </div>
+          </div>
         </div>
       </div>
     </div>

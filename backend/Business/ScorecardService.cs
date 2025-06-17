@@ -94,9 +94,13 @@ namespace GolfLeagueManager
                     await _context.HoleScores.AddRangeAsync(holeScores);
                 }
 
-                // Update the matchup with total scores
+                // Update the matchup with total scores and absence information
                 matchup.PlayerAScore = request.PlayerATotalScore > 0 ? request.PlayerATotalScore : null;
                 matchup.PlayerBScore = request.PlayerBTotalScore > 0 ? request.PlayerBTotalScore : null;
+                matchup.PlayerAAbsent = request.PlayerAAbsent;
+                matchup.PlayerBAbsent = request.PlayerBAbsent;
+                matchup.PlayerAAbsentWithNotice = request.PlayerAAbsentWithNotice;
+                matchup.PlayerBAbsentWithNotice = request.PlayerBAbsentWithNotice;
 
                 // Save changes to get hole scores in database
                 await _context.SaveChangesAsync();

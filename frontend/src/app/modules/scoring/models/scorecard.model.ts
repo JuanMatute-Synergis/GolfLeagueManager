@@ -31,8 +31,15 @@ export interface ScorecardData {
   playerBHolePoints?: number; // Points from individual holes (0-18)
   playerAMatchPoints?: number; // Total match play points (0-20)
   playerBMatchPoints?: number; // Total match play points (0-20)
+  playerAMatchWin?: boolean; // Player A won the overall match
+  playerBMatchWin?: boolean; // Player B won the overall match
   playerAHandicap?: number;
   playerBHandicap?: number;
+  // Absence scenarios
+  playerAAbsent?: boolean;
+  playerBAbsent?: boolean;
+  playerAAbsentWithNotice?: boolean;
+  playerBAbsentWithNotice?: boolean;
 }
 
 export interface Course {
