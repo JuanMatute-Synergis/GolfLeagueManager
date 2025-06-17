@@ -4,6 +4,7 @@ namespace GolfLeagueManager
     {
         void AddPlayer(GolfLeagueManager.Player player);
         IEnumerable<GolfLeagueManager.Player> GetPlayers();
+        Task<Player?> GetByIdAsync(Guid id);
         bool DeletePlayer(Guid id);
         bool UpdatePlayer(GolfLeagueManager.Player player);
         // Additional repository methods can be added here
@@ -52,6 +53,11 @@ namespace GolfLeagueManager
             
             _context.SaveChanges();
             return true;
+        }
+
+        public async Task<Player?> GetByIdAsync(Guid id)
+        {
+            return await _context.Players.FindAsync(id);
         }
 
         // Additional repository methods can be implemented here

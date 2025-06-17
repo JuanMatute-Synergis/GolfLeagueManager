@@ -1,0 +1,47 @@
+/* Additional custom styles for score entry component */
+
+/* Table scrolling improvements */
+.scrollable-table-container {
+  flex: 1;
+  overflow: hidden;
+}
+
+.scrollable-table {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Ensure table rows are properly sized */
+.table-row {
+  min-height: 60px;
+}
+
+/* Better visual feedback for changed scores */
+.score-changed {
+  background-color: rgba(var(--primary), 0.05);
+  border-left: 3px solid rgb(var(--primary));
+}
+
+/* Loading states */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .score-label {
+    min-width: 2rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .action-button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}

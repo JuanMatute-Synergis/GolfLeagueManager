@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 namespace GolfLeagueManager
 {
     public class Week
@@ -10,13 +13,18 @@ namespace GolfLeagueManager
         public bool IsActive { get; set; } = true;
         
         // Foreign key to Season
+        [Required]
         public Guid SeasonId { get; set; }
-        public Season Season { get; set; } = null!;
+        
+        [JsonIgnore]
+        public Season? Season { get; set; }
         
         // Navigation property for matchups in this week
+        [JsonIgnore]
         public List<Matchup> Matchups { get; set; } = new List<Matchup>();
 
         // Navigation property for score entries in this week
+        [JsonIgnore]
         public List<ScoreEntry> ScoreEntries { get; set; } = new List<ScoreEntry>();
     }
 }

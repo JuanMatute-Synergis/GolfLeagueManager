@@ -34,8 +34,8 @@ namespace GolfLeagueManager
                 .Include(a => a.Player)
                 .Include(a => a.Flight)
                 .Where(a => a.FlightId == flightId)
-                .OrderBy(a => a.Player.LastName)
-                .ThenBy(a => a.Player.FirstName)
+                .OrderBy(a => a.Player!.LastName)
+                .ThenBy(a => a.Player!.FirstName)
                 .ToList();
         }
 
@@ -45,7 +45,7 @@ namespace GolfLeagueManager
                 .Include(a => a.Player)
                 .Include(a => a.Flight)
                 .Where(a => a.PlayerId == playerId)
-                .OrderBy(a => a.Flight.Name)
+                .OrderBy(a => a.Flight!.Name)
                 .ToList();
         }
 

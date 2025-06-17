@@ -59,6 +59,36 @@ namespace backend.Migrations
                     b.ToTable("Flights");
                 });
 
+            modelBuilder.Entity("GolfLeagueManager.HoleScore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<int>("HoleNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("MatchupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Par")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PlayerAScore")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PlayerBScore")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchupId", "HoleNumber")
+                        .IsUnique();
+
+                    b.ToTable("HoleScores");
+                });
+
             modelBuilder.Entity("GolfLeagueManager.Matchup", b =>
                 {
                     b.Property<Guid>("Id")
@@ -253,6 +283,17 @@ namespace backend.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Season");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.HoleScore", b =>
+                {
+                    b.HasOne("GolfLeagueManager.Matchup", "Matchup")
+                        .WithMany()
+                        .HasForeignKey("MatchupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Matchup");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Matchup", b =>

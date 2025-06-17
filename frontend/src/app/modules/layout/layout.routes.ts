@@ -7,6 +7,11 @@ export const layoutRoutes: Routes = [
     loadChildren: () => import('../dashboard/dashboard.routes').then((m) => m.dashboardRoutes),
   },
   {
+    path: 'scoring',
+    loadComponent: () => import('./layout.component').then(m => m.LayoutComponent),
+    loadChildren: () => import('../scoring/scoring.routes').then((m) => m.scoringRoutes),
+  },
+  {
     path: 'settings',
     loadComponent: () => import('./layout.component').then(m => m.LayoutComponent),
     loadChildren: () => import('../settings/settings.routes').then((m) => m.settingsRoutes),

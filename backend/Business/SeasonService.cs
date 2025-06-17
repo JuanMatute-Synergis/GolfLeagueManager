@@ -3,17 +3,28 @@ namespace GolfLeagueManager
     public class SeasonService
     {
         private readonly ISeasonRepository _seasonRepository;
+        private readonly WeekService _weekService;
 
-        public SeasonService(ISeasonRepository seasonRepository)
+        public SeasonService(ISeasonRepository seasonRepository, WeekService weekService)
         {
             _seasonRepository = seasonRepository;
+            _weekService = weekService;
         }
 
-        public void AddSeason(Season season)
+        public async Task AddSeasonAsync(Season season)
         {
             // Business logic validation
             ValidateSeason(season);
             _seasonRepository.AddSeason(season);
+
+            // Automatically generate weeks for the season
+            await _weekService.GenerateWeeksForSeasonAsync(season.Id);
+        }
+
+        public void AddSeason(Season season)
+        {
+            // Synchronous wrapper for backward compatibility
+            AddSeasonAsync(season).GetAwaiter().GetResult();
         }
 
         public IEnumerable<Season> GetSeasons()

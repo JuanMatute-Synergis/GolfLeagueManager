@@ -14,6 +14,7 @@ namespace GolfLeagueManager
         public DbSet<Matchup> Matchups { get; set; }
         public DbSet<PlayerFlightAssignment> PlayerFlightAssignments { get; set; }
         public DbSet<ScoreEntry> ScoreEntries { get; set; }
+        public DbSet<HoleScore> HoleScores { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -148,6 +149,20 @@ namespace GolfLeagueManager
                     .WithMany(w => w.ScoreEntries)
                     .HasForeignKey(e => e.WeekId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure HoleScore entity
+            modelBuilder.Entity<HoleScore>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasDefaultValueSql("gen_random_uuid()");
+                entity.HasOne(e => e.Matchup)
+                    .WithMany()
+                    .HasForeignKey(e => e.MatchupId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                // Create unique index on MatchupId and HoleNumber
+                entity.HasIndex(e => new { e.MatchupId, e.HoleNumber })
+                    .IsUnique();
             });
 
             base.OnModelCreating(modelBuilder);

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Scalar.AspNetCore;
 using System;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace GolfLeagueManager
@@ -13,8 +14,7 @@ namespace GolfLeagueManager
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            
-            // Register OpenAPI services
+              // Register OpenAPI services
             builder.Services.AddOpenApi();
             
             // Configure JSON serialization to handle circular references
@@ -22,13 +22,8 @@ namespace GolfLeagueManager
             {
                 options.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             });
-            
-            // Register business services
-            builder.Services.AddScoped<PlayerService>();
-            builder.Services.AddScoped<FlightService>();
-            builder.Services.AddScoped<SeasonService>();
-            builder.Services.AddScoped<PlayerFlightAssignmentService>();
             
             // Register EF Core with PostgreSQL
             builder.Services.AddDbContext<AppDbContext>(options =>
@@ -39,6 +34,19 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<IFlightRepository, FlightRepository>();
             builder.Services.AddScoped<ISeasonRepository, SeasonRepository>();
             builder.Services.AddScoped<IPlayerFlightAssignmentRepository, PlayerFlightAssignmentRepository>();
+            builder.Services.AddScoped<IWeekRepository, WeekRepository>();
+            builder.Services.AddScoped<IScoreEntryRepository, ScoreEntryRepository>();
+            builder.Services.AddScoped<IMatchupRepository, MatchupRepository>();
+            
+            // Register business services
+            builder.Services.AddScoped<PlayerService>();
+            builder.Services.AddScoped<FlightService>();
+            builder.Services.AddScoped<SeasonService>();
+            builder.Services.AddScoped<PlayerFlightAssignmentService>();
+            builder.Services.AddScoped<WeekService>();
+            builder.Services.AddScoped<ScoreEntryService>();
+            builder.Services.AddScoped<MatchupService>();
+            builder.Services.AddScoped<ScorecardService>();
 
             // Add controllers with JSON options
             builder.Services.AddControllers()
@@ -46,9 +54,8 @@ namespace GolfLeagueManager
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                });
-
-            // Add CORS
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                });            // Add CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngularApp", policy =>
@@ -57,7 +64,9 @@ namespace GolfLeagueManager
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
-            });            var app = builder.Build();
+            });
+
+            var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
             {

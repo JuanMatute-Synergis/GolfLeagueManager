@@ -14,8 +14,8 @@
             class="w-full p-3 border border-border rounded-md text-foreground bg-background focus:border-primary focus:ring-2 focus:ring-primary/20">
             <option value="players">👥 Players</option>
             <option value="seasons">📅 Seasons</option>
-            <option value="scoring">🏆 Scoring</option>
-            <option value="schedule">⏰ Schedule</option>
+            <option value="scheduling">⚡ Scheduling</option>
+            <option value="weeks">📅 Week Management</option>
           </select>
         </div>
 
@@ -36,15 +36,21 @@
             </button>
             <button 
               class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-              [class]="activeTab === 'scoring' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
-              (click)="setActiveTab('scoring')">
-              <i class="fas fa-trophy mr-2"></i>Scoring
+              [class]="activeTab === 'scheduling' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
+              (click)="setActiveTab('scheduling')">
+              <i class="fas fa-clock mr-2"></i>Scheduling
             </button>
             <button 
               class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-              [class]="activeTab === 'schedule' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
-              (click)="setActiveTab('schedule')">
-              <i class="fas fa-clock mr-2"></i>Schedule
+              [class]="activeTab === 'weeks' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
+              (click)="setActiveTab('weeks')">
+              <i class="fas fa-calendar-week mr-2"></i>Week Management
+            </button>
+            <button 
+              class="py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
+              [class]="activeTab === 'score-entry' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted'"
+              (click)="setActiveTab('score-entry')">
+              <i class="fas fa-edit mr-2"></i>Score Entry
             </button>
           </nav>
         </div>
@@ -62,14 +68,19 @@
           <app-seasons-settings></app-seasons-settings>
         </div>
 
-        <!-- Scoring Tab -->
-        <div class="h-full" *ngIf="activeTab === 'scoring'">
-          <app-scoring-settings></app-scoring-settings>
+        <!-- Scheduling Tab -->
+        <div class="h-full" *ngIf="activeTab === 'scheduling'">
+          <app-scheduling-settings></app-scheduling-settings>
         </div>
 
-        <!-- Schedule Tab -->
-        <div class="h-full" *ngIf="activeTab === 'schedule'">
-          <app-schedule-settings></app-schedule-settings>
+        <!-- Week Management Tab -->
+        <div class="h-full" *ngIf="activeTab === 'weeks'">
+          <app-week-management></app-week-management>
+        </div>
+
+        <!-- Score Entry Tab -->
+        <div class="h-full" *ngIf="activeTab === 'score-entry'">
+          <app-score-entry></app-score-entry>
         </div>
       </div>
 </div>

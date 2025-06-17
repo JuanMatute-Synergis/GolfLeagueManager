@@ -23,7 +23,6 @@ export class SeasonsSettingsComponent implements OnInit {
   seasonFlights: Flight[] = [];
   flightAssignments: PlayerFlightAssignment[] = [];
   players: Player[] = [];
-  playersWithHandicap: (Player & { handicap?: number })[] = [];
   
   // Selected data
   selectedSeasonId: string | null = null;
@@ -335,7 +334,7 @@ export class SeasonsSettingsComponent implements OnInit {
     this.playerFlightAssignmentService.getAssignmentsByFlight(flightId).subscribe({
       next: (assignments: PlayerFlightAssignment[]) => {
         this.flightAssignments = assignments;
-        this.loadPlayersWithHandicap(flightId);
+        this.isLoading = false;
       },
       error: (error: any) => {
         console.error('Error loading flight assignments:', error);
@@ -345,26 +344,11 @@ export class SeasonsSettingsComponent implements OnInit {
     });
   }
 
-  loadPlayersWithHandicap(flightId: string) {
-    this.playerFlightAssignmentService.getPlayersWithHandicap(flightId, this.players).subscribe({
-      next: (players) => {
-        this.playersWithHandicap = players;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading player handicaps:', error);
-        this.isLoading = false;
-      }
-    });
-  }
-
   onPlayerSelected() {
-    if (this.selectedPlayerId) {
-      const selectedPlayer = this.playersWithHandicap.find(p => p.id === this.selectedPlayerId);
-      this.playerHandicap = selectedPlayer?.handicap || null;
-    } else {
+    if (!this.selectedPlayerId) {
       this.playerHandicap = null;
     }
+    // Let the user enter the handicap manually
   }
 
   getSelectedFlightName(): string {

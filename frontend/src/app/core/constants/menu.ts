@@ -28,5 +28,36 @@ export class Menu {
         },
       ],
     },
+    {
+      group: 'Scoring',
+      separator: false,
+      items: [
+        {
+          icon: 'assets/icons/heroicons/outline/chart-bar.svg',
+          label: 'Scoring Dashboard',
+          route: '/scoring',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/calendar-days.svg',
+          label: 'Week Management',
+          route: '/scoring/weeks',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/pencil-square.svg',
+          label: 'Score Entry',
+          route: '/scoring/score-entry',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/chart-pie.svg',
+          label: 'Leaderboard',
+          route: '/scoring/leaderboard',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/trophy.svg',
+          label: 'Season Standings',
+          route: '/scoring/standings',
+        },
+      ],
+    },
   ];
 }

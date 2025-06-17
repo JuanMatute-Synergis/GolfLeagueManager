@@ -1,0 +1,216 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" 
+     (click)="onBackdropClick($event)">
+  <div class="bg-card border border-border rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
+       (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="bg-primary text-primary-foreground p-4 flex justify-between items-center flex-shrink-0">
+      <div>
+        <h2 class="text-xl font-bold">Golf Scorecard</h2>
+        <p class="text-sm opacity-90">{{ scorecardData.flightName }} - {{ course.name }}</p>
+      </div>
+      <button 
+        (click)="onClose()"
+        class="text-primary-foreground hover:bg-primary/80 rounded-full p-2 transition-colors">
+        ✕
+      </button>
+    </div>
+
+    <!-- Players Header -->
+    <div class="bg-muted/20 border-b border-border p-4 flex-shrink-0">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="text-center">
+          <h3 class="font-bold text-lg text-foreground">{{ scorecardData.playerAName }}</h3>
+          <div class="text-sm text-muted-foreground">Player A</div>
+        </div>
+        <div class="text-center">
+          <h3 class="font-bold text-lg text-foreground">{{ scorecardData.playerBName }}</h3>
+          <div class="text-sm text-muted-foreground">Player B</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scorecard Table -->
+    <div class="flex-1 overflow-auto bg-background">
+      <table class="w-full text-sm border-collapse">
+        <!-- Front 9 Header -->
+        <thead class=" sticky top-0 z-10">
+          <tr>
+            <th class="border border-border p-2 text-left font-semibold text-foreground ">Hole</th>
+            <th class="border border-border p-2 text-center font-semibold text-foreground " 
+                *ngFor="let hole of getFrontNine()">
+              {{ hole.number }}
+            </th>
+            <th class="border border-border p-2 text-center font-semibold text-foreground ">OUT</th>
+          </tr>
+          <tr>
+            <th class="border border-border p-2 text-left font-semibold text-foreground ">Par</th>
+            <th class="border border-border p-2 text-center text-foreground font-semibold " 
+                *ngFor="let hole of getFrontNine()">
+              {{ hole.par }}
+            </th>
+            <th class="border border-border p-2 text-center font-medium text-foreground ">{{ getFrontNinePar() }}</th>
+          </tr>
+        </thead>
+        
+        <!-- Player A Front 9 -->
+        <tbody>
+          <tr class="player-a-row">
+            <td class="border border-border p-2 font-medium text-foreground bg-muted/50">{{ scorecardData.playerAName }}</td>
+            <td class="border border-border" *ngFor="let hole of getFrontNine(); let i = index">
+              <input 
+                type="number"
+                [(ngModel)]="scorecardData.holes[i].playerAScore"
+                (ngModelChange)="calculateTotals()"
+                [class]="getScoreClass(scorecardData.holes[i].playerAScore, hole.par)"
+                class="w-full text-center border-0 bg-transparent text-foreground focus:ring-2 focus:ring-primary/20"
+                min="1"
+                max="10"
+                placeholder="-">
+            </td>
+            <td class="border border-border p-2 text-center font-bold text-foreground bg-muted/50">
+              {{ getPlayerFrontNineTotal('A') }}
+            </td>
+          </tr>
+          
+          <!-- Player B Front 9 -->
+          <tr class="player-b-row">
+            <td class="border border-border p-2 font-medium text-foreground bg-muted/50">{{ scorecardData.playerBName }}</td>
+            <td class="border border-border" *ngFor="let hole of getFrontNine(); let i = index">
+              <input 
+                type="number"
+                [(ngModel)]="scorecardData.holes[i].playerBScore"
+                (ngModelChange)="calculateTotals()"
+                [class]="getScoreClass(scorecardData.holes[i].playerBScore, hole.par)"
+                class="w-full text-center border-0 bg-transparent text-foreground focus:ring-2 focus:ring-primary/20"
+                min="1"
+                max="10"
+                placeholder="-">
+            </td>
+            <td class="border border-border p-2 text-center font-bold text-foreground bg-muted/50">
+              {{ getPlayerFrontNineTotal('B') }}
+            </td>
+          </tr>
+        </tbody>
+
+        <!-- Back 9 Header -->
+        <thead class=" sticky top-0 z-10">
+          <tr>
+            <th class="border border-border p-2 text-left font-semibold text-foreground ">Hole</th>
+            <th class="border border-border p-2 text-center font-semibold text-foreground " 
+                *ngFor="let hole of getBackNine()">
+              {{ hole.number }}
+            </th>
+            <th class="border border-border p-2 text-center font-semibold text-foreground ">IN</th>
+            <th class="border border-border p-2 text-center font-semibold text-foreground ">TOTAL</th>
+          </tr>
+          <tr>
+            <th class="border border-border p-2 text-left font-semibold text-foreground ">Par</th>
+            <th class="border border-border p-2 text-center text-foreground font-semibold " 
+                *ngFor="let hole of getBackNine()">
+              {{ hole.par }}
+            </th>
+            <th class="border border-border p-2 text-center font-medium text-foreground ">{{ getBackNinePar() }}</th>
+            <th class="border border-border p-2 text-center font-bold text-foreground ">{{ getTotalPar() }}</th>
+          </tr>
+        </thead>
+        
+        <!-- Player A Back 9 -->
+        <tbody>
+          <tr class="player-a-row">
+            <td class="border border-border p-2 font-medium text-foreground bg-muted/50">{{ scorecardData.playerAName }}</td>
+            <td class="border border-border" *ngFor="let hole of getBackNine(); let i = index">
+              <input 
+                type="number"
+                [(ngModel)]="scorecardData.holes[i + 9].playerAScore"
+                (ngModelChange)="calculateTotals()"
+                [class]="getScoreClass(scorecardData.holes[i + 9].playerAScore, hole.par)"
+                class="text-foreground w-full text-center border-0 bg-transparent focus:ring-2 focus:ring-primary/20"
+                min="1"
+                max="10"
+                placeholder="-">
+            </td>
+            <td class="border border-border p-2 text-center font-bold text-foreground bg-muted/50">
+              {{ getPlayerBackNineTotal('A') }}
+            </td>
+            <td class="border border-border p-2 text-center font-bold text-foreground bg-muted/50">
+              {{ scorecardData.playerATotalScore || 0 }}
+            </td>
+          </tr>
+          
+          <!-- Player B Back 9 -->
+          <tr class="player-b-row">
+            <td class="border border-border p-2 font-medium text-foreground bg-muted/50">{{ scorecardData.playerBName }}</td>
+            <td class="border border-border" *ngFor="let hole of getBackNine(); let i = index">
+              <input 
+                type="number"
+                [(ngModel)]="scorecardData.holes[i + 9].playerBScore"
+                (ngModelChange)="calculateTotals()"
+                [class]="getScoreClass(scorecardData.holes[i + 9].playerBScore, hole.par)"
+                class="w-full text-center border-0 bg-transparent focus:ring-2 focus:ring-primary/20 text-foreground"
+                min="1"
+                max="10"
+                placeholder="-">
+            </td>
+            <td class="border border-border p-2 text-center font-bold text-foreground bg-muted/50">
+              {{ getPlayerBackNineTotal('B') }}
+            </td>
+            <td class="border border-border p-2 text-center font-bold text-foreground bg-muted/50">
+              {{ scorecardData.playerBTotalScore || 0 }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Match Summary -->
+    <div class="bg-gray-50 dark:bg-gray-700 p-4 border-t border-gray-200 dark:border-gray-600 flex-shrink-0">
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div class="player-summary-a p-3 rounded-lg">
+          <div class="font-bold text-lg text-foreground">{{ scorecardData.playerAName }}</div>
+          <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ scorecardData.playerATotalScore || 0 }}</div>
+          <div class="text-sm text-muted-foreground">Total Score</div>
+        </div>
+        <div class="bg-gray-100 dark:bg-gray-600 p-3 rounded-lg border border-gray-200 dark:border-gray-500">
+          <div class="font-bold text-lg text-foreground">Match Status</div>
+          <div class="text-xl font-bold text-foreground">{{ getMatchResult() }}</div>
+          <div class="text-sm text-muted-foreground">{{ getScoreDifference() }}</div>
+        </div>
+        <div class="player-summary-b p-3 rounded-lg">
+          <div class="font-bold text-lg text-foreground">{{ scorecardData.playerBName }}</div>
+          <div class="text-2xl font-bold text-red-600 dark:text-red-400">{{ scorecardData.playerBTotalScore || 0 }}</div>
+          <div class="text-sm text-muted-foreground">Total Score</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="bg-white dark:bg-gray-800 p-4 border-t border-gray-200 dark:border-gray-600 flex-shrink-0">
+      <!-- Error Message -->
+      <div *ngIf="saveError" class="mb-3 p-3 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md">
+        <p class="text-red-700 dark:text-red-300 text-sm">{{ saveError }}</p>
+      </div>
+      
+      <div class="flex justify-between items-center">
+        <div class="text-sm text-muted-foreground">
+          Course Par: {{ getTotalPar() }} | {{ course.name }}
+        </div>
+        <div class="flex gap-2">
+          <button 
+            (click)="onClose()"
+            [disabled]="isLoading"
+            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            Cancel
+          </button>
+          <button 
+            (click)="onSave()"
+            [disabled]="!isValidScorecard() || isLoading"
+            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+            <span *ngIf="isLoading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+            {{ isLoading ? 'Saving...' : 'Save Scorecard' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

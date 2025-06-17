@@ -1,0 +1,26 @@
+namespace GolfLeagueManager
+{
+    public class ScorecardSaveRequest
+    {
+        public Guid MatchupId { get; set; }
+        public List<HoleScoreDto> HoleScores { get; set; } = new List<HoleScoreDto>();
+        public int PlayerATotalScore { get; set; }
+        public int PlayerBTotalScore { get; set; }
+    }
+
+    public class HoleScoreDto
+    {
+        public int HoleNumber { get; set; }
+        public int Par { get; set; }
+        public int? PlayerAScore { get; set; }
+        public int? PlayerBScore { get; set; }
+    }
+
+    public class ScorecardResponse
+    {
+        public Guid MatchupId { get; set; }
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public List<HoleScore> HoleScores { get; set; } = new List<HoleScore>();
+    }
+}

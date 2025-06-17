@@ -14,7 +14,7 @@ namespace GolfLeagueManager
         }
 
         [HttpPost]
-        public IActionResult AddAssignment(PlayerFlightAssignment assignment)
+        public ActionResult<PlayerFlightAssignment> AddAssignment(PlayerFlightAssignment assignment)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace GolfLeagueManager
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateAssignment(Guid id, PlayerFlightAssignment assignment)
+        public ActionResult<PlayerFlightAssignment> UpdateAssignment(Guid id, PlayerFlightAssignment assignment)
         {
             if (id != assignment.Id)
                 return BadRequest("Assignment ID mismatch");
@@ -63,7 +63,7 @@ namespace GolfLeagueManager
                 if (!updated)
                     return NotFound();
 
-                return NoContent();
+                return Ok(assignment);
             }
             catch (ArgumentException ex)
             {

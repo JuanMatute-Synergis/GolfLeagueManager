@@ -7,6 +7,7 @@ namespace GolfLeagueManager
         void AddSeason(Season season);
         IEnumerable<Season> GetSeasons();
         Season? GetSeasonById(Guid id);
+        Task<Season?> GetByIdAsync(Guid id);
         bool DeleteSeason(Guid id);
         bool UpdateSeason(Season season);
         IEnumerable<Season> GetActiveSeasons();
@@ -72,6 +73,11 @@ namespace GolfLeagueManager
                 .OrderBy(s => s.Year)
                 .ThenBy(s => s.SeasonNumber)
                 .ToList();
+        }
+
+        public async Task<Season?> GetByIdAsync(Guid id)
+        {
+            return await _context.Seasons.FindAsync(id);
         }
     }
 }

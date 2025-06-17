@@ -11,6 +11,10 @@ namespace GolfLeagueManager
 
         public void AddAssignment(PlayerFlightAssignment assignment)
         {
+            if (assignment.Id == Guid.Empty)
+            {
+                assignment.Id = Guid.NewGuid();
+            }
             ValidateAssignment(assignment);
             _repository.AddAssignment(assignment);
         }

@@ -49,5 +49,12 @@ namespace GolfLeagueManager
                 return NotFound();
             return NoContent();
         }
+
+        [HttpGet("season/{seasonId}/flights")]
+        public ActionResult<IEnumerable<PlayerWithFlight>> GetPlayersInFlights(Guid seasonId)
+        {
+            var players = _playerService.GetPlayersInFlights(seasonId);
+            return Ok(players);
+        }
     }
 }

@@ -1,0 +1,174 @@
+/* Player row backgrounds matching site design */
+.player-a-row { 
+  background-color: hsl(var(--muted) / 0.3);
+}
+.player-b-row { 
+  background-color: hsl(var(--muted) / 0.5);
+}
+
+/* Input styling improvements matching site - highest specificity */
+input[type="number"] {
+  background: transparent !important;
+  transition: all 0.2s ease;
+  color: var(--foreground) !important;
+  /* Hide number input spinner arrows for consistent centering */
+  -webkit-appearance: textfield !important;
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+  /* Completely fill the parent cell */
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  /* Remove all spacing */
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  /* Maintain text centering */
+  text-align: center !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* Ensure proper box sizing */
+  box-sizing: border-box !important;
+}
+
+/* Hide spinner arrows in WebKit browsers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide spinner arrows in Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="number"]:hover {
+  background-color: hsl(var(--muted) / 0.5) !important;
+  color: var(--foreground) !important;
+}
+
+input[type="number"]:focus {
+  background-color: var(--background) !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+  color: var(--foreground) !important;
+  /* Add border when focused/active without padding */
+  border: 2px solid var(--primary) !important;
+  /* Keep no padding to fill entire cell */
+  padding: 0 !important;
+}
+
+/* Score input focus styles matching site */
+input:focus {
+  outline: none;
+}
+
+/* Ensure ALL inputs always have visible text - maximum specificity */
+td input[type="number"] {
+  color: var(--foreground) !important;
+}
+
+tbody td input[type="number"] {
+  color: var(--foreground) !important;
+}
+
+table tbody td input[type="number"] {
+  color: var(--foreground) !important;
+}
+
+/* Score performance colors using consistent design tokens - background only for inputs */
+.score-eagle { 
+  background-color: hsl(var(--primary)) !important; 
+  font-weight: bold; 
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+}
+.score-birdie { 
+  background-color: hsl(var(--primary) / 0.8) !important; 
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+}
+.score-par { 
+  background-color: hsl(var(--muted-foreground)) !important; 
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+}
+.score-bogey { 
+  background-color: hsl(var(--destructive) / 0.7) !important; 
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+}
+.score-double-bogey { 
+  background-color: hsl(var(--destructive)) !important; 
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+}
+.score-worse { 
+  background-color: hsl(var(--destructive) / 1.2) !important; 
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+}
+
+/* Ensure input text is ALWAYS visible - ultimate override */
+input[type="number"].score-eagle,
+input[type="number"].score-birdie,
+input[type="number"].score-par,
+input[type="number"].score-bogey,
+input[type="number"].score-double-bogey,
+input[type="number"].score-worse,
+input.score-eagle,
+input.score-birdie,
+input.score-par,
+input.score-bogey,
+input.score-double-bogey,
+input.score-worse {
+  color: var(--foreground) !important;
+}
+
+/* Triple-nested selector for maximum specificity */
+table tbody tr td input[type="number"].score-eagle,
+table tbody tr td input[type="number"].score-birdie,
+table tbody tr td input[type="number"].score-par,
+table tbody tr td input[type="number"].score-bogey,
+table tbody tr td input[type="number"].score-double-bogey,
+table tbody tr td input[type="number"].score-worse {
+  color: var(--foreground) !important;
+}
+
+/* Table styling matching site design */
+table {
+  border-collapse: collapse;
+  background-color: var(--background);
+}
+
+/* Table cell styling for input cells - remove all padding */
+td {
+  min-height: 2.5rem;
+  vertical-align: middle;
+}
+
+/* Specific styling for cells containing inputs */
+td:has(input[type="number"]) {
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative !important;
+}
+
+/* Alternative selector for older browsers */
+td input[type="number"] {
+  display: block !important;
+  position: absolute !important;
+}
+
+/* Make sure parent cells have relative positioning */
+tbody td {
+  position: relative;
+}
+
+/* Sticky headers */
