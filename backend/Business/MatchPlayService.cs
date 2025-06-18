@@ -43,11 +43,17 @@ namespace GolfLeagueManager
             var playerAHandicap = matchup.PlayerA?.CurrentHandicap ?? 0;
             var playerBHandicap = matchup.PlayerB?.CurrentHandicap ?? 0;
 
+            // Calculate gross totals for tie-breaking
+            var playerAGrossTotal = holeScores.Where(hs => hs.PlayerAScore.HasValue).Sum(hs => hs.PlayerAScore!.Value);
+            var playerBGrossTotal = holeScores.Where(hs => hs.PlayerBScore.HasValue).Sum(hs => hs.PlayerBScore!.Value);
+
             // Use the new match play scoring service
             var matchPlayResult = _scoringService.CalculateMatchPlayResult(
                 holeScores, 
                 playerAHandicap, 
-                playerBHandicap);
+                playerBHandicap,
+                playerAGrossTotal,
+                playerBGrossTotal);
 
             // Update hole scores with match play points
             for (int i = 0; i < holeScores.Count; i++)

@@ -37,7 +37,9 @@ namespace GolfLeagueManager
         public MatchPlayResult CalculateMatchPlayResult(
             List<HoleScore> holeScores, 
             decimal playerAHandicap, 
-            decimal playerBHandicap)
+            decimal playerBHandicap,
+            int playerAGrossTotal = 0,
+            int playerBGrossTotal = 0)
         {
             var result = new MatchPlayResult();
             
@@ -60,24 +62,38 @@ namespace GolfLeagueManager
                 result.PlayerBHolePoints += holeResult.PlayerBPoints;
             }
 
-            // Determine match winner based on hole points and award 2-point bonus
-            if (result.PlayerAHolePoints > result.PlayerBHolePoints)
+            // Calculate total net scores for both players
+            int playerANetTotal = 0;
+            int playerBNetTotal = 0;
+            
+            foreach (var holeResult in result.HoleResults)
             {
+                playerANetTotal += holeResult.PlayerANetScore;
+                playerBNetTotal += holeResult.PlayerBNetScore;
+            }
+
+            // Determine match winner based on lowest total net score and award 2-point bonus
+            if (playerANetTotal < playerBNetTotal)
+            {
+                // Player A has lower net total - wins match
                 result.PlayerAMatchWin = true;
                 result.PlayerATotalPoints = result.PlayerAHolePoints + 2; // 2-point match bonus
                 result.PlayerBTotalPoints = result.PlayerBHolePoints;
             }
-            else if (result.PlayerBHolePoints > result.PlayerAHolePoints)
+            else if (playerBNetTotal < playerANetTotal)
             {
+                // Player B has lower net total - wins match
                 result.PlayerBMatchWin = true;
                 result.PlayerBTotalPoints = result.PlayerBHolePoints + 2; // 2-point match bonus
                 result.PlayerATotalPoints = result.PlayerAHolePoints;
             }
             else
             {
-                // Tie - no match bonus
-                result.PlayerATotalPoints = result.PlayerAHolePoints;
-                result.PlayerBTotalPoints = result.PlayerBHolePoints;
+                // Tie in net total scores - each player gets 1 point instead of 2-point bonus
+                result.PlayerAMatchWin = false;
+                result.PlayerBMatchWin = false;
+                result.PlayerATotalPoints = result.PlayerAHolePoints + 1; // 1 point for tie
+                result.PlayerBTotalPoints = result.PlayerBHolePoints + 1; // 1 point for tie
             }
 
             return result;

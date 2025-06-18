@@ -230,7 +230,9 @@ namespace GolfLeagueManager
                     var matchPlayResult = _matchPlayScoringService.CalculateMatchPlayResult(
                         holeScores,
                         playerA.CurrentHandicap,
-                        playerB.CurrentHandicap
+                        playerB.CurrentHandicap,
+                        matchup.PlayerAScore ?? 0,
+                        matchup.PlayerBScore ?? 0
                     );
 
                     // Update matchup with calculated match play points

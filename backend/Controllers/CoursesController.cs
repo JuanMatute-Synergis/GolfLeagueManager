@@ -71,13 +71,17 @@ namespace GolfLeagueManager
             return NoContent();
         }
 
-        [HttpPost("seed-allentown")]
-        public async Task<ActionResult<Course>> SeedAllentownCourse()
+        [HttpPut("upsert-data/{courseName}")]
+        public async Task<ActionResult<Course>> UpsertCourseData(string courseName, [FromBody] CourseUpdateData courseData)
         {
             try
             {
-                var course = await _courseService.CreateAllentownMunicipalCourseAsync();
-                return Created($"/api/courses/{course.Id}", course);
+                var updatedCourse = await _courseService.UpdateCourseFromDataAsync(courseName, courseData);
+                return Ok(updatedCourse);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -92,6 +96,24 @@ namespace GolfLeagueManager
             {
                 await dataSeeder.SeedPlayersWithHandicapsAsync();
                 return Ok(new { message = "Players seeded successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("update-data/{courseName}")]
+        public async Task<ActionResult<Course>> UpdateCourseData(string courseName, [FromBody] CourseUpdateData courseData)
+        {
+            try
+            {
+                var updatedCourse = await _courseService.UpdateCourseFromDataAsync(courseName, courseData);
+                return Ok(updatedCourse);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {

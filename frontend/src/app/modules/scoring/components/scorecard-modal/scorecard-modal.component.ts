@@ -441,46 +441,38 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     this.scorecardData.playerAHolePoints = playerAHolePoints;
     this.scorecardData.playerBHolePoints = playerBHolePoints;
 
-    // Determine match play winner based on hole points and add 2-point bonus
+    // Calculate total net scores for both players
+    let playerANetTotal = 0;
+    let playerBNetTotal = 0;
+    
+    for (let i = 0; i < this.scorecardData.holes.length; i++) {
+      const hole = this.scorecardData.holes[i];
+      if (hole?.playerAScore && hole?.playerBScore) {
+        playerANetTotal += this.getNetScoreValue(i, 'A');
+        playerBNetTotal += this.getNetScoreValue(i, 'B');
+      }
+    }
+
+    // Determine match play winner based on lowest total net score and award 2-point bonus
     let playerAMatchPoints = playerAHolePoints;
     let playerBMatchPoints = playerBHolePoints;
 
-    if (playerAHolePoints > playerBHolePoints) {
-      // Player A wins the match - gets 2 bonus points
+    if (playerANetTotal < playerBNetTotal) {
+      // Player A has lower net total - wins match
       playerAMatchPoints += 2;
       this.scorecardData.playerAMatchWin = true;
       this.scorecardData.playerBMatchWin = false;
-    } else if (playerBHolePoints > playerAHolePoints) {
-      // Player B wins the match - gets 2 bonus points
+    } else if (playerBNetTotal < playerANetTotal) {
+      // Player B has lower net total - wins match
       playerBMatchPoints += 2;
       this.scorecardData.playerAMatchWin = false;
       this.scorecardData.playerBMatchWin = true;
     } else {
-      // Tie in match play - use stroke play (gross total) as tiebreaker
-      const playerAGross = this.scorecardData.playerATotalScore || 0;
-      const playerBGross = this.scorecardData.playerBTotalScore || 0;
-      
-      if (playerAGross > 0 && playerBGross > 0) {
-        if (playerAGross < playerBGross) {
-          // Player A wins tie-breaker with lower stroke play score
-          playerAMatchPoints += 2;
-          this.scorecardData.playerAMatchWin = true;
-          this.scorecardData.playerBMatchWin = false;
-        } else if (playerBGross < playerAGross) {
-          // Player B wins tie-breaker with lower stroke play score
-          playerBMatchPoints += 2;
-          this.scorecardData.playerAMatchWin = false;
-          this.scorecardData.playerBMatchWin = true;
-        } else {
-          // Complete tie - no bonus points
-          this.scorecardData.playerAMatchWin = false;
-          this.scorecardData.playerBMatchWin = false;
-        }
-      } else {
-        // No valid gross totals - no bonus points
-        this.scorecardData.playerAMatchWin = false;
-        this.scorecardData.playerBMatchWin = false;
-      }
+      // Tie in net total scores - each player gets 1 point instead of 2-point bonus
+      playerAMatchPoints += 1;
+      playerBMatchPoints += 1;
+      this.scorecardData.playerAMatchWin = false;
+      this.scorecardData.playerBMatchWin = false;
     }
 
     this.scorecardData.playerAMatchPoints = playerAMatchPoints;
@@ -676,16 +668,15 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       return 'Not Yet Calculated';
     }
 
-    // Check if there was a tie in hole points but someone got match bonus (tie-breaker)
-    const wasMatchTieBreaker = playerAHolePoints === playerBHolePoints && 
-                              (this.scorecardData.playerAMatchWin || this.scorecardData.playerBMatchWin);
+    // Check if there was a net score based win (when hole points might be different)
+    const wasNetScoreWin = (this.scorecardData.playerAMatchWin || this.scorecardData.playerBMatchWin);
 
     if (playerAMatchPoints > playerBMatchPoints) {
       const result = `${this.scorecardData.playerAName} Wins`;
-      return wasMatchTieBreaker ? `${result} (Tie-breaker)` : result;
+      return wasNetScoreWin ? `${result} (Lower Net Score)` : result;
     } else if (playerBMatchPoints > playerAMatchPoints) {
       const result = `${this.scorecardData.playerBName} Wins`;
-      return wasMatchTieBreaker ? `${result} (Tie-breaker)` : result;
+      return wasNetScoreWin ? `${result} (Lower Net Score)` : result;
     } else {
       return 'Tie';
     }

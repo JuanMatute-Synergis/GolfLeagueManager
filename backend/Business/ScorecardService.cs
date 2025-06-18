@@ -8,13 +8,15 @@ namespace GolfLeagueManager
         private readonly MatchupService _matchupService;
         private readonly ScoreEntryService _scoreEntryService;
         private readonly MatchPlayService _matchPlayService;
+        private readonly MatchPlayScoringService _matchPlayScoringService;
 
-        public ScorecardService(AppDbContext context, MatchupService matchupService, ScoreEntryService scoreEntryService, MatchPlayService matchPlayService)
+        public ScorecardService(AppDbContext context, MatchupService matchupService, ScoreEntryService scoreEntryService, MatchPlayService matchPlayService, MatchPlayScoringService matchPlayScoringService)
         {
             _context = context;
             _matchupService = matchupService;
             _scoreEntryService = scoreEntryService;
             _matchPlayService = matchPlayService;
+            _matchPlayScoringService = matchPlayScoringService;
         }
 
         public async Task<ScorecardResponse> SaveScorecardAsync(ScorecardSaveRequest request)
@@ -44,53 +46,41 @@ namespace GolfLeagueManager
                     .ToListAsync();
                 
                 _context.HoleScores.RemoveRange(existingHoleScores);
+                
+                // Save the deletion to ensure clean state
+                await _context.SaveChangesAsync();
 
-                // Create new hole scores with handicap information
+                // Create new hole scores directly from the request
                 var holeScores = new List<HoleScore>();
                 
-                // Initialize hole scores with default handicaps if not provided
-                await _matchPlayService.InitializeHoleScoresAsync(request.MatchupId);
-                
-                // Get the initialized hole scores and update them with actual scores
-                var initializedHoleScores = await _context.HoleScores
-                    .Where(hs => hs.MatchupId == request.MatchupId)
-                    .OrderBy(hs => hs.HoleNumber)
-                    .ToListAsync();
-
                 foreach (var holeScoreDto in request.HoleScores)
                 {
-                    var existingHoleScore = initializedHoleScores
-                        .FirstOrDefault(hs => hs.HoleNumber == holeScoreDto.HoleNumber);
+                    var holeScore = new HoleScore
+                    {
+                        Id = Guid.NewGuid(),
+                        MatchupId = request.MatchupId,
+                        HoleNumber = holeScoreDto.HoleNumber,
+                        Par = holeScoreDto.Par,
+                        HoleHandicap = 1, // Will be set properly below
+                        PlayerAScore = holeScoreDto.PlayerAScore,
+                        PlayerBScore = holeScoreDto.PlayerBScore,
+                        PlayerAMatchPoints = 0, // Will be calculated by match play service
+                        PlayerBMatchPoints = 0  // Will be calculated by match play service
+                    };
                     
-                    if (existingHoleScore != null)
-                    {
-                        // Update existing hole score with actual scores
-                        existingHoleScore.PlayerAScore = holeScoreDto.PlayerAScore;
-                        existingHoleScore.PlayerBScore = holeScoreDto.PlayerBScore;
-                        existingHoleScore.Par = holeScoreDto.Par;
-                    }
-                    else
-                    {
-                        // Create new hole score if it doesn't exist
-                        var holeScore = new HoleScore
-                        {
-                            Id = Guid.NewGuid(),
-                            MatchupId = request.MatchupId,
-                            HoleNumber = holeScoreDto.HoleNumber,
-                            Par = holeScoreDto.Par,
-                            HoleHandicap = holeScoreDto.HoleNumber, // Default handicap, will be overridden by service
-                            PlayerAScore = holeScoreDto.PlayerAScore,
-                            PlayerBScore = holeScoreDto.PlayerBScore,
-                            PlayerAMatchPoints = 0,
-                            PlayerBMatchPoints = 0
-                        };
-                        
-                        holeScores.Add(holeScore);
-                    }
+                    holeScores.Add(holeScore);
                 }
 
+                // Add all hole scores and set proper hole handicaps
                 if (holeScores.Any())
                 {
+                    // Set the proper hole handicaps from the database
+                    foreach (var holeScore in holeScores)
+                    {
+                        // Get the correct handicap for this hole from the database
+                        holeScore.HoleHandicap = await _matchPlayScoringService.GetHoleHandicapAsync(holeScore.HoleNumber);
+                    }
+
                     await _context.HoleScores.AddRangeAsync(holeScores);
                 }
 
@@ -266,13 +256,6 @@ namespace GolfLeagueManager
         /// </summary>
         private async Task<List<HoleScore>> InitializeDefaultHoleScoresAsync(Guid matchupId)
         {
-            // Standard 9-hole stroke index (1 = hardest, 9 = easiest)
-            var defaultHoleHandicaps = new Dictionary<int, int>
-            {
-                { 1, 1 }, { 2, 5 }, { 3, 3 }, { 4, 7 }, { 5, 2 },
-                { 6, 8 }, { 7, 4 }, { 8, 6 }, { 9, 9 }
-            };
-
             // Standard 9-hole pars
             var defaultPars = new Dictionary<int, int>
             {
@@ -284,13 +267,16 @@ namespace GolfLeagueManager
 
             for (int holeNumber = 1; holeNumber <= 9; holeNumber++)
             {
+                // Get the correct handicap for this hole from the database
+                var holeHandicap = await _matchPlayScoringService.GetHoleHandicapAsync(holeNumber);
+                
                 var holeScore = new HoleScore
                 {
                     Id = Guid.NewGuid(),
                     MatchupId = matchupId,
                     HoleNumber = holeNumber,
                     Par = defaultPars[holeNumber],
-                    HoleHandicap = defaultHoleHandicaps[holeNumber],
+                    HoleHandicap = holeHandicap,
                     PlayerAMatchPoints = 0,
                     PlayerBMatchPoints = 0
                 };

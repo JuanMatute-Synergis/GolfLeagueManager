@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace GolfLeagueManager
 {
     public class CourseService
@@ -34,42 +36,91 @@ namespace GolfLeagueManager
             return await _courseRepository.DeleteAsync(id);
         }
 
-        public async Task<Course> CreateAllentownMunicipalCourseAsync()
+        public async Task<Course> UpdateCourseFromDataAsync(string courseName, CourseUpdateData courseData)
         {
-            var course = new Course
+            // Find the existing course by name
+            var courses = await _courseRepository.GetAllAsync();
+            var existingCourse = courses.FirstOrDefault(c => c.Name.Contains(courseName, StringComparison.OrdinalIgnoreCase));
+            
+            Course courseWithHoles;
+
+            if (existingCourse == null)
             {
-                Name = "Allentown Municipal Golf Course",
-                Location = "Allentown, PA",
-                SlopeRating = 113,
-                CourseRating = 72,
-                CourseHoles = new List<CourseHole>
+                // Course doesn't exist, create it
+                courseWithHoles = new Course
                 {
-                    new CourseHole { HoleNumber = 1, Par = 4, Yardage = 380, HandicapIndex = 3 },
-                    new CourseHole { HoleNumber = 2, Par = 3, Yardage = 165, HandicapIndex = 11 },
-                    new CourseHole { HoleNumber = 3, Par = 5, Yardage = 520, HandicapIndex = 1 },
-                    new CourseHole { HoleNumber = 4, Par = 4, Yardage = 420, HandicapIndex = 5 },
-                    new CourseHole { HoleNumber = 5, Par = 3, Yardage = 180, HandicapIndex = 17 },
-                    new CourseHole { HoleNumber = 6, Par = 4, Yardage = 400, HandicapIndex = 7 },
-                    new CourseHole { HoleNumber = 7, Par = 5, Yardage = 540, HandicapIndex = 13 },
-                    new CourseHole { HoleNumber = 8, Par = 4, Yardage = 360, HandicapIndex = 9 },
-                    new CourseHole { HoleNumber = 9, Par = 4, Yardage = 390, HandicapIndex = 15 },
-                    new CourseHole { HoleNumber = 10, Par = 4, Yardage = 410, HandicapIndex = 12 },
-                    new CourseHole { HoleNumber = 11, Par = 3, Yardage = 170, HandicapIndex = 4 },
-                    new CourseHole { HoleNumber = 12, Par = 5, Yardage = 560, HandicapIndex = 2 },
-                    new CourseHole { HoleNumber = 13, Par = 4, Yardage = 440, HandicapIndex = 6 },
-                    new CourseHole { HoleNumber = 14, Par = 3, Yardage = 190, HandicapIndex = 14 },
-                    new CourseHole { HoleNumber = 15, Par = 4, Yardage = 380, HandicapIndex = 10 },
-                    new CourseHole { HoleNumber = 16, Par = 5, Yardage = 530, HandicapIndex = 8 },
-                    new CourseHole { HoleNumber = 17, Par = 4, Yardage = 370, HandicapIndex = 18 },
-                    new CourseHole { HoleNumber = 18, Par = 4, Yardage = 415, HandicapIndex = 16 }
+                    Name = courseName,
+                    Location = string.Empty, // Will be updated if provided in courseData
+                    SlopeRating = 113, // Default values
+                    CourseRating = 72,
+                    TotalPar = 72,
+                    TotalYardage = 6400,
+                    CourseHoles = new List<CourseHole>()
+                };
+
+                // Create basic 18-hole structure with default values
+                for (int i = 1; i <= 18; i++)
+                {
+                    courseWithHoles.CourseHoles.Add(new CourseHole
+                    {
+                        HoleNumber = i,
+                        Par = 4, // Default par, will be updated below if provided
+                        Yardage = 350, // Default yardage, will be updated below if provided
+                        HandicapIndex = i // Default handicap index, will be updated below if provided
+                    });
                 }
-            };
 
-            // Calculate total par and yardage
-            course.TotalPar = course.CourseHoles.Sum(h => h.Par);
-            course.TotalYardage = course.CourseHoles.Sum(h => h.Yardage);
+                // Create the course first to get the ID
+                courseWithHoles = await _courseRepository.CreateAsync(courseWithHoles);
+            }
+            else
+            {
+                // Get the existing course with holes for update
+                var retrievedCourse = await _courseRepository.GetByIdWithHolesAsync(existingCourse.Id);
+                if (retrievedCourse == null)
+                {
+                    throw new InvalidOperationException("Course with holes not found");
+                }
+                courseWithHoles = retrievedCourse;
+            }
 
-            return await _courseRepository.CreateAsync(course);
+            // Update course-level information
+            if (!string.IsNullOrEmpty(courseData.Location))
+                courseWithHoles.Location = courseData.Location;
+            
+            if (courseData.CourseRating.HasValue)
+                courseWithHoles.CourseRating = courseData.CourseRating.Value;
+            
+            if (courseData.SlopeRating.HasValue)
+                courseWithHoles.SlopeRating = courseData.SlopeRating.Value;
+            
+            if (courseData.TotalYardage.HasValue)
+                courseWithHoles.TotalYardage = courseData.TotalYardage.Value;
+
+            // Update hole data
+            if (courseData.Holes != null && courseData.Holes.Any())
+            {
+                foreach (var holeData in courseData.Holes)
+                {
+                    var existingHole = courseWithHoles.CourseHoles.FirstOrDefault(h => h.HoleNumber == holeData.HoleNumber);
+                    if (existingHole != null)
+                    {
+                        if (holeData.Par.HasValue)
+                            existingHole.Par = holeData.Par.Value;
+                        
+                        if (holeData.HandicapIndex.HasValue)
+                            existingHole.HandicapIndex = holeData.HandicapIndex.Value;
+                        
+                        if (holeData.Yardage.HasValue)
+                            existingHole.Yardage = holeData.Yardage.Value;
+                    }
+                }
+
+                // Recalculate total par
+                courseWithHoles.TotalPar = courseWithHoles.CourseHoles.Sum(h => h.Par);
+            }
+
+            return await _courseRepository.UpdateAsync(courseWithHoles);
         }
     }
 }
