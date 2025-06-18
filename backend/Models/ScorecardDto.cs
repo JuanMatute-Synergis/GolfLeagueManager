@@ -36,6 +36,10 @@ namespace GolfLeagueManager
         public bool PlayerAMatchWin { get; set; }
         public bool PlayerBMatchWin { get; set; }
         
+        // Player handicaps
+        public decimal PlayerAHandicap { get; set; }
+        public decimal PlayerBHandicap { get; set; }
+        
         // Absence status
         public bool PlayerAAbsent { get; set; }
         public bool PlayerBAbsent { get; set; }

@@ -11,6 +11,8 @@ export interface HoleScore {
   playerBMatchPoints?: number; // 0, 1, or 2 points for this hole
   playerANetScore?: number; // Net score after handicap
   playerBNetScore?: number; // Net score after handicap
+  winner?: 'playerA' | 'playerB' | 'tie'; // Who won this hole
+  strokesGiven?: number; // Number of strokes given on this hole due to handicap
 }
 
 export interface ScorecardData {

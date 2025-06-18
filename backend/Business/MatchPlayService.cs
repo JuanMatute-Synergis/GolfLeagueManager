@@ -5,10 +5,12 @@ namespace GolfLeagueManager
     public class MatchPlayService
     {
         private readonly AppDbContext _context;
+        private readonly MatchPlayScoringService _scoringService;
 
-        public MatchPlayService(AppDbContext context)
+        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService)
         {
             _context = context;
+            _scoringService = scoringService;
         }
 
         /// <summary>
@@ -37,93 +39,34 @@ namespace GolfLeagueManager
 
             if (!holeScores.Any()) return false;
 
-            // Get handicaps for both players from their flight assignments
-            var playerAHandicap = await GetPlayerHandicapAsync(matchup.PlayerAId);
-            var playerBHandicap = await GetPlayerHandicapAsync(matchup.PlayerBId);
+            // Get current handicaps for both players
+            var playerAHandicap = matchup.PlayerA?.CurrentHandicap ?? 0;
+            var playerBHandicap = matchup.PlayerB?.CurrentHandicap ?? 0;
 
-            // Calculate handicap difference and stroke allocation
-            var handicapDifference = Math.Abs(playerAHandicap - playerBHandicap);
-            var strokesForPlayerA = playerAHandicap > playerBHandicap ? (int)Math.Round(handicapDifference) : 0;
-            var strokesForPlayerB = playerBHandicap > playerAHandicap ? (int)Math.Round(handicapDifference) : 0;
+            // Use the new match play scoring service
+            var matchPlayResult = _scoringService.CalculateMatchPlayResult(
+                holeScores, 
+                playerAHandicap, 
+                playerBHandicap);
 
-            // Calculate match play points for each hole
-            int playerAHolePoints = 0;
-            int playerBHolePoints = 0;
-
-            foreach (var holeScore in holeScores)
+            // Update hole scores with match play points
+            for (int i = 0; i < holeScores.Count; i++)
             {
-                if (!holeScore.PlayerAScore.HasValue || !holeScore.PlayerBScore.HasValue)
-                    continue;
-
-                // Calculate net scores (apply handicap strokes to hardest holes first)
-                var playerANetScore = holeScore.PlayerAScore.Value;
-                var playerBNetScore = holeScore.PlayerBScore.Value;
-
-                // Apply handicap strokes based on hole difficulty (stroke index)
-                if (strokesForPlayerA > 0 && holeScore.HoleHandicap <= strokesForPlayerA)
+                var holeResult = matchPlayResult.HoleResults.FirstOrDefault(hr => hr.HoleNumber == holeScores[i].HoleNumber);
+                if (holeResult != null)
                 {
-                    playerANetScore -= 1;
-                }
-                if (strokesForPlayerB > 0 && holeScore.HoleHandicap <= strokesForPlayerB)
-                {
-                    playerBNetScore -= 1;
-                }
-
-                // Determine hole winner and assign match play points
-                if (playerANetScore < playerBNetScore)
-                {
-                    // Player A wins hole
-                    holeScore.PlayerAMatchPoints = 2;
-                    holeScore.PlayerBMatchPoints = 0;
-                    playerAHolePoints += 2;
-                }
-                else if (playerBNetScore < playerANetScore)
-                {
-                    // Player B wins hole
-                    holeScore.PlayerAMatchPoints = 0;
-                    holeScore.PlayerBMatchPoints = 2;
-                    playerBHolePoints += 2;
-                }
-                else
-                {
-                    // Tie
-                    holeScore.PlayerAMatchPoints = 1;
-                    holeScore.PlayerBMatchPoints = 1;
-                    playerAHolePoints += 1;
-                    playerBHolePoints += 1;
+                    holeScores[i].PlayerAMatchPoints = holeResult.PlayerAPoints;
+                    holeScores[i].PlayerBMatchPoints = holeResult.PlayerBPoints;
                 }
             }
 
-            // Determine overall match winner and assign bonus points
-            bool playerAWinsMatch = playerAHolePoints > playerBHolePoints;
-            bool playerBWinsMatch = playerBHolePoints > playerAHolePoints;
-            bool isTie = playerAHolePoints == playerBHolePoints;
-
-            // Update matchup with results
-            matchup.PlayerAHolePoints = playerAHolePoints;
-            matchup.PlayerBHolePoints = playerBHolePoints;
-            matchup.PlayerAMatchWin = playerAWinsMatch;
-            matchup.PlayerBMatchWin = playerBWinsMatch;
-
-            // Calculate total points - ALWAYS distributes exactly 20 points
-            if (isTie)
-            {
-                // In case of tie, each player gets their hole points + 1 point each (splitting the 2-point bonus)
-                matchup.PlayerAPoints = playerAHolePoints + 1;
-                matchup.PlayerBPoints = playerBHolePoints + 1;
-            }
-            else if (playerAWinsMatch)
-            {
-                // Player A gets hole points + 2 point match bonus, Player B gets just hole points
-                matchup.PlayerAPoints = playerAHolePoints + 2;
-                matchup.PlayerBPoints = playerBHolePoints;
-            }
-            else
-            {
-                // Player B gets hole points + 2 point match bonus, Player A gets just hole points
-                matchup.PlayerAPoints = playerAHolePoints;
-                matchup.PlayerBPoints = playerBHolePoints + 2;
-            }
+            // Update matchup with match play results
+            matchup.PlayerAHolePoints = matchPlayResult.PlayerAHolePoints;
+            matchup.PlayerBHolePoints = matchPlayResult.PlayerBHolePoints;
+            matchup.PlayerAPoints = matchPlayResult.PlayerATotalPoints;
+            matchup.PlayerBPoints = matchPlayResult.PlayerBTotalPoints;
+            matchup.PlayerAMatchWin = matchPlayResult.PlayerAMatchWin;
+            matchup.PlayerBMatchWin = matchPlayResult.PlayerBMatchWin;
 
             await _context.SaveChangesAsync();
             return true;

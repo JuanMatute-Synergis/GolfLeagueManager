@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { ScoringService } from '../../services/scoring.service';
 import { ScorecardService } from '../../services/scorecard.service';
 import { MatchupService } from '../../../settings/services/matchup.service';
@@ -10,6 +11,7 @@ import { Matchup } from '../../../settings/services/matchup.service';
 import { ScorecardModalComponent } from '../scorecard-modal/scorecard-modal.component';
 import { ScorecardData } from '../../models/scorecard.model';
 import { HoleScoreBackend } from '../../services/scorecard.service';
+import { DateUtilService } from '../../../../core/services/date-util.service';
 
 interface MatchupWithDetails extends Matchup {
   playerAName?: string;
@@ -41,13 +43,15 @@ export class ScoreEntryComponent implements OnInit {
   // Scorecard modal properties
   showScorecardModal: boolean = false;
   currentScorecardData: ScorecardData | null = null;
+  @ViewChild(ScorecardModalComponent) scorecardModal!: ScorecardModalComponent;
 
   constructor(
     private scoringService: ScoringService,
     private scorecardService: ScorecardService,
     private matchupService: MatchupService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private dateUtil: DateUtilService
   ) {}
 
   ngOnInit() {
@@ -80,8 +84,7 @@ export class ScoreEntryComponent implements OnInit {
       this.selectedWeekId = '';
       this.selectedWeek = null;
       this.matchups = [];
-      // Load both weeks and players, but load players first
-      this.loadPlayers();
+      // Only load weeks - players will be loaded when week is selected
       this.loadWeeks();
     }
   }
@@ -141,8 +144,8 @@ export class ScoreEntryComponent implements OnInit {
         this.selectedWeek = week;
         this.loadSeasons();
         this.loadWeeks();
-        this.loadPlayers();
-        this.onWeekChange();
+        // Use the robust loading method
+        this.loadPlayersAndMatchups();
       },
       error: (error) => console.error('Error loading week:', error)
     });
@@ -151,7 +154,8 @@ export class ScoreEntryComponent implements OnInit {
   onWeekChange() {
     if (this.selectedWeekId) {
       this.selectedWeek = this.weeks.find(w => w.id === this.selectedWeekId) || null;
-      this.loadMatchupsForWeek();
+      // Use the robust loading method to avoid timing issues
+      this.loadPlayersAndMatchups();
     } else {
       this.selectedWeek = null;
       this.matchups = [];
@@ -161,11 +165,15 @@ export class ScoreEntryComponent implements OnInit {
   loadPlayers() {
     if (!this.selectedSeasonId) return;
     
+    console.log('Loading players for season:', this.selectedSeasonId);
     this.scoringService.getPlayersInFlights(this.selectedSeasonId).subscribe({
       next: (players: PlayerWithFlight[]) => {
+        console.log('Players loaded:', players.length, 'players');
         this.players = players;
+        
         // Re-enrich matchups with player details after players are loaded
         if (this.matchups.length > 0) {
+          console.log('Re-enriching', this.matchups.length, 'matchups with player details');
           this.matchups = this.matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
         }
       },
@@ -173,19 +181,68 @@ export class ScoreEntryComponent implements OnInit {
     });
   }
 
+  // Load both players and matchups simultaneously to avoid timing issues
+  loadPlayersAndMatchups() {
+    if (!this.selectedSeasonId || !this.selectedWeekId) return;
+    
+    this.isLoading = true;
+    console.log('Loading players and matchups simultaneously');
+    
+    forkJoin({
+      players: this.scoringService.getPlayersInFlights(this.selectedSeasonId),
+      matchups: this.matchupService.getMatchupsByWeek(this.selectedWeekId)
+    }).subscribe({
+      next: ({ players, matchups }) => {
+        console.log('Loaded:', players.length, 'players and', matchups.length, 'matchups');
+        
+        // Set players first
+        this.players = players;
+        
+        // Then enrich matchups with player details
+        this.matchups = matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
+        
+        // Load hole scores
+        this.loadHoleScoresForMatchups();
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading players and matchups:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
   loadMatchupsForWeek() {
     if (!this.selectedWeekId) return;
 
     this.isLoading = true;
+    console.log('Loading matchups for week:', this.selectedWeekId);
+    
     this.matchupService.getMatchupsByWeek(this.selectedWeekId).subscribe({
       next: (matchups) => {
-        this.matchups = matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
-        this.loadHoleScoresForMatchups();
-        this.isLoading = false;
-        // If players aren't loaded yet, re-enrich after players are loaded
-        if (this.players.length === 0) {
+        console.log('Matchups loaded:', matchups.length, 'matchups');
+        console.log('Players available:', this.players.length, 'players');
+        
+        // Only enrich if we have players, otherwise store raw matchups
+        if (this.players.length > 0) {
+          this.matchups = matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
+        } else {
+          // Store raw matchups and enrich later when players are loaded
+          this.matchups = matchups.map(matchup => ({
+            ...matchup,
+            playerAName: `Loading... (${matchup.playerAId})`,
+            playerBName: `Loading... (${matchup.playerBId})`,
+            flightName: 'Loading...',
+            hasChanged: false,
+            originalPlayerAScore: matchup.playerAScore,
+            originalPlayerBScore: matchup.playerBScore
+          }));
+          // Load players if not already loaded
           this.loadPlayers();
         }
+        
+        this.loadHoleScoresForMatchups();
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading matchups:', error);
@@ -215,23 +272,23 @@ export class ScoreEntryComponent implements OnInit {
     const playerA = this.players.find(p => p.id === matchup.playerAId);
     const playerB = this.players.find(p => p.id === matchup.playerBId);
     
-    // Debug logging to help identify the issue
+    // Debug logging only if players are missing
     if (!playerA || !playerB) {
-      console.log('Player not found for matchup:', {
+      console.warn('Player lookup failed for matchup:', {
         matchupId: matchup.id,
         playerAId: matchup.playerAId,
         playerBId: matchup.playerBId,
         playerAFound: !!playerA,
         playerBFound: !!playerB,
         totalPlayers: this.players.length,
-        playerIds: this.players.map(p => p.id)
+        playerIds: this.players.map(p => p.id).slice(0, 5) // Show first 5 IDs
       });
     }
     
     return {
       ...matchup,
-      playerAName: playerA ? `${playerA.firstName} ${playerA.lastName}` : `Unknown Player (${matchup.playerAId})`,
-      playerBName: playerB ? `${playerB.firstName} ${playerB.lastName}` : `Unknown Player (${matchup.playerBId})`,
+      playerAName: playerA ? `${playerA.firstName} ${playerA.lastName}` : `Player ${matchup.playerAId}`,
+      playerBName: playerB ? `${playerB.firstName} ${playerB.lastName}` : `Player ${matchup.playerBId}`,
       flightName: playerA?.flightName || playerB?.flightName || 'Unknown Flight',
       hasChanged: false,
       originalPlayerAScore: matchup.playerAScore,
@@ -467,11 +524,7 @@ export class ScoreEntryComponent implements OnInit {
   }
 
   getWeekDisplayName(week: Week): string {
-    const weekDate = new Date(week.date).toLocaleDateString('en-US', { 
-      weekday: 'long',
-      month: 'short', 
-      day: 'numeric' 
-    });
+    const weekDate = this.dateUtil.formatDateShort(week.date);
     return `${week.name} (${weekDate})`;
   }
 
@@ -486,22 +539,71 @@ export class ScoreEntryComponent implements OnInit {
       return;
     }
 
-    this.currentScorecardData = {
-      matchupId: matchup.id || '',
-      playerAId: matchup.playerAId || '',
-      playerBId: matchup.playerBId || '',
-      playerAName: matchup.playerAName,
-      playerBName: matchup.playerBName,
-      flightName: matchup.flightName || 'Unknown Flight',
-      holes: [], // Will be initialized by the modal
-      playerATotalScore: matchup.playerAScore || 0,
-      playerBTotalScore: matchup.playerBScore || 0,
-      playerAHolesWon: 0,
-      playerBHolesWon: 0,
-      holesHalved: 0
-    };
+    // Fetch player handicaps before opening modal
+    this.scoringService.getPlayers().subscribe({
+      next: (players) => {
+        const playerA = players.find(p => p.id === matchup.playerAId);
+        const playerB = players.find(p => p.id === matchup.playerBId);
 
-    this.showScorecardModal = true;
+        this.currentScorecardData = {
+          matchupId: matchup.id || '',
+          playerAId: matchup.playerAId || '',
+          playerBId: matchup.playerBId || '',
+          playerAName: matchup.playerAName || '',
+          playerBName: matchup.playerBName || '',
+          flightName: matchup.flightName || 'Unknown Flight',
+          holes: [], // Will be initialized by the modal
+          playerATotalScore: matchup.playerAScore || 0,
+          playerBTotalScore: matchup.playerBScore || 0,
+          playerAHolesWon: 0,
+          playerBHolesWon: 0,
+          holesHalved: 0,
+          // Include player handicaps
+          playerAHandicap: playerA?.currentHandicap || 0,
+          playerBHandicap: playerB?.currentHandicap || 0
+        };
+
+        this.showScorecardModal = true;
+        
+        // Manually trigger scorecard initialization after the view is rendered
+        setTimeout(() => {
+          if (this.scorecardModal) {
+            console.log('Manually triggering scorecard initialization');
+            this.scorecardModal.initializeScorecard();
+          }
+        }, 0);
+      },
+      error: (error) => {
+        console.error('Error fetching player handicaps:', error);
+        // Open modal without handicaps as fallback
+        this.currentScorecardData = {
+          matchupId: matchup.id || '',
+          playerAId: matchup.playerAId || '',
+          playerBId: matchup.playerBId || '',
+          playerAName: matchup.playerAName || '',
+          playerBName: matchup.playerBName || '',
+          flightName: matchup.flightName || 'Unknown Flight',
+          holes: [], // Will be initialized by the modal
+          playerATotalScore: matchup.playerAScore || 0,
+          playerBTotalScore: matchup.playerBScore || 0,
+          playerAHolesWon: 0,
+          playerBHolesWon: 0,
+          holesHalved: 0,
+          playerAHandicap: 0,
+          playerBHandicap: 0
+        };
+
+        this.showScorecardModal = true;
+        
+        // Manually trigger scorecard initialization after the view is rendered
+        setTimeout(() => {
+          if (this.scorecardModal) {
+            console.log('Manually triggering scorecard initialization (fallback)');
+            this.scorecardModal.initializeScorecard();
+          }
+        }, 0);
+      }
+    });
   }
 
   onScorecardSave(scorecardData: ScorecardData) {
@@ -530,5 +632,9 @@ export class ScoreEntryComponent implements OnInit {
   closeScorecardModal() {
     this.showScorecardModal = false;
     this.currentScorecardData = null;
+  }
+
+  formatWeekDate(week: Week): string {
+    return this.dateUtil.formatDateOnly(week.date);
   }
 }

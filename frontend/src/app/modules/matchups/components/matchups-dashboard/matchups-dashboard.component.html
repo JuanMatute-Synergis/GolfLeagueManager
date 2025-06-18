@@ -113,10 +113,9 @@
             [class.text-muted-foreground]="selectedFlightId !== flight.id"
             [class.shadow-sm]="selectedFlightId === flight.id"
             (click)="selectFlight(flight.id)">
-            <span class="bg-primary/10 text-primary px-2 py-1 rounded-full text-xs font-medium">
+            <span class="bg-primary text-primary-foreground px-2 py-1 rounded-full text-xs font-medium">
               Flight {{ flight.name.replace('Flight ', '') }}
             </span>
-            <span class="text-xs opacity-75">({{ matchupsByFlight[flight.id].length || 0 }})</span>
           </button>
         </div>
 
@@ -230,13 +229,14 @@
   </div>
 </div>
 
-<!-- Scorecard Viewer Modal -->
-<app-scorecard-viewer
+<!-- Scorecard Modal (View Mode) -->
+<app-scorecard-modal
   *ngIf="selectedMatchupForScorecard"
   [isOpen]="showScorecardViewer"
+  [mode]="'view'"
   [matchupId]="selectedMatchupForScorecard.id || ''"
   [playerAName]="selectedMatchupForScorecard.playerAName"
   [playerBName]="selectedMatchupForScorecard.playerBName"
   [flightName]="selectedMatchupForScorecard.flightName"
   (close)="closeScorecardViewer()">
-</app-scorecard-viewer>
+</app-scorecard-modal>

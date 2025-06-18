@@ -4,7 +4,7 @@ echo "==================================="
 echo "Golf League Score Import - JSON"
 echo "==================================="
 
-JSON_FILE="/Users/juanmatute/Sources/GolfLeagueManager/Scores.json"
+JSON_FILE="../data/Scores.json"
 
 if [ ! -f "$JSON_FILE" ]; then
     echo "❌ JSON file not found: $JSON_FILE"

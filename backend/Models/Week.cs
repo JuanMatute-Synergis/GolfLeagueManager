@@ -11,6 +11,10 @@ namespace GolfLeagueManager
         public string Name { get; set; } = string.Empty; // e.g. "Week 1", "Championship Week"
         public bool IsActive { get; set; } = true;
         
+        // Scoring and handicap calculation toggles
+        public bool CountsForScoring { get; set; } = true; // Whether this week counts for scoring
+        public bool CountsForHandicap { get; set; } = true; // Whether this week counts for handicap calculation
+        
         // Foreign key to Season
         [Required]
         public Guid SeasonId { get; set; }

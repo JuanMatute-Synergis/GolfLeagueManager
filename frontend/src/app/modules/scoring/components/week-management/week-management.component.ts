@@ -97,7 +97,7 @@ import { Season, Week } from '../../models/week.model';
               <div *ngFor="let holidayWeek of getHolidayWeeks()" 
                    class="flex items-center space-x-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md px-3 py-2">
                 <span class="text-sm">
-                  <strong>Week {{ holidayWeek.week.weekNumber }}</strong> - {{ holidayWeek.week.date | date:'MMM d' }}
+                  <span class="text-foreground">Week {{ holidayWeek.week.weekNumber }}</span> <span class="text-foreground"> - {{ holidayWeek.week.date | date:'MMM d' }}</span>
                   <span class="text-yellow-700 dark:text-yellow-300 ml-1">({{ holidayWeek.reason }})</span>
                 </span>
                 <button 

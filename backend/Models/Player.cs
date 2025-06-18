@@ -10,6 +10,10 @@ namespace GolfLeagueManager
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
         
+        // Handicap system
+        public decimal InitialHandicap { get; set; } = 0; // Starting handicap for the season
+        public decimal CurrentHandicap { get; set; } = 0; // Current calculated handicap
+        
         // Navigation properties for matchups where this player is involved
         [JsonIgnore]
         public List<Matchup> MatchupsAsPlayerA { get; set; } = new List<Matchup>();

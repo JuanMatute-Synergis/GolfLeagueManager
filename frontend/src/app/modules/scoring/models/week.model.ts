@@ -34,6 +34,8 @@ export interface Player {
   lastName: string;
   email: string;
   phone: string;
+  initialHandicap: number;
+  currentHandicap: number;
 }
 
 export interface PlayerWithFlight extends Player {

@@ -58,7 +58,7 @@ export class Menu {
           route: '/scoring/leaderboard',
         },
         {
-          icon: 'assets/icons/heroicons/outline/trophy.svg',
+          icon: 'assets/icons/heroicons/outline/users.svg',
           label: 'Season Standings',
           route: '/scoring/standings',
         },

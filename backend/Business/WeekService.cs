@@ -101,6 +101,8 @@ namespace GolfLeagueManager
             foreach (var week in subsequentWeeks)
             {
                 week.WeekNumber -= 1;
+                // Update the name to match the new week number
+                week.Name = $"Week {week.WeekNumber}";
                 await _weekRepository.UpdateAsync(week);
             }
         }

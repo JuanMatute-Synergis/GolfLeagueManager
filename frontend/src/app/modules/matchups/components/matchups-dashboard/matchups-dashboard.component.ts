@@ -11,13 +11,14 @@ import {
   PlayerFlightAssignment, 
   Player 
 } from '../../services/matchups.service';
-import { ScorecardViewerComponent } from '../scorecard-viewer/scorecard-viewer.component';
+import { ScorecardModalComponent } from '../../../scoring/components/scorecard-modal/scorecard-modal.component';
+import { DateUtilService } from '../../../../core/services/date-util.service';
 import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-matchups-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScorecardViewerComponent],
+  imports: [CommonModule, FormsModule, ScorecardModalComponent],
   templateUrl: './matchups-dashboard.component.html',
   styleUrls: ['./matchups-dashboard.component.css']
 })
@@ -47,7 +48,10 @@ export class MatchupsDashboardComponent implements OnInit {
   showScorecardViewer = false;
   selectedMatchupForScorecard: MatchupWithFlightInfo | null = null;
 
-  constructor(private matchupsService: MatchupsService) {}
+  constructor(
+    private matchupsService: MatchupsService,
+    private dateUtil: DateUtilService
+  ) {}
 
   ngOnInit(): void {
     this.loadSeasons();
@@ -113,12 +117,19 @@ export class MatchupsDashboardComponent implements OnInit {
         
         // Auto-select current week or first week
         if (this.weeks.length > 0) {
-          // Try to find current week based on date (closest Wednesday)
-          const now = new Date();
+          // Try to find current week based on date
+          const today = new Date();
+          const todayString = today.getFullYear() + '-' + 
+            String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(today.getDate()).padStart(2, '0');
+          
           const currentWeek = this.weeks.find(week => {
-            const weekDate = new Date(week.date);
-            const daysDiff = Math.abs(now.getTime() - weekDate.getTime()) / (1000 * 3600 * 24);
-            return daysDiff <= 3; // Within 3 days of the Wednesday
+            // Compare date strings directly to avoid timezone issues
+            const weekDateString = week.date.split('T')[0]; // Get YYYY-MM-DD part
+            const weekDate = new Date(weekDateString + 'T12:00:00'); // Add noon time to avoid timezone issues
+            const todayDate = new Date(todayString + 'T12:00:00');
+            const daysDiff = Math.abs(todayDate.getTime() - weekDate.getTime()) / (1000 * 3600 * 24);
+            return daysDiff <= 3; // Within 3 days of the week
           });
           
           this.selectedWeekId = currentWeek ? currentWeek.id : this.weeks[0].id;
@@ -227,12 +238,7 @@ export class MatchupsDashboardComponent implements OnInit {
   }
 
   getWeekDateRange(week: Week): string {
-    const weekDate = new Date(week.date).toLocaleDateString('en-US', { 
-      weekday: 'long',
-      month: 'short', 
-      day: 'numeric' 
-    });
-    return weekDate; // Just show the Wednesday date
+    return this.dateUtil.formatDateShort(week.date);
   }
 
   hasScores(matchup: MatchupWithFlightInfo): boolean {

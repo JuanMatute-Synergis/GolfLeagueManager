@@ -35,7 +35,7 @@
         <div class="flex flex-col sm:flex-row sm:items-center gap-4">
           <div class="flex-shrink-0">
             <h3 class="text-lg font-semibold text-foreground">{{ selectedWeek.name }}</h3>
-            <p class="text-sm text-muted-foreground">{{ selectedWeek.date | date:'fullDate' }}</p>
+            <p class="text-sm text-muted-foreground">{{ formatWeekDate(selectedWeek) }}</p>
           </div>
           <div class="flex items-center gap-6 text-sm">
             <div class="flex items-center gap-1">
@@ -179,6 +179,7 @@
 
 <!-- Scorecard Modal -->
 <app-scorecard-modal
+  #scorecardModal
   *ngIf="showScorecardModal && currentScorecardData"
   [scorecardData]="currentScorecardData"
   [isOpen]="showScorecardModal"

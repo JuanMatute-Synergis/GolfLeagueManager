@@ -185,7 +185,11 @@ namespace GolfLeagueManager
 
         public async Task<ScorecardResponse> GetCompleteScorecardAsync(Guid matchupId)
         {
-            var matchup = await _context.Matchups.FindAsync(matchupId);
+            var matchup = await _context.Matchups
+                .Include(m => m.PlayerA)
+                .Include(m => m.PlayerB)
+                .FirstOrDefaultAsync(m => m.Id == matchupId);
+                
             if (matchup == null)
             {
                 return new ScorecardResponse
@@ -220,6 +224,10 @@ namespace GolfLeagueManager
                 PlayerBHolePoints = matchup.PlayerBHolePoints,
                 PlayerAMatchWin = matchup.PlayerAMatchWin,
                 PlayerBMatchWin = matchup.PlayerBMatchWin,
+                // Include player handicaps
+                PlayerAHandicap = matchup.PlayerA?.CurrentHandicap ?? 0,
+                PlayerBHandicap = matchup.PlayerB?.CurrentHandicap ?? 0,
+                // Include absence status
                 PlayerAAbsent = matchup.PlayerAAbsent,
                 PlayerBAbsent = matchup.PlayerBAbsent,
                 PlayerAAbsentWithNotice = matchup.PlayerAAbsentWithNotice,

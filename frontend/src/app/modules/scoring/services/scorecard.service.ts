@@ -34,6 +34,9 @@ export interface ScorecardResponse {
   playerBHolePoints?: number;
   playerAMatchWin?: boolean;
   playerBMatchWin?: boolean;
+  // Player handicaps
+  playerAHandicap?: number;
+  playerBHandicap?: number;
   // Absence status
   playerAAbsent?: boolean;
   playerBAbsent?: boolean;

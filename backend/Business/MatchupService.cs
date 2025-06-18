@@ -7,12 +7,14 @@ namespace GolfLeagueManager
         private readonly IMatchupRepository _matchupRepository;
         private readonly PlayerFlightAssignmentService _playerFlightAssignmentService;
         private readonly AppDbContext _context;
+        private readonly MatchPlayScoringService _matchPlayScoringService;
 
-        public MatchupService(IMatchupRepository matchupRepository, PlayerFlightAssignmentService playerFlightAssignmentService, AppDbContext context)
+        public MatchupService(IMatchupRepository matchupRepository, PlayerFlightAssignmentService playerFlightAssignmentService, AppDbContext context, MatchPlayScoringService matchPlayScoringService)
         {
             _matchupRepository = matchupRepository;
             _playerFlightAssignmentService = playerFlightAssignmentService;
             _context = context;
+            _matchPlayScoringService = matchPlayScoringService;
         }
 
         public async Task<IEnumerable<Matchup>> GetAllMatchupsAsync()
@@ -22,7 +24,12 @@ namespace GolfLeagueManager
 
         public async Task<Matchup?> GetMatchupByIdAsync(Guid id)
         {
-            return await _matchupRepository.GetByIdAsync(id);
+            var matchup = await _matchupRepository.GetByIdAsync(id);
+            if (matchup != null)
+            {
+                await CalculateMatchupTotalsAsync(matchup);
+            }
+            return matchup;
         }
 
         public async Task<IEnumerable<Matchup>> GetMatchupsByWeekIdAsync(Guid weekId)
@@ -206,12 +213,45 @@ namespace GolfLeagueManager
 
             if (holeScores.Any())
             {
-                // Calculate total scores
+                // Calculate total stroke scores
                 matchup.PlayerAScore = holeScores
                     .Sum(hs => hs.PlayerAScore ?? 0);
 
                 matchup.PlayerBScore = holeScores
                     .Sum(hs => hs.PlayerBScore ?? 0);
+
+                // Get player handicaps
+                var playerA = await _context.Players.FindAsync(matchup.PlayerAId);
+                var playerB = await _context.Players.FindAsync(matchup.PlayerBId);
+
+                if (playerA != null && playerB != null)
+                {
+                    // Calculate match play results using the scoring service
+                    var matchPlayResult = _matchPlayScoringService.CalculateMatchPlayResult(
+                        holeScores,
+                        playerA.CurrentHandicap,
+                        playerB.CurrentHandicap
+                    );
+
+                    // Update matchup with calculated match play points
+                    matchup.PlayerAHolePoints = matchPlayResult.PlayerAHolePoints;
+                    matchup.PlayerBHolePoints = matchPlayResult.PlayerBHolePoints;
+                    matchup.PlayerAPoints = matchPlayResult.PlayerATotalPoints;
+                    matchup.PlayerBPoints = matchPlayResult.PlayerBTotalPoints;
+                    matchup.PlayerAMatchWin = matchPlayResult.PlayerAMatchWin;
+                    matchup.PlayerBMatchWin = matchPlayResult.PlayerBMatchWin;
+
+                    // Update individual hole scores with match play points
+                    foreach (var holeResult in matchPlayResult.HoleResults)
+                    {
+                        var holeScore = holeScores.FirstOrDefault(hs => hs.HoleNumber == holeResult.HoleNumber);
+                        if (holeScore != null)
+                        {
+                            holeScore.PlayerAMatchPoints = holeResult.PlayerAPoints;
+                            holeScore.PlayerBMatchPoints = holeResult.PlayerBPoints;
+                        }
+                    }
+                }
             }
         }
     }

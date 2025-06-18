@@ -22,6 +22,68 @@ namespace backend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("GolfLeagueManager.Course", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<decimal>("CourseRating")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<decimal>("SlopeRating")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("TotalPar")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalYardage")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.CourseHole", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("HandicapIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HoleNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Par")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Yardage")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CourseHoles");
+                });
+
             modelBuilder.Entity("GolfLeagueManager.Flight", b =>
                 {
                     b.Property<Guid>("Id")
@@ -168,6 +230,9 @@ namespace backend.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<decimal>("CurrentHandicap")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -175,6 +240,9 @@ namespace backend.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal>("InitialHandicap")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -281,6 +349,12 @@ namespace backend.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<bool>("CountsForHandicap")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CountsForScoring")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
@@ -303,6 +377,17 @@ namespace backend.Migrations
                     b.HasIndex("SeasonId");
 
                     b.ToTable("Weeks");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.CourseHole", b =>
+                {
+                    b.HasOne("GolfLeagueManager.Course", "Course")
+                        .WithMany("CourseHoles")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Flight", b =>
@@ -400,6 +485,11 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Season");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.Course", b =>
+                {
+                    b.Navigation("CourseHoles");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Player", b =>
