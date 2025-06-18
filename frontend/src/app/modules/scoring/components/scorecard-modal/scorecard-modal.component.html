@@ -7,7 +7,7 @@
     <div class="bg-primary text-primary-foreground p-3 flex justify-between items-center flex-shrink-0">
       <div>
         <h2 class="text-lg font-bold">{{ isViewMode() ? 'Scorecard View' : 'Golf Scorecard' }}</h2>
-        <p class="text-xs opacity-90">{{ getFlightName() }} - {{ course.name }}</p>
+        <p class="text-xs opacity-90">{{ viewModel.summary.flightName }} - {{ viewModel.summary.courseName }}</p>
       </div>
       <button 
         (click)="onClose()"
@@ -22,31 +22,36 @@
         <!-- Player A Section - Left Aligned -->
         <div class="flex flex-col items-start">
           <div class="flex items-center gap-2">
-            <h3 class="font-medium text-sm text-blue-600">{{ scorecardData.playerAName }}</h3>
-            <span class="text-xs text-muted-foreground">HC: {{ scorecardData.playerAHandicap || 0 }}</span>
+            <h3 class="font-medium text-sm text-blue-600">{{ viewModel.playerA.name }}</h3>
+            <span class="text-xs text-muted-foreground">HC: {{ viewModel.playerA.handicap }}</span>
+            <span *ngIf="viewModel.playerA.isStrokeRecipient && viewModel.playerA.strokeCount > 0" 
+                  class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full"
+                  [title]="'Gets ' + viewModel.playerA.strokeCount + ' stroke(s) on highlighted holes'">
+              +{{ viewModel.playerA.strokeCount }}
+            </span>
             <div class="text-xs font-bold text-primary">
-              {{ scorecardData.playerAMatchPoints || 0 }}/20
-              <span class="text-muted-foreground ml-1">({{ scorecardData.playerAHolePoints || 0 }}{{ scorecardData.playerAMatchWin ? '+2' : '' }})</span>
+              {{ viewModel.playerA.matchPoints }}/20
+              <span class="text-muted-foreground ml-1">({{ viewModel.playerA.holePoints }}{{ viewModel.playerA.matchWin ? '+2' : '' }})</span>
             </div>
           </div>
           
           <!-- Inline Absence Options - Edit Mode Only -->
-          <div *ngIf="isEditMode() && !scorecardData.playerAAbsent" class="flex items-center gap-2 mt-1">
+          <div *ngIf="isEditMode() && !viewModel.playerA.absent" class="flex items-center gap-2 mt-1">
             <label class="flex items-center gap-1 cursor-pointer text-xs">
               <input 
                 type="checkbox" 
-                [(ngModel)]="scorecardData.playerAAbsent"
-                (change)="onPlayerAbsenceChange('A')"
+                [(ngModel)]="viewModel.playerA.absent"
+                (change)="onAbsenceChange('A')"
                 class="w-3 h-3 text-primary bg-background border-border rounded">
               <span class="text-muted-foreground">Absent</span>
             </label>
           </div>
-          <div *ngIf="isEditMode() && scorecardData.playerAAbsent" class="flex items-center gap-3 mt-1 text-xs">
+          <div *ngIf="isEditMode() && viewModel.playerA.absent" class="flex items-center gap-3 mt-1 text-xs">
             <label class="flex items-center gap-1 cursor-pointer">
               <input 
                 type="checkbox" 
-                [(ngModel)]="scorecardData.playerAAbsent"
-                (change)="onPlayerAbsenceChange('A')"
+                [(ngModel)]="viewModel.playerA.absent"
+                (change)="onAbsenceChange('A')"
                 class="w-3 h-3 text-primary bg-background border-border rounded">
               <span class="text-foreground">Absent</span>
             </label>
@@ -55,7 +60,7 @@
                 type="radio" 
                 name="playerAAbsenceType"
                 [value]="true"
-                [(ngModel)]="scorecardData.playerAAbsentWithNotice"
+                [(ngModel)]="viewModel.playerA.absentWithNotice"
                 class="w-3 h-3 text-primary bg-background border-border">
               <span class="text-muted-foreground">Notice (4pts)</span>
             </label>
@@ -64,7 +69,7 @@
                 type="radio" 
                 name="playerAAbsenceType"
                 [value]="false"
-                [(ngModel)]="scorecardData.playerAAbsentWithNotice"
+                [(ngModel)]="viewModel.playerA.absentWithNotice"
                 class="w-3 h-3 text-primary bg-background border-border">
               <span class="text-muted-foreground">No Notice (0pts)</span>
             </label>
@@ -75,32 +80,37 @@
         <div class="flex flex-col items-end">
           <div class="flex items-center gap-2">
             <div class="text-xs font-bold text-primary">
-              {{ scorecardData.playerBMatchPoints || 0 }}/20
-              <span class="text-muted-foreground mr-1">({{ scorecardData.playerBHolePoints || 0 }}{{ scorecardData.playerBMatchWin ? '+2' : '' }})</span>
+              {{ viewModel.playerB.matchPoints }}/20
+              <span class="text-muted-foreground mr-1">({{ viewModel.playerB.holePoints }}{{ viewModel.playerB.matchWin ? '+2' : '' }})</span>
             </div>
-            <span class="text-xs text-muted-foreground">HC: {{ scorecardData.playerBHandicap || 0 }}</span>
-            <h3 class="font-medium text-sm text-red-600">{{ scorecardData.playerBName }}</h3>
+            <span *ngIf="viewModel.playerB.isStrokeRecipient && viewModel.playerB.strokeCount > 0" 
+                  class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full"
+                  [title]="'Gets ' + viewModel.playerB.strokeCount + ' stroke(s) on highlighted holes'">
+              +{{ viewModel.playerB.strokeCount }}
+            </span>
+            <span class="text-xs text-muted-foreground">HC: {{ viewModel.playerB.handicap }}</span>
+            <h3 class="font-medium text-sm text-red-600">{{ viewModel.playerB.name }}</h3>
           </div>
           
           <!-- Inline Absence Options - Edit Mode Only -->
-          <div *ngIf="isEditMode() && !scorecardData.playerBAbsent" class="flex items-center gap-2 mt-1">
+          <div *ngIf="isEditMode() && !viewModel.playerB.absent" class="flex items-center gap-2 mt-1">
             <label class="flex items-center gap-1 cursor-pointer text-xs">
               <span class="text-muted-foreground">Absent</span>
               <input 
                 type="checkbox" 
-                [(ngModel)]="scorecardData.playerBAbsent"
-                (change)="onPlayerAbsenceChange('B')"
+                [(ngModel)]="viewModel.playerB.absent"
+                (change)="onAbsenceChange('B')"
                 class="w-3 h-3 text-primary bg-background border-border rounded">
             </label>
           </div>
-          <div *ngIf="isEditMode() && scorecardData.playerBAbsent" class="flex items-center gap-3 mt-1 text-xs">
+          <div *ngIf="isEditMode() && viewModel.playerB.absent" class="flex items-center gap-3 mt-1 text-xs">
             <label class="flex items-center gap-1 cursor-pointer">
               <span class="text-muted-foreground">No Notice (0pts)</span>
               <input 
                 type="radio" 
                 name="playerBAbsenceType"
                 [value]="false"
-                [(ngModel)]="scorecardData.playerBAbsentWithNotice"
+                [(ngModel)]="viewModel.playerB.absentWithNotice"
                 class="w-3 h-3 text-primary bg-background border-border">
             </label>
             <label class="flex items-center gap-1 cursor-pointer">
@@ -109,15 +119,15 @@
                 type="radio" 
                 name="playerBAbsenceType"
                 [value]="true"
-                [(ngModel)]="scorecardData.playerBAbsentWithNotice"
+                [(ngModel)]="viewModel.playerB.absentWithNotice"
                 class="w-3 h-3 text-primary bg-background border-border">
             </label>
             <label class="flex items-center gap-1 cursor-pointer">
               <span class="text-foreground">Absent</span>
               <input 
                 type="checkbox" 
-                [(ngModel)]="scorecardData.playerBAbsent"
-                (change)="onPlayerAbsenceChange('B')"
+                [(ngModel)]="viewModel.playerB.absent"
+                (change)="onAbsenceChange('B')"
                 class="w-3 h-3 text-primary bg-background border-border rounded">
             </label>
           </div>
@@ -133,8 +143,8 @@
           <!-- Hole Numbers Row -->
           <tr class="bg-muted/30">
             <td class="border border-border p-1 text-center font-bold text-foreground bg-muted/50 min-w-[80px] sm:p-2">Player</td>
-            <td class="border border-border p-1 text-center font-bold text-muted-foreground min-w-[24px] sm:min-w-[32px] sm:p-2" *ngFor="let hole of course.holes">
-              {{ hole.number }}
+            <td class="border border-border p-1 text-center font-bold text-muted-foreground min-w-[24px] sm:min-w-[32px] sm:p-2" *ngFor="let hole of viewModel.holes">
+              {{ hole.holeNumber }}
             </td>
             <td class="border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2">Total</td>
           </tr>
@@ -142,16 +152,16 @@
           <!-- Par Row -->
           <tr class="bg-muted/30">
             <td class="border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2">Par</td>
-            <td class="border border-border p-1 text-center font-bold text-muted-foreground sm:p-2" *ngFor="let hole of course.holes">
+            <td class="border border-border p-1 text-center font-bold text-muted-foreground sm:p-2" *ngFor="let hole of viewModel.holes">
               {{ hole.par }}
             </td>
-            <td class="text-lg border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2">{{ getTotalPar() }}</td>
+            <td class="text-lg border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2">{{ viewModel.summary.totalPar }}</td>
           </tr>
           
           <!-- Handicap Row -->
           <tr class="bg-muted/30">
             <td class="border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2">HCP</td>
-            <td class="border border-border p-1 text-center text-xs text-muted-foreground sm:p-2" *ngFor="let hole of course.holes">
+            <td class="border border-border p-1 text-center text-xs text-muted-foreground sm:p-2" *ngFor="let hole of viewModel.holes">
               {{ hole.handicap }}
             </td>
             <td class="border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2"></td>
@@ -163,95 +173,123 @@
           <!-- Player A Row -->
           <tr class="bg-muted/40">
             <td class="border border-border p-1 font-medium text-foreground bg-muted/50 sm:p-2 text-center">
-              <span class="font-bold text-base">{{ scorecardData.playerAName }}</span>
+              <span class="font-bold text-base">{{ viewModel.playerA.name }}</span>
             </td>
-            <td class="border border-border relative h-10 p-0 m-0 sm:h-12" *ngFor="let hole of course.holes; let i = index">
+            <td class="border border-border relative h-10 p-0 m-0 sm:h-12" *ngFor="let hole of viewModel.holes; let i = index">
               <!-- Compact Score Input/Display -->
               <input 
+                #scoreInput
                 type="number"
-                [ngModel]="getPlayerScore(i, 'A')"
-                (ngModelChange)="setPlayerScore(i, 'A', $event)"
-                [class]="getScoreClass(getPlayerScore(i, 'A'), hole.par)"
+                [id]="'playerA-hole-' + (i + 1)"
+                [(ngModel)]="hole.playerAScore"
+                (ngModelChange)="onScoreChangeWithAutoAdvance(i, 'A', $event)"
+                (keydown)="onKeyDown($event, i, 'A')"
+                (paste)="onPaste($event, i, 'A')"
+                [class]="hole.playerAScoreClass"
                 class="absolute inset-0 w-full h-full text-center border-0 bg-transparent text-foreground focus:bg-primary/10 focus:ring-2 focus:ring-primary/20 focus:outline-none leading-none placeholder:text-xl placeholder:font-bold placeholder:text-muted-foreground/50 hover:bg-muted/50 transition-colors"
+                [class.!bg-green-100]="hole.playerAIsStrokeHole"
+                [class.!border-green-400]="hole.playerAIsStrokeHole"
+                [class.!text-green-900]="hole.playerAIsStrokeHole"
+                [class.dark:!text-green-900]="hole.playerAIsStrokeHole"
+                [class.dark:!bg-green-300]="hole.playerAIsStrokeHole"
+                [class.hover:!bg-green-200]="hole.playerAIsStrokeHole"
+                [class.dark:hover:!bg-green-400]="hole.playerAIsStrokeHole"
                 [readonly]="isViewMode()"
                 [tabindex]="isViewMode() ? -1 : 0"
                 min="1"
-                max="10"
+                max="19"
                 placeholder="-"
-                [attr.aria-label]="'Player A score for hole ' + hole.number">
+                [attr.aria-label]="'Player A score for hole ' + hole.holeNumber"
+                [title]="hole.playerAStrokeTooltip"
+                [attr.data-hole]="i"
+                [attr.data-player]="'A'">
               
               <!-- Compact Net Score Display -->
               <div class="absolute bottom-0 left-0 right-0 text-xs text-muted-foreground text-center leading-none pointer-events-none">
-                {{ getNetScore(i, 'A') }}
+                {{ hole.playerANetScore }}
               </div>
               
               <!-- Compact Hole Winner Indicator -->
-              <div class="absolute top-0 right-0 pointer-events-none" *ngIf="getHoleWinner(i)">
+              <div class="absolute top-0 right-0 pointer-events-none" *ngIf="hole.holeWinner">
                 <div class="w-2 h-2 rounded-full"
-                     [class.bg-green-500]="getHoleWinner(i) === 'playerA'"
-                     [class.bg-yellow-500]="getHoleWinner(i) === 'tie'"
-                     [class.bg-red-500]="getHoleWinner(i) === 'playerB'">
+                     [class.bg-green-500]="hole.holeWinner === 'playerA'"
+                     [class.bg-yellow-500]="hole.holeWinner === 'tie'"
+                     [class.bg-red-500]="hole.holeWinner === 'playerB'">
                 </div>
               </div>
             </td>
             <td class="border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2">
-              {{ scorecardData.playerATotalScore || 0 }}
+              {{ viewModel.playerA.totalScore }}
             </td>
           </tr>
           
           <!-- Player B Row -->
           <tr class="bg-muted/60">
             <td class="border border-border p-1 font-medium text-foreground bg-muted/50 sm:p-2 text-center">
-              <span class="font-bold text-base">{{ scorecardData.playerBName }}</span>
+              <span class="font-bold text-base">{{ viewModel.playerB.name }}</span>
             </td>
-            <td class="border border-border relative h-10 p-0 m-0 sm:h-12" *ngFor="let hole of course.holes; let i = index">
+            <td class="border border-border relative h-10 p-0 m-0 sm:h-12" *ngFor="let hole of viewModel.holes; let i = index">
               <!-- Compact Score Input/Display -->
               <input 
+                #scoreInput
                 type="number"
-                [ngModel]="getPlayerScore(i, 'B')"
-                (ngModelChange)="setPlayerScore(i, 'B', $event)"
-                [class]="getScoreClass(getPlayerScore(i, 'B'), hole.par)"
+                [id]="'playerB-hole-' + (i + 1)"
+                [(ngModel)]="hole.playerBScore"
+                (ngModelChange)="onScoreChangeWithAutoAdvance(i, 'B', $event)"
+                (keydown)="onKeyDown($event, i, 'B')"
+                (paste)="onPaste($event, i, 'B')"
+                [class]="hole.playerBScoreClass"
                 class="absolute inset-0 w-full h-full text-center border-0 bg-transparent text-foreground focus:bg-primary/10 focus:ring-2 focus:ring-primary/20 focus:outline-none leading-none placeholder:text-xl placeholder:font-bold placeholder:text-muted-foreground/50 hover:bg-muted/50 transition-colors"
+                [class.!bg-green-100]="hole.playerBIsStrokeHole"
+                [class.!border-green-400]="hole.playerBIsStrokeHole"
+                [class.!text-green-900]="hole.playerBIsStrokeHole"
+                [class.dark:!text-green-900]="hole.playerBIsStrokeHole"
+                [class.dark:!bg-green-300]="hole.playerBIsStrokeHole"
+                [class.hover:!bg-green-200]="hole.playerBIsStrokeHole"
+                [class.dark:hover:!bg-green-400]="hole.playerBIsStrokeHole"
                 [readonly]="isViewMode()"
                 [tabindex]="isViewMode() ? -1 : 0"
                 min="1"
-                max="10"
+                max="19"
                 placeholder="-"
-                [attr.aria-label]="'Player B score for hole ' + hole.number">
+                [attr.aria-label]="'Player B score for hole ' + hole.holeNumber"
+                [title]="hole.playerBStrokeTooltip"
+                [attr.data-hole]="i"
+                [attr.data-player]="'B'">
               
               <!-- Compact Net Score Display -->
               <div class="absolute bottom-0 left-0 right-0 text-xs text-muted-foreground text-center leading-none pointer-events-none">
-                {{ getNetScore(i, 'B') }}
+                {{ hole.playerBNetScore }}
               </div>
             </td>
             <td class="border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2">
-              {{ scorecardData.playerBTotalScore || 0 }}
+              {{ viewModel.playerB.totalScore }}
             </td>
           </tr>
           
           <!-- Match Points Row -->
           <tr class="bg-primary/10">
             <td class="border border-border p-1 text-center font-bold text-foreground bg-primary/20 sm:p-2">Match Pts</td>
-            <td class="border border-border p-1 text-center sm:p-2" *ngFor="let hole of course.holes; let i = index">
+            <td class="border border-border p-1 text-center sm:p-2" *ngFor="let hole of viewModel.holes; let i = index">
               <div class="grid grid-cols-2 gap-1 text-xs font-bold">
                 <div class="text-center" 
-                     [class.text-green-600]="getMatchPoints(i, 'A') === 2"
-                     [class.text-yellow-600]="getMatchPoints(i, 'A') === 1"
-                     [class.text-red-600]="getMatchPoints(i, 'A') === 0">
-                  {{ getMatchPoints(i, 'A') }}
+                     [class.text-green-600]="hole.playerAMatchPoints === 2"
+                     [class.text-yellow-600]="hole.playerAMatchPoints === 1"
+                     [class.text-red-600]="hole.playerAMatchPoints === 0">
+                  {{ hole.playerAMatchPoints }}
                 </div>
                 <div class="text-center"
-                     [class.text-green-600]="getMatchPoints(i, 'B') === 2"
-                     [class.text-yellow-600]="getMatchPoints(i, 'B') === 1"
-                     [class.text-red-600]="getMatchPoints(i, 'B') === 0">
-                  {{ getMatchPoints(i, 'B') }}
+                     [class.text-green-600]="hole.playerBMatchPoints === 2"
+                     [class.text-yellow-600]="hole.playerBMatchPoints === 1"
+                     [class.text-red-600]="hole.playerBMatchPoints === 0">
+                  {{ hole.playerBMatchPoints }}
                 </div>
               </div>
             </td>
             <td class="border border-border p-1 text-center sm:p-2">
               <div class="grid grid-cols-2 gap-1 text-xs font-bold">
-                <div class="text-primary">{{ scorecardData.playerAHolePoints || 0 }}</div>
-                <div class="text-primary">{{ scorecardData.playerBHolePoints || 0 }}</div>
+                <div class="text-primary">{{ viewModel.playerA.holePoints }}</div>
+                <div class="text-primary">{{ viewModel.playerB.holePoints }}</div>
               </div>
             </td>
           </tr>
@@ -264,43 +302,47 @@
       <div class="grid grid-cols-3 gap-4 text-sm">
         <!-- Player A Score Summary -->
         <div class="text-left space-y-1">
-          <div class="font-bold text-blue-600 truncate">{{ scorecardData.playerAName }}</div>
+          <div class="font-bold text-blue-600 truncate">{{ viewModel.playerA.name }}</div>
           <div class="text-xs text-muted-foreground">
-            Gross: <span class="font-bold text-blue-600">{{ scorecardData.playerATotalScore || 0 }}</span>
+            Gross: <span class="font-bold text-blue-600">{{ viewModel.playerA.totalScore }}</span>
           </div>
           <div class="text-xs text-muted-foreground">
-            Match: <span class="font-bold text-primary">{{ scorecardData.playerAMatchPoints || 0 }}/20</span>
-            <span *ngIf="scorecardData.playerAMatchWin" class="ml-1 text-green-600 font-bold">🏆+2</span>
+            Match: <span class="font-bold text-primary">{{ viewModel.playerA.matchPoints }}/20</span>
+            <span *ngIf="viewModel.playerA.matchWin" class="ml-1 text-green-600 font-bold">🏆+2</span>
           </div>
           <div class="text-xs text-muted-foreground">
-            Holes: {{ scorecardData.playerAHolePoints || 0 }}
-            <span *ngIf="scorecardData.playerAMatchWin" class="text-green-600">+ 2 bonus</span>
+            Holes: {{ viewModel.playerA.holePoints }}
+            <span *ngIf="viewModel.playerA.matchWin" class="text-green-600">+ 2 bonus</span>
           </div>
         </div>
         
         <!-- Match Results Center -->
         <div class="text-center space-y-1">
-          <div class="font-bold text-foreground">{{ getMatchPlayResult() }}</div>
+          <div class="font-bold text-foreground">{{ viewModel.summary.matchPlayResult }}</div>
           <div class="text-xs text-muted-foreground">Match Play</div>
-          <div class="text-xs text-muted-foreground">{{ getMatchPlayScore() }}</div>
-          <div *ngIf="scorecardData.playerAMatchWin || scorecardData.playerBMatchWin" class="text-xs text-green-600 font-medium">
+          <div class="text-xs text-muted-foreground">{{ viewModel.summary.matchPlayScore }}</div>
+          <div *ngIf="viewModel.playerA.matchWin || viewModel.playerB.matchWin" class="text-xs text-green-600 font-medium">
             +2 Match Winner Bonus
+          </div>
+          <!-- Show tie-breaker explanation when applicable -->
+          <div *ngIf="getTieBreaker()" class="text-xs text-blue-600 font-medium">
+            {{ getTieBreaker() }}
           </div>
         </div>
         
         <!-- Player B Score Summary -->
         <div class="text-right space-y-1">
-          <div class="font-bold text-red-600 truncate">{{ scorecardData.playerBName }}</div>
+          <div class="font-bold text-red-600 truncate">{{ viewModel.playerB.name }}</div>
           <div class="text-xs text-muted-foreground">
-            Gross: <span class="font-bold text-red-600">{{ scorecardData.playerBTotalScore || 0 }}</span>
+            Gross: <span class="font-bold text-red-600">{{ viewModel.playerB.totalScore }}</span>
           </div>
           <div class="text-xs text-muted-foreground">
-            Match: <span class="font-bold text-primary">{{ scorecardData.playerBMatchPoints || 0 }}/20</span>
-            <span *ngIf="scorecardData.playerBMatchWin" class="ml-1 text-green-600 font-bold">🏆+2</span>
+            Match: <span class="font-bold text-primary">{{ viewModel.playerB.matchPoints }}/20</span>
+            <span *ngIf="viewModel.playerB.matchWin" class="ml-1 text-green-600 font-bold">🏆+2</span>
           </div>
           <div class="text-xs text-muted-foreground">
-            Holes: {{ scorecardData.playerBHolePoints || 0 }}
-            <span *ngIf="scorecardData.playerBMatchWin" class="text-green-600">+ 2 bonus</span>
+            Holes: {{ viewModel.playerB.holePoints }}
+            <span *ngIf="viewModel.playerB.matchWin" class="text-green-600">+ 2 bonus</span>
           </div>
         </div>
       </div>
@@ -308,7 +350,7 @@
       <!-- Stroke Play Summary -->
       <div class="mt-3 pt-2 border-t border-border text-center">
         <div class="text-xs text-muted-foreground">
-          Stroke Play: <span class="font-medium">{{ getMatchResult() }} {{ getScoreDifference() }}</span>
+          Stroke Play: <span class="font-medium">{{ viewModel.summary.strokePlayResult }} {{ viewModel.summary.scoreDifference }}</span>
         </div>
       </div>
     </div>
@@ -322,14 +364,14 @@
       </button>
       <button 
         (click)="onSave()"
-        [disabled]="isLoading || !isValidScorecard()"
+        [disabled]="viewModel.isLoading || !isValidScorecard()"
         class="px-4 py-2 text-sm bg-primary text-primary-foreground dark:text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-        {{ isLoading ? 'Saving...' : 'Save' }}
+        {{ viewModel.isLoading ? 'Saving...' : 'Save' }}
       </button>
     </div>
 
     <!-- Loading Overlay -->
-    <div *ngIf="isLoading" class="absolute inset-0 bg-background/80 flex items-center justify-center">
+    <div *ngIf="viewModel.isLoading" class="absolute inset-0 bg-background/80 flex items-center justify-center">
       <div class="text-center">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
         <div class="text-sm text-muted-foreground">Loading scorecard...</div>
@@ -337,13 +379,13 @@
     </div>
 
     <!-- Error Display for View Mode -->
-    <div *ngIf="error && isViewMode()" class="bg-destructive/10 border border-destructive/20 rounded-md p-3 m-3">
-      <div class="text-sm text-destructive">{{ error }}</div>
+    <div *ngIf="viewModel.error && isViewMode()" class="bg-destructive/10 border border-destructive/20 rounded-md p-3 m-3">
+      <div class="text-sm text-destructive">{{ viewModel.error }}</div>
     </div>
 
     <!-- Save Error Display -->
-    <div *ngIf="saveError" class="bg-destructive/10 border border-destructive/20 rounded-md p-3 m-3">
-      <div class="text-sm text-destructive">{{ saveError }}</div>
+    <div *ngIf="viewModel.saveError" class="bg-destructive/10 border border-destructive/20 rounded-md p-3 m-3">
+      <div class="text-sm text-destructive">{{ viewModel.saveError }}</div>
     </div>
   </div>
 </div>

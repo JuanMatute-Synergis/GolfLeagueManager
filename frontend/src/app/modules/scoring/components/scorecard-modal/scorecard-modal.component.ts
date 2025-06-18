@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, SimpleChanges, ViewChildren, QueryList, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScorecardData, HoleScore, Course } from '../../models/scorecard.model';
+import { ScorecardViewModel, ScorecardHoleView, ScorecardPlayerView, ScorecardSummaryView } from '../../models/scorecard-view.model';
 import { ScorecardService } from '../../services/scorecard.service';
 import { CourseService } from '../../../../core/services/course.service';
 import { Course as CourseModel } from '../../../../core/models/course.model';
@@ -13,7 +14,7 @@ import { Course as CourseModel } from '../../../../core/models/course.model';
   templateUrl: './scorecard-modal.component.html',
   styleUrls: ['./scorecard-modal.component.css']
 })
-export class ScorecardModalComponent implements OnInit, OnChanges {
+export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() scorecardData!: ScorecardData;
   @Input() isOpen: boolean = false;
   @Input() mode: 'edit' | 'view' = 'edit'; // New input to determine mode
@@ -27,39 +28,51 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
   @Output() save = new EventEmitter<ScorecardData>();
   @Output() close = new EventEmitter<void>();
 
-  isLoading = false;
-  saveError: string | null = null;
-  error: string | null = null; // For view mode errors
+  // View model for template binding
+  viewModel: ScorecardViewModel = this.createEmptyViewModel();
 
   constructor(
     private scorecardService: ScorecardService,
     private courseService: CourseService
   ) {}
 
-  // Default course - in real app this would come from a service
+  // Convenience getters for backward compatibility
+  get isLoading(): boolean { return this.viewModel.isLoading; }
+  set isLoading(value: boolean) { this.viewModel.isLoading = value; }
+  
+  get error(): string | null { return this.viewModel.error; }
+  set error(value: string | null) { this.viewModel.error = value; }
+  
+  get saveError(): string | null { return this.viewModel.saveError; }
+  set saveError(value: string | null) { this.viewModel.saveError = value; }
+
+  // Default course - updated to match current database values
   course: Course = {
     name: "Allentown Municipal Golf Course",
     holes: [
       { number: 1, par: 4, yardage: 380, handicap: 3 },
-      { number: 2, par: 3, yardage: 165, handicap: 11 },
+      { number: 2, par: 4, yardage: 165, handicap: 11 },
       { number: 3, par: 5, yardage: 520, handicap: 1 },
       { number: 4, par: 4, yardage: 420, handicap: 5 },
       { number: 5, par: 3, yardage: 180, handicap: 17 },
-      { number: 6, par: 4, yardage: 400, handicap: 7 },
-      { number: 7, par: 5, yardage: 540, handicap: 13 },
+      { number: 6, par: 5, yardage: 400, handicap: 7 },
+      { number: 7, par: 4, yardage: 540, handicap: 13 },
       { number: 8, par: 4, yardage: 360, handicap: 9 },
-      { number: 9, par: 4, yardage: 390, handicap: 15 },
-      { number: 10, par: 4, yardage: 410, handicap: 12 },
-      { number: 11, par: 3, yardage: 170, handicap: 4 },
-      { number: 12, par: 5, yardage: 560, handicap: 2 },
-      { number: 13, par: 4, yardage: 440, handicap: 6 },
-      { number: 14, par: 3, yardage: 190, handicap: 14 },
-      { number: 15, par: 4, yardage: 380, handicap: 10 },
-      { number: 16, par: 5, yardage: 530, handicap: 8 },
-      { number: 17, par: 4, yardage: 370, handicap: 18 },
-      { number: 18, par: 4, yardage: 415, handicap: 16 }
+      { number: 9, par: 3, yardage: 390, handicap: 15 },
+      { number: 10, par: 4, yardage: 410, handicap: 2 },
+      { number: 11, par: 3, yardage: 170, handicap: 12 },
+      { number: 12, par: 4, yardage: 560, handicap: 4 },
+      { number: 13, par: 5, yardage: 440, handicap: 16 },
+      { number: 14, par: 4, yardage: 190, handicap: 6 },
+      { number: 15, par: 4, yardage: 380, handicap: 14 },
+      { number: 16, par: 3, yardage: 530, handicap: 10 },
+      { number: 17, par: 4, yardage: 370, handicap: 8 },
+      { number: 18, par: 5, yardage: 415, handicap: 18 }
     ]
   };
+
+  // ViewChildren to access all score input elements - simplified approach
+  @ViewChildren('scoreInput') scoreInputs!: QueryList<ElementRef<HTMLInputElement>>;
 
   ngOnInit() {
     console.log('ngOnInit called, initializing scorecard modal, mode:', this.mode);
@@ -76,6 +89,9 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
     if (!this.scorecardData?.holes) {
       this.initializeHoles();
     }
+    
+    // Build the view model
+    this.buildViewModel();
     
     // Initialize the scorecard when component loads
     if (((this.scorecardData && this.mode === 'edit') || (this.matchupId && this.mode === 'view')) && this.isOpen) {
@@ -105,6 +121,11 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
         // Keep default course configuration as fallback
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    // ViewChildren are now available
+    console.log('ngAfterViewInit called - score inputs available:', this.scoreInputs?.length);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -193,6 +214,10 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
           this.scorecardData.playerBAbsent = response.playerBAbsent;
           this.scorecardData.playerAAbsentWithNotice = response.playerAAbsentWithNotice;
           this.scorecardData.playerBAbsentWithNotice = response.playerBAbsentWithNotice;
+          
+          // Update player handicaps from backend response
+          this.scorecardData.playerAHandicap = response.playerAHandicap;
+          this.scorecardData.playerBHandicap = response.playerBHandicap;
           
           // Force another calculation after a short delay to ensure everything is updated
           setTimeout(() => {
@@ -346,6 +371,9 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
 
     // Calculate match play points for each hole
     this.calculateMatchPlayPoints();
+    
+    // Rebuild view model after calculations
+    this.buildViewModel();
   }
 
   private calculateMatchPlayPoints() {
@@ -428,9 +456,31 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
       this.scorecardData.playerAMatchWin = false;
       this.scorecardData.playerBMatchWin = true;
     } else {
-      // Tie - no bonus points
-      this.scorecardData.playerAMatchWin = false;
-      this.scorecardData.playerBMatchWin = false;
+      // Tie in match play - use stroke play (gross total) as tiebreaker
+      const playerAGross = this.scorecardData.playerATotalScore || 0;
+      const playerBGross = this.scorecardData.playerBTotalScore || 0;
+      
+      if (playerAGross > 0 && playerBGross > 0) {
+        if (playerAGross < playerBGross) {
+          // Player A wins tie-breaker with lower stroke play score
+          playerAMatchPoints += 2;
+          this.scorecardData.playerAMatchWin = true;
+          this.scorecardData.playerBMatchWin = false;
+        } else if (playerBGross < playerAGross) {
+          // Player B wins tie-breaker with lower stroke play score
+          playerBMatchPoints += 2;
+          this.scorecardData.playerAMatchWin = false;
+          this.scorecardData.playerBMatchWin = true;
+        } else {
+          // Complete tie - no bonus points
+          this.scorecardData.playerAMatchWin = false;
+          this.scorecardData.playerBMatchWin = false;
+        }
+      } else {
+        // No valid gross totals - no bonus points
+        this.scorecardData.playerAMatchWin = false;
+        this.scorecardData.playerBMatchWin = false;
+      }
     }
 
     this.scorecardData.playerAMatchPoints = playerAMatchPoints;
@@ -617,17 +667,25 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
     }
 
     // Standard match play result
-    const playerAPoints = this.scorecardData.playerAMatchPoints || 0;
-    const playerBPoints = this.scorecardData.playerBMatchPoints || 0;
+    const playerAHolePoints = this.scorecardData.playerAHolePoints || 0;
+    const playerBHolePoints = this.scorecardData.playerBHolePoints || 0;
+    const playerAMatchPoints = this.scorecardData.playerAMatchPoints || 0;
+    const playerBMatchPoints = this.scorecardData.playerBMatchPoints || 0;
 
-    if (playerAPoints === 0 && playerBPoints === 0) {
+    if (playerAMatchPoints === 0 && playerBMatchPoints === 0) {
       return 'Not Yet Calculated';
     }
 
-    if (playerAPoints > playerBPoints) {
-      return `${this.scorecardData.playerAName} Wins`;
-    } else if (playerBPoints > playerAPoints) {
-      return `${this.scorecardData.playerBName} Wins`;
+    // Check if there was a tie in hole points but someone got match bonus (tie-breaker)
+    const wasMatchTieBreaker = playerAHolePoints === playerBHolePoints && 
+                              (this.scorecardData.playerAMatchWin || this.scorecardData.playerBMatchWin);
+
+    if (playerAMatchPoints > playerBMatchPoints) {
+      const result = `${this.scorecardData.playerAName} Wins`;
+      return wasMatchTieBreaker ? `${result} (Tie-breaker)` : result;
+    } else if (playerBMatchPoints > playerAMatchPoints) {
+      const result = `${this.scorecardData.playerBName} Wins`;
+      return wasMatchTieBreaker ? `${result} (Tie-breaker)` : result;
     } else {
       return 'Tie';
     }
@@ -779,5 +837,471 @@ export class ScorecardModalComponent implements OnInit, OnChanges {
   getMatchPoints(holeIndex: number, player: 'A' | 'B'): number {
     const hole = this.getHoleData(holeIndex);
     return player === 'A' ? (hole.playerAMatchPoints || 0) : (hole.playerBMatchPoints || 0);
+  }
+
+  // Stroke allocation methods
+  getStrokeHoles(): number[] {
+    const handicapDiff = Math.abs((this.scorecardData.playerAHandicap || 0) - (this.scorecardData.playerBHandicap || 0));
+    if (handicapDiff === 0) return [];
+
+    // Debug logging
+    console.log('Calculating stroke holes:', {
+      playerAHandicap: this.scorecardData.playerAHandicap,
+      playerBHandicap: this.scorecardData.playerBHandicap,
+      handicapDiff: handicapDiff
+    });
+
+    // Determine which 9 holes to consider based on which holes have scores
+    const playingFront = this.isPlayingFrontNine();
+    const holes = playingFront ? this.course.holes.slice(0, 9) : this.course.holes.slice(9, 18);
+    
+    console.log('Playing front nine:', playingFront, 'holes considered:', holes.map(h => h.number));
+    
+    // Sort holes by handicap index (1 = hardest)
+    const sortedHoles = holes
+      .map((hole, index) => ({ 
+        holeNumber: hole.number, 
+        handicapIndex: hole.handicap || 18,
+        arrayIndex: playingFront ? index : index + 9
+      }))
+      .sort((a, b) => a.handicapIndex - b.handicapIndex);
+    
+    // Return the hole numbers that get strokes (based on handicap difference)
+    const strokeHoles = sortedHoles.slice(0, handicapDiff).map(h => h.holeNumber);
+    console.log('Stroke holes calculated:', strokeHoles);
+    
+    return strokeHoles;
+  }
+
+  getStrokeRecipient(): 'A' | 'B' | null {
+    const playerAHandicap = this.scorecardData.playerAHandicap || 0;
+    const playerBHandicap = this.scorecardData.playerBHandicap || 0;
+    
+    if (playerAHandicap > playerBHandicap) return 'A';
+    if (playerBHandicap > playerAHandicap) return 'B';
+    return null;
+  }
+
+  isStrokeHole(holeNumber: number, player: 'A' | 'B'): boolean {
+    const strokeRecipient = this.getStrokeRecipient();
+    const strokeHoles = this.getStrokeHoles();
+    
+    const result = strokeRecipient === player && strokeHoles.includes(holeNumber);
+    
+    // Debug logging for specific holes
+    if (holeNumber <= 3) {
+      console.log(`isStrokeHole(${holeNumber}, ${player}):`, {
+        strokeRecipient,
+        strokeHoles,
+        result
+      });
+    }
+    
+    return result;
+  }
+
+  private isPlayingFrontNine(): boolean {
+    // Check if there are more scores in front nine vs back nine
+    const frontScores = this.scorecardData.holes.slice(0, 9).filter(hole => 
+      (hole.playerAScore && hole.playerAScore > 0) || (hole.playerBScore && hole.playerBScore > 0)
+    ).length;
+    
+    const backScores = this.scorecardData.holes.slice(9, 18).filter(hole => 
+      (hole.playerAScore && hole.playerAScore > 0) || (hole.playerBScore && hole.playerBScore > 0)
+    ).length;
+    
+    // Default to front nine if no scores yet
+    return frontScores >= backScores;
+  }
+
+  getStrokeTooltip(holeNumber: number, player: 'A' | 'B'): string {
+    if (!this.isStrokeHole(holeNumber, player)) return '';
+    
+    const handicapDiff = Math.abs((this.scorecardData.playerAHandicap || 0) - (this.scorecardData.playerBHandicap || 0));
+    const playerName = player === 'A' ? this.scorecardData.playerAName : this.scorecardData.playerBName;
+    
+    return `${playerName} gets a stroke on this hole (handicap difference: ${handicapDiff})`;
+  }
+
+  private createEmptyViewModel(): ScorecardViewModel {
+    return {
+      matchupId: '',
+      playerA: this.createEmptyPlayerView('A'),
+      playerB: this.createEmptyPlayerView('B'),
+      holes: [],
+      summary: this.createEmptySummaryView(),
+      isLoading: false,
+      error: null,
+      saveError: null
+    };
+  }
+
+  private createEmptyPlayerView(player: 'A' | 'B'): ScorecardPlayerView {
+    return {
+      name: '',
+      handicap: 0,
+      totalScore: 0,
+      matchPoints: 0,
+      holePoints: 0,
+      matchWin: false,
+      absent: false,
+      absentWithNotice: false,
+      strokeCount: 0,
+      isStrokeRecipient: false
+    };
+  }
+
+  private createEmptySummaryView(): ScorecardSummaryView {
+    return {
+      totalPar: 0,
+      matchPlayResult: '',
+      matchPlayScore: '',
+      strokePlayResult: '',
+      scoreDifference: '',
+      flightName: '',
+      courseName: ''
+    };
+  }
+
+  // Build view model from scorecard data
+  private buildViewModel(): void {
+    if (!this.scorecardData) {
+      this.viewModel = this.createEmptyViewModel();
+      return;
+    }
+
+    // Build player view models
+    this.viewModel.playerA = this.buildPlayerViewModel('A');
+    this.viewModel.playerB = this.buildPlayerViewModel('B');
+
+    // Build hole view models
+    this.viewModel.holes = this.course.holes.map((courseHole, index) => 
+      this.buildHoleViewModel(courseHole, index)
+    );
+
+    // Build summary view model
+    this.viewModel.summary = this.buildSummaryViewModel();
+
+    // Set metadata
+    this.viewModel.matchupId = this.scorecardData.matchupId || '';
+  }
+
+  private buildPlayerViewModel(player: 'A' | 'B'): ScorecardPlayerView {
+    const isPlayerA = player === 'A';
+    const handicapDiff = Math.abs((this.scorecardData.playerAHandicap || 0) - (this.scorecardData.playerBHandicap || 0));
+    const strokeRecipient = this.getStrokeRecipient();
+    
+    return {
+      name: isPlayerA ? this.scorecardData.playerAName : this.scorecardData.playerBName,
+      handicap: isPlayerA ? (this.scorecardData.playerAHandicap || 0) : (this.scorecardData.playerBHandicap || 0),
+      totalScore: isPlayerA ? (this.scorecardData.playerATotalScore || 0) : (this.scorecardData.playerBTotalScore || 0),
+      matchPoints: isPlayerA ? (this.scorecardData.playerAMatchPoints || 0) : (this.scorecardData.playerBMatchPoints || 0),
+      holePoints: isPlayerA ? (this.scorecardData.playerAHolePoints || 0) : (this.scorecardData.playerBHolePoints || 0),
+      matchWin: isPlayerA ? (this.scorecardData.playerAMatchWin || false) : (this.scorecardData.playerBMatchWin || false),
+      absent: isPlayerA ? (this.scorecardData.playerAAbsent || false) : (this.scorecardData.playerBAbsent || false),
+      absentWithNotice: isPlayerA ? (this.scorecardData.playerAAbsentWithNotice || false) : (this.scorecardData.playerBAbsentWithNotice || false),
+      strokeCount: strokeRecipient === player ? handicapDiff : 0,
+      isStrokeRecipient: strokeRecipient === player
+    };
+  }
+
+  private buildHoleViewModel(courseHole: any, index: number): ScorecardHoleView {
+    const holeData = this.getHoleData(index);
+    const strokeHoles = this.getStrokeHoles();
+    
+    return {
+      holeNumber: courseHole.number,
+      par: courseHole.par,
+      handicap: courseHole.handicap,
+      
+      // Player A data
+      playerAScore: holeData.playerAScore,
+      playerAScoreClass: this.getScoreClass(holeData.playerAScore, courseHole.par),
+      playerANetScore: this.getNetScore(index, 'A'),
+      playerAMatchPoints: holeData.playerAMatchPoints || 0,
+      playerAIsStrokeHole: this.isStrokeHole(courseHole.number, 'A'),
+      playerAStrokeTooltip: this.getStrokeTooltip(courseHole.number, 'A'),
+      
+      // Player B data
+      playerBScore: holeData.playerBScore,
+      playerBScoreClass: this.getScoreClass(holeData.playerBScore, courseHole.par),
+      playerBNetScore: this.getNetScore(index, 'B'),
+      playerBMatchPoints: holeData.playerBMatchPoints || 0,
+      playerBIsStrokeHole: this.isStrokeHole(courseHole.number, 'B'),
+      playerBStrokeTooltip: this.getStrokeTooltip(courseHole.number, 'B'),
+      
+      // Hole result
+      holeWinner: this.getHoleWinner(index)
+    };
+  }
+
+  private buildSummaryViewModel(): ScorecardSummaryView {
+    return {
+      totalPar: this.getTotalPar(),
+      matchPlayResult: this.getMatchPlayResult(),
+      matchPlayScore: this.getMatchPlayScore(),
+      strokePlayResult: this.getMatchResult(),
+      scoreDifference: this.getScoreDifference(),
+      flightName: this.getFlightName(),
+      courseName: this.course.name
+    };
+  }
+
+  // Combined method to update view model when scores change AND handle auto-advance
+  onScoreChangeWithAutoAdvance(holeIndex: number, player: 'A' | 'B', score: number | undefined): void {
+    // First, do the normal score change logic
+    this.onScoreChange(holeIndex, player, score);
+    
+    // Then handle auto-advance logic
+    this.handleAutoAdvance(holeIndex, player, score);
+  }
+
+  private handleAutoAdvance(holeIndex: number, player: 'A' | 'B', score: number | undefined): void {
+    const inputId = `${player}-${holeIndex}`;
+    
+    // Clear any existing timeout for this input
+    if (this.autoAdvanceTimeouts.has(inputId)) {
+      clearTimeout(this.autoAdvanceTimeouts.get(inputId));
+      this.autoAdvanceTimeouts.delete(inputId);
+    }
+    
+    // Don't auto-advance if the score is empty or undefined
+    if (!score || score === 0) {
+      return;
+    }
+    
+    // If score is 2-9, advance immediately
+    if (score >= 2 && score <= 9) {
+      setTimeout(() => this.advanceToNextInput(holeIndex, player), 10);
+    }
+    // If score is 10-19, advance immediately
+    else if (score >= 10 && score <= 19) {
+      setTimeout(() => this.advanceToNextInput(holeIndex, player), 10);
+    }
+    // If score is 1, wait to see if user might want to enter 10+
+    else if (score === 1) {
+      // Set a timeout to advance after 800ms if no more input
+      const timeoutId = setTimeout(() => {
+        this.advanceToNextInput(holeIndex, player);
+        this.autoAdvanceTimeouts.delete(inputId);
+      }, 800);
+      this.autoAdvanceTimeouts.set(inputId, timeoutId);
+    }
+  }
+
+  // Method to update view model when scores change
+  onScoreChange(holeIndex: number, player: 'A' | 'B', score: number | undefined): void {
+    // Update the underlying scorecard data
+    this.setPlayerScore(holeIndex, player, score);
+    
+    // Rebuild the affected hole view model
+    const courseHole = this.course.holes[holeIndex];
+    this.viewModel.holes[holeIndex] = this.buildHoleViewModel(courseHole, holeIndex);
+    
+    // Update player totals
+    this.viewModel.playerA = this.buildPlayerViewModel('A');
+    this.viewModel.playerB = this.buildPlayerViewModel('B');
+    
+    // Update summary
+    this.viewModel.summary = this.buildSummaryViewModel();
+  }
+
+  // Method to update view model when absence status changes
+  onAbsenceChange(player: 'A' | 'B'): void {
+    // Update the underlying scorecard data
+    if (player === 'A') {
+      this.scorecardData.playerAAbsent = this.viewModel.playerA.absent;
+      this.scorecardData.playerAAbsentWithNotice = this.viewModel.playerA.absentWithNotice;
+    } else {
+      this.scorecardData.playerBAbsent = this.viewModel.playerB.absent;
+      this.scorecardData.playerBAbsentWithNotice = this.viewModel.playerB.absentWithNotice;
+    }
+    
+    this.onPlayerAbsenceChange(player);
+    
+    // Rebuild the entire view model since absence affects multiple aspects
+    this.buildViewModel();
+  }
+
+  getTieBreaker(): string {
+    // Check if there was a tie in hole points but someone got match bonus (tie-breaker)
+    const playerAHolePoints = this.scorecardData.playerAHolePoints || 0;
+    const playerBHolePoints = this.scorecardData.playerBHolePoints || 0;
+    const wasMatchTieBreaker = playerAHolePoints === playerBHolePoints && 
+                              (this.scorecardData.playerAMatchWin || this.scorecardData.playerBMatchWin);
+    
+    if (wasMatchTieBreaker) {
+      return 'Won by lowest gross score';
+    }
+    
+    return '';
+  }
+
+  // Auto-advance functionality for score inputs
+  private autoAdvanceTimeouts = new Map<string, any>();
+
+  onScoreInput(event: Event, holeIndex: number, player: 'A' | 'B'): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    const inputId = `${player}-${holeIndex}`;
+    
+    console.log('Score input:', value, 'for player:', player, 'hole:', holeIndex + 1);
+    
+    // Clear any existing timeout for this input
+    if (this.autoAdvanceTimeouts.has(inputId)) {
+      clearTimeout(this.autoAdvanceTimeouts.get(inputId));
+      this.autoAdvanceTimeouts.delete(inputId);
+    }
+    
+    // Don't auto-advance if the input is empty
+    if (!value) {
+      return;
+    }
+    
+    const numValue = parseInt(value, 10);
+    
+    // If value is 2-9, advance immediately
+    if (numValue >= 2 && numValue <= 9) {
+      setTimeout(() => this.advanceToNextInput(holeIndex, player), 50);
+    }
+    // If value is 10-19, advance immediately
+    else if (numValue >= 10 && numValue <= 19) {
+      setTimeout(() => this.advanceToNextInput(holeIndex, player), 50);
+    }
+    // If value starts with 1, wait to see if another digit follows
+    else if (value === '1') {
+      // Set a timeout to advance after 800ms if no more input
+      const timeoutId = setTimeout(() => {
+        this.advanceToNextInput(holeIndex, player);
+        this.autoAdvanceTimeouts.delete(inputId);
+      }, 800);
+      this.autoAdvanceTimeouts.set(inputId, timeoutId);
+    }
+    // If value is two digits starting with 1 (10-19)
+    else if (value.length === 2 && value.startsWith('1')) {
+      setTimeout(() => this.advanceToNextInput(holeIndex, player), 50);
+    }
+  }
+
+  onKeyDown(event: KeyboardEvent, holeIndex: number, player: 'A' | 'B'): void {
+    const inputId = `${player}-${holeIndex}`;
+    
+    // Handle arrow keys for manual navigation
+    if (event.key === 'ArrowRight' || event.key === 'Tab' && !event.shiftKey) {
+      this.clearAutoAdvanceTimeout(inputId);
+      // Let default behavior happen for Tab and ArrowRight
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        this.advanceToNextInput(holeIndex, player);
+      }
+    } else if (event.key === 'ArrowLeft' || event.key === 'Tab' && event.shiftKey) {
+      this.clearAutoAdvanceTimeout(inputId);
+      // Let default behavior happen for Shift+Tab and ArrowLeft
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        this.advanceToPreviousInput(holeIndex, player);
+      }
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.clearAutoAdvanceTimeout(inputId);
+      // Move to the other player's input for the same hole
+      const otherPlayer = player === 'A' ? 'B' : 'A';
+      this.focusInput(holeIndex, otherPlayer);
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.clearAutoAdvanceTimeout(inputId);
+      // Move to the other player's input for the same hole
+      const otherPlayer = player === 'A' ? 'B' : 'A';
+      this.focusInput(holeIndex, otherPlayer);
+    } else if (event.key === 'Backspace' || event.key === 'Delete') {
+      // Clear timeout when user is editing
+      this.clearAutoAdvanceTimeout(inputId);
+    }
+  }
+
+  onPaste(event: ClipboardEvent, holeIndex: number, player: 'A' | 'B'): void {
+    // After paste, advance to next input
+    setTimeout(() => {
+      this.advanceToNextInput(holeIndex, player);
+    }, 10);
+  }
+
+  private clearAutoAdvanceTimeout(inputId: string): void {
+    if (this.autoAdvanceTimeouts.has(inputId)) {
+      clearTimeout(this.autoAdvanceTimeouts.get(inputId));
+      this.autoAdvanceTimeouts.delete(inputId);
+    }
+  }
+
+  private advanceToNextInput(holeIndex: number, player: 'A' | 'B'): void {
+    // For a 9-hole league
+    if (holeIndex < 8) {
+      // Move to next hole for same player
+      this.focusInput(holeIndex + 1, player);
+    } else {
+      // Last hole for current player, move to other player's first hole
+      const otherPlayer = player === 'A' ? 'B' : 'A';
+      if (player === 'A') {
+        // Move from Player A hole 9 to Player B hole 1
+        this.focusInput(0, otherPlayer);
+      }
+      // If we're on Player B hole 9, we're done - don't advance
+    }
+  }
+
+  private advanceToPreviousInput(holeIndex: number, player: 'A' | 'B'): void {
+    if (holeIndex > 0) {
+      // Move to previous hole for same player
+      this.focusInput(holeIndex - 1, player);
+    } else {
+      // First hole for current player, move to other player's last hole
+      const otherPlayer = player === 'A' ? 'B' : 'A';
+      if (player === 'B') {
+        // Move from Player B hole 1 to Player A hole 9
+        this.focusInput(8, otherPlayer);
+      }
+      // If we're on Player A hole 1, we're at the beginning - don't go back
+    }
+  }
+
+  private focusInput(holeIndex: number, player: 'A' | 'B'): void {
+    // Use setTimeout to ensure DOM is updated
+    setTimeout(() => {
+      const inputId = `player${player}-hole-${holeIndex + 1}`;
+      const input = document.getElementById(inputId) as HTMLInputElement;
+      
+      if (input && !input.readOnly && !input.disabled) {
+        try {
+          input.focus();
+          input.select();
+        } catch (error) {
+          console.error('Error focusing input:', error);
+        }
+      } else {
+        
+        // Fallback: try ViewChildren approach
+        if (this.scoreInputs) {
+          const inputs = this.scoreInputs.toArray();
+          const targetInput = inputs.find(inputRef => {
+            const element = inputRef.nativeElement;
+            const holeAttr = element.getAttribute('data-hole');
+            const playerAttr = element.getAttribute('data-player');
+            return holeAttr === holeIndex.toString() && playerAttr === player;
+          });
+
+          if (targetInput && !targetInput.nativeElement.readOnly) {
+            targetInput.nativeElement.focus();
+            targetInput.nativeElement.select();
+            console.log('Focused using ViewChildren fallback');
+          }
+        }
+      }
+    }, 10);
+  }
+
+  ngOnDestroy(): void {
+    // Clean up all auto-advance timeouts
+    this.autoAdvanceTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.autoAdvanceTimeouts.clear();
   }
 }
