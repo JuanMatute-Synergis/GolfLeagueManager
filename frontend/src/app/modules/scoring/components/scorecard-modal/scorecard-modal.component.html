@@ -307,6 +307,9 @@
             Gross: <span class="font-bold text-blue-600">{{ viewModel.playerA.totalScore }}</span>
           </div>
           <div class="text-xs text-muted-foreground">
+            Net: <span class="font-bold text-blue-600">{{ calculateNetTotal('A') }}</span>
+          </div>
+          <div class="text-xs text-muted-foreground">
             Match: <span class="font-bold text-primary">{{ viewModel.playerA.matchPoints }}/20</span>
             <span *ngIf="viewModel.playerA.matchWin" class="ml-1 text-green-600 font-bold">🏆+2</span>
           </div>
@@ -335,6 +338,9 @@
           <div class="font-bold text-red-600 truncate">{{ viewModel.playerB.name }}</div>
           <div class="text-xs text-muted-foreground">
             Gross: <span class="font-bold text-red-600">{{ viewModel.playerB.totalScore }}</span>
+          </div>
+          <div class="text-xs text-muted-foreground">
+            Net: <span class="font-bold text-red-600">{{ calculateNetTotal('B') }}</span>
           </div>
           <div class="text-xs text-muted-foreground">
             Match: <span class="font-bold text-primary">{{ viewModel.playerB.matchPoints }}/20</span>

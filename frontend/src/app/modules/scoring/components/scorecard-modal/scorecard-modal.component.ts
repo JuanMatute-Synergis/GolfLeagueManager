@@ -610,26 +610,42 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     const courseHole = this.course.holes[holeIndex];
     if (!courseHole || !courseHole.handicap) return 0;
     
-    // Standard golf handicap system: 
-    // - If handicap is 18 or less, player gets 1 stroke on holes with handicap index <= player handicap
-    // - If handicap is more than 18, player gets 1 stroke on all holes plus additional strokes
+    // For match play, strokes are based on handicap DIFFERENCE, not individual handicaps
+    const playerAHandicap = this.scorecardData?.playerAHandicap || 0;
+    const playerBHandicap = this.scorecardData?.playerBHandicap || 0;
+    
+    // Calculate handicap difference
+    const handicapDifference = Math.abs(playerAHandicap - playerBHandicap);
+    
+    if (handicapDifference === 0) return 0;
+    
+    // Determine who gets strokes (higher handicap player)
+    const playerAReceivesStrokes = playerAHandicap > playerBHandicap;
+    const playerBReceivesStrokes = playerBHandicap > playerAHandicap;
+    
+    // Only the higher handicap player gets strokes
+    const playerReceivesStrokes = (playerHandicap === playerAHandicap && playerAReceivesStrokes) ||
+                                 (playerHandicap === playerBHandicap && playerBReceivesStrokes);
+    
+    if (!playerReceivesStrokes) return 0;
+    
+    // Standard golf handicap allocation (match backend logic):
+    // Holes are ranked 1-9 by difficulty (handicap index)
+    // Player receives strokes on holes based on their handicap difference
     const holeHandicap = courseHole.handicap;
+    const totalStrokes = Math.round(handicapDifference);
     
-    if (playerHandicap <= 0) return 0;
-    
-    let strokes = 0;
-    
-    // First round of strokes (1-18)
-    if (playerHandicap >= holeHandicap) {
-      strokes += 1;
+    // First round: give strokes to holes 1-9
+    if (holeHandicap <= Math.min(totalStrokes, 9)) {
+      return 1;
     }
     
-    // Second round of strokes (19-36)
-    if (playerHandicap > 18 && (playerHandicap - 18) >= holeHandicap) {
-      strokes += 1;
+    // Second round: give additional strokes to holes 1-9 if handicap difference > 9
+    if (totalStrokes > 9 && holeHandicap <= (totalStrokes - 9)) {
+      return 2;
     }
     
-    return strokes;
+    return 0;
   }
 
   getMatchResult(): string {
@@ -668,17 +684,28 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       return 'Not Yet Calculated';
     }
 
-    // Check if there was a net score based win (when hole points might be different)
-    const wasNetScoreWin = (this.scorecardData.playerAMatchWin || this.scorecardData.playerBMatchWin);
+    // Check if there was a tie in net scores (both players have matchWin = false but no one wins overall)
+    const wasNetScoreTie = !this.scorecardData.playerAMatchWin && !this.scorecardData.playerBMatchWin && 
+                          (playerAMatchPoints > 0 || playerBMatchPoints > 0);
 
     if (playerAMatchPoints > playerBMatchPoints) {
       const result = `${this.scorecardData.playerAName} Wins`;
-      return wasNetScoreWin ? `${result} (Lower Net Score)` : result;
+      if (wasNetScoreTie) {
+        return `${result} (Tied Net Scores, Won More Holes)`;
+      } else if (this.scorecardData.playerAMatchWin) {
+        return `${result} (Lower Net Score)`;
+      }
+      return result;
     } else if (playerBMatchPoints > playerAMatchPoints) {
       const result = `${this.scorecardData.playerBName} Wins`;
-      return wasNetScoreWin ? `${result} (Lower Net Score)` : result;
+      if (wasNetScoreTie) {
+        return `${result} (Tied Net Scores, Won More Holes)`;
+      } else if (this.scorecardData.playerBMatchWin) {
+        return `${result} (Lower Net Score)`;
+      }
+      return result;
     } else {
-      return 'Tie';
+      return wasNetScoreTie ? 'Tie (Equal Net Scores & Hole Points)' : 'Tie';
     }
   }
 
@@ -1115,17 +1142,34 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   }
 
   getTieBreaker(): string {
-    // Check if there was a tie in hole points but someone got match bonus (tie-breaker)
-    const playerAHolePoints = this.scorecardData.playerAHolePoints || 0;
-    const playerBHolePoints = this.scorecardData.playerBHolePoints || 0;
-    const wasMatchTieBreaker = playerAHolePoints === playerBHolePoints && 
-                              (this.scorecardData.playerAMatchWin || this.scorecardData.playerBMatchWin);
+    // Check if there was a tie in net scores
+    const wasNetScoreTie = !this.scorecardData.playerAMatchWin && !this.scorecardData.playerBMatchWin;
+    const playerAMatchPoints = this.scorecardData.playerAMatchPoints || 0;
+    const playerBMatchPoints = this.scorecardData.playerBMatchPoints || 0;
     
-    if (wasMatchTieBreaker) {
-      return 'Won by lowest gross score';
+    if (wasNetScoreTie && (playerAMatchPoints > 0 || playerBMatchPoints > 0)) {
+      const playerANetTotal = this.calculateNetTotal('A');
+      const playerBNetTotal = this.calculateNetTotal('B');
+      
+      if (playerANetTotal === playerBNetTotal) {
+        return `Tied Net Scores (${playerANetTotal})`;
+      }
     }
     
     return '';
+  }
+
+  calculateNetTotal(player: 'A' | 'B'): number {
+    if (!this.scorecardData?.holes) return 0;
+    
+    let netTotal = 0;
+    for (let i = 0; i < this.scorecardData.holes.length; i++) {
+      const hole = this.scorecardData.holes[i];
+      if (hole && (player === 'A' ? hole.playerAScore : hole.playerBScore)) {
+        netTotal += this.getNetScoreValue(i, player);
+      }
+    }
+    return netTotal;
   }
 
   // Auto-advance functionality for score inputs
