@@ -222,5 +222,36 @@ namespace GolfLeagueManager
             
             return handicapMap.ContainsKey(holeNumber) ? handicapMap[holeNumber] : 18;
         }
+
+        /// <summary>
+        /// Calculate net score for a player on a specific hole
+        /// </summary>
+        public int CalculateNetScore(int grossScore, int playerHandicap, int opponentHandicap, int holeHandicap)
+        {
+            var strokesReceived = GetStrokesForHole(playerHandicap, opponentHandicap, holeHandicap);
+            return grossScore - strokesReceived;
+        }
+
+        /// <summary>
+        /// Get the number of strokes a player receives on a specific hole
+        /// </summary>
+        public int GetStrokesForHole(int playerHandicap, int opponentHandicap, int holeHandicap)
+        {
+            // Only the higher handicap player receives strokes
+            if (playerHandicap <= opponentHandicap)
+            {
+                return 0; // No strokes for equal or lower handicap
+            }
+
+            var handicapDifference = playerHandicap - opponentHandicap;
+            
+            // Player gets strokes on holes based on hole handicap
+            if (holeHandicap <= handicapDifference)
+            {
+                return 1; // Player gets 1 stroke on this hole
+            }
+
+            return 0; // No strokes on this hole
+        }
     }
 }

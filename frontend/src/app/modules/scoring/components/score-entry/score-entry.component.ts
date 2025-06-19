@@ -6,6 +6,7 @@ import { forkJoin } from 'rxjs';
 import { ScoringService } from '../../services/scoring.service';
 import { ScorecardService } from '../../services/scorecard.service';
 import { MatchupService } from '../../../settings/services/matchup.service';
+import { ScoreCalculationService } from '../../services/score-calculation.service';
 import { Season, Week, ScoreEntry, Player, PlayerWithFlight } from '../../models/week.model';
 import { Matchup } from '../../../settings/services/matchup.service';
 import { ScorecardModalComponent } from '../scorecard-modal/scorecard-modal.component';
@@ -49,6 +50,7 @@ export class ScoreEntryComponent implements OnInit {
     private scoringService: ScoringService,
     private scorecardService: ScorecardService,
     private matchupService: MatchupService,
+    private scoreCalculationService: ScoreCalculationService,
     private route: ActivatedRoute,
     private router: Router,
     private dateUtil: DateUtilService
@@ -662,29 +664,18 @@ export class ScoreEntryComponent implements OnInit {
     const grossScore = player === 'A' ? matchup.playerAScore : matchup.playerBScore;
     if (!grossScore) return '-';
 
-    // Calculate net score using handicap difference logic (like in scorecard component)
-    const handicapDifference = Math.abs(playerAHandicap - playerBHandicap);
-    
-    if (handicapDifference === 0) {
-      return grossScore.toString(); // No handicap adjustment
-    }
-
-    // Determine who gets strokes (higher handicap player)
+    // Use backend logic for net score calculation
     const playerHandicap = player === 'A' ? playerAHandicap : playerBHandicap;
-    const playerAReceivesStrokes = playerAHandicap > playerBHandicap;
-    const playerBReceivesStrokes = playerBHandicap > playerAHandicap;
-    
-    const playerReceivesStrokes = (player === 'A' && playerAReceivesStrokes) || 
-                                 (player === 'B' && playerBReceivesStrokes);
+    const opponentHandicap = player === 'A' ? playerBHandicap : playerAHandicap;
 
-    if (!playerReceivesStrokes) {
-      return grossScore.toString(); // No strokes for this player
+    // Fallback synchronous calculation to maintain UI responsiveness
+    // This should match the backend logic for overall net scores
+    if (playerHandicap <= opponentHandicap) {
+      return grossScore.toString(); // No strokes for equal or lower handicap
     }
 
-    // For simplicity in the list view, approximate strokes as handicap difference
-    // (The exact hole-by-hole calculation is done in the scorecard component)
-    const approximateStrokes = Math.round(handicapDifference);
-    const netScore = grossScore - approximateStrokes;
+    const handicapDifference = playerHandicap - opponentHandicap;
+    const netScore = grossScore - handicapDifference;
     
     return netScore.toString();
   }
