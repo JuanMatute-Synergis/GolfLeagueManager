@@ -55,12 +55,6 @@ namespace GolfLeagueManager
 
         public async Task<Week> UpdateWeekAsync(Week week)
         {
-            var existingWeek = await _weekRepository.GetByIdAsync(week.Id);
-            if (existingWeek == null)
-            {
-                throw new ArgumentException("Week not found");
-            }
-
             return await _weekRepository.UpdateAsync(week);
         }
 

@@ -125,18 +125,10 @@ namespace GolfLeagueManager
                 var playerBHandicap = await GetPlayerHandicapAsync(matchup.PlayerBId);
                 var playerBPoints = await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerBId, playerBHandicap);
                 
-                // Ensure total equals 20
-                var totalPoints = playerAPoints + playerBPoints;
-                if (totalPoints != 20)
-                {
-                    // Adjust player B's points to make total = 20
-                    playerBPoints = 20 - playerAPoints;
-                }
-                
                 matchup.PlayerAPoints = playerAPoints;
                 matchup.PlayerBPoints = playerBPoints;
                 matchup.PlayerAHolePoints = 0;
-                matchup.PlayerBHolePoints = playerBPoints - 2; // Simulate hole points (total - match bonus)
+                matchup.PlayerBHolePoints = Math.Max(0, playerBPoints - 2); // Subtract match bonus to get hole points
                 matchup.PlayerAMatchWin = false;
                 matchup.PlayerBMatchWin = playerBPoints > playerAPoints;
             }
@@ -147,17 +139,9 @@ namespace GolfLeagueManager
                 var playerAHandicap = await GetPlayerHandicapAsync(matchup.PlayerAId);
                 var playerAPoints = await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerAId, playerAHandicap);
                 
-                // Ensure total equals 20
-                var totalPoints = playerAPoints + playerBPoints;
-                if (totalPoints != 20)
-                {
-                    // Adjust player A's points to make total = 20
-                    playerAPoints = 20 - playerBPoints;
-                }
-                
                 matchup.PlayerAPoints = playerAPoints;
                 matchup.PlayerBPoints = playerBPoints;
-                matchup.PlayerAHolePoints = playerAPoints - 2; // Simulate hole points (total - match bonus)
+                matchup.PlayerAHolePoints = Math.Max(0, playerAPoints - 2); // Subtract match bonus to get hole points
                 matchup.PlayerBHolePoints = 0;
                 matchup.PlayerAMatchWin = playerAPoints > playerBPoints;
                 matchup.PlayerBMatchWin = false;
@@ -168,11 +152,19 @@ namespace GolfLeagueManager
         }
 
         /// <summary>
-        /// Calculate points when player has no opponent (playing against their handicap hole by hole)
+        /// Calculate points when player has no opponent (absence scenario)
+        /// Rules: Present player gets 16 points if they beat their average by a whole number, otherwise 8 points
         /// </summary>
         private async Task<int> CalculateNoOpponentScoringAsync(Matchup matchup, Guid playerId, double handicap)
         {
-            // Get hole scores for this matchup
+            // Get the player's current average score
+            var player = await _context.Players.FindAsync(playerId);
+            if (player == null)
+            {
+                return 8; // Default fallback if player not found
+            }
+
+            // Get hole scores for this matchup to calculate total score
             var holeScores = await _context.HoleScores
                 .Where(hs => hs.MatchupId == matchup.Id)
                 .OrderBy(hs => hs.HoleNumber)
@@ -180,49 +172,46 @@ namespace GolfLeagueManager
 
             if (!holeScores.Any())
             {
-                // No hole scores available, award 0 points
-                return 0;
+                // No hole scores available, award minimum points
+                return 8;
             }
 
-            // Calculate handicap strokes to allocate
-            var totalStrokes = (int)Math.Round(handicap);
-            
-            int holePoints = 0;
+            // Calculate the player's total gross score
+            int totalScore = 0;
+            bool hasValidScore = false;
             
             foreach (var holeScore in holeScores)
             {
-                // Get the player's actual score for this hole
                 var actualScore = playerId == matchup.PlayerAId ? holeScore.PlayerAScore : holeScore.PlayerBScore;
                 
-                if (!actualScore.HasValue)
+                if (actualScore.HasValue)
                 {
-                    // No score for this hole, skip it
-                    continue;
+                    totalScore += actualScore.Value;
+                    hasValidScore = true;
                 }
-                
-                // Calculate net score (apply handicap stroke if this hole gets one)
-                var netScore = actualScore.Value;
-                if (totalStrokes > 0 && holeScore.HoleHandicap <= totalStrokes)
-                {
-                    netScore -= 1;
-                }
-                
-                // Compare net score to par for this hole
-                if (netScore < holeScore.Par)
-                {
-                    // Beat par on this hole - award 2 points
-                    holePoints += 2;
-                }
-                else if (netScore == holeScore.Par)
-                {
-                    // Tied par on this hole - award 1 point
-                    holePoints += 1;
-                }
-                // If over par, award 0 points (no need to explicitly add 0)
             }
+
+            if (!hasValidScore)
+            {
+                // No valid scores found, award minimum points
+                return 8;
+            }
+
+            // Check if player beat their average by a whole number
+            // Example: If average is 43.99, they need to shoot 42 or better
+            var averageScore = player.CurrentAverageScore;
+            var requiredScore = Math.Floor(averageScore); // This gives us the whole number threshold
             
-            // Add 2-point match bonus (since they're playing alone, they "win" the match)
-            return holePoints + 2;
+            if (totalScore < requiredScore)
+            {
+                // Player beat their average by a whole number - award 16 points
+                return 16;
+            }
+            else
+            {
+                // Player did not beat their average by a whole number - award 8 points
+                return 8;
+            }
         }
 
         /// <summary>

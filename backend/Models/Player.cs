@@ -14,6 +14,10 @@ namespace GolfLeagueManager
         public decimal InitialHandicap { get; set; } = 0; // Starting handicap for the season
         public decimal CurrentHandicap { get; set; } = 0; // Current calculated handicap
         
+        // Average score system
+        public decimal InitialAverageScore { get; set; } = 0; // Starting average score for the season
+        public decimal CurrentAverageScore { get; set; } = 0; // Current calculated average score
+        
         // Navigation properties for matchups where this player is involved
         [JsonIgnore]
         public List<Matchup> MatchupsAsPlayerA { get; set; } = new List<Matchup>();

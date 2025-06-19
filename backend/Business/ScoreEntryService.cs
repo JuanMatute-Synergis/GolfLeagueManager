@@ -8,17 +8,20 @@ namespace GolfLeagueManager
         private readonly IPlayerRepository _playerRepository;
         private readonly IWeekRepository _weekRepository;
         private readonly IPlayerFlightAssignmentRepository _playerFlightAssignmentRepository;
+        private readonly AppDbContext _context;
 
         public ScoreEntryService(
             IScoreEntryRepository scoreEntryRepository,
             IPlayerRepository playerRepository,
             IWeekRepository weekRepository,
-            IPlayerFlightAssignmentRepository playerFlightAssignmentRepository)
+            IPlayerFlightAssignmentRepository playerFlightAssignmentRepository,
+            AppDbContext context)
         {
             _scoreEntryRepository = scoreEntryRepository;
             _playerRepository = playerRepository;
             _weekRepository = weekRepository;
             _playerFlightAssignmentRepository = playerFlightAssignmentRepository;
+            _context = context;
         }
 
         public async Task<IEnumerable<ScoreEntry>> GetAllScoreEntriesAsync()
@@ -93,7 +96,17 @@ namespace GolfLeagueManager
 
         public async Task<IEnumerable<PlayerSeasonStats>> GetSeasonStandingsAsync(Guid seasonId)
         {
-            var scoreEntries = await _scoreEntryRepository.GetScoreEntriesBySeasonIdAsync(seasonId);
+            // Get all weeks for the season that count for scoring
+            var scoringWeeks = await _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
+                .Select(w => w.Id)
+                .ToListAsync();
+
+            // Get score entries only from weeks that count for scoring
+            var scoreEntries = await _context.ScoreEntries
+                .Include(se => se.Player)
+                .Where(se => scoringWeeks.Contains(se.WeekId))
+                .ToListAsync();
             
             var standings = scoreEntries
                 .GroupBy(se => se.PlayerId)

@@ -23,7 +23,6 @@ namespace GolfLeagueManager
         public Season? Season { get; set; }
         
         // Navigation property for matchups in this week
-        [JsonIgnore]
         public List<Matchup> Matchups { get; set; } = new List<Matchup>();
 
         // Navigation property for score entries in this week

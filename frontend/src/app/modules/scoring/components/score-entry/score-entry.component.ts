@@ -637,4 +637,84 @@ export class ScoreEntryComponent implements OnInit {
   formatWeekDate(week: Week): string {
     return this.dateUtil.formatDateOnly(week.date);
   }
+
+  getPlayerMatchPoints(matchup: MatchupWithDetails, player: 'A' | 'B'): string {
+    // Return match play points if available
+    const points = player === 'A' ? matchup.playerAPoints : matchup.playerBPoints;
+    return points !== null && points !== undefined ? points.toString() : '-';
+  }
+
+  getPlayerNetScore(matchup: MatchupWithDetails, player: 'A' | 'B'): string {
+    // If no scores available, return dash
+    if (!matchup.playerAScore || !matchup.playerBScore) {
+      return '-';
+    }
+
+    // If we don't have player handicap information, fall back to gross score
+    const playerAHandicap = this.getPlayerHandicap(matchup.playerAId);
+    const playerBHandicap = this.getPlayerHandicap(matchup.playerBId);
+    
+    if (playerAHandicap === null || playerBHandicap === null) {
+      // Return gross score if handicaps not available
+      return player === 'A' ? (matchup.playerAScore?.toString() || '-') : (matchup.playerBScore?.toString() || '-');
+    }
+
+    const grossScore = player === 'A' ? matchup.playerAScore : matchup.playerBScore;
+    if (!grossScore) return '-';
+
+    // Calculate net score using handicap difference logic (like in scorecard component)
+    const handicapDifference = Math.abs(playerAHandicap - playerBHandicap);
+    
+    if (handicapDifference === 0) {
+      return grossScore.toString(); // No handicap adjustment
+    }
+
+    // Determine who gets strokes (higher handicap player)
+    const playerHandicap = player === 'A' ? playerAHandicap : playerBHandicap;
+    const playerAReceivesStrokes = playerAHandicap > playerBHandicap;
+    const playerBReceivesStrokes = playerBHandicap > playerAHandicap;
+    
+    const playerReceivesStrokes = (player === 'A' && playerAReceivesStrokes) || 
+                                 (player === 'B' && playerBReceivesStrokes);
+
+    if (!playerReceivesStrokes) {
+      return grossScore.toString(); // No strokes for this player
+    }
+
+    // For simplicity in the list view, approximate strokes as handicap difference
+    // (The exact hole-by-hole calculation is done in the scorecard component)
+    const approximateStrokes = Math.round(handicapDifference);
+    const netScore = grossScore - approximateStrokes;
+    
+    return netScore.toString();
+  }
+
+  getPlayerAverageScore(playerId: string | undefined): string {
+    if (!playerId) return '-';
+    
+    const player = this.players.find(p => p.id === playerId);
+    return player?.currentAverageScore?.toString() || '-';
+  }
+
+  showPlayerStats(matchup: MatchupWithDetails): boolean {
+    // Show stats if we have player information
+    return !!matchup.playerAId && !!matchup.playerBId;
+  }
+
+  public getPlayerHandicapForDisplay(playerId: string | undefined): string {
+    const handicap = this.getPlayerHandicap(playerId);
+    return handicap !== null ? handicap.toString() : '-';
+  }
+
+  private getPlayerHandicap(playerId: string | undefined): number | null {
+    if (!playerId) return null;
+    
+    const player = this.players.find(p => p.id === playerId);
+    return player?.currentHandicap || null;
+  }
+
+  getPlayerFirstName(fullName: string | undefined): string {
+    if (!fullName) return '';
+    return fullName.split(' ')[0] || '';
+  }
 }

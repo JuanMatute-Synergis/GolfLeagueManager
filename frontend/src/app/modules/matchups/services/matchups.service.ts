@@ -31,6 +31,8 @@ export interface Player {
   email: string;
   phone?: string;
   handicap?: number;
+  initialAverageScore?: number;
+  currentAverageScore?: number;
 }
 
 export interface Week {

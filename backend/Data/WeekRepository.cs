@@ -44,6 +44,7 @@ namespace GolfLeagueManager
             return await _context.Weeks
                 .Where(w => w.SeasonId == seasonId)
                 .Include(w => w.Season)
+                .Include(w => w.Matchups)
                 .OrderBy(w => w.WeekNumber)
                 .ToListAsync();
         }
@@ -60,10 +61,27 @@ namespace GolfLeagueManager
 
         public async Task<Week> UpdateAsync(Week week)
         {
-            _context.Weeks.Update(week);
+            // Check if entity exists
+            var exists = await _context.Weeks
+                .AsNoTracking()
+                .AnyAsync(w => w.Id == week.Id);
+            
+            if (!exists)
+            {
+                throw new ArgumentException($"Week with ID {week.Id} not found");
+            }
+
+            // Clear any existing tracking to avoid conflicts
+            _context.ChangeTracker.Clear();
+            
+            // Attach and mark as modified
+            var entry = _context.Entry(week);
+            entry.State = EntityState.Modified;
+            
             await _context.SaveChangesAsync();
             
-            // Return the updated week with includes
+            // Clear tracking again and return fresh entity
+            _context.ChangeTracker.Clear();
             return await GetByIdAsync(week.Id) ?? week;
         }
 

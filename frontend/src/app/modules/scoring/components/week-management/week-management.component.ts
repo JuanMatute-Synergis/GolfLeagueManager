@@ -63,6 +63,35 @@ import { Season, Week } from '../../models/week.model';
                 required
                 class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
             </div>
+
+            <div class="flex items-center space-x-4">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox"
+                  [(ngModel)]="weekForm_countsForScoring"
+                  name="countsForScoring"
+                  class="w-4 h-4 text-primary border-border rounded focus:ring-primary focus:ring-2">
+                <span class="text-sm font-medium text-foreground">Counts for Scoring</span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div class="flex items-center space-x-4">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox"
+                  [(ngModel)]="weekForm_countsForHandicap"
+                  name="countsForHandicap"
+                  class="w-4 h-4 text-primary border-border rounded focus:ring-primary focus:ring-2">
+                <span class="text-sm font-medium text-foreground">Counts for Handicap</span>
+              </label>
+            </div>
+            
+            <div class="text-xs text-muted-foreground">
+              <p><strong>Counts for Scoring:</strong> Week scores contribute to season standings and average score calculations</p>
+              <p><strong>Counts for Handicap:</strong> Week scores contribute to handicap calculations</p>
+            </div>
           </div>
           
           <div class="flex justify-end space-x-3 mt-6">
@@ -102,9 +131,9 @@ import { Season, Week } from '../../models/week.model';
                 </span>
                 <button 
                   (click)="deleteWeek(holidayWeek.week)"
-                  [disabled]="(holidayWeek.week.scoreEntries?.length || 0) > 0"
+                  [disabled]="getIndividualScoresCount(holidayWeek.week) > 0"
                   class="text-red-600 hover:text-red-800 disabled:text-gray-400 disabled:cursor-not-allowed text-xs"
-                  [title]="(holidayWeek.week.scoreEntries?.length || 0) > 0 ? 'Cannot delete week with scores' : 'Delete holiday week'">
+                  [title]="getIndividualScoresCount(holidayWeek.week) > 0 ? 'Cannot delete week with scores' : 'Delete holiday week'">>>
                   Remove
                 </button>
               </div>
@@ -139,6 +168,7 @@ import { Season, Week } from '../../models/week.model';
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Name</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Date</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Status</th>
+                    <th class="text-left font-semibold text-foreground p-4 border-b border-border">Scoring</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Scores</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Actions</th>
                   </tr>
@@ -166,7 +196,23 @@ import { Season, Week } from '../../models/week.model';
                     </td>
                     <td class="p-4 border-b border-border">
                       <div class="flex items-center space-x-2">
-                        <span class="font-semibold text-foreground">{{ week.scoreEntries?.length || 0 }}</span>
+                        <button 
+                          (click)="toggleWeekScoringStatus(week)"
+                          [class]="'px-2 py-1 text-xs rounded-full cursor-pointer transition-colors hover:opacity-80 ' + (week.countsForScoring ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200')"
+                          [title]="'Click to ' + (week.countsForScoring ? 'disable' : 'enable') + ' scoring for this week'">
+                          {{ week.countsForScoring ? '✓ Counts' : '✗ Disabled' }}
+                        </button>
+                        <button 
+                          (click)="toggleWeekHandicapStatus(week)"
+                          [class]="'px-2 py-1 text-xs rounded-full cursor-pointer transition-colors hover:opacity-80 ' + (week.countsForHandicap ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200')" 
+                          [title]="'Click to ' + (week.countsForHandicap ? 'disable' : 'enable') + ' handicap calculation for this week'">
+                          {{ week.countsForHandicap ? '✓ H' : '✗ H' }}
+                        </button>
+                      </div>
+                    </td>
+                    <td class="p-4 border-b border-border">
+                      <div class="flex items-center space-x-2">
+                        <span class="font-semibold text-foreground">{{ getIndividualScoresCount(week) }}</span>
                         <button 
                           *ngIf="getWeekStatus(week) === 'Active'"
                           (click)="navigateToScoreEntry(week)"
@@ -185,10 +231,24 @@ import { Season, Week } from '../../models/week.model';
                         </button>
                         <button 
                           (click)="deleteWeek(week)"
-                          [disabled]="(week.scoreEntries?.length || 0) > 0"
+                          [disabled]="getIndividualScoresCount(week) > 0"
                           class="text-destructive hover:text-destructive/80 disabled:text-muted-foreground disabled:cursor-not-allowed p-1"
-                          [title]="(week.scoreEntries?.length || 0) > 0 ? 'Cannot delete week with scores' : 'Delete week'">
+                          [title]="getIndividualScoresCount(week) > 0 ? 'Cannot delete week with scores' : 'Delete week'">>>
                           🗑️
+                        </button>
+                        <button 
+                          (click)="toggleWeekScoringStatus(week)"
+                          class="p-1"
+                          [title]="week.countsForScoring ? 'Disable scoring for this week' : 'Enable scoring for this week'">
+                          <span *ngIf="week.countsForScoring" class="text-green-500">✔️</span>
+                          <span *ngIf="!week.countsForScoring" class="text-red-500">✖️</span>
+                        </button>
+                        <button 
+                          (click)="toggleWeekHandicapStatus(week)"
+                          class="p-1"
+                          [title]="week.countsForHandicap ? 'Remove from handicap calculations' : 'Include in handicap calculations'">
+                          <span *ngIf="week.countsForHandicap" class="text-blue-500">✔️</span>
+                          <span *ngIf="!week.countsForHandicap" class="text-gray-500">✖️</span>
                         </button>
                       </div>
                     </td>
@@ -226,6 +286,8 @@ export class WeekManagementComponent implements OnInit {
   weekForm_weekNumber: number = 1;
   weekForm_name: string = '';
   weekForm_date: string = '';
+  weekForm_countsForScoring: boolean = true;
+  weekForm_countsForHandicap: boolean = true;
 
   constructor(
     private scoringService: ScoringService,
@@ -276,7 +338,9 @@ export class WeekManagementComponent implements OnInit {
       weekNumber: this.weekForm_weekNumber,
       name: this.weekForm_name,
       date: this.weekForm_date,
-      isActive: true
+      isActive: true,
+      countsForScoring: this.weekForm_countsForScoring,
+      countsForHandicap: this.weekForm_countsForHandicap
     };
 
     const operation = this.editingWeek 
@@ -301,11 +365,13 @@ export class WeekManagementComponent implements OnInit {
     this.weekForm_weekNumber = week.weekNumber;
     this.weekForm_name = week.name;
     this.weekForm_date = this.formatDateForInput(week.date);
+    this.weekForm_countsForScoring = week.countsForScoring;
+    this.weekForm_countsForHandicap = week.countsForHandicap;
     this.showCreateForm = false;
   }
 
   deleteWeek(week: Week) {
-    if ((week.scoreEntries?.length || 0) > 0) {
+    if (this.getIndividualScoresCount(week) > 0) {
       alert('Cannot delete a week that has score entries.');
       return;
     }
@@ -332,6 +398,38 @@ export class WeekManagementComponent implements OnInit {
     }
   }
 
+  toggleWeekScoringStatus(week: Week) {
+    const updatedWeek = { ...week, countsForScoring: !week.countsForScoring };
+    this.scoringService.updateWeek(week.id, updatedWeek).subscribe({
+      next: () => {
+        week.countsForScoring = !week.countsForScoring;
+        // Show success feedback
+        console.log(`Week ${week.weekNumber} scoring status updated to: ${week.countsForScoring ? 'Enabled' : 'Disabled'}`);
+      },
+      error: (error) => {
+        console.error('Error updating week scoring status:', error);
+        // Show error feedback
+        alert('Failed to update week scoring status. Please try again.');
+      }
+    });
+  }
+
+  toggleWeekHandicapStatus(week: Week) {
+    const updatedWeek = { ...week, countsForHandicap: !week.countsForHandicap };
+    this.scoringService.updateWeek(week.id, updatedWeek).subscribe({
+      next: () => {
+        week.countsForHandicap = !week.countsForHandicap;
+        // Show success feedback
+        console.log(`Week ${week.weekNumber} handicap status updated to: ${week.countsForHandicap ? 'Enabled' : 'Disabled'}`);
+      },
+      error: (error) => {
+        console.error('Error updating week handicap status:', error);
+        // Show error feedback
+        alert('Failed to update week handicap status. Please try again.');
+      }
+    });
+  }
+  
   cancelEdit() {
     this.resetForm();
   }
@@ -342,6 +440,8 @@ export class WeekManagementComponent implements OnInit {
     this.weekForm_weekNumber = this.weeks.length + 1;
     this.weekForm_name = `Week ${this.weeks.length + 1}`;
     this.weekForm_date = '';
+    this.weekForm_countsForScoring = true;
+    this.weekForm_countsForHandicap = true;
   }
 
   getWeekStatus(week: Week): string {
@@ -458,5 +558,24 @@ export class WeekManagementComponent implements OnInit {
   getHolidayReason(week: Week): string {
     const holidayWeek = this.getHolidayWeeks().find(hw => hw.week.id === week.id);
     return holidayWeek ? holidayWeek.reason : '';
+  }
+
+  getIndividualScoresCount(week: Week): number {
+    if (!week.matchups) {
+      return 0;
+    }
+    
+    // Count individual player scores entered (not matchups)
+    let scoreCount = 0;
+    week.matchups.forEach(matchup => {
+      if (matchup.playerAScore !== undefined && matchup.playerAScore !== null) {
+        scoreCount++;
+      }
+      if (matchup.playerBScore !== undefined && matchup.playerBScore !== null) {
+        scoreCount++;
+      }
+    });
+    
+    return scoreCount;
   }
 }

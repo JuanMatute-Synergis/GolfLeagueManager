@@ -9,14 +9,16 @@ namespace GolfLeagueManager
         private readonly ScoreEntryService _scoreEntryService;
         private readonly MatchPlayService _matchPlayService;
         private readonly MatchPlayScoringService _matchPlayScoringService;
+        private readonly AverageScoreService _averageScoreService;
 
-        public ScorecardService(AppDbContext context, MatchupService matchupService, ScoreEntryService scoreEntryService, MatchPlayService matchPlayService, MatchPlayScoringService matchPlayScoringService)
+        public ScorecardService(AppDbContext context, MatchupService matchupService, ScoreEntryService scoreEntryService, MatchPlayService matchPlayService, MatchPlayScoringService matchPlayScoringService, AverageScoreService averageScoreService)
         {
             _context = context;
             _matchupService = matchupService;
             _scoreEntryService = scoreEntryService;
             _matchPlayService = matchPlayService;
             _matchPlayScoringService = matchPlayScoringService;
+            _averageScoreService = averageScoreService;
         }
 
         public async Task<ScorecardResponse> SaveScorecardAsync(ScorecardSaveRequest request)
@@ -129,6 +131,20 @@ namespace GolfLeagueManager
                 }
 
                 await _context.SaveChangesAsync();
+                
+                // Update average scores for both players after scores are saved
+                if (matchup.Week != null && matchup.Week.CountsForScoring)
+                {
+                    if (matchup.PlayerAScore.HasValue)
+                    {
+                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerAId, matchup.Week.SeasonId);
+                    }
+                    if (matchup.PlayerBScore.HasValue)
+                    {
+                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerBId, matchup.Week.SeasonId);
+                    }
+                }
+                
                 await transaction.CommitAsync();
 
                 // Reload the matchup to get the calculated match play results

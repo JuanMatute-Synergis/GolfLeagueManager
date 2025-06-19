@@ -5,8 +5,20 @@ export interface Week {
   name: string;
   isActive: boolean;
   seasonId: string;
+  countsForScoring: boolean; // Whether this week counts for scoring
+  countsForHandicap: boolean; // Whether this week counts for handicap calculation
   season?: Season;
   scoreEntries?: ScoreEntry[];
+  matchups?: BasicMatchup[];
+}
+
+export interface BasicMatchup {
+  id: string;
+  weekId: string;
+  playerAId: string;
+  playerBId: string;
+  playerAScore?: number;
+  playerBScore?: number;
 }
 
 export interface Season {
@@ -36,6 +48,8 @@ export interface Player {
   phone: string;
   initialHandicap: number;
   currentHandicap: number;
+  initialAverageScore: number;
+  currentAverageScore: number;
 }
 
 export interface PlayerWithFlight extends Player {
@@ -43,6 +57,8 @@ export interface PlayerWithFlight extends Player {
   flightName?: string;
   handicapAtAssignment?: number;
   isFlightLeader?: boolean;
+  initialAverageScore: number;
+  currentAverageScore: number;
 }
 
 export interface PlayerSeasonStats {
