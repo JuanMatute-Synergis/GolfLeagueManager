@@ -1,25 +1,83 @@
 # 🏌️‍♂️ Golf League Manager
 
-A comprehensive full-stack web application for managing golf leagues, player statistics, and tournament schedules.
+A comprehensive full-stack web application for managing golf leagues, player statistics, match play scoring, and tournament administration with advanced features for absence handling and average score tracking.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![.NET Core](https://img.shields.io/badge/.NET%20Core-9.0-blue.svg)
 ![Angular](https://img.shields.io/badge/Angular-17-red.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)
 
 ## 🎯 Overview
 
-Golf League Manager is a modern web application designed to streamline the administration of golf leagues. It provides tools for player management, season scheduling, flight organization, scoring systems, and comprehensive statistics tracking.
+Golf League Manager is a modern, feature-rich web application designed to streamline the complete administration of golf leagues. It provides comprehensive tools for player management, season organization, advanced match play scoring, flight management, absence handling, and detailed statistics tracking with real-time calculations.
 
-### ✨ Key Features
+### ✨ Core Features
 
-- **👥 Player Management** - Complete CRUD operations for player profiles, handicaps, and contact information
-- **🏆 Season & Flight Management** - Organize players into flights, manage multiple seasons
-- **📊 Scoring System** - Configurable point systems for wins, losses, and ties
-- **📅 Schedule Management** - Create and manage tournament schedules with templates
-- **📈 Statistics & Reports** - Track player performance and league standings
-- **🎨 Modern UI** - Responsive design with Bootstrap styling
-- **🔧 Admin Dashboard** - Comprehensive settings and configuration management
+#### 👥 **Player Management**
+- Complete CRUD operations for player profiles
+- Handicap tracking (initial and current)
+- **Average Score System** with decimal precision
+- Contact information management
+- Flight assignments with history tracking
+- Player statistics and performance metrics
+
+#### 🏆 **Season & Competition Management**
+- Multi-season organization and management
+- **Week-based scoring toggles** (enable/disable weeks from calculations)
+- Flight organization with handicap-based assignments
+- Flexible scoring system configuration
+- Holiday week detection and management
+- Season standings and leaderboards
+
+#### ⛳ **Advanced Match Play Scoring**
+- **Hole-by-hole match play scoring** with net score calculations
+- **Triple scoring display**: Match Play, Gross, and Net scores
+- Handicap stroke allocation by hole difficulty
+- **2-point match bonus** for lowest net score
+- Proper tie handling in match play scenarios
+- Real-time point calculations and updates
+
+#### 🚫 **Comprehensive Absence Handling**
+- **Absent with Notice**: 4 points awarded to absent player
+- **Absent without Notice**: 0 points awarded
+- **Present Player Scoring**: 
+  - 16 points if beating average score by a whole number
+  - 8 points if not beating average significantly
+- **Smart average comparison**: If average is 43.99, must shoot 42 or better for 16 points
+- Dual absence scenarios with proper point distribution
+
+#### 📊 **Advanced Scoring & Statistics**
+- **Average Score Tracking** with decimal precision (e.g., 43.75, 39.99)
+- Initial and current average score calculations
+- Week-specific score entry and management
+- Season standings with multiple sorting options
+- Individual and team performance metrics
+- Comprehensive leaderboards and reports
+
+#### 📅 **Schedule & Week Management**
+- **Interactive week management** with scoring toggles
+- Visual indicators for week status (Active, Completed, Upcoming)
+- Holiday week detection (Memorial Day, July 4th, Labor Day, Thanksgiving)
+- Quick toggle for scoring/handicap inclusion
+- Individual score count tracking
+- Week reset and regeneration capabilities
+
+#### 🎨 **Modern User Interface**
+- **Responsive design** with Tailwind CSS
+- Dark/light theme support
+- Mobile-optimized layouts
+- Interactive dashboards and real-time updates
+- Intuitive navigation and user experience
+- Progressive Web App (PWA) capabilities
+
+#### 🔧 **Administrative Features**
+- **Database cleanup tools** for data management
+- **Import/export functionality** for player and matchup data
+- Comprehensive settings management
+- **Course management** with hole-by-hole configuration
+- Flight assignment automation
+- Data seeding and migration tools
 
 ## 🏗️ Architecture
 
