@@ -161,7 +161,7 @@
                         </span>
                         <!-- Gross Score -->
                         <span class="px-2 py-1 text-xs font-medium text-foreground bg-muted rounded" title="Gross Score">
-                          {{ getScoreDisplay(matchup.playerAScore) }}
+                          {{ getPlayerScoreDisplay(matchup, 'A') }}
                         </span>
                         <!-- Net Score -->
                         <span class="px-2 py-1 text-xs text-muted-foreground bg-muted/50 rounded" title="Net Score">
@@ -194,7 +194,7 @@
                         </span>
                         <!-- Gross Score -->
                         <span class="px-2 py-1 text-xs font-medium text-foreground bg-muted rounded" title="Gross Score">
-                          {{ getScoreDisplay(matchup.playerBScore) }}
+                          {{ getPlayerScoreDisplay(matchup, 'B') }}
                         </span>
                         <!-- Net Score -->
                         <span class="px-2 py-1 text-xs text-muted-foreground bg-muted/50 rounded" title="Net Score">

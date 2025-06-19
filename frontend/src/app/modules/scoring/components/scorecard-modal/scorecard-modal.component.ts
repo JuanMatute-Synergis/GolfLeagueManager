@@ -202,30 +202,40 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
             playerBMatchPoints: hs.playerBMatchPoints
           }));
           
-          // Calculate total scores and match play points
-          this.calculateTotals();
-          
-          // Update match play data from backend response
-          this.scorecardData.playerAMatchPoints = response.playerAMatchPoints || this.scorecardData.playerAMatchPoints;
-          this.scorecardData.playerBMatchPoints = response.playerBMatchPoints || this.scorecardData.playerBMatchPoints;
-          this.scorecardData.playerAHolePoints = response.playerAHolePoints || this.scorecardData.playerAHolePoints;
-          this.scorecardData.playerBHolePoints = response.playerBHolePoints || this.scorecardData.playerBHolePoints;
-          this.scorecardData.playerAMatchWin = response.playerAMatchWin || this.scorecardData.playerAMatchWin;
-          this.scorecardData.playerBMatchWin = response.playerBMatchWin || this.scorecardData.playerBMatchWin;
+          // Update absence status FIRST before calculating totals
           this.scorecardData.playerAAbsent = response.playerAAbsent;
           this.scorecardData.playerBAbsent = response.playerBAbsent;
           this.scorecardData.playerAAbsentWithNotice = response.playerAAbsentWithNotice;
           this.scorecardData.playerBAbsentWithNotice = response.playerBAbsentWithNotice;
           
+          // Update match play data from backend response BEFORE calculating totals
+          this.scorecardData.playerAMatchPoints = response.playerAMatchPoints ?? 0;
+          this.scorecardData.playerBMatchPoints = response.playerBMatchPoints ?? 0;
+          this.scorecardData.playerAHolePoints = response.playerAHolePoints ?? 0;
+          this.scorecardData.playerBHolePoints = response.playerBHolePoints ?? 0;
+          this.scorecardData.playerAMatchWin = response.playerAMatchWin ?? false;
+          this.scorecardData.playerBMatchWin = response.playerBMatchWin ?? false;
+          
+          // Calculate total scores and match play points AFTER setting backend values
+          this.calculateTotals();
+          
+          console.log('[DEBUG] Backend response match points:', {
+            playerAMatchPoints: response.playerAMatchPoints,
+            playerBMatchPoints: response.playerBMatchPoints,
+            playerAAbsent: response.playerAAbsent,
+            playerBAbsent: response.playerBAbsent
+          });
+          console.log('[DEBUG] Scorecard data after assignment:', {
+            playerAMatchPoints: this.scorecardData.playerAMatchPoints,
+            playerBMatchPoints: this.scorecardData.playerBMatchPoints
+          });
+          
           // Update player handicaps from backend response
           this.scorecardData.playerAHandicap = response.playerAHandicap;
           this.scorecardData.playerBHandicap = response.playerBHandicap;
           
-          // Force another calculation after a short delay to ensure everything is updated
-          setTimeout(() => {
-            console.log('Final calculation after data load');
-            this.calculateTotals();
-          }, 50);
+          // Rebuild view model with updated backend data
+          this.buildViewModel();
         } else {
           // No existing scorecard, initialize with empty holes
           if (this.mode === 'view') {
@@ -368,11 +378,28 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       playerATotalScore: this.scorecardData.playerATotalScore,
       playerBTotalScore: this.scorecardData.playerBTotalScore,
       playerAHandicap: this.scorecardData.playerAHandicap,
-      playerBHandicap: this.scorecardData.playerBHandicap
+      playerBHandicap: this.scorecardData.playerBHandicap,
+      isAbsenceScenario: this.scorecardData.playerAAbsent || this.scorecardData.playerBAbsent
     });
 
-    // Calculate match play points for each hole
-    this.calculateMatchPlayPoints();
+    // For absence scenarios, trust the backend calculation and skip local match play calculation
+    if (this.scorecardData.playerAAbsent || this.scorecardData.playerBAbsent) {
+      console.log('[DEBUG] Absence scenario detected, skipping local match play calculation');
+      console.log('[DEBUG] Backend points preserved:', {
+        playerAMatchPoints: this.scorecardData.playerAMatchPoints,
+        playerBMatchPoints: this.scorecardData.playerBMatchPoints,
+        playerAAbsent: this.scorecardData.playerAAbsent,
+        playerBAbsent: this.scorecardData.playerBAbsent,
+        playerAAbsentWithNotice: this.scorecardData.playerAAbsentWithNotice,
+        playerBAbsentWithNotice: this.scorecardData.playerBAbsentWithNotice
+      });
+      
+      // Alert for testing - can be removed once confirmed working
+      console.warn('🚨 ABSENCE SCENARIO POINTS TEST: Player A=' + this.scorecardData.playerAMatchPoints + ', Player B=' + this.scorecardData.playerBMatchPoints);
+    } else {
+      // Normal scenario - calculate match play points for each hole
+      this.calculateMatchPlayPoints();
+    }
     
     // Rebuild view model after calculations
     this.buildViewModel();
@@ -490,8 +517,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     if (player === 'A') {
       if (this.scorecardData.playerAAbsent) {
-        // Initialize absence notice option to false (no notice)
-        this.scorecardData.playerAAbsentWithNotice = false;
+        // Don't automatically set AbsentWithNotice to false here
+        // Let the user choose and preserve their choice
         // Clear player A scores when marked as absent
         this.scorecardData.holes.forEach(hole => {
           if (hole) hole.playerAScore = undefined;
@@ -503,8 +530,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       }
     } else {
       if (this.scorecardData.playerBAbsent) {
-        // Initialize absence notice option to false (no notice)
-        this.scorecardData.playerBAbsentWithNotice = false;
+        // Don't automatically set AbsentWithNotice to false here
+        // Let the user choose and preserve their choice
         // Clear player B scores when marked as absent
         this.scorecardData.holes.forEach(hole => {
           if (hole) hole.playerBScore = undefined;
@@ -515,6 +542,9 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         this.scorecardData.playerBAbsentWithNotice = false;
       }
     }
+
+    // Don't automatically save here - let the user set "with notice" first if they want
+    // The save will happen when they click the save button
   }
 
   getScoreClass(score: number | undefined, par: number): string {
@@ -755,6 +785,11 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   }
 
   isValidScorecard(): boolean {
+    // Check if any player is marked absent (makes scorecard valid for saving)
+    if (this.scorecardData.playerAAbsent || this.scorecardData.playerBAbsent) {
+      return true;
+    }
+    
     // Check if at least some scores are entered
     return this.scorecardData.holes.some(hole => hole.playerAScore || hole.playerBScore);
   }
@@ -1010,6 +1045,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   // Build view model from scorecard data
   private buildViewModel(): void {
+    console.log('[DEBUG] buildViewModel called with match points:', {
+      playerAMatchPoints: this.scorecardData?.playerAMatchPoints,
+      playerBMatchPoints: this.scorecardData?.playerBMatchPoints,
+      playerAAbsent: this.scorecardData?.playerAAbsent,
+      playerBAbsent: this.scorecardData?.playerBAbsent
+    });
+    
     if (!this.scorecardData) {
       this.viewModel = this.createEmptyViewModel();
       return;
@@ -1036,11 +1078,18 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     const handicapDiff = Math.abs((this.scorecardData.playerAHandicap || 0) - (this.scorecardData.playerBHandicap || 0));
     const strokeRecipient = this.getStrokeRecipient();
     
+    const matchPoints = isPlayerA ? (this.scorecardData.playerAMatchPoints || 0) : (this.scorecardData.playerBMatchPoints || 0);
+    
+    console.log(`[DEBUG] Building view model for player ${player}:`, {
+      matchPoints: matchPoints,
+      scorecardDataMatchPoints: isPlayerA ? this.scorecardData.playerAMatchPoints : this.scorecardData.playerBMatchPoints
+    });
+    
     return {
       name: isPlayerA ? this.scorecardData.playerAName : this.scorecardData.playerBName,
       handicap: isPlayerA ? (this.scorecardData.playerAHandicap || 0) : (this.scorecardData.playerBHandicap || 0),
       totalScore: isPlayerA ? (this.scorecardData.playerATotalScore || 0) : (this.scorecardData.playerBTotalScore || 0),
-      matchPoints: isPlayerA ? (this.scorecardData.playerAMatchPoints || 0) : (this.scorecardData.playerBMatchPoints || 0),
+      matchPoints: matchPoints,
       holePoints: isPlayerA ? (this.scorecardData.playerAHolePoints || 0) : (this.scorecardData.playerBHolePoints || 0),
       matchWin: isPlayerA ? (this.scorecardData.playerAMatchWin || false) : (this.scorecardData.playerBMatchWin || false),
       absent: isPlayerA ? (this.scorecardData.playerAAbsent || false) : (this.scorecardData.playerBAbsent || false),
@@ -1365,5 +1414,15 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Clean up all auto-advance timeouts
     this.autoAdvanceTimeouts.forEach(timeout => clearTimeout(timeout));
     this.autoAdvanceTimeouts.clear();
+  }
+
+  isMatchupComplete(): boolean {
+    // Consider matchup complete if any player is marked absent
+    if (this.scorecardData.playerAAbsent || this.scorecardData.playerBAbsent) {
+      return true;
+    }
+    
+    // Traditional completion check - at least some scores are entered
+    return this.scorecardData.holes.some(hole => hole.playerAScore || hole.playerBScore);
   }
 }

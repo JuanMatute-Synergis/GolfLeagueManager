@@ -72,13 +72,17 @@ namespace GolfLeagueManager
             {
                 // Update existing entry
                 existingEntry.Score = scoreEntry.Score;
-                existingEntry.PointsEarned = await CalculatePointsAsync(scoreEntry.PlayerId, scoreEntry.WeekId, scoreEntry.Score);
+                existingEntry.PointsEarned = scoreEntry.Score.HasValue 
+                    ? await CalculatePointsAsync(scoreEntry.PlayerId, scoreEntry.WeekId, scoreEntry.Score.Value)
+                    : scoreEntry.PointsEarned; // Use provided points for absent players
                 return await _scoreEntryRepository.UpdateAsync(existingEntry);
             }
             else
             {
                 // Create new entry
-                scoreEntry.PointsEarned = await CalculatePointsAsync(scoreEntry.PlayerId, scoreEntry.WeekId, scoreEntry.Score);
+                scoreEntry.PointsEarned = scoreEntry.Score.HasValue 
+                    ? await CalculatePointsAsync(scoreEntry.PlayerId, scoreEntry.WeekId, scoreEntry.Score.Value)
+                    : scoreEntry.PointsEarned; // Use provided points for absent players
                 return await _scoreEntryRepository.CreateAsync(scoreEntry);
             }
         }
@@ -109,16 +113,17 @@ namespace GolfLeagueManager
                 .ToListAsync();
             
             var standings = scoreEntries
+                .Where(se => se.Score.HasValue) // Only include entries with actual scores
                 .GroupBy(se => se.PlayerId)
                 .Select(g => new PlayerSeasonStats
                 {
                     PlayerId = g.Key,
                     PlayerName = g.First().Player?.FirstName + " " + g.First().Player?.LastName,
                     TotalPoints = g.Sum(se => se.PointsEarned),
-                    AverageScore = g.Average(se => se.Score),
+                    AverageScore = g.Where(se => se.Score.HasValue).Average(se => se.Score!.Value),
                     RoundsPlayed = g.Count(),
-                    BestScore = g.Min(se => se.Score),
-                    WorstScore = g.Max(se => se.Score)
+                    BestScore = g.Where(se => se.Score.HasValue).Min(se => se.Score!.Value),
+                    WorstScore = g.Where(se => se.Score.HasValue).Max(se => se.Score!.Value)
                 })
                 .OrderByDescending(ps => ps.TotalPoints)
                 .ThenBy(ps => ps.AverageScore);
@@ -128,9 +133,9 @@ namespace GolfLeagueManager
 
         private async Task<int> CalculatePointsAsync(Guid playerId, Guid weekId, int score)
         {
-            // Get all scores for this week
+            // Get all scores for this week (only non-null scores)
             var weekScores = await GetScoreEntriesByWeekIdAsync(weekId);
-            var allScores = weekScores.Select(se => se.Score).ToList();
+            var allScores = weekScores.Where(se => se.Score.HasValue).Select(se => se.Score!.Value).ToList();
             allScores.Add(score); // Include the new score
 
             // Sort scores (ascending - lower scores are better in golf)

@@ -11,6 +11,16 @@ export interface Matchup {
   playerBScore?: number;
   playerAPoints?: number;
   playerBPoints?: number;
+  // Absence tracking
+  playerAAbsent?: boolean;
+  playerBAbsent?: boolean;
+  playerAAbsentWithNotice?: boolean;
+  playerBAbsentWithNotice?: boolean;
+  // Match play results
+  playerAHolePoints?: number;
+  playerBHolePoints?: number;
+  playerAMatchWin?: boolean;
+  playerBMatchWin?: boolean;
   // Navigation properties for display
   playerA?: any;
   playerB?: any;

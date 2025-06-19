@@ -52,7 +52,9 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<CourseService>();
             builder.Services.AddScoped<DataSeeder>();
             builder.Services.AddScoped<ScorecardService>();
-            builder.Services.AddScoped<MatchPlayService>();            builder.Services.AddScoped<MatchPlayScoringService>();
+            builder.Services.AddScoped<MatchPlayService>();
+            builder.Services.AddScoped<MatchPlayScoringService>();
+            builder.Services.AddScoped<PdfScorecardService>();
             builder.Services.AddScoped<AverageScoreService>();
             builder.Services.AddScoped<ScoreImportService>();
             builder.Services.AddScoped<JsonImportService>();

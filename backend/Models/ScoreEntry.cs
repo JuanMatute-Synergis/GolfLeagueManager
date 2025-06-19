@@ -13,7 +13,7 @@ namespace GolfLeagueManager
         [Required]
         public Guid WeekId { get; set; }
         
-        public int Score { get; set; }
+        public int? Score { get; set; } // Nullable to allow absent players (who earn points but have no score)
         
         public int PointsEarned { get; set; }
         

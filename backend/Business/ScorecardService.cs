@@ -100,30 +100,32 @@ namespace GolfLeagueManager
                 // Calculate match play results using the new scoring system
                 await _matchPlayService.CalculateMatchPlayResultsAsync(request.MatchupId);
 
-                // Create or update score entries
+                // Create or update score entries for both players
                 if (matchup.Week != null)
                 {
-                    if (matchup.PlayerAScore.HasValue)
+                    // Player A score entry
+                    if (matchup.PlayerAScore.HasValue || matchup.PlayerAAbsent)
                     {
                         var scoreEntryA = new ScoreEntry
                         {
                             Id = Guid.NewGuid(),
                             PlayerId = matchup.PlayerAId,
                             WeekId = matchup.WeekId,
-                            Score = matchup.PlayerAScore.Value,
+                            Score = matchup.PlayerAScore, // Can be null for absent players
                             PointsEarned = matchup.PlayerAPoints ?? 0
                         };
                         await _scoreEntryService.CreateOrUpdateScoreEntryAsync(scoreEntryA);
                     }
 
-                    if (matchup.PlayerBScore.HasValue)
+                    // Player B score entry
+                    if (matchup.PlayerBScore.HasValue || matchup.PlayerBAbsent)
                     {
                         var scoreEntryB = new ScoreEntry
                         {
                             Id = Guid.NewGuid(),
                             PlayerId = matchup.PlayerBId,
                             WeekId = matchup.WeekId,
-                            Score = matchup.PlayerBScore.Value,
+                            Score = matchup.PlayerBScore, // Can be null for absent players
                             PointsEarned = matchup.PlayerBPoints ?? 0
                         };
                         await _scoreEntryService.CreateOrUpdateScoreEntryAsync(scoreEntryB);

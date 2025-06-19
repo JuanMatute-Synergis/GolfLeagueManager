@@ -61,6 +61,7 @@
                 name="playerAAbsenceType"
                 [value]="true"
                 [(ngModel)]="viewModel.playerA.absentWithNotice"
+                (change)="onAbsenceChange('A')"
                 class="w-3 h-3 text-primary bg-background border-border">
               <span class="text-muted-foreground">Notice (4pts)</span>
             </label>
@@ -70,6 +71,7 @@
                 name="playerAAbsenceType"
                 [value]="false"
                 [(ngModel)]="viewModel.playerA.absentWithNotice"
+                (change)="onAbsenceChange('A')"
                 class="w-3 h-3 text-primary bg-background border-border">
               <span class="text-muted-foreground">No Notice (0pts)</span>
             </label>
@@ -111,6 +113,7 @@
                 name="playerBAbsenceType"
                 [value]="false"
                 [(ngModel)]="viewModel.playerB.absentWithNotice"
+                (change)="onAbsenceChange('B')"
                 class="w-3 h-3 text-primary bg-background border-border">
             </label>
             <label class="flex items-center gap-1 cursor-pointer">
@@ -120,6 +123,7 @@
                 name="playerBAbsenceType"
                 [value]="true"
                 [(ngModel)]="viewModel.playerB.absentWithNotice"
+                (change)="onAbsenceChange('B')"
                 class="w-3 h-3 text-primary bg-background border-border">
             </label>
             <label class="flex items-center gap-1 cursor-pointer">

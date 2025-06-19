@@ -244,11 +244,25 @@ export class MatchupsDashboardComponent implements OnInit {
   }
 
   hasScores(matchup: MatchupWithFlightInfo): boolean {
+    // Consider matchup complete if either player has scored OR if any player is marked absent
     return (matchup.playerAScore !== null && matchup.playerAScore !== undefined) ||
-           (matchup.playerBScore !== null && matchup.playerBScore !== undefined);
+           (matchup.playerBScore !== null && matchup.playerBScore !== undefined) ||
+           (matchup.playerAAbsent === true) || (matchup.playerBAbsent === true);
   }
 
   getMatchupStatus(matchup: MatchupWithFlightInfo): string {
+    // Handle absence scenarios first
+    if (matchup.playerAAbsent === true && matchup.playerBAbsent === true) {
+      return 'Both Absent';
+    }
+    if (matchup.playerAAbsent === true) {
+      return `${matchup.playerBName} Wins (A Absent)`;
+    }
+    if (matchup.playerBAbsent === true) {
+      return `${matchup.playerAName} Wins (B Absent)`;
+    }
+
+    // Handle normal scoring scenarios
     if (!this.hasScores(matchup)) {
       return 'Pending';
     }
@@ -305,6 +319,11 @@ export class MatchupsDashboardComponent implements OnInit {
   closeScorecardViewer(): void {
     this.showScorecardViewer = false;
     this.selectedMatchupForScorecard = null;
+    
+    // Refresh matchup data to get updated points after scorecard save
+    if (this.selectedWeekId) {
+      this.onWeekChange();
+    }
   }
 
   // TrackBy functions for performance
@@ -317,6 +336,12 @@ export class MatchupsDashboardComponent implements OnInit {
   }
 
   getPlayerMatchPoints(matchup: MatchupWithFlightInfo, player: 'A' | 'B'): string {
+    // Handle absence scenarios - show points if they're calculated
+    if (matchup.playerAAbsent === true || matchup.playerBAbsent === true) {
+      const points = player === 'A' ? matchup.playerAPoints : matchup.playerBPoints;
+      return points !== null && points !== undefined ? points.toString() : '0';
+    }
+
     // Return match play points if available
     const points = player === 'A' ? matchup.playerAPoints : matchup.playerBPoints;
     return points !== null && points !== undefined ? points.toString() : '-';
@@ -378,5 +403,15 @@ export class MatchupsDashboardComponent implements OnInit {
   getPlayerFirstName(fullName: string | undefined): string {
     if (!fullName) return '';
     return fullName.split(' ')[0] || '';
+  }
+
+  getPlayerScoreDisplay(matchup: MatchupWithFlightInfo, player: 'A' | 'B'): string {
+    const isAbsent = player === 'A' ? (matchup.playerAAbsent === true) : (matchup.playerBAbsent === true);
+    if (isAbsent) {
+      return 'ABSENT';
+    }
+    
+    const score = player === 'A' ? matchup.playerAScore : matchup.playerBScore;
+    return score !== null && score !== undefined ? score.toString() : '--';
   }
 }

@@ -7,14 +7,14 @@ namespace GolfLeagueManager
         private readonly IMatchupRepository _matchupRepository;
         private readonly PlayerFlightAssignmentService _playerFlightAssignmentService;
         private readonly AppDbContext _context;
-        private readonly MatchPlayScoringService _matchPlayScoringService;
+        private readonly MatchPlayService _matchPlayService;
 
-        public MatchupService(IMatchupRepository matchupRepository, PlayerFlightAssignmentService playerFlightAssignmentService, AppDbContext context, MatchPlayScoringService matchPlayScoringService)
+        public MatchupService(IMatchupRepository matchupRepository, PlayerFlightAssignmentService playerFlightAssignmentService, AppDbContext context, MatchPlayService matchPlayService)
         {
             _matchupRepository = matchupRepository;
             _playerFlightAssignmentService = playerFlightAssignmentService;
             _context = context;
-            _matchPlayScoringService = matchPlayScoringService;
+            _matchPlayService = matchPlayService;
         }
 
         public async Task<IEnumerable<Matchup>> GetAllMatchupsAsync()
@@ -206,55 +206,8 @@ namespace GolfLeagueManager
 
         private async Task CalculateMatchupTotalsAsync(Matchup matchup)
         {
-            // Get all hole scores for this matchup
-            var holeScores = await _context.HoleScores
-                .Where(hs => hs.MatchupId == matchup.Id)
-                .ToListAsync();
-
-            if (holeScores.Any())
-            {
-                // Calculate total stroke scores
-                matchup.PlayerAScore = holeScores
-                    .Sum(hs => hs.PlayerAScore ?? 0);
-
-                matchup.PlayerBScore = holeScores
-                    .Sum(hs => hs.PlayerBScore ?? 0);
-
-                // Get player handicaps
-                var playerA = await _context.Players.FindAsync(matchup.PlayerAId);
-                var playerB = await _context.Players.FindAsync(matchup.PlayerBId);
-
-                if (playerA != null && playerB != null)
-                {
-                    // Calculate match play results using the scoring service
-                    var matchPlayResult = _matchPlayScoringService.CalculateMatchPlayResult(
-                        holeScores,
-                        playerA.CurrentHandicap,
-                        playerB.CurrentHandicap,
-                        matchup.PlayerAScore ?? 0,
-                        matchup.PlayerBScore ?? 0
-                    );
-
-                    // Update matchup with calculated match play points
-                    matchup.PlayerAHolePoints = matchPlayResult.PlayerAHolePoints;
-                    matchup.PlayerBHolePoints = matchPlayResult.PlayerBHolePoints;
-                    matchup.PlayerAPoints = matchPlayResult.PlayerATotalPoints;
-                    matchup.PlayerBPoints = matchPlayResult.PlayerBTotalPoints;
-                    matchup.PlayerAMatchWin = matchPlayResult.PlayerAMatchWin;
-                    matchup.PlayerBMatchWin = matchPlayResult.PlayerBMatchWin;
-
-                    // Update individual hole scores with match play points
-                    foreach (var holeResult in matchPlayResult.HoleResults)
-                    {
-                        var holeScore = holeScores.FirstOrDefault(hs => hs.HoleNumber == holeResult.HoleNumber);
-                        if (holeScore != null)
-                        {
-                            holeScore.PlayerAMatchPoints = holeResult.PlayerAPoints;
-                            holeScore.PlayerBMatchPoints = holeResult.PlayerBPoints;
-                        }
-                    }
-                }
-            }
+            // Use the centralized match play calculation that handles all scenarios including absences
+            await _matchPlayService.CalculateMatchPlayResultsAsync(matchup.Id);
         }
     }
 }

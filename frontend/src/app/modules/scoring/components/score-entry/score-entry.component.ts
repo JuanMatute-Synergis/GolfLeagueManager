@@ -318,6 +318,17 @@ export class ScoreEntryComponent implements OnInit {
   }
 
   getMatchupStatus(matchup: MatchupWithDetails): string {
+    // Handle absence scenarios first
+    if (matchup.playerAAbsent === true && matchup.playerBAbsent === true) {
+      return 'Both Absent';
+    }
+    if (matchup.playerAAbsent === true) {
+      return 'Player A Absent';
+    }
+    if (matchup.playerBAbsent === true) {
+      return 'Player B Absent';
+    }
+
     // If no hole scores are loaded yet, fall back to simple total score check
     if (!matchup.holeScores || matchup.holeScores.length === 0) {
       if (matchup.playerAScore && matchup.playerBScore) {
@@ -379,13 +390,19 @@ export class ScoreEntryComponent implements OnInit {
     switch (status) {
       case 'Completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'Partial': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'Both Absent': 
+      case 'Player A Absent': 
+      case 'Player B Absent': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'Pending': return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
       default: return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
     }
   }
 
   getCompletedMatchupsCount(): number {
-    return this.matchups.filter(m => m.playerAScore && m.playerBScore).length;
+    return this.matchups.filter(m => 
+      (m.playerAScore && m.playerBScore) || // Both players have scores
+      (m.playerAAbsent === true) || (m.playerBAbsent === true)     // Or at least one player is absent
+    ).length;
   }
 
   hasUnsavedChanges(): boolean {
@@ -634,6 +651,11 @@ export class ScoreEntryComponent implements OnInit {
   closeScorecardModal() {
     this.showScorecardModal = false;
     this.currentScorecardData = null;
+    
+    // Refresh matchup data to get updated points after scorecard save
+    if (this.selectedWeekId) {
+      this.loadPlayersAndMatchups();
+    }
   }
 
   formatWeekDate(week: Week): string {
