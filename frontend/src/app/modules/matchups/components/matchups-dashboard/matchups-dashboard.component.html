@@ -168,6 +168,10 @@
                           {{ getPlayerNetScore(matchup, 'A') }}
                         </span>
                       </div>
+                      <!-- Player Stats -->
+                      <div class="text-xs text-muted-foreground mt-1">
+                        HC {{ getPlayerHandicapForDisplay(matchup.playerAId) }} | Avg {{ getPlayerAverageScore(matchup.playerAId) }}
+                      </div>
                     </div>
                   </div>
 
@@ -196,6 +200,10 @@
                         <span class="px-2 py-1 text-xs text-muted-foreground bg-muted/50 rounded" title="Net Score">
                           {{ getPlayerNetScore(matchup, 'B') }}
                         </span>
+                      </div>
+                      <!-- Player Stats -->
+                      <div class="text-xs text-muted-foreground mt-1">
+                        HC {{ getPlayerHandicapForDisplay(matchup.playerBId) }} | Avg {{ getPlayerAverageScore(matchup.playerBId) }}
                       </div>
                     </div>
                   </div>

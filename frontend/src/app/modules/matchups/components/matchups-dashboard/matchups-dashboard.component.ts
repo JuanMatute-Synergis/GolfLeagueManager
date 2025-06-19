@@ -96,12 +96,12 @@ export class MatchupsDashboardComponent implements OnInit {
     this.error = null;
     this.selectedWeekId = '';
     
-    // Load weeks and flights for the selected season
+    // Load weeks, flights, and players for the selected season
     forkJoin({
       weeks: this.matchupsService.getWeeksBySeason(this.selectedSeasonId),
       flights: this.matchupsService.getFlightsBySeason(this.selectedSeasonId),
       playerAssignments: this.matchupsService.getPlayerFlightAssignments(),
-      players: this.matchupsService.getPlayers()
+      players: this.matchupsService.getPlayersInFlights(this.selectedSeasonId)
     }).subscribe({
       next: (result) => {
         this.weeks = result.weeks.sort((a, b) => a.weekNumber - b.weekNumber);
@@ -361,5 +361,22 @@ export class MatchupsDashboardComponent implements OnInit {
     
     const player = this.players.find(p => p.id === playerId);
     return player?.handicap || null;
+  }
+
+  getPlayerHandicapForDisplay(playerId: string | undefined): string {
+    const handicap = this.getPlayerHandicap(playerId);
+    return handicap !== null ? handicap.toString() : '-';
+  }
+
+  getPlayerAverageScore(playerId: string | undefined): string {
+    if (!playerId) return '-';
+    
+    const player = this.players.find(p => p.id === playerId);
+    return player?.currentAverageScore?.toString() || '-';
+  }
+
+  getPlayerFirstName(fullName: string | undefined): string {
+    if (!fullName) return '';
+    return fullName.split(' ')[0] || '';
   }
 }

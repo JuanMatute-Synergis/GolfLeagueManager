@@ -12,6 +12,10 @@ namespace GolfLeagueManager
         public double? HandicapAtAssignment { get; set; }
         public bool IsFlightLeader { get; set; }
         
+        // Current handicap information
+        public decimal InitialHandicap { get; set; } = 0;
+        public decimal CurrentHandicap { get; set; } = 0;
+        
         // Average score information
         public decimal InitialAverageScore { get; set; } = 0;
         public decimal CurrentAverageScore { get; set; } = 0;

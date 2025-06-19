@@ -105,8 +105,13 @@ export class MatchupsService {
     return this.http.get<PlayerFlightAssignment[]>(`${this.apiUrl}/player-flight-assignments`);
   }
 
-  // Get all players
+  // Get all players with flight information
   getPlayers(): Observable<Player[]> {
     return this.http.get<Player[]>(`${this.apiUrl}/players`);
+  }
+
+  // Get players in flights for a specific season (includes handicap and average score)
+  getPlayersInFlights(seasonId: string): Observable<Player[]> {
+    return this.http.get<Player[]>(`${this.apiUrl}/players/season/${seasonId}/flights`);
   }
 }
