@@ -124,4 +124,10 @@ export class MatchupsService {
   getPlayersInFlights(seasonId: string): Observable<Player[]> {
     return this.http.get<Player[]>(`${this.apiUrl}/players/season/${seasonId}/flights`);
   }
+
+  // Download week scorecard PDF
+  downloadWeekScorecardPdf(weekId: string) {
+    const url = `${this.apiUrl}/pdf/scorecard/week/${weekId}`;
+    return this.http.get(url, { responseType: 'blob' });
+  }
 }

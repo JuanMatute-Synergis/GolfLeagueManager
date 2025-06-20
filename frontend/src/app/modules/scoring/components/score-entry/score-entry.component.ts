@@ -13,6 +13,7 @@ import { ScorecardModalComponent } from '../scorecard-modal/scorecard-modal.comp
 import { ScorecardData } from '../../models/scorecard.model';
 import { HoleScoreBackend } from '../../services/scorecard.service';
 import { DateUtilService } from '../../../../core/services/date-util.service';
+import { HttpClient } from '@angular/common/http';
 
 interface MatchupWithDetails extends Matchup {
   playerAName?: string;
@@ -53,7 +54,8 @@ export class ScoreEntryComponent implements OnInit {
     private scoreCalculationService: ScoreCalculationService,
     private route: ActivatedRoute,
     private router: Router,
-    private dateUtil: DateUtilService
+    private dateUtil: DateUtilService,
+    private http: HttpClient // <-- add HttpClient
   ) {}
 
   ngOnInit() {
@@ -729,5 +731,26 @@ export class ScoreEntryComponent implements OnInit {
   getPlayerFirstName(fullName: string | undefined): string {
     if (!fullName) return '';
     return fullName.split(' ')[0] || '';
+  }
+
+  downloadWeekScorecardPdf(): void {
+    if (!this.selectedWeekId) return;
+    const url = `http://localhost:5274/api/pdf/scorecard/week/${this.selectedWeekId}`;
+    this.isLoading = true;
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const fileName = `Scorecard_Week_${this.selectedWeekId}.pdf`;
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        alert('Failed to generate PDF: ' + (err?.error || err));
+        this.isLoading = false;
+      }
+    });
   }
 }

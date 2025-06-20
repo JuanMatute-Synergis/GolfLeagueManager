@@ -8,15 +8,15 @@
   <!-- Season and Week Selection -->
   <div class="bg-card border border-border rounded-lg shadow-sm p-4 mb-6 flex-shrink-0">
     <div class="flex flex-col sm:flex-row gap-4">
-      <select 
+      <select
         [(ngModel)]="selectedSeasonId"
         (change)="onSeasonChange()"
         class="px-4 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
         <option value="">Select Season</option>
         <option *ngFor="let season of seasons" [value]="season.id">{{ season.name }}</option>
       </select>
-      
-      <select 
+
+      <select
         [(ngModel)]="selectedWeekId"
         (change)="onWeekChange()"
         [disabled]="!selectedSeasonId || weeks.length === 0"
@@ -50,22 +50,27 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Quick Actions -->
         <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0">
-          <button 
+          <!-- <button
             (click)="saveAllScores()"
             [disabled]="!hasUnsavedChanges() || isLoading"
             class="bg-primary text-primary-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
             <span *ngIf="isLoading" class="animate-spin">⟳</span>
             💾 Save All
-          </button>
-          
-          <button 
+          </button> -->
+          <!-- <button
             (click)="clearAllScores()"
             [disabled]="matchups.length === 0"
             class="bg-destructive text-destructive-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed">
             🗑️ Clear All
+          </button> -->
+          <button
+            class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+            (click)="downloadWeekScorecardPdf()"
+            [disabled]="!selectedWeekId || isLoading">
+            📝 Generate PDF Scorecards
           </button>
         </div>
       </div>
@@ -76,7 +81,7 @@
       <div class="px-6 py-4 border-b border-border bg-muted/20 flex-shrink-0">
         <h2 class="text-xl font-semibold text-foreground">Matchup Scores</h2>
       </div>
-      
+
       <div *ngIf="matchups.length === 0" class="p-8 text-center flex-1 flex items-center justify-center">
         <div>
           <div class="text-6xl mb-4">⛳</div>
@@ -98,7 +103,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let matchup of matchups; trackBy: trackByMatchupId" 
+              <tr *ngFor="let matchup of matchups; trackBy: trackByMatchupId"
                   [class]="'hover:bg-muted/20 transition-colors ' + (matchup.hasChanged ? 'bg-primary/5' : '')">
                 <!-- Matchup & Scores -->
                 <td class="p-3 border-b border-border">
@@ -178,19 +183,19 @@
                 <!-- Actions -->
                 <td class="p-3 border-b border-border">
                   <div class="flex justify-center space-x-1">
-                    <button 
+                    <button
                       (click)="openScorecardModal(matchup)"
                       class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors">
                       📋
                     </button>
-                    <button 
+                    <button
                       *ngIf="matchup.hasChanged"
                       (click)="saveMatchupScore(matchup)"
                       [disabled]="isLoading"
                       class="bg-primary text-primary-foreground px-2 py-1 rounded text-xs hover:bg-primary/90 transition-colors disabled:opacity-50">
                       💾
                     </button>
-                    <button 
+                    <button
                       *ngIf="matchup.playerAScore || matchup.playerBScore"
                       (click)="clearMatchupScores(matchup)"
                       class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs hover:bg-destructive/90 transition-colors">
