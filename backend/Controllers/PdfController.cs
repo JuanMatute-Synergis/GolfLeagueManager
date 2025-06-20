@@ -48,7 +48,7 @@ namespace GolfLeagueManager.Controllers
         {
             try
             {
-                var pdfBytes = await _pdfService.GenerateBlankWeekScorecardPdfAsync(weekId);
+                var pdfBytes = await _pdfService.GenerateWeekScorecardPdfAsync(weekId);
                 
                 var fileName = $"Blank_Scorecard_Week_{weekId}.pdf";
                 

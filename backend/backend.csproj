@@ -18,4 +18,10 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.4.13" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="Fonts\*.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

@@ -22,9 +22,9 @@
           <label for="season-select" class="block text-sm font-medium text-foreground mb-2">
             Season
           </label>
-          <select 
+          <select
             id="season-select"
-            [(ngModel)]="selectedSeasonId" 
+            [(ngModel)]="selectedSeasonId"
             (ngModelChange)="onSeasonChange()"
             class="w-full px-4 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none">
             <option value="">Select a season</option>
@@ -39,9 +39,9 @@
           <label for="week-select" class="block text-sm font-medium text-foreground mb-2">
             Week
           </label>
-          <select 
+          <select
             id="week-select"
-            [(ngModel)]="selectedWeekId" 
+            [(ngModel)]="selectedWeekId"
             (ngModelChange)="onWeekChange()"
             [disabled]="!selectedSeasonId || weeks.length === 0"
             class="w-full px-4 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed">
@@ -60,6 +60,12 @@
           <span><strong class="text-foreground">Week:</strong> {{ getSelectedWeekName() }}</span>
           <span><strong class="text-foreground">Flights:</strong> {{ flightOrder.length }}</span>
           <span><strong class="text-foreground">Total Matchups:</strong> {{ matchups.length }}</span>
+          <button
+            class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+            (click)="downloadWeekScorecardPdf()"
+            [disabled]="!selectedWeekId || isLoading">
+            📝 Generate PDF Scorecards
+          </button>
         </div>
       </div>
     </div>
@@ -97,15 +103,15 @@
 
   <!-- Matchups by Flight -->
   <div class="flex-1 min-h-0 flex flex-col" *ngIf="!isLoading && selectedSeasonId && selectedWeekId && flightOrder.length > 0">
-    
+
     <!-- Flight Tabs -->
     <div class="mb-6 flex-shrink-0">
       <div class="bg-card border border-border rounded-lg shadow-sm p-4">
         <h3 class="text-lg font-semibold text-foreground mb-4">Select Flight</h3>
-        
+
         <!-- Desktop Tabs -->
         <div class="hidden md:flex bg-muted rounded-lg p-1">
-          <button 
+          <button
             *ngFor="let flight of flightOrder; trackBy: trackByFlightId"
             class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors flex items-center justify-center gap-2"
             [class.bg-background]="selectedFlightId === flight.id"
@@ -121,7 +127,7 @@
 
         <!-- Mobile Dropdown -->
         <div class="md:hidden">
-          <select 
+          <select
             [(ngModel)]="selectedFlightId"
             class="w-full px-4 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none">
             <option *ngFor="let flight of flightOrder" [value]="flight.id">
@@ -135,14 +141,14 @@
     <!-- Selected Flight Matchups -->
     <div class="flex-1 min-h-0">
       <div *ngIf="selectedFlightId && getSelectedFlightMatchups().length > 0" class="bg-card border border-border rounded-lg shadow-sm h-full flex flex-col">
-        
+
         <!-- Matchups List -->
         <div class="flex-1 min-h-0 overflow-y-auto p-4">
           <div class="space-y-3">
             <!-- Individual Matchup -->
-            <div *ngFor="let matchup of getSelectedFlightMatchups(); trackBy: trackByMatchupId" 
+            <div *ngFor="let matchup of getSelectedFlightMatchups(); trackBy: trackByMatchupId"
                  class="bg-background border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
-              
+
               <!-- Matchup Content -->
               <div class="flex items-center justify-between">
                 <!-- Players Side by Side -->
@@ -223,9 +229,9 @@
                         [class.dark:text-green-200]="hasScores(matchup)">
                     {{ getMatchupStatus(matchup) }}
                   </span>
-                  
+
                   <!-- View Scorecard Button -->
-                  <button 
+                  <button
                     class="text-primary hover:bg-primary/10 p-2 rounded transition-colors"
                     [disabled]="!hasScores(matchup)"
                     [class.opacity-50]="!hasScores(matchup)"

@@ -16,7 +16,7 @@ type ButtonProps = {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './button.component.html',
-  styleUrl: './button.component.scss',
+  styleUrl: './button.component.css',
 })
 export class ButtonComponent implements OnInit {
   impact = input<ButtonProps['impact']>('none');
