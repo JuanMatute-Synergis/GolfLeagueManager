@@ -60,7 +60,7 @@ export class ScoreEntryComponent implements OnInit {
 
   ngOnInit() {
     this.loadSeasons();
-    
+
     // Check if weekId was passed as query parameter
     this.route.queryParams.subscribe(params => {
       if (params['weekId']) {
@@ -108,7 +108,7 @@ export class ScoreEntryComponent implements OnInit {
 
   selectCurrentWeek() {
     if (!this.selectedSeasonId || this.weeks.length === 0) return;
-    
+
     this.scoringService.getCurrentWeek(this.selectedSeasonId).subscribe({
       next: (currentWeek) => {
         // Check if the current week exists in our weeks list
@@ -168,13 +168,13 @@ export class ScoreEntryComponent implements OnInit {
 
   loadPlayers() {
     if (!this.selectedSeasonId) return;
-    
+
     console.log('Loading players for season:', this.selectedSeasonId);
     this.scoringService.getPlayersInFlights(this.selectedSeasonId).subscribe({
       next: (players: PlayerWithFlight[]) => {
         console.log('Players loaded:', players.length, 'players');
         this.players = players;
-        
+
         // Re-enrich matchups with player details after players are loaded
         if (this.matchups.length > 0) {
           console.log('Re-enriching', this.matchups.length, 'matchups with player details');
@@ -188,23 +188,23 @@ export class ScoreEntryComponent implements OnInit {
   // Load both players and matchups simultaneously to avoid timing issues
   loadPlayersAndMatchups() {
     if (!this.selectedSeasonId || !this.selectedWeekId) return;
-    
+
     this.isLoading = true;
     console.log('Loading players and matchups simultaneously');
-    
+
     forkJoin({
       players: this.scoringService.getPlayersInFlights(this.selectedSeasonId),
       matchups: this.matchupService.getMatchupsByWeek(this.selectedWeekId)
     }).subscribe({
       next: ({ players, matchups }) => {
         console.log('Loaded:', players.length, 'players and', matchups.length, 'matchups');
-        
+
         // Set players first
         this.players = players;
-        
+
         // Then enrich matchups with player details
         this.matchups = matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
-        
+
         // Load hole scores
         this.loadHoleScoresForMatchups();
         this.isLoading = false;
@@ -221,12 +221,12 @@ export class ScoreEntryComponent implements OnInit {
 
     this.isLoading = true;
     console.log('Loading matchups for week:', this.selectedWeekId);
-    
+
     this.matchupService.getMatchupsByWeek(this.selectedWeekId).subscribe({
       next: (matchups) => {
         console.log('Matchups loaded:', matchups.length, 'matchups');
         console.log('Players available:', this.players.length, 'players');
-        
+
         // Only enrich if we have players, otherwise store raw matchups
         if (this.players.length > 0) {
           this.matchups = matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
@@ -244,7 +244,7 @@ export class ScoreEntryComponent implements OnInit {
           // Load players if not already loaded
           this.loadPlayers();
         }
-        
+
         this.loadHoleScoresForMatchups();
         this.isLoading = false;
       },
@@ -275,7 +275,7 @@ export class ScoreEntryComponent implements OnInit {
   enrichMatchupWithDetails(matchup: Matchup): MatchupWithDetails {
     const playerA = this.players.find(p => p.id === matchup.playerAId);
     const playerB = this.players.find(p => p.id === matchup.playerBId);
-    
+
     // Debug logging only if players are missing
     if (!playerA || !playerB) {
       console.warn('Player lookup failed for matchup:', {
@@ -288,7 +288,7 @@ export class ScoreEntryComponent implements OnInit {
         playerIds: this.players.map(p => p.id).slice(0, 5) // Show first 5 IDs
       });
     }
-    
+
     return {
       ...matchup,
       playerAName: playerA ? `${playerA.firstName} ${playerA.lastName}` : `Player ${matchup.playerAId}`,
@@ -309,7 +309,7 @@ export class ScoreEntryComponent implements OnInit {
 
   getMatchupWinner(matchup: MatchupWithDetails): string {
     if (!matchup.playerAScore || !matchup.playerBScore) return '';
-    
+
     if (matchup.playerAScore < matchup.playerBScore) {
       return matchup.playerAName || 'Player A';
     } else if (matchup.playerBScore < matchup.playerAScore) {
@@ -347,24 +347,24 @@ export class ScoreEntryComponent implements OnInit {
     const back9Holes = matchup.holeScores.filter(h => h.holeNumber >= 10 && h.holeNumber <= 18);
 
     // Count completed holes for each 9
-    const front9Completed = front9Holes.filter(h => 
-      (h.playerAScore !== null && h.playerAScore !== undefined) && 
+    const front9Completed = front9Holes.filter(h =>
+      (h.playerAScore !== null && h.playerAScore !== undefined) &&
       (h.playerBScore !== null && h.playerBScore !== undefined)
     ).length;
-    
-    const back9Completed = back9Holes.filter(h => 
-      (h.playerAScore !== null && h.playerAScore !== undefined) && 
+
+    const back9Completed = back9Holes.filter(h =>
+      (h.playerAScore !== null && h.playerAScore !== undefined) &&
       (h.playerBScore !== null && h.playerBScore !== undefined)
     ).length;
 
     // Count any partial entries in each 9
-    const front9Partial = front9Holes.filter(h => 
-      (h.playerAScore !== null && h.playerAScore !== undefined) || 
+    const front9Partial = front9Holes.filter(h =>
+      (h.playerAScore !== null && h.playerAScore !== undefined) ||
       (h.playerBScore !== null && h.playerBScore !== undefined)
     ).length;
-    
-    const back9Partial = back9Holes.filter(h => 
-      (h.playerAScore !== null && h.playerAScore !== undefined) || 
+
+    const back9Partial = back9Holes.filter(h =>
+      (h.playerAScore !== null && h.playerAScore !== undefined) ||
       (h.playerBScore !== null && h.playerBScore !== undefined)
     ).length;
 
@@ -392,8 +392,8 @@ export class ScoreEntryComponent implements OnInit {
     switch (status) {
       case 'Completed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
       case 'Partial': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'Both Absent': 
-      case 'Player A Absent': 
+      case 'Both Absent':
+      case 'Player A Absent':
       case 'Player B Absent': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
       case 'Pending': return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
       default: return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
@@ -401,7 +401,7 @@ export class ScoreEntryComponent implements OnInit {
   }
 
   getCompletedMatchupsCount(): number {
-    return this.matchups.filter(m => 
+    return this.matchups.filter(m =>
       (m.playerAScore && m.playerBScore) || // Both players have scores
       (m.playerAAbsent === true) || (m.playerBAbsent === true)     // Or at least one player is absent
     ).length;
@@ -444,7 +444,7 @@ export class ScoreEntryComponent implements OnInit {
             matchup.originalPlayerBScore = matchup.playerBScore;
             matchup.hasChanged = false;
             savedCount++;
-            
+
             if (savedCount === matchupsToSave.length) {
               this.isLoading = false;
             }
@@ -452,7 +452,7 @@ export class ScoreEntryComponent implements OnInit {
           error: (error) => {
             console.error('Error saving matchup score:', error);
             savedCount++;
-            
+
             if (savedCount === matchupsToSave.length) {
               this.isLoading = false;
             }
@@ -466,7 +466,7 @@ export class ScoreEntryComponent implements OnInit {
     if (!matchup.id) return;
 
     this.isLoading = true;
-    
+
     // Clear scorecard data from backend
     this.scorecardService.deleteScorecard(matchup.id).subscribe({
       next: () => {
@@ -508,7 +508,7 @@ export class ScoreEntryComponent implements OnInit {
             matchup.playerAScore = undefined;
             matchup.playerBScore = undefined;
             this.onScoreChange(matchup);
-            
+
             clearedCount++;
             if (clearedCount === totalMatchups) {
               this.isLoading = false;
@@ -522,7 +522,7 @@ export class ScoreEntryComponent implements OnInit {
             matchup.playerAScore = undefined;
             matchup.playerBScore = undefined;
             this.onScoreChange(matchup);
-            
+
             clearedCount++;
             if (clearedCount === totalMatchups) {
               this.isLoading = false;
@@ -535,7 +535,7 @@ export class ScoreEntryComponent implements OnInit {
         matchup.playerAScore = undefined;
         matchup.playerBScore = undefined;
         this.onScoreChange(matchup);
-        
+
         clearedCount++;
         if (clearedCount === totalMatchups) {
           this.isLoading = false;
@@ -585,7 +585,7 @@ export class ScoreEntryComponent implements OnInit {
         };
 
         this.showScorecardModal = true;
-        
+
         // Manually trigger scorecard initialization after the view is rendered
         setTimeout(() => {
           if (this.scorecardModal) {
@@ -615,7 +615,7 @@ export class ScoreEntryComponent implements OnInit {
         };
 
         this.showScorecardModal = true;
-        
+
         // Manually trigger scorecard initialization after the view is rendered
         setTimeout(() => {
           if (this.scorecardModal) {
@@ -634,7 +634,7 @@ export class ScoreEntryComponent implements OnInit {
       matchup.playerAScore = scorecardData.playerATotalScore;
       matchup.playerBScore = scorecardData.playerBTotalScore;
       this.onScoreChange(matchup);
-      
+
       // Reload hole scores for this matchup to update status
       this.scorecardService.getScorecard(scorecardData.matchupId).subscribe({
         next: (holeScores) => {
@@ -646,14 +646,14 @@ export class ScoreEntryComponent implements OnInit {
 
     // Show success message - the scorecard has been saved to the backend
     console.log('Scorecard saved successfully:', scorecardData);
-    
+
     this.closeScorecardModal();
   }
 
   closeScorecardModal() {
     this.showScorecardModal = false;
     this.currentScorecardData = null;
-    
+
     // Refresh matchup data to get updated points after scorecard save
     if (this.selectedWeekId) {
       this.loadPlayersAndMatchups();
@@ -679,7 +679,7 @@ export class ScoreEntryComponent implements OnInit {
     // If we don't have player handicap information, fall back to gross score
     const playerAHandicap = this.getPlayerHandicap(matchup.playerAId);
     const playerBHandicap = this.getPlayerHandicap(matchup.playerBId);
-    
+
     if (playerAHandicap === null || playerBHandicap === null) {
       // Return gross score if handicaps not available
       return player === 'A' ? (matchup.playerAScore?.toString() || '-') : (matchup.playerBScore?.toString() || '-');
@@ -700,13 +700,13 @@ export class ScoreEntryComponent implements OnInit {
 
     const handicapDifference = playerHandicap - opponentHandicap;
     const netScore = grossScore - handicapDifference;
-    
+
     return netScore.toString();
   }
 
   getPlayerAverageScore(playerId: string | undefined): string {
     if (!playerId) return '-';
-    
+
     const player = this.players.find(p => p.id === playerId);
     return player?.currentAverageScore?.toString() || '-';
   }
@@ -723,7 +723,7 @@ export class ScoreEntryComponent implements OnInit {
 
   private getPlayerHandicap(playerId: string | undefined): number | null {
     if (!playerId) return null;
-    
+
     const player = this.players.find(p => p.id === playerId);
     return player?.currentHandicap || null;
   }
