@@ -118,14 +118,17 @@ namespace GolfLeagueManager
             var playerAHandicap = playerA?.CurrentHandicap ?? 0;
             var playerBHandicap = playerB?.CurrentHandicap ?? 0;
 
-            // Get hole scores
+            // Get hole scores - use the data that's already calculated and stored
             var holeScores = await _context.HoleScores.Where(hs => hs.MatchupId == matchup.Id).OrderBy(hs => hs.HoleNumber).ToListAsync();
-            await _matchPlayService.CalculateMatchPlayResultsAsync(matchup.Id);
-            var updatedMatchup = await _context.Matchups.FirstOrDefaultAsync(m => m.Id == matchup.Id);
+            
+            // Get the updated matchup data with all calculated scores
+            var updatedMatchup = await _context.Matchups
+                .Include(m => m.PlayerA)
+                .Include(m => m.PlayerB)
+                .FirstOrDefaultAsync(m => m.Id == matchup.Id);
             if (updatedMatchup != null) matchup = updatedMatchup;
 
-            // --- 9-hole stroke allocation fix for PDF ---
-            // Use the actual 9 holes in play and their HoleHandicap values from the matchup's HoleScore records
+            // --- Use proper 9-hole stroke allocation matching backend logic ---
             var holeScoresOrdered = holeScores.OrderBy(hs => hs.HoleNumber).ToList();
             var holesInPlay = holeScoresOrdered.Select(hs => new { hs.HoleNumber, hs.HoleHandicap }).ToList();
             int playerAHandicapInt = (int)Math.Round((double)playerAHandicap);
@@ -133,7 +136,7 @@ namespace GolfLeagueManager
             bool playerAReceivesStrokes = playerAHandicapInt > playerBHandicapInt;
             bool playerBReceivesStrokes = playerBHandicapInt > playerAHandicapInt;
             int handicapDiff = Math.Abs(playerAHandicapInt - playerBHandicapInt);
-            // Find the hardest holes among the 9 in play (lowest HoleHandicap values)
+            // Find the hardest holes among the 9 in play (lowest HoleHandicap values) - matches backend logic
             var hardestHoles = holesInPlay.OrderBy(h => h.HoleHandicap).Take(handicapDiff).Select(h => h.HoleNumber).ToHashSet();
 
             // Compact horizontal layout: holes as columns + total
@@ -201,12 +204,9 @@ namespace GolfLeagueManager
             foreach (var hole in holes)
             {
                 var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
-                bool highlight = false;
-                if (playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) highlight = true;
-                if (playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) highlight = true;
                 var cell = new Cell().Add(new Paragraph((hs?.HoleHandicap ?? hole.HandicapIndex).ToString()).SetFont(boldFont).SetFontSize(9f))
                     .SetTextAlignment(TextAlignment.CENTER)
-                    .SetBackgroundColor(highlight ? new DeviceRgb(255, 255, 180) : new DeviceRgb(245, 245, 245));
+                    .SetBackgroundColor(new DeviceRgb(245, 245, 245));
                 table.AddCell(cell);
             }
             table.AddCell(new Cell().SetBackgroundColor(new DeviceRgb(245, 245, 245)));
@@ -220,16 +220,38 @@ namespace GolfLeagueManager
             {
                 var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
                 int gross = hs?.PlayerAScore ?? 0;
-                playerATotal += gross;
+                if (gross > 0) playerATotal += gross;
+                
+                // Use exact backend logic for stroke calculation
                 int strokes = (playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) ? 1 : 0;
                 int net = gross > 0 ? gross - strokes : 0;
-                playerANetTotal += net;
-                table.AddCell(new Cell().Add(new Paragraph(hs?.PlayerAScore != null ? $"{gross}/{net}" : "")
+                if (gross > 0) playerANetTotal += net;
+                
+                string displayText = "";
+                if (matchup.PlayerAAbsent)
+                {
+                    displayText = "ABS";
+                }
+                else if (hs?.PlayerAScore != null)
+                {
+                    displayText = $"{gross}/{net}";
+                }
+                
+                // Highlight score cell if player A receives strokes on this hole
+                bool highlightPlayerA = playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
+                var backgroundColor = highlightPlayerA ? new DeviceRgb(255, 255, 180) : ColorConstants.WHITE;
+                
+                table.AddCell(new Cell().Add(new Paragraph(displayText)
                     .SetFont(boldFont)
                     .SetFontSize(9f))
-                    .SetTextAlignment(TextAlignment.CENTER));
+                    .SetTextAlignment(TextAlignment.CENTER)
+                    .SetBackgroundColor(backgroundColor));
             }
-            table.AddCell(new Cell().Add(new Paragraph($"{(matchup.PlayerAScore ?? playerATotal)}/{playerANetTotal}")
+            
+            // Use the stored totals from the matchup, but show calculated gross/net for display
+            var storedPlayerAScore = matchup.PlayerAScore ?? playerATotal;
+            string playerATotalText = matchup.PlayerAAbsent ? "ABSENT" : $"{storedPlayerAScore}/{playerANetTotal}";
+            table.AddCell(new Cell().Add(new Paragraph(playerATotalText)
                 .SetFont(boldFont).SetFontSize(9f))
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetBackgroundColor(new DeviceRgb(220, 255, 220)));
@@ -243,16 +265,38 @@ namespace GolfLeagueManager
             {
                 var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
                 int gross = hs?.PlayerBScore ?? 0;
-                playerBTotal += gross;
+                if (gross > 0) playerBTotal += gross;
+                
+                // Use exact backend logic for stroke calculation
                 int strokes = (playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) ? 1 : 0;
                 int net = gross > 0 ? gross - strokes : 0;
-                playerBNetTotal += net;
-                table.AddCell(new Cell().Add(new Paragraph(hs?.PlayerBScore != null ? $"{gross}/{net}" : "")
+                if (gross > 0) playerBNetTotal += net;
+                
+                string displayText = "";
+                if (matchup.PlayerBAbsent)
+                {
+                    displayText = "ABS";
+                }
+                else if (hs?.PlayerBScore != null)
+                {
+                    displayText = $"{gross}/{net}";
+                }
+                
+                // Highlight score cell if player B receives strokes on this hole
+                bool highlightPlayerB = playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
+                var backgroundColor = highlightPlayerB ? new DeviceRgb(255, 255, 180) : ColorConstants.WHITE;
+                
+                table.AddCell(new Cell().Add(new Paragraph(displayText)
                     .SetFont(boldFont)
                     .SetFontSize(9f))
-                    .SetTextAlignment(TextAlignment.CENTER));
+                    .SetTextAlignment(TextAlignment.CENTER)
+                    .SetBackgroundColor(backgroundColor));
             }
-            table.AddCell(new Cell().Add(new Paragraph($"{(matchup.PlayerBScore ?? playerBTotal)}/{playerBNetTotal}")
+            
+            // Use the stored totals from the matchup, but show calculated gross/net for display
+            var storedPlayerBScore = matchup.PlayerBScore ?? playerBTotal;
+            string playerBTotalText = matchup.PlayerBAbsent ? "ABSENT" : $"{storedPlayerBScore}/{playerBNetTotal}";
+            table.AddCell(new Cell().Add(new Paragraph(playerBTotalText)
                 .SetFont(boldFont).SetFontSize(9f))
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetBackgroundColor(new DeviceRgb(255, 220, 220)));
@@ -260,57 +304,82 @@ namespace GolfLeagueManager
             // Consolidated Match Play Points Row (per hole + total)
             table.AddCell(new Cell().Add(new Paragraph("MP/Hole").SetFont(boldFont).SetFontSize(9f))
                 .SetBackgroundColor(new DeviceRgb(240, 240, 255)));
+            
+            // Use the backend-calculated match play points that are already stored
             int playerAMatchTotal = matchup.PlayerAPoints ?? 0;
             int playerBMatchTotal = matchup.PlayerBPoints ?? 0;
+            
             foreach (var hole in holes)
             {
                 var hs = holeScores.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
-                string mp = hs != null ? $"{hs.PlayerAMatchPoints}-{hs.PlayerBMatchPoints}" : "-";
+                string mp;
+                
+                if (matchup.PlayerAAbsent || matchup.PlayerBAbsent)
+                {
+                    // For absent players, show 0-0 for each hole
+                    mp = "0-0";
+                }
+                else if (hs != null)
+                {
+                    // Use the backend-calculated hole match points
+                    mp = $"{hs.PlayerAMatchPoints}-{hs.PlayerBMatchPoints}";
+                }
+                else
+                {
+                    mp = "-";
+                }
+                
                 table.AddCell(new Cell().Add(new Paragraph(mp).SetFont(boldFont).SetFontSize(9f))
                     .SetTextAlignment(TextAlignment.CENTER).SetFontColor(new DeviceRgb(0, 0, 255))  // Dark blue for match points
                     .SetBackgroundColor(new DeviceRgb(240, 240, 255)));
             }
-            // Show total as e.g. "12-8" in the last cell
+            
+            // Show total match points as calculated by backend
             table.AddCell(new Cell().Add(new Paragraph($"{playerAMatchTotal}-{playerBMatchTotal}").SetFont(boldFont).SetFontSize(9f))
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetFontColor(new DeviceRgb(0, 0, 255)) // Dark blue for totals
                 .SetBackgroundColor(new DeviceRgb(240, 240, 255)));
 
-            // Absence status
+            // Absence status explanation
             if (matchup.PlayerAAbsent || matchup.PlayerBAbsent)
             {
                 string absenceExplanation = "";
                 if (matchup.PlayerAAbsent && matchup.PlayerBAbsent)
                 {
                     if (matchup.PlayerAAbsentWithNotice && matchup.PlayerBAbsentWithNotice)
-                        absenceExplanation = "Both absent with notice: 10 points each";
+                        absenceExplanation = "Both absent with notice: 10-10 points";
                     else if (matchup.PlayerAAbsentWithNotice)
-                        absenceExplanation = "Player A absent with notice (4), Player B absent without notice (0)";
+                        absenceExplanation = $"A absent with notice (4 pts), B absent no notice (0 pts)";
                     else if (matchup.PlayerBAbsentWithNotice)
-                        absenceExplanation = "Player B absent with notice (4), Player A absent without notice (0)";
+                        absenceExplanation = $"A absent no notice (0 pts), B absent with notice (4 pts)";
                     else
-                        absenceExplanation = "Both absent without notice: 0 points each";
+                        absenceExplanation = "Both absent without notice: 0-0 points";
                 }
                 else if (matchup.PlayerAAbsent)
                 {
-                    if (matchup.PlayerAAbsentWithNotice)
-                        absenceExplanation = "Player A absent with notice (4 points)";
-                    else
-                        absenceExplanation = "Player A absent without notice (0 points)";
-                    absenceExplanation += ". Player B: " + (matchup.PlayerBPoints == 16 ? "Beat avg by whole number (16 points)" : "Did not beat avg (8 points)");
+                    var noticeText = matchup.PlayerAAbsentWithNotice ? "with notice" : "no notice";
+                    var playerAPoints = matchup.PlayerAAbsentWithNotice ? 4 : 0;
+                    var playerBPoints = matchup.PlayerBPoints ?? 8;
+                    var playerBExplanation = playerBPoints == 16 ? "beat average by whole stroke" : "did not beat average by whole stroke";
+                    absenceExplanation = $"A absent {noticeText} ({playerAPoints} pts). B played and {playerBExplanation} ({playerBPoints} pts)";
                 }
                 else if (matchup.PlayerBAbsent)
                 {
-                    if (matchup.PlayerBAbsentWithNotice)
-                        absenceExplanation = "Player B absent with notice (4 points)";
-                    else
-                        absenceExplanation = "Player B absent without notice (0 points)";
-                    absenceExplanation += ". Player A: " + (matchup.PlayerAPoints == 16 ? "Beat avg by whole number (16 points)" : "Did not beat avg (8 points)");
+                    var noticeText = matchup.PlayerBAbsentWithNotice ? "with notice" : "no notice";
+                    var playerBPoints = matchup.PlayerBAbsentWithNotice ? 4 : 0;
+                    var playerAPoints = matchup.PlayerAPoints ?? 8;
+                    var playerAExplanation = playerAPoints == 16 ? "beat average by whole stroke" : "did not beat average by whole stroke";
+                    absenceExplanation = $"B absent {noticeText} ({playerBPoints} pts). A played and {playerAExplanation} ({playerAPoints} pts)";
                 }
+                
+                // Add explanation row spanning all columns
                 table.AddCell(new Cell(1, holeCount + 2)
-                    .Add(new Paragraph(absenceExplanation))
+                    .Add(new Paragraph(absenceExplanation)
+                        .SetFont(boldFont)
+                        .SetFontSize(8f))
                     .SetFontColor(ColorConstants.RED)
-                    .SetFont(boldFont));
+                    .SetTextAlignment(TextAlignment.CENTER)
+                    .SetBackgroundColor(new DeviceRgb(255, 240, 240)));
             }
 
             return table;

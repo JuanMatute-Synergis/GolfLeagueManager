@@ -28,6 +28,9 @@ export class LeaderboardComponent implements OnInit {
   playerFlights: PlayerWithFlight[] = [];
   filteredLeaderboard: ScoreEntry[] = [];
 
+  // Course information - could be made dynamic in the future
+  private readonly coursePar = 36; // 9-hole course: 4+3+4+5+4+3+4+4+5 = 36
+
   constructor(
     private scoringService: ScoringService,
     private router: Router
@@ -190,8 +193,7 @@ export class LeaderboardComponent implements OnInit {
   }
 
   getScoreRelativeToPar(score: number): string {
-    const par = 72; // Standard par
-    const difference = score - par;
+    const difference = score - this.coursePar;
     if (difference === 0) return 'Even par';
     if (difference > 0) return `+${difference} over par`;
     return `${difference} under par`;

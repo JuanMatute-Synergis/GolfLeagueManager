@@ -1,8 +1,8 @@
 <div class="h-full flex flex-col">
-  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 flex-shrink-0 gap-4">
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 flex-shrink-0 gap-2">
     <div>
-      <h1 class="text-3xl font-semibold text-foreground">Weekly Leaderboard</h1>
-      <p class="mt-1 text-sm sm:text-base text-muted-foreground">View weekly golf results and rankings</p>
+      <h1 class="text-xl font-semibold text-foreground">Weekly Leaderboard</h1>
+      <p class="mt-1 text-xs text-muted-foreground">View weekly golf results and rankings</p>
     </div>
     <div class="flex items-center space-x-4">
       <select
@@ -25,26 +25,26 @@
   </div>
   <div *ngIf="selectedWeekId && selectedWeek" class="flex-1 flex flex-col min-h-0">
     <!-- Week Info Banner -->
-    <div class="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-lg p-6 mb-6 flex-shrink-0">
+    <div class="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground rounded-lg p-3 mb-4 flex-shrink-0">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold mb-2">{{ selectedWeek.name }}</h2>
-          <p class="opacity-90">{{ selectedWeek.date | date:'fullDate' }}</p>
+          <h2 class="text-lg font-bold mb-1">{{ selectedWeek.name }}</h2>
+          <p class="opacity-90 text-sm">{{ selectedWeek.date | date:'shortDate' }}</p>
         </div>
         <div class="text-right">
-          <div class="text-3xl font-bold">{{ leaderboard.length }}</div>
-          <div class="opacity-90">players competed</div>
+          <div class="text-xl font-bold">{{ leaderboard.length }}</div>
+          <div class="opacity-90 text-xs">players</div>
         </div>
       </div>
     </div>
 
     <!-- Flight Filter -->
-    <div class="flex flex-wrap gap-4 items-center mb-4 flex-shrink-0">
-      <label class="font-medium text-foreground" for="flightFilter">Filter by Flight:</label>
+    <div class="flex flex-wrap gap-2 items-center mb-3 flex-shrink-0">
+      <label class="font-medium text-foreground text-sm" for="flightFilter">Filter by Flight:</label>
       <select id="flightFilter"
               [(ngModel)]="selectedFlight"
               (change)="onFlightChange()"
-              class="px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 min-w-[180px]">
+              class="px-2 py-1 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 min-w-[140px] text-sm">
         <option value="">All Flights</option>
         <option *ngFor="let flight of flights" [value]="flight.id">{{ flight.name }}</option>
       </select>
@@ -53,34 +53,31 @@
     <!-- Content Area -->
     <div class="flex-1 flex flex-col min-h-0">
       <!-- Top 3 Podium -->
-      <div *ngIf="filteredLeaderboard.length >= 3" class="mb-4 flex-shrink-0">
-        <h2 class="text-xl font-bold text-gray-900 mb-3 text-center">🏆 Top 3 Finishers</h2>
-        <div class="flex justify-center items-end space-x-2 mb-4">
+      <div *ngIf="filteredLeaderboard.length >= 3" class="mb-3 flex-shrink-0">
+        <h2 class="text-sm font-bold text-gray-900 mb-2 text-center">🏆 Top 3</h2>
+        <div class="flex justify-center items-end space-x-1 mb-2">
           <!-- 2nd Place -->
-          <div class="bg-gradient-to-t from-gray-300 to-gray-400 text-white p-3 rounded-lg text-center transform scale-90 min-w-[120px]">
-            <div class="text-2xl mb-1">🥈</div>
-            <div class="font-bold text-base">{{ getPlayerDisplayName(filteredLeaderboard[1]) }}</div>
-            <div class="text-xs opacity-90 mb-1">{{ filteredLeaderboard[1].score }} strokes</div>
-            <div class="text-base font-bold">{{ filteredLeaderboard[1].pointsEarned }} pts</div>
-            <div class="text-xs mt-1">2nd Place</div>
+          <div class="bg-gradient-to-t from-gray-300 to-gray-400 text-white p-2 rounded-lg text-center transform scale-75 min-w-[80px]">
+            <div class="text-lg mb-1">🥈</div>
+            <div class="font-bold text-xs">{{ getPlayerDisplayName(filteredLeaderboard[1]).split(' ')[0] }}</div>
+            <div class="text-xs opacity-90">{{ filteredLeaderboard[1].score }}</div>
+            <div class="text-xs font-bold">{{ filteredLeaderboard[1].pointsEarned }}pts</div>
           </div>
 
           <!-- 1st Place -->
-          <div class="bg-gradient-to-t from-yellow-400 to-yellow-500 text-white p-4 rounded-lg text-center transform scale-100 min-w-[140px]">
-            <div class="text-3xl mb-1">🏆</div>
-            <div class="font-bold text-lg">{{ getPlayerDisplayName(filteredLeaderboard[0]) }}</div>
-            <div class="text-xs opacity-90 mb-1">{{ filteredLeaderboard[0].score }} strokes</div>
-            <div class="text-lg font-bold">{{ filteredLeaderboard[0].pointsEarned }} pts</div>
-            <div class="text-xs mt-1">🎉 WINNER 🎉</div>
+          <div class="bg-gradient-to-t from-yellow-400 to-yellow-500 text-white p-2 rounded-lg text-center transform scale-85 min-w-[90px]">
+            <div class="text-xl mb-1">🏆</div>
+            <div class="font-bold text-sm">{{ getPlayerDisplayName(filteredLeaderboard[0]).split(' ')[0] }}</div>
+            <div class="text-xs opacity-90">{{ filteredLeaderboard[0].score }}</div>
+            <div class="text-sm font-bold">{{ filteredLeaderboard[0].pointsEarned }}pts</div>
           </div>
 
           <!-- 3rd Place -->
-          <div class="bg-gradient-to-t from-amber-600 to-amber-700 text-white p-3 rounded-lg text-center transform scale-90 min-w-[120px]">
-            <div class="text-2xl mb-1">🥉</div>
-            <div class="font-bold text-base">{{ getPlayerDisplayName(filteredLeaderboard[2]) }}</div>
-            <div class="text-xs opacity-90 mb-1">{{ filteredLeaderboard[2].score }} strokes</div>
-            <div class="text-base font-bold">{{ filteredLeaderboard[2].pointsEarned }} pts</div>
-            <div class="text-xs mt-1">3rd Place</div>
+          <div class="bg-gradient-to-t from-amber-600 to-amber-700 text-white p-2 rounded-lg text-center transform scale-75 min-w-[80px]">
+            <div class="text-lg mb-1">🥉</div>
+            <div class="font-bold text-xs">{{ getPlayerDisplayName(filteredLeaderboard[2]).split(' ')[0] }}</div>
+            <div class="text-xs opacity-90">{{ filteredLeaderboard[2].score }}</div>
+            <div class="text-xs font-bold">{{ filteredLeaderboard[2].pointsEarned }}pts</div>
           </div>
         </div>
       </div>    <!-- Full Leaderboard -->
