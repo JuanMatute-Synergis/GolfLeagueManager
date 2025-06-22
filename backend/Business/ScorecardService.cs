@@ -306,5 +306,32 @@ namespace GolfLeagueManager
             await _context.SaveChangesAsync();
             return holeScores;
         }
+
+        public async Task<List<Matchup>> GetAllMatchupsForSeasonAsync(Guid seasonId)
+        {
+            // Join Matchup with Week to filter by SeasonId
+            return await _context.Matchups
+                .Join(_context.Weeks,
+                      m => m.WeekId,
+                      w => w.Id,
+                      (m, w) => new { Matchup = m, Week = w })
+                .Where(x => x.Week.SeasonId == seasonId)
+                .Select(x => x.Matchup)
+                .ToListAsync();
+        }
+
+        public async Task<List<HoleScore>> GetAllHoleScoresForSeasonAsync(Guid seasonId)
+        {
+            // Get all matchup IDs for the season
+            var matchupIds = await _context.Matchups
+                .Join(_context.Weeks,
+                      m => m.WeekId,
+                      w => w.Id,
+                      (m, w) => new { Matchup = m, Week = w })
+                .Where(x => x.Week.SeasonId == seasonId)
+                .Select(x => x.Matchup.Id)
+                .ToListAsync();
+            return await _context.HoleScores.Where(hs => matchupIds.Contains(hs.MatchupId)).ToListAsync();
+        }
     }
 }

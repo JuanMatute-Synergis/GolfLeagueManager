@@ -124,6 +124,18 @@ namespace GolfLeagueManager
             var updatedMatchup = await _context.Matchups.FirstOrDefaultAsync(m => m.Id == matchup.Id);
             if (updatedMatchup != null) matchup = updatedMatchup;
 
+            // --- 9-hole stroke allocation fix for PDF ---
+            // Use the actual 9 holes in play and their HoleHandicap values from the matchup's HoleScore records
+            var holeScoresOrdered = holeScores.OrderBy(hs => hs.HoleNumber).ToList();
+            var holesInPlay = holeScoresOrdered.Select(hs => new { hs.HoleNumber, hs.HoleHandicap }).ToList();
+            int playerAHandicapInt = (int)Math.Round((double)playerAHandicap);
+            int playerBHandicapInt = (int)Math.Round((double)playerBHandicap);
+            bool playerAReceivesStrokes = playerAHandicapInt > playerBHandicapInt;
+            bool playerBReceivesStrokes = playerBHandicapInt > playerAHandicapInt;
+            int handicapDiff = Math.Abs(playerAHandicapInt - playerBHandicapInt);
+            // Find the hardest holes among the 9 in play (lowest HoleHandicap values)
+            var hardestHoles = holesInPlay.OrderBy(h => h.HoleHandicap).Take(handicapDiff).Select(h => h.HoleNumber).ToHashSet();
+
             // Compact horizontal layout: holes as columns + total
             int holeCount = holes.Count;
             var columnWidths = new float[holeCount + 2];
@@ -186,19 +198,13 @@ namespace GolfLeagueManager
             // Row: Handicap
             table.AddCell(new Cell().Add(new Paragraph("HCP").SetFont(boldFont).SetFontSize(9f))
                 .SetBackgroundColor(new DeviceRgb(245, 245, 245)));
-            int playerAHandicapInt = (int)Math.Round((double)playerAHandicap);
-            int playerBHandicapInt = (int)Math.Round((double)playerBHandicap);
-            bool playerAReceivesStrokes = playerAHandicapInt > playerBHandicapInt;
-            bool playerBReceivesStrokes = playerBHandicapInt > playerAHandicapInt;
-            int handicapDiff = Math.Abs(playerAHandicapInt - playerBHandicapInt);
-            var sortedHoles = holes.OrderBy(h => h.HandicapIndex).ToList();
-            var strokeHoles = sortedHoles.Take(handicapDiff).Select(h => h.HoleNumber).ToHashSet();
             foreach (var hole in holes)
             {
+                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
                 bool highlight = false;
-                if (playerAReceivesStrokes && strokeHoles.Contains(hole.HoleNumber)) highlight = true;
-                if (playerBReceivesStrokes && strokeHoles.Contains(hole.HoleNumber)) highlight = true;
-                var cell = new Cell().Add(new Paragraph(hole.HandicapIndex.ToString()).SetFont(boldFont).SetFontSize(9f))
+                if (playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) highlight = true;
+                if (playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) highlight = true;
+                var cell = new Cell().Add(new Paragraph((hs?.HoleHandicap ?? hole.HandicapIndex).ToString()).SetFont(boldFont).SetFontSize(9f))
                     .SetTextAlignment(TextAlignment.CENTER)
                     .SetBackgroundColor(highlight ? new DeviceRgb(255, 255, 180) : new DeviceRgb(245, 245, 245));
                 table.AddCell(cell);
@@ -209,16 +215,21 @@ namespace GolfLeagueManager
             table.AddCell(new Cell().Add(new Paragraph(playerAName.Split(' ')[0]).SetFont(boldFont).SetFontSize(9f))
                 .SetBackgroundColor(new DeviceRgb(235, 245, 255)));
             int playerATotal = 0;
+            int playerANetTotal = 0;
             foreach (var hole in holes)
             {
-                var hs = holeScores.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
-                playerATotal += hs?.PlayerAScore ?? 0;
-                table.AddCell(new Cell().Add(new Paragraph(hs?.PlayerAScore?.ToString() ?? "")
+                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
+                int gross = hs?.PlayerAScore ?? 0;
+                playerATotal += gross;
+                int strokes = (playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) ? 1 : 0;
+                int net = gross > 0 ? gross - strokes : 0;
+                playerANetTotal += net;
+                table.AddCell(new Cell().Add(new Paragraph(hs?.PlayerAScore != null ? $"{gross}/{net}" : "")
                     .SetFont(boldFont)
                     .SetFontSize(9f))
                     .SetTextAlignment(TextAlignment.CENTER));
             }
-            table.AddCell(new Cell().Add(new Paragraph(matchup.PlayerAScore?.ToString() ?? playerATotal.ToString())
+            table.AddCell(new Cell().Add(new Paragraph($"{(matchup.PlayerAScore ?? playerATotal)}/{playerANetTotal}")
                 .SetFont(boldFont).SetFontSize(9f))
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetBackgroundColor(new DeviceRgb(220, 255, 220)));
@@ -227,16 +238,21 @@ namespace GolfLeagueManager
             table.AddCell(new Cell().Add(new Paragraph(playerBName.Split(' ')[0]).SetFont(boldFont).SetFontSize(9f))
                 .SetBackgroundColor(new DeviceRgb(255, 245, 235)));
             int playerBTotal = 0;
+            int playerBNetTotal = 0;
             foreach (var hole in holes)
             {
-                var hs = holeScores.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
-                playerBTotal += hs?.PlayerBScore ?? 0;
-                table.AddCell(new Cell().Add(new Paragraph(hs?.PlayerBScore?.ToString() ?? "")
+                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
+                int gross = hs?.PlayerBScore ?? 0;
+                playerBTotal += gross;
+                int strokes = (playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) ? 1 : 0;
+                int net = gross > 0 ? gross - strokes : 0;
+                playerBNetTotal += net;
+                table.AddCell(new Cell().Add(new Paragraph(hs?.PlayerBScore != null ? $"{gross}/{net}" : "")
                     .SetFont(boldFont)
                     .SetFontSize(9f))
                     .SetTextAlignment(TextAlignment.CENTER));
             }
-            table.AddCell(new Cell().Add(new Paragraph(matchup.PlayerBScore?.ToString() ?? playerBTotal.ToString())
+            table.AddCell(new Cell().Add(new Paragraph($"{(matchup.PlayerBScore ?? playerBTotal)}/{playerBNetTotal}")
                 .SetFont(boldFont).SetFontSize(9f))
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetBackgroundColor(new DeviceRgb(255, 220, 220)));

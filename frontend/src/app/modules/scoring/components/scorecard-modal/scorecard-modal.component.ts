@@ -664,42 +664,24 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   private getStrokesGiven(holeIndex: number, playerHandicap: number): number {
     const courseHole = this.course.holes[holeIndex];
     if (!courseHole || !courseHole.handicap) return 0;
-    
-    // For match play, strokes are based on handicap DIFFERENCE, not individual handicaps
     const playerAHandicap = this.scorecardData?.playerAHandicap || 0;
     const playerBHandicap = this.scorecardData?.playerBHandicap || 0;
-    
-    // Calculate handicap difference
     const handicapDifference = Math.abs(playerAHandicap - playerBHandicap);
-    
     if (handicapDifference === 0) return 0;
-    
-    // Determine who gets strokes (higher handicap player)
     const playerAReceivesStrokes = playerAHandicap > playerBHandicap;
     const playerBReceivesStrokes = playerBHandicap > playerAHandicap;
-    
-    // Only the higher handicap player gets strokes
     const playerReceivesStrokes = (playerHandicap === playerAHandicap && playerAReceivesStrokes) ||
                                  (playerHandicap === playerBHandicap && playerBReceivesStrokes);
-    
     if (!playerReceivesStrokes) return 0;
-    
-    // Standard golf handicap allocation (match backend logic):
-    // Holes are ranked 1-9 by difficulty (handicap index)
-    // Player receives strokes on holes based on their handicap difference
-    const holeHandicap = courseHole.handicap;
-    const totalStrokes = Math.round(handicapDifference);
-    
-    // First round: give strokes to holes 1-9
-    if (holeHandicap <= Math.min(totalStrokes, 9)) {
-      return 1;
-    }
-    
-    // Second round: give additional strokes to holes 1-9 if handicap difference > 9
-    if (totalStrokes > 9 && holeHandicap <= (totalStrokes - 9)) {
-      return 2;
-    }
-    
+    // --- 9-hole stroke allocation fix ---
+    // Only allocate strokes to the hardest holes within the 9 being played
+    const holesInPlay = this.course.holes.slice(0, 9); // assumes 9-hole match, holes 1-9 or adjust as needed
+    const holesWithHandicap = holesInPlay.filter(h => typeof h.handicap === 'number');
+    const hardestHoles = [...holesWithHandicap]
+      .sort((a, b) => (a.handicap ?? 99) - (b.handicap ?? 99))
+      .slice(0, Math.round(handicapDifference))
+      .map(h => h.number);
+    if (hardestHoles.includes(courseHole.number)) return 1;
     return 0;
   }
 

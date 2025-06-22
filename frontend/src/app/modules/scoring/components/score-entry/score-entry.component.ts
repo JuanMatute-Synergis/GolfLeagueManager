@@ -306,8 +306,32 @@ export class ScoreEntryComponent implements OnInit {
       matchup.playerBScore !== matchup.originalPlayerBScore
     );
   }
-
   getMatchupWinner(matchup: MatchupWithDetails): string {
+    // Handle absence scenarios first
+    if (matchup.playerAAbsent && matchup.playerBAbsent) {
+      return 'Both Absent';
+    }
+    if (matchup.playerAAbsent) {
+      return matchup.playerBName || 'Player B';
+    }
+    if (matchup.playerBAbsent) {
+      return matchup.playerAName || 'Player A';
+    }
+
+    // Use match play points if available (this is the correct way for match play scoring)
+    if (matchup.playerAPoints !== null && matchup.playerAPoints !== undefined &&
+        matchup.playerBPoints !== null && matchup.playerBPoints !== undefined) {
+      
+      if (matchup.playerAPoints > matchup.playerBPoints) {
+        return matchup.playerAName || 'Player A';
+      } else if (matchup.playerBPoints > matchup.playerAPoints) {
+        return matchup.playerBName || 'Player B';
+      } else {
+        return 'Tie';
+      }
+    }
+
+    // Fall back to gross scores if match play points aren't available
     if (!matchup.playerAScore || !matchup.playerBScore) return '';
 
     if (matchup.playerAScore < matchup.playerBScore) {
@@ -322,13 +346,13 @@ export class ScoreEntryComponent implements OnInit {
   getMatchupStatus(matchup: MatchupWithDetails): string {
     // Handle absence scenarios first
     if (matchup.playerAAbsent === true && matchup.playerBAbsent === true) {
-      return 'Both Absent';
+      return 'Both Absent'; // treat as completed
     }
     if (matchup.playerAAbsent === true) {
-      return 'Player A Absent';
+      return 'Completed (A Absent)'; // treat as completed
     }
     if (matchup.playerBAbsent === true) {
-      return 'Player B Absent';
+      return 'Completed (B Absent)'; // treat as completed
     }
 
     // If no hole scores are loaded yet, fall back to simple total score check
@@ -692,15 +716,26 @@ export class ScoreEntryComponent implements OnInit {
     const playerHandicap = player === 'A' ? playerAHandicap : playerBHandicap;
     const opponentHandicap = player === 'A' ? playerBHandicap : playerAHandicap;
 
-    // Fallback synchronous calculation to maintain UI responsiveness
-    // This should match the backend logic for overall net scores
-    if (playerHandicap <= opponentHandicap) {
-      return grossScore.toString(); // No strokes for equal or lower handicap
+    // --- 9-hole stroke allocation fix ---
+    // Only allocate strokes to the hardest holes within the 9 being played
+    // For score-entry, assume holes 1-9 (adjust if back 9 is supported)
+    const holesInPlay = Array.from({length: 9}, (_, i) => ({ number: i + 1, handicap: i + 1 })); // Replace with real hole data if available
+    const holesWithHandicap = holesInPlay.filter(h => typeof h.handicap === 'number');
+    const handicapDifference = Math.abs(playerHandicap - opponentHandicap);
+    const playerReceivesStrokes = playerHandicap > opponentHandicap;
+    let strokesOnThisHole = 0;
+    if (playerReceivesStrokes) {
+      const hardestHoles = [...holesWithHandicap]
+        .sort((a, b) => (a.handicap ?? 99) - (b.handicap ?? 99))
+        .slice(0, Math.round(handicapDifference))
+        .map(h => h.number);
+      // Find the current hole number (if available)
+      const currentHoleNumber = matchup.holeScores && matchup.holeScores.length === 9 ? matchup.holeScores.find((h, idx) => (player === 'A' ? h.playerAScore : h.playerBScore) === grossScore)?.holeNumber : null;
+      if (currentHoleNumber && hardestHoles.includes(currentHoleNumber)) {
+        strokesOnThisHole = 1;
+      }
     }
-
-    const handicapDifference = playerHandicap - opponentHandicap;
-    const netScore = grossScore - handicapDifference;
-
+    const netScore = grossScore - strokesOnThisHole;
     return netScore.toString();
   }
 

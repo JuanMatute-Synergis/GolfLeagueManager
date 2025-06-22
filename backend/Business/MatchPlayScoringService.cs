@@ -35,83 +35,78 @@ namespace GolfLeagueManager
         /// Calculate match play results based on hole scores and handicaps
         /// </summary>
         public MatchPlayResult CalculateMatchPlayResult(
-            List<HoleScore> holeScores, 
-            decimal playerAHandicap, 
+            List<HoleScore> holeScores,
+            decimal playerAHandicap,
             decimal playerBHandicap,
             int playerAGrossTotal = 0,
             int playerBGrossTotal = 0)
         {
             var result = new MatchPlayResult();
-            
-            // Calculate net handicap difference
             var handicapDifference = Math.Abs(playerAHandicap - playerBHandicap);
             var playerAReceivesStrokes = playerAHandicap > playerBHandicap;
-            
+
+            // --- 9-hole stroke allocation fix ---
+            // Only allocate strokes to the hardest holes within the 9 being played
+            // Get the 9 holes being played (assume holeScores.Count == 9, holes 1-9 or 10-18)
+            var holesInPlay = holeScores.Select(h => new { h.HoleNumber, h.HoleHandicap }).ToList();
+            // Order by difficulty (Handicap index: 1 = hardest)
+            var hardestHoles = holesInPlay.OrderBy(h => h.HoleHandicap).Take((int)Math.Round(handicapDifference)).Select(h => h.HoleNumber).ToHashSet();
+
             foreach (var hole in holeScores.OrderBy(h => h.HoleNumber))
             {
                 if (!hole.PlayerAScore.HasValue || !hole.PlayerBScore.HasValue)
                     continue;
 
-                var holeResult = CalculateHoleResult(
-                    hole, 
-                    handicapDifference, 
-                    playerAReceivesStrokes);
-                
+                var holeResult = CalculateHoleResult9Hole(
+                    hole,
+                    playerAReceivesStrokes,
+                    hardestHoles
+                );
                 result.HoleResults.Add(holeResult);
                 result.PlayerAHolePoints += holeResult.PlayerAPoints;
                 result.PlayerBHolePoints += holeResult.PlayerBPoints;
             }
 
-            // Calculate total net scores for both players
             int playerANetTotal = 0;
             int playerBNetTotal = 0;
-            
             foreach (var holeResult in result.HoleResults)
             {
                 playerANetTotal += holeResult.PlayerANetScore;
                 playerBNetTotal += holeResult.PlayerBNetScore;
             }
 
-            // Determine match winner based on lowest total net score and award 2-point bonus
             if (playerANetTotal < playerBNetTotal)
             {
-                // Player A has lower net total - wins match
                 result.PlayerAMatchWin = true;
-                result.PlayerATotalPoints = result.PlayerAHolePoints + 2; // 2-point match bonus
+                result.PlayerATotalPoints = result.PlayerAHolePoints + 2;
                 result.PlayerBTotalPoints = result.PlayerBHolePoints;
             }
             else if (playerBNetTotal < playerANetTotal)
             {
-                // Player B has lower net total - wins match
                 result.PlayerBMatchWin = true;
-                result.PlayerBTotalPoints = result.PlayerBHolePoints + 2; // 2-point match bonus
+                result.PlayerBTotalPoints = result.PlayerBHolePoints + 2;
                 result.PlayerATotalPoints = result.PlayerAHolePoints;
             }
             else
             {
-                // Tie in net total scores - each player gets 1 point instead of 2-point bonus
                 result.PlayerAMatchWin = false;
                 result.PlayerBMatchWin = false;
-                result.PlayerATotalPoints = result.PlayerAHolePoints + 1; // 1 point for tie
-                result.PlayerBTotalPoints = result.PlayerBHolePoints + 1; // 1 point for tie
+                result.PlayerATotalPoints = result.PlayerAHolePoints + 1;
+                result.PlayerBTotalPoints = result.PlayerBHolePoints + 1;
             }
 
             return result;
         }
 
-        private HoleResult CalculateHoleResult(
-            HoleScore hole, 
-            decimal handicapDifference, 
-            bool playerAReceivesStrokes)
+        // New: 9-hole aware hole result calculation
+        private HoleResult CalculateHoleResult9Hole(
+            HoleScore hole,
+            bool playerAReceivesStrokes,
+            HashSet<int> hardestHoles
+        )
         {
-            var result = new HoleResult
-            {
-                HoleNumber = hole.HoleNumber
-            };
-
-            // Calculate net scores with handicap strokes
-            var strokesOnThisHole = CalculateStrokesForHole(handicapDifference, hole.HoleHandicap);
-            
+            var result = new HoleResult { HoleNumber = hole.HoleNumber };
+            int strokesOnThisHole = hardestHoles.Contains(hole.HoleNumber) ? 1 : 0;
             if (playerAReceivesStrokes)
             {
                 result.PlayerANetScore = hole.PlayerAScore!.Value - strokesOnThisHole;
@@ -122,8 +117,6 @@ namespace GolfLeagueManager
                 result.PlayerANetScore = hole.PlayerAScore!.Value;
                 result.PlayerBNetScore = hole.PlayerBScore!.Value - strokesOnThisHole;
             }
-
-            // Award points based on net scores
             if (result.PlayerANetScore < result.PlayerBNetScore)
             {
                 result.PlayerAPoints = 2;
@@ -142,7 +135,6 @@ namespace GolfLeagueManager
                 result.PlayerBPoints = 1;
                 result.Winner = "Tie";
             }
-
             return result;
         }
 
@@ -151,19 +143,19 @@ namespace GolfLeagueManager
             // Standard golf handicap allocation:
             // Holes are ranked 1-9 by difficulty (handicap index)
             // Player receives strokes on holes based on their handicap difference
-            
+
             var totalStrokes = (int)Math.Round(handicapDifference);
-            
+
             if (totalStrokes == 0) return 0;
-            
+
             // First round: give strokes to holes 1-9
             if (holeHandicap <= Math.Min(totalStrokes, 9))
                 return 1;
-            
+
             // Second round: give additional strokes to holes 1-9 if handicap difference > 9
             if (totalStrokes > 9 && holeHandicap <= (totalStrokes - 9))
                 return 2;
-            
+
             return 0;
         }
 
@@ -203,7 +195,7 @@ namespace GolfLeagueManager
         {
             var courseHole = await _context.CourseHoles
                 .FirstOrDefaultAsync(ch => ch.HoleNumber == holeNumber);
-            
+
             return courseHole?.HandicapIndex ?? GetHoleHandicapFallback(holeNumber);
         }
 
@@ -219,7 +211,7 @@ namespace GolfLeagueManager
                 { 11, 4 },  { 12, 2 },  { 13, 6 },  { 14, 14 }, { 15, 10 },
                 { 16, 8 },  { 17, 18 }, { 18, 16 }
             };
-            
+
             return handicapMap.ContainsKey(holeNumber) ? handicapMap[holeNumber] : 18;
         }
 
@@ -244,7 +236,7 @@ namespace GolfLeagueManager
             }
 
             var handicapDifference = playerHandicap - opponentHandicap;
-            
+
             // Player gets strokes on holes based on hole handicap
             if (holeHandicap <= handicapDifference)
             {

@@ -167,18 +167,26 @@
                 </td>
                 <!-- Result -->
                 <td class="p-3 border-b border-border text-center">
-                  <div *ngIf="matchup.playerAScore && matchup.playerBScore" class="text-sm">
-                    <span class="font-semibold text-foreground">{{ getMatchupWinner(matchup) }}</span>
+                  <ng-container *ngIf="matchup.playerAAbsent || matchup.playerBAbsent; else normalResult">
+                    <span class="font-semibold text-foreground">{{ getMatchupStatus(matchup) }}</span>
                     <span [class]="'block text-xs px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
                       {{ getMatchupStatus(matchup) }}
                     </span>
-                  </div>
-                  <div *ngIf="!matchup.playerAScore || !matchup.playerBScore" class="text-xs text-muted-foreground">
-                    <span class="block">Pending</span>
-                    <span [class]="'block px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
-                      {{ getMatchupStatus(matchup) }}
-                    </span>
-                  </div>
+                  </ng-container>
+                  <ng-template #normalResult>
+                    <div *ngIf="matchup.playerAScore && matchup.playerBScore" class="text-sm">
+                      <span class="font-semibold text-foreground">{{ getMatchupWinner(matchup) }}</span>
+                      <span [class]="'block text-xs px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
+                        {{ getMatchupStatus(matchup) }}
+                      </span>
+                    </div>
+                    <div *ngIf="!matchup.playerAScore || !matchup.playerBScore" class="text-xs text-muted-foreground">
+                      <span class="block">Pending</span>
+                      <span [class]="'block px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
+                        {{ getMatchupStatus(matchup) }}
+                      </span>
+                    </div>
+                  </ng-template>
                 </td>
                 <!-- Actions -->
                 <td class="p-3 border-b border-border">

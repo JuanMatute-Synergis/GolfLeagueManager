@@ -18,6 +18,11 @@ const routes: Routes = [
     component: LayoutComponent,
     loadChildren: () => import('../uikit/uikit.module').then((m) => m.UikitModule),
   },
+  {
+    path: 'standings',
+    component: LayoutComponent,
+    loadChildren: () => import('../standings/standings.routes').then((m) => m.standingsRoutes),
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'error/404' },
 ];

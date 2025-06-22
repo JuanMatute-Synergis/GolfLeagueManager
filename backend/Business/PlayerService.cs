@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GolfLeagueManager
 {
@@ -77,6 +78,12 @@ namespace GolfLeagueManager
             }
             
             return playersWithFlights;
+        }
+
+        public async Task<List<Player>> GetAllPlayersAsync()
+        {
+            // Use the repository, not _context
+            return await Task.Run(() => _playerRepository.GetPlayers().ToList());
         }
 
         // Additional business logic methods can be added here

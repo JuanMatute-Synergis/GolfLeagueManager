@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ScoringService } from '../../services/scoring.service';
-import { Season, PlayerSeasonStats } from '../../models/week.model';
+import { Season, PlayerSeasonStats, PlayerWithFlight } from '../../models/week.model';
 
 @Component({
   selector: 'app-season-standings',
@@ -17,14 +17,22 @@ import { Season, PlayerSeasonStats } from '../../models/week.model';
           <p class="mt-1 text-sm sm:text-base text-muted-foreground">View complete season rankings and statistics</p>
         </div>
         <div class="flex items-center space-x-4">
-          <select 
+          <select
             [(ngModel)]="selectedSeasonId"
             (change)="onSeasonChange()"
             class="px-4 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
             <option value="">Select Season</option>
             <option *ngFor="let season of seasons" [value]="season.id">{{ season.name }}</option>
           </select>
-          <button 
+          <!-- Flight Filter Dropdown -->
+          <select
+            [(ngModel)]="selectedFlightId"
+            (change)="onFlightChange()"
+            class="px-4 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
+            <option value="">All Flights</option>
+            <option *ngFor="let flight of flights" [value]="flight.id">{{ flight.name }}</option>
+          </select>
+          <button
             (click)="loadStandings()"
             [disabled]="!selectedSeasonId || loading"
             class="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -85,7 +93,7 @@ import { Season, PlayerSeasonStats } from '../../models/week.model';
               <h2 class="text-xl font-semibold text-foreground">Season Rankings</h2>
               <div class="flex items-center space-x-2">
                 <span class="text-sm text-muted-foreground">Sort by:</span>
-                <select 
+                <select
                   [(ngModel)]="selectedSort"
                   (change)="onSortChange()"
                   class="px-3 py-1 border border-border rounded text-sm bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
@@ -94,10 +102,9 @@ import { Season, PlayerSeasonStats } from '../../models/week.model';
               </div>
             </div>
           </div>
-
           <div *ngIf="standings.length > 0" class="flex-1 overflow-hidden">
-            <div class="h-full overflow-y-auto">
-              <table class="w-full border-collapse">
+            <div class="h-full max-h-[500px] overflow-auto">
+              <table class="w-full border-collapse min-w-[900px]">
                 <thead class="bg-muted/50 text-xs uppercase text-muted-foreground sticky top-0">
                   <tr>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Rank</th>
@@ -111,8 +118,8 @@ import { Season, PlayerSeasonStats } from '../../models/week.model';
                   </tr>
                 </thead>
                 <tbody [class.animate-pulse]="loading">
-                  <tr *ngFor="let player of sortedStandings; let i = index" 
-                      [class]="getRowClass(i + 1)" 
+                  <tr *ngFor="let player of sortedStandings; let i = index"
+                      [class]="getRowClass(i + 1)"
                       class="hover:bg-muted/20 transition-colors duration-150">
                     <td class="p-4 border-b border-border">
                       <div class="flex items-center space-x-2">
@@ -143,7 +150,7 @@ import { Season, PlayerSeasonStats } from '../../models/week.model';
                       <span class="font-bold text-red-600">{{ player.worstScore }}</span>
                     </td>
                     <td class="p-4 border-b border-border text-center">
-                      <span 
+                      <span
                         class="px-2 py-1 rounded-full text-xs font-bold"
                         [class]="getFormClass(player)">
                         {{ getPlayerForm(player) }}
@@ -160,13 +167,13 @@ import { Season, PlayerSeasonStats } from '../../models/week.model';
                   Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, sortedStandings.length) }} of {{ sortedStandings.length }} players
                 </div>
                 <div class="flex space-x-2">
-                  <button 
+                  <button
                     (click)="previousPage()"
                     [disabled]="currentPage === 1"
                     class="px-3 py-1 border border-border rounded text-sm bg-background text-foreground hover:bg-muted/50 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors">
                     Previous
                   </button>
-                  <button 
+                  <button
                     (click)="nextPage()"
                     [disabled]="currentPage === totalPages"
                     class="px-3 py-1 border border-border rounded text-sm bg-background text-foreground hover:bg-muted/50 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed transition-colors">
@@ -303,9 +310,12 @@ export class SeasonStandingsComponent implements OnInit {
   selectedSeasonId: string = '';
   standings: PlayerSeasonStats[] = [];
   sortedStandings: PlayerSeasonStats[] = [];
+  flights: any[] = [];
+  selectedFlightId: string = '';
+  playersWithFlight: PlayerWithFlight[] = [];
   loading = false;
   selectedSort = 'points';
-  
+
   // Pagination properties
   currentPage = 1;
   pageSize = 25;
@@ -343,8 +353,29 @@ export class SeasonStandingsComponent implements OnInit {
 
   onSeasonChange() {
     if (this.selectedSeasonId) {
-      this.loadStandings();
+      this.loading = true;
+      // Fetch both flights and playersWithFlight
+      this.scoringService.getPlayersInFlights(this.selectedSeasonId).subscribe({
+        next: (players) => {
+          this.playersWithFlight = players;
+          // Extract unique flights from playersWithFlight
+          this.flights = Array.from(
+            new Map(players.filter(p => p.flightId && p.flightName).map(p => [p.flightId, { id: p.flightId, name: p.flightName }])).values()
+          );
+          this.selectedFlightId = '';
+          this.loadStandings();
+        },
+        error: (error) => {
+          this.playersWithFlight = [];
+          this.flights = [];
+          this.loadStandings();
+        }
+      });
     }
+  }
+
+  onFlightChange() {
+    this.applySorting();
   }
 
   loadStandings() {
@@ -371,8 +402,15 @@ export class SeasonStandingsComponent implements OnInit {
   }
 
   applySorting() {
-    let sorted = [...this.standings];
-    
+    // Join standings with playersWithFlight to get flightId
+    let filtered = this.selectedFlightId
+      ? this.standings.filter(s => {
+          const player = this.playersWithFlight.find(p => p.id === s.playerId);
+          return player && player.flightId === this.selectedFlightId;
+        })
+      : [...this.standings];
+
+    let sorted = [...filtered];
     switch (this.selectedSort) {
       case 'points':
         sorted.sort((a, b) => b.totalPoints - a.totalPoints);
@@ -447,7 +485,7 @@ export class SeasonStandingsComponent implements OnInit {
   getPlayerForm(player: PlayerSeasonStats): string {
     const avgScore = player.averageScore;
     const roundsPlayed = player.roundsPlayed;
-    
+
     if (roundsPlayed < 3) return 'NEW';
     if (avgScore <= 74) return 'HOT';
     if (avgScore <= 78) return 'WARM';

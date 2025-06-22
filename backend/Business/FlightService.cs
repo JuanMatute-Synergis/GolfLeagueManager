@@ -47,6 +47,12 @@ namespace GolfLeagueManager
             return _flightRepository.GetFlightsBySeason(seasonId);
         }
 
+        public async Task<List<Flight>> GetFlightsBySeasonIdAsync(Guid seasonId)
+        {
+            // Use the repository, not _context
+            return await Task.Run(() => _flightRepository.GetFlightsBySeason(seasonId).ToList());
+        }
+
         private void ValidateFlight(Flight flight)
         {
             if (string.IsNullOrWhiteSpace(flight.Name))

@@ -269,7 +269,6 @@ export class MatchupsDashboardComponent implements OnInit {
            (matchup.playerBScore !== null && matchup.playerBScore !== undefined) ||
            (matchup.playerAAbsent === true) || (matchup.playerBAbsent === true);
   }
-
   getMatchupStatus(matchup: MatchupWithFlightInfo): string {
     // Handle absence scenarios first
     if (matchup.playerAAbsent === true && matchup.playerBAbsent === true) {
@@ -287,6 +286,20 @@ export class MatchupsDashboardComponent implements OnInit {
       return 'Pending';
     }
 
+    // Use match play points if available (this is the correct way for match play scoring)
+    if (matchup.playerAPoints !== null && matchup.playerAPoints !== undefined &&
+        matchup.playerBPoints !== null && matchup.playerBPoints !== undefined) {
+
+      if (matchup.playerAPoints > matchup.playerBPoints) {
+        return `${matchup.playerAName} Wins`;
+      } else if (matchup.playerBPoints > matchup.playerAPoints) {
+        return `${matchup.playerBName} Wins`;
+      } else {
+        return 'Tied';
+      }
+    }
+
+    // Fall back to gross scores if match play points aren't available
     const scoreA = matchup.playerAScore || 0;
     const scoreB = matchup.playerBScore || 0;
 
