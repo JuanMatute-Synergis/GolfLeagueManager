@@ -110,8 +110,8 @@ namespace GolfLeagueManager
                 if (matchup.PlayerAAbsentWithNotice && matchup.PlayerBAbsentWithNotice)
                 {
                     // Both gave notice - split points evenly
-                    matchup.PlayerAPoints = 10;
-                    matchup.PlayerBPoints = 10;
+                    matchup.PlayerAPoints = 4;
+                    matchup.PlayerBPoints = 4;
                     Console.WriteLine("[DEBUG] Both gave notice: A=10, B=10");
                 }
                 else if (matchup.PlayerAAbsentWithNotice)
