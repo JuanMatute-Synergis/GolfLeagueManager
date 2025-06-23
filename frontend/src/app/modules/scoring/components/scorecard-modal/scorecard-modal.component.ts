@@ -190,17 +190,20 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           if (this.mode === 'view' && !this.scorecardData) {
             this.initializeViewModeData();
           }
-          
-          // Convert backend hole scores to frontend format
-          this.scorecardData.holes = response.holeScores.map(hs => ({
-            hole: hs.holeNumber,
-            par: hs.par,
-            playerAScore: hs.playerAScore,
-            playerBScore: hs.playerBScore,
-            holeHandicap: hs.holeHandicap,
-            playerAMatchPoints: hs.playerAMatchPoints,
-            playerBMatchPoints: hs.playerBMatchPoints
-          }));
+          // Always display all 18 holes, assign scores to correct hole number
+          const holesArray = this.course.holes.map(hole => {
+            const hs = (response.holeScores ?? []).find(h => h.holeNumber === hole.number);
+            return {
+              hole: hole.number,
+              par: hole.par,
+              playerAScore: hs ? hs.playerAScore : undefined,
+              playerBScore: hs ? hs.playerBScore : undefined,
+              holeHandicap: hs ? hs.holeHandicap : hole.handicap,
+              playerAMatchPoints: hs ? hs.playerAMatchPoints : 0,
+              playerBMatchPoints: hs ? hs.playerBMatchPoints : 0
+            };
+          });
+          this.scorecardData.holes = holesArray;
           
           // Update absence status FIRST before calculating totals
           this.scorecardData.playerAAbsent = response.playerAAbsent;

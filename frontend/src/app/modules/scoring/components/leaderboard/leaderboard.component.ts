@@ -31,6 +31,10 @@ export class LeaderboardComponent implements OnInit {
   // Course information - could be made dynamic in the future
   private readonly coursePar = 36; // 9-hole course: 4+3+4+5+4+3+4+4+5 = 36
 
+  // Sorting additions
+  selectedSort: string = 'rank';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   constructor(
     private scoringService: ScoringService,
     private router: Router
@@ -124,6 +128,7 @@ export class LeaderboardComponent implements OnInit {
     this.scoringService.getWeeklyLeaderboard(this.selectedWeekId).subscribe({
       next: (scores) => {
         console.log('Leaderboard data:', scores); // Debug log
+        console.log('Sample score entry:', scores[0]); // Debug first entry
         this.leaderboard = scores;
         this.applyFlightFilter();
       },
@@ -134,15 +139,57 @@ export class LeaderboardComponent implements OnInit {
   applyFlightFilter() {
     if (!this.selectedFlight) {
       this.filteredLeaderboard = [...this.leaderboard];
-      return;
+    } else {
+      // Build a set of playerIds in the selected flight
+      const playerIdsInFlight = new Set(
+        this.playerFlights.filter(pf => pf.flightId === this.selectedFlight).map(pf => pf.id)
+      );
+      this.filteredLeaderboard = this.leaderboard.filter(score => {
+        const pid = score.playerId || (score.player && score.player.id);
+        return pid && playerIdsInFlight.has(pid);
+      });
     }
-    // Build a set of playerIds in the selected flight
-    const playerIdsInFlight = new Set(
-      this.playerFlights.filter(pf => pf.flightId === this.selectedFlight).map(pf => pf.id)
-    );
-    this.filteredLeaderboard = this.leaderboard.filter(score => {
-      const pid = score.playerId || (score.player && score.player.id);
-      return pid && playerIdsInFlight.has(pid);
+    this.sortLeaderboard();
+  }
+
+  sortLeaderboard(sortBy?: string) {
+    if (sortBy) {
+      if (this.selectedSort === sortBy) {
+        // Toggle direction
+        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        this.selectedSort = sortBy;
+        this.sortDirection = 'asc';
+      }
+    }
+    const dir = this.sortDirection === 'asc' ? 1 : -1;
+    this.filteredLeaderboard.sort((a, b) => {
+      switch (this.selectedSort) {
+        case 'player': {
+          const nameA = this.getPlayerDisplayName(a).toLowerCase();
+          const nameB = this.getPlayerDisplayName(b).toLowerCase();
+          return nameA.localeCompare(nameB) * dir;
+        }
+        case 'handicap': {
+          const hA = typeof this.getHandicap(a) === 'number' ? (this.getHandicap(a) as number) : 999;
+          const hB = typeof this.getHandicap(b) === 'number' ? (this.getHandicap(b) as number) : 999;
+          return (hA - hB) * dir;
+        }
+        case 'score':
+          return ((a.score ?? 999) - (b.score ?? 999)) * dir;
+        case 'points':
+          return ((a.pointsEarned ?? 0) - (b.pointsEarned ?? 0)) * dir;
+        case 'performance': {
+          // Use points then score as tiebreaker
+          const perfA = (a.pointsEarned ?? 0) * 1000 - (a.score ?? 999);
+          const perfB = (b.pointsEarned ?? 0) * 1000 - (b.score ?? 999);
+          return (perfA - perfB) * dir;
+        }
+        case 'rank':
+        default:
+          // Default: sort by points desc, then score asc
+          return (b.pointsEarned - a.pointsEarned) * dir || (a.score - b.score) * dir;
+      }
     });
   }
 
@@ -277,5 +324,15 @@ export class LeaderboardComponent implements OnInit {
     }
 
     return 'Unknown Player';
+  }
+
+  getHandicap(score: any): number | string {
+    if (score.player && typeof score.player.currentHandicap === 'number') {
+      return score.player.currentHandicap;
+    }
+    if (typeof score.currentHandicap === 'number') {
+      return score.currentHandicap;
+    }
+    return '-';
   }
 }

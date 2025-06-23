@@ -83,6 +83,14 @@ namespace GolfLeagueManager
                 var matchupsInFlight = flightGroup.Matchups;
                 if (!matchupsInFlight.Any()) continue;
                 if (pdf.GetNumberOfPages() > 0) document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+
+                // --- Add summary table as the first page for this flight ---
+                var summaryTable = await CreateFlightSummaryTableAsync(flight, matchupsInFlight, week, seasonId, font, boldFont);
+                document.Add(new Paragraph($"{flightName} - Weekly Summary").SetFont(boldFont).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetMarginBottom(5));
+                document.Add(summaryTable);
+                document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                // --- End summary page ---
+
                 document.Add(new Paragraph($"{flightName} - H.T. Lyons Golf League")
                     .SetFont(boldFont).SetFontSize(7).SetTextAlignment(TextAlignment.CENTER));
 
@@ -106,6 +114,80 @@ namespace GolfLeagueManager
             }
             document.Close();
             return ms.ToArray();
+        }
+
+        // --- New: Create summary table for a flight ---
+        private async Task<Table> CreateFlightSummaryTableAsync(Flight flight, List<Matchup> matchupsInFlight, Week currentWeek, Guid seasonId, PdfFont font, PdfFont boldFont)
+        {
+            // Get all players in this flight for the season
+            var playerIds = matchupsInFlight
+                .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
+                .Distinct()
+                .ToList();
+            var players = await _context.Players.Where(p => playerIds.Contains(p.Id)).ToListAsync();
+
+            // Get all matchups for these players in the season up to and including the current week
+            var allMatchups = await _context.Matchups
+                .Where(m => (playerIds.Contains(m.PlayerAId) || playerIds.Contains(m.PlayerBId)))
+                .ToListAsync();
+            var weekNumber = currentWeek.WeekNumber;
+            var weekIdsUpToCurrent = await _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber)
+                .Select(w => w.Id)
+                .ToListAsync();
+            var matchupsUpToCurrent = allMatchups.Where(m => weekIdsUpToCurrent.Contains(m.WeekId)).ToList();
+
+            // Table columns: Player, Handicap, Average, Gross, Net, Match Play Points, Accumulated Score
+            var table = new Table(UnitValue.CreatePercentArray(new float[] { 2f, 1f, 1f, 1f, 1f, 1f, 1.5f })).UseAllAvailableWidth();
+            table.SetFont(font).SetFontSize(9f);
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Player").SetFont(boldFont)));
+            table.AddHeaderCell(new Cell().Add(new Paragraph("HCP").SetFont(boldFont)));
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Avg").SetFont(boldFont)));
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Gross").SetFont(boldFont)));
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Net").SetFont(boldFont)));
+            table.AddHeaderCell(new Cell().Add(new Paragraph("MP Pts").SetFont(boldFont)));
+            table.AddHeaderCell(new Cell().Add(new Paragraph("Accum. Score").SetFont(boldFont)));
+
+            foreach (var player in players.OrderBy(p => p.LastName).ThenBy(p => p.FirstName))
+            {
+                // Handicap and average from player
+                var hcp = player.CurrentHandicap;
+                var avg = player.CurrentAverageScore;
+
+                // Find this week's matchup for this player
+                var matchup = matchupsInFlight.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
+                int gross = 0, net = 0, mpPoints = 0;
+                if (matchup != null)
+                {
+                    if (matchup.PlayerAId == player.Id)
+                    {
+                        gross = matchup.PlayerAScore ?? 0;
+                        mpPoints = matchup.PlayerAPoints ?? 0;
+                        net = gross; // For more accurate net, sum net per hole if needed
+                    }
+                    else if (matchup.PlayerBId == player.Id)
+                    {
+                        gross = matchup.PlayerBScore ?? 0;
+                        mpPoints = matchup.PlayerBPoints ?? 0;
+                        net = gross;
+                    }
+                }
+                // Accumulated score: sum all gross scores for this player up to and including this week
+                var grossScores = matchupsUpToCurrent
+                    .Where(m => (m.PlayerAId == player.Id && m.PlayerAScore.HasValue) || (m.PlayerBId == player.Id && m.PlayerBScore.HasValue))
+                    .Select(m => m.PlayerAId == player.Id ? (m.PlayerAScore ?? 0) : (m.PlayerBScore ?? 0))
+                    .ToList();
+                var accumScore = grossScores.Sum();
+
+                table.AddCell(new Cell().Add(new Paragraph($"{player.FirstName} {player.LastName}")));
+                table.AddCell(new Cell().Add(new Paragraph(hcp.ToString("0.##"))));
+                table.AddCell(new Cell().Add(new Paragraph(avg.ToString("0.##"))));
+                table.AddCell(new Cell().Add(new Paragraph(gross > 0 ? gross.ToString() : "-")));
+                table.AddCell(new Cell().Add(new Paragraph(net > 0 ? net.ToString() : "-")));
+                table.AddCell(new Cell().Add(new Paragraph(mpPoints > 0 ? mpPoints.ToString() : "-")));
+                table.AddCell(new Cell().Add(new Paragraph(accumScore > 0 ? accumScore.ToString() : "-")));
+            }
+            return table;
         }
 
         private async Task<Table> CreateCompactScorecardTableAsync(Matchup matchup, List<CourseHole> holes, PdfFont font, PdfFont boldFont)

@@ -49,38 +49,6 @@
         <option *ngFor="let flight of flights" [value]="flight.id">{{ flight.name }}</option>
       </select>
     </div>
-
-    <!-- Content Area -->
-    <div class="flex-1 flex flex-col min-h-0">
-      <!-- Top 3 Podium -->
-      <div *ngIf="filteredLeaderboard.length >= 3" class="mb-3 flex-shrink-0">
-        <h2 class="text-sm font-bold text-gray-900 mb-2 text-center">🏆 Top 3</h2>
-        <div class="flex justify-center items-end space-x-1 mb-2">
-          <!-- 2nd Place -->
-          <div class="bg-gradient-to-t from-gray-300 to-gray-400 text-white p-2 rounded-lg text-center transform scale-75 min-w-[80px]">
-            <div class="text-lg mb-1">🥈</div>
-            <div class="font-bold text-xs">{{ getPlayerDisplayName(filteredLeaderboard[1]).split(' ')[0] }}</div>
-            <div class="text-xs opacity-90">{{ filteredLeaderboard[1].score }}</div>
-            <div class="text-xs font-bold">{{ filteredLeaderboard[1].pointsEarned }}pts</div>
-          </div>
-
-          <!-- 1st Place -->
-          <div class="bg-gradient-to-t from-yellow-400 to-yellow-500 text-white p-2 rounded-lg text-center transform scale-85 min-w-[90px]">
-            <div class="text-xl mb-1">🏆</div>
-            <div class="font-bold text-sm">{{ getPlayerDisplayName(filteredLeaderboard[0]).split(' ')[0] }}</div>
-            <div class="text-xs opacity-90">{{ filteredLeaderboard[0].score }}</div>
-            <div class="text-sm font-bold">{{ filteredLeaderboard[0].pointsEarned }}pts</div>
-          </div>
-
-          <!-- 3rd Place -->
-          <div class="bg-gradient-to-t from-amber-600 to-amber-700 text-white p-2 rounded-lg text-center transform scale-75 min-w-[80px]">
-            <div class="text-lg mb-1">🥉</div>
-            <div class="font-bold text-xs">{{ getPlayerDisplayName(filteredLeaderboard[2]).split(' ')[0] }}</div>
-            <div class="text-xs opacity-90">{{ filteredLeaderboard[2].score }}</div>
-            <div class="text-xs font-bold">{{ filteredLeaderboard[2].pointsEarned }}pts</div>
-          </div>
-        </div>
-      </div>    <!-- Full Leaderboard -->
     <div class="bg-card border border-border rounded-lg shadow-sm flex-1 flex flex-col min-h-0">
       <div class="px-6 py-4 border-b border-border bg-muted/20 flex-shrink-0">
         <h2 class="text-xl font-semibold text-foreground">Complete Results</h2>
@@ -104,11 +72,36 @@
           <table class="w-full border-collapse min-w-[900px]">
           <thead class="bg-muted/50 text-xs uppercase text-muted-foreground sticky top-0">
             <tr>
-              <th class="text-left font-semibold text-foreground p-4 border-b border-border">Rank</th>
-              <th class="text-left font-semibold text-foreground p-4 border-b border-border">Player</th>
-              <th class="text-left font-semibold text-foreground p-4 border-b border-border">Score</th>
-              <th class="text-left font-semibold text-foreground p-4 border-b border-border">Points</th>
-              <th class="text-left font-semibold text-foreground p-4 border-b border-border">Performance</th>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border cursor-pointer select-none"
+                  (click)="sortLeaderboard('rank')">
+                Rank
+                <span *ngIf="selectedSort === 'rank'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </th>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border cursor-pointer select-none"
+                  (click)="sortLeaderboard('player')">
+                Player
+                <span *ngIf="selectedSort === 'player'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </th>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border cursor-pointer select-none"
+                  (click)="sortLeaderboard('handicap')">
+                Handicap
+                <span *ngIf="selectedSort === 'handicap'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </th>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border cursor-pointer select-none"
+                  (click)="sortLeaderboard('score')">
+                Score
+                <span *ngIf="selectedSort === 'score'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </th>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border cursor-pointer select-none"
+                  (click)="sortLeaderboard('points')">
+                Points
+                <span *ngIf="selectedSort === 'points'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </th>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border cursor-pointer select-none"
+                  (click)="sortLeaderboard('performance')">
+                Performance
+                <span *ngIf="selectedSort === 'performance'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -129,6 +122,11 @@
                   {{ getPlayerDisplayName(score) }}
                 </div>
                 <div class="text-sm text-muted-foreground" *ngIf="score.player && score.player.email">{{ score.player.email }}</div>
+              </td>
+              <td class="p-4 border-b border-border text-center">
+                <span class="text-lg font-bold text-foreground">
+                  {{ getHandicap(score) }}
+                </span>
               </td>
               <td class="p-4 border-b border-border">
                 <div class="flex items-center space-x-2">

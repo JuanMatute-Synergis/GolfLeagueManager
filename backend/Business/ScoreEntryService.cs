@@ -94,8 +94,43 @@ namespace GolfLeagueManager
 
         public async Task<IEnumerable<ScoreEntry>> GetLeaderboardByWeekAsync(Guid weekId)
         {
-            var scores = await GetScoreEntriesByWeekIdAsync(weekId);
-            return scores.OrderByDescending(s => s.PointsEarned).ThenBy(s => s.Score);
+            // Get matchups for the week to get the actual match play points directly from the matchup table
+            // This ensures we always show the correct match play points as calculated by MatchPlayService
+            var matchups = await _context.Matchups
+                .Include(m => m.PlayerA)
+                .Include(m => m.PlayerB)
+                .Where(m => m.WeekId == weekId)
+                .ToListAsync();
+
+            var leaderboardEntries = new List<ScoreEntry>();
+
+            foreach (var matchup in matchups)
+            {
+                // Always add Player A (even if no score and not absent)
+                leaderboardEntries.Add(new ScoreEntry
+                {
+                    Id = Guid.NewGuid(),
+                    PlayerId = matchup.PlayerAId,
+                    WeekId = weekId,
+                    Score = matchup.PlayerAScore,
+                    PointsEarned = matchup.PlayerAPoints ?? 0,
+                    Player = matchup.PlayerA
+                });
+
+                // Always add Player B (even if no score and not absent)
+                leaderboardEntries.Add(new ScoreEntry
+                {
+                    Id = Guid.NewGuid(),
+                    PlayerId = matchup.PlayerBId,
+                    WeekId = weekId,
+                    Score = matchup.PlayerBScore,
+                    PointsEarned = matchup.PlayerBPoints ?? 0,
+                    Player = matchup.PlayerB
+                });
+            }
+
+            // Order by match play points (highest first), then by score (lowest first)
+            return leaderboardEntries.OrderByDescending(s => s.PointsEarned).ThenBy(s => s.Score);
         }
 
         public async Task<IEnumerable<PlayerSeasonStats>> GetSeasonStandingsAsync(Guid seasonId)
