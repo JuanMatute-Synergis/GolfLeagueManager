@@ -94,6 +94,14 @@ namespace GolfLeagueManager
                 matchup.PlayerAAbsentWithNotice = request.PlayerAAbsentWithNotice;
                 matchup.PlayerBAbsentWithNotice = request.PlayerBAbsentWithNotice;
 
+                // Special circumstance points logic
+                if (matchup.Week != null && matchup.Week.SpecialPointsAwarded.HasValue)
+                {
+                    int special = matchup.Week.SpecialPointsAwarded.Value;
+                    matchup.PlayerAPoints = matchup.PlayerAAbsent ? special / 2 : special;
+                    matchup.PlayerBPoints = matchup.PlayerBAbsent ? special / 2 : special;
+                }
+
                 // Save changes to get hole scores in database
                 await _context.SaveChangesAsync();
 

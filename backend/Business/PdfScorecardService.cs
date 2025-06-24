@@ -86,12 +86,13 @@ namespace GolfLeagueManager
 
                 // --- Add summary table as the first page for this flight ---
                 var summaryTable = await CreateFlightSummaryTableAsync(flight, matchupsInFlight, week, seasonId, font, boldFont);
-                document.Add(new Paragraph($"{flightName} - Weekly Summary").SetFont(boldFont).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetMarginBottom(5));
+                var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
+                document.Add(new Paragraph($"{weekTitle} - {flightName} - Weekly Summary").SetFont(boldFont).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetMarginBottom(5));
                 document.Add(summaryTable);
                 document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
                 // --- End summary page ---
 
-                document.Add(new Paragraph($"{flightName} - H.T. Lyons Golf League")
+                document.Add(new Paragraph($"{weekTitle} - {flightName} - H.T. Lyons Golf League")
                     .SetFont(boldFont).SetFontSize(7).SetTextAlignment(TextAlignment.CENTER));
 
                 // 4 cards per page, each on its own row
@@ -107,7 +108,7 @@ namespace GolfLeagueManager
                     if ((i + 1) % 4 == 0 && (i + 1) < matchupsInFlight.Count)
                     {
                         document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-                        document.Add(new Paragraph($"{flightName} - H.T. Lyons Golf League")
+                        document.Add(new Paragraph($"{weekTitle} - {flightName} - H.T. Lyons Golf League")
                             .SetFont(boldFont).SetFontSize(7).SetTextAlignment(TextAlignment.CENTER));
                     }
                 }
@@ -137,8 +138,21 @@ namespace GolfLeagueManager
                 .ToListAsync();
             var matchupsUpToCurrent = allMatchups.Where(m => weekIdsUpToCurrent.Contains(m.WeekId)).ToList();
 
-            // Table columns: Player, Handicap, Average, Gross, Net, Match Play Points, Accumulated Score
-            var table = new Table(UnitValue.CreatePercentArray(new float[] { 2f, 1f, 1f, 1f, 1f, 1f, 1.5f })).UseAllAvailableWidth();
+            // Find the most recent SessionStart week up to and including the current week
+            var sessionStartWeek = await _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber && w.SessionStart)
+                .OrderByDescending(w => w.WeekNumber)
+                .FirstOrDefaultAsync();
+            int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
+            // Ensure the session includes the session start week and all weeks up to and including the current week
+            var weekIdsInSession = await _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber >= sessionStartWeekNumber && w.WeekNumber <= weekNumber)
+                .OrderBy(w => w.WeekNumber)
+                .Select(w => w.Id)
+                .ToListAsync();
+
+            // Table columns: Player, Handicap, Average, Gross, Net, Match Play Points, This Week MP, Accumulated Score
+            var table = new Table(UnitValue.CreatePercentArray(new float[] { 2f, 1f, 1f, 1f, 1f, 1f, 1f, 1.5f })).UseAllAvailableWidth();
             table.SetFont(font).SetFontSize(9f);
             table.AddHeaderCell(new Cell().Add(new Paragraph("Player").SetFont(boldFont)));
             table.AddHeaderCell(new Cell().Add(new Paragraph("HCP").SetFont(boldFont)));
@@ -146,6 +160,7 @@ namespace GolfLeagueManager
             table.AddHeaderCell(new Cell().Add(new Paragraph("Gross").SetFont(boldFont)));
             table.AddHeaderCell(new Cell().Add(new Paragraph("Net").SetFont(boldFont)));
             table.AddHeaderCell(new Cell().Add(new Paragraph("MP Pts").SetFont(boldFont)));
+            table.AddHeaderCell(new Cell().Add(new Paragraph("This Week MP").SetFont(boldFont)));
             table.AddHeaderCell(new Cell().Add(new Paragraph("Accum. Score").SetFont(boldFont)));
 
             foreach (var player in players.OrderBy(p => p.LastName).ThenBy(p => p.FirstName))
@@ -156,28 +171,78 @@ namespace GolfLeagueManager
 
                 // Find this week's matchup for this player
                 var matchup = matchupsInFlight.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
-                int gross = 0, net = 0, mpPoints = 0;
+                int gross = 0, net = 0, mpPoints = 0, thisWeekMpPoints = 0;
+                bool isAbsent = false;
                 if (matchup != null)
                 {
                     if (matchup.PlayerAId == player.Id)
                     {
                         gross = matchup.PlayerAScore ?? 0;
+                        net = gross;
+                        isAbsent = matchup.PlayerAAbsent;
                         mpPoints = matchup.PlayerAPoints ?? 0;
-                        net = gross; // For more accurate net, sum net per hole if needed
+                        thisWeekMpPoints = matchup.PlayerAPoints ?? 0;
                     }
                     else if (matchup.PlayerBId == player.Id)
                     {
                         gross = matchup.PlayerBScore ?? 0;
-                        mpPoints = matchup.PlayerBPoints ?? 0;
                         net = gross;
+                        isAbsent = matchup.PlayerBAbsent;
+                        mpPoints = matchup.PlayerBPoints ?? 0;
+                        thisWeekMpPoints = matchup.PlayerBPoints ?? 0;
                     }
                 }
-                // Accumulated score: sum all gross scores for this player up to and including this week
-                var grossScores = matchupsUpToCurrent
-                    .Where(m => (m.PlayerAId == player.Id && m.PlayerAScore.HasValue) || (m.PlayerBId == player.Id && m.PlayerBScore.HasValue))
-                    .Select(m => m.PlayerAId == player.Id ? (m.PlayerAScore ?? 0) : (m.PlayerBScore ?? 0))
+                // Use special points if set for this week
+                if (currentWeek.SpecialPointsAwarded.HasValue)
+                {
+                    int special = currentWeek.SpecialPointsAwarded.Value;
+                    if (!isAbsent)
+                    {
+                        mpPoints = special;
+                        thisWeekMpPoints = special;
+                    }
+                    else
+                    {
+                        mpPoints = special / 2;
+                        thisWeekMpPoints = special / 2;
+                    }
+                }
+                // Accumulated score: sum all match points for this player in the current session (including current week)
+                var matchPoints = allMatchups
+                    .Where(m => weekIdsInSession.Contains(m.WeekId) && ((m.PlayerAId == player.Id && m.PlayerAScore.HasValue) || (m.PlayerBId == player.Id && m.PlayerBScore.HasValue)))
+                    .Select(m => {
+                        var week = _context.Weeks.FirstOrDefault(x => x.Id == m.WeekId);
+                        bool absent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
+                        if (week != null && week.SpecialPointsAwarded.HasValue)
+                        {
+                            int special = week.SpecialPointsAwarded.Value;
+                            return absent ? (special / 2) : special;
+                        }
+                        return m.PlayerAId == player.Id ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+                    })
                     .ToList();
-                var accumScore = grossScores.Sum();
+                var accumScore = matchPoints.Sum();
+
+                // Previous week match points
+                int prevMpPoints = 0;
+                var prevWeek = weekIdsUpToCurrent
+                    .Where(wid => wid != currentWeek.Id)
+                    .OrderByDescending(wid =>
+                        _context.Weeks.FirstOrDefault(x => x.Id == wid)?.WeekNumber ?? 0)
+                    .FirstOrDefault();
+                if (prevWeek != Guid.Empty)
+                {
+                    var prevMatchup = allMatchups.FirstOrDefault(m => m.WeekId == prevWeek && (m.PlayerAId == player.Id || m.PlayerBId == player.Id));
+                    var prevWeekObj = _context.Weeks.FirstOrDefault(x => x.Id == prevWeek);
+                    if (prevWeekObj != null && prevWeekObj.SpecialPointsAwarded.HasValue)
+                    {
+                        prevMpPoints = prevWeekObj.SpecialPointsAwarded.Value;
+                    }
+                    else if (prevMatchup != null)
+                    {
+                        prevMpPoints = prevMatchup.PlayerAId == player.Id ? (prevMatchup.PlayerAPoints ?? 0) : (prevMatchup.PlayerBPoints ?? 0);
+                    }
+                }
 
                 table.AddCell(new Cell().Add(new Paragraph($"{player.FirstName} {player.LastName}")));
                 table.AddCell(new Cell().Add(new Paragraph(hcp.ToString("0.##"))));
@@ -185,6 +250,7 @@ namespace GolfLeagueManager
                 table.AddCell(new Cell().Add(new Paragraph(gross > 0 ? gross.ToString() : "-")));
                 table.AddCell(new Cell().Add(new Paragraph(net > 0 ? net.ToString() : "-")));
                 table.AddCell(new Cell().Add(new Paragraph(mpPoints > 0 ? mpPoints.ToString() : "-")));
+                table.AddCell(new Cell().Add(new Paragraph(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-")));
                 table.AddCell(new Cell().Add(new Paragraph(accumScore > 0 ? accumScore.ToString() : "-")));
             }
             return table;

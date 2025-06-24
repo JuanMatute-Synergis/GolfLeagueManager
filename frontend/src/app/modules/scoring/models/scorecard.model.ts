@@ -1,8 +1,8 @@
 export interface HoleScore {
   hole: number;
   par: number;
-  playerAScore?: number;
-  playerBScore?: number;
+  playerAScore?: number | null;
+  playerBScore?: number | null;
   playerAHolesWon?: number;
   playerBHolesWon?: number;
   // Match play fields

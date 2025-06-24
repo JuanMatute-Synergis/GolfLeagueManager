@@ -90,6 +90,18 @@ namespace GolfLeagueManager
             matchup.PlayerAMatchWin = matchPlayResult.PlayerAMatchWin;
             matchup.PlayerBMatchWin = matchPlayResult.PlayerBMatchWin;
 
+            // Special circumstance points logic (applies to both normal and absence scenarios)
+            var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == matchup.WeekId);
+            if (week != null && week.SpecialPointsAwarded.HasValue)
+            {
+                int special = week.SpecialPointsAwarded.Value;
+                matchup.PlayerAPoints = matchup.PlayerAAbsent ? special / 2 : special;
+                matchup.PlayerBPoints = matchup.PlayerBAbsent ? special / 2 : special;
+                // Optionally, set hole points to 0 for special weeks
+                matchup.PlayerAHolePoints = 0;
+                matchup.PlayerBHolePoints = 0;
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }

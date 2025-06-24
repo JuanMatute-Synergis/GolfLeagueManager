@@ -5,7 +5,7 @@ export interface ScorecardHoleView {
   handicap: number;
   
   // Player A data
-  playerAScore?: number;
+  playerAScore?: number | null;
   playerAScoreClass: string;
   playerANetScore: string;
   playerAMatchPoints: number;
@@ -13,7 +13,7 @@ export interface ScorecardHoleView {
   playerAStrokeTooltip: string;
   
   // Player B data
-  playerBScore?: number;
+  playerBScore?: number | null;
   playerBScoreClass: string;
   playerBNetScore: string;
   playerBMatchPoints: number;

@@ -874,7 +874,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   // Helper method to safely get player score
   getPlayerScore(holeIndex: number, player: 'A' | 'B'): number | undefined {
     const hole = this.getHoleData(holeIndex);
-    return player === 'A' ? hole.playerAScore : hole.playerBScore;
+    const score = player === 'A' ? hole.playerAScore : hole.playerBScore;
+    return score === null ? undefined : score;
   }
 
   // Helper method to safely set player score
@@ -1095,7 +1096,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       
       // Player A data
       playerAScore: holeData.playerAScore,
-      playerAScoreClass: this.getScoreClass(holeData.playerAScore, courseHole.par),
+      playerAScoreClass: this.getScoreClass(holeData.playerAScore === null ? undefined : holeData.playerAScore, courseHole.par),
       playerANetScore: this.getNetScore(index, 'A'),
       playerAMatchPoints: holeData.playerAMatchPoints || 0,
       playerAIsStrokeHole: this.isStrokeHole(courseHole.number, 'A'),
@@ -1103,7 +1104,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       
       // Player B data
       playerBScore: holeData.playerBScore,
-      playerBScoreClass: this.getScoreClass(holeData.playerBScore, courseHole.par),
+      playerBScoreClass: this.getScoreClass(holeData.playerBScore === null ? undefined : holeData.playerBScore, courseHole.par),
       playerBNetScore: this.getNetScore(index, 'B'),
       playerBMatchPoints: holeData.playerBMatchPoints || 0,
       playerBIsStrokeHole: this.isStrokeHole(courseHole.number, 'B'),
@@ -1330,33 +1331,29 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   }
 
   private advanceToNextInput(holeIndex: number, player: 'A' | 'B'): void {
-    // For a 9-hole league
-    if (holeIndex < 8) {
+    // Support both 9 and 18 hole scorecards
+    const totalHoles = this.course?.holes?.length || this.viewModel?.holes?.length || 18;
+    if (holeIndex < totalHoles - 1) {
       // Move to next hole for same player
       this.focusInput(holeIndex + 1, player);
     } else {
       // Last hole for current player, move to other player's first hole
       const otherPlayer = player === 'A' ? 'B' : 'A';
-      if (player === 'A') {
-        // Move from Player A hole 9 to Player B hole 1
-        this.focusInput(0, otherPlayer);
-      }
-      // If we're on Player B hole 9, we're done - don't advance
+      this.focusInput(0, otherPlayer);
+      // If on Player B last hole, do not advance further
     }
   }
 
   private advanceToPreviousInput(holeIndex: number, player: 'A' | 'B'): void {
+    const totalHoles = this.course?.holes?.length || this.viewModel?.holes?.length || 18;
     if (holeIndex > 0) {
       // Move to previous hole for same player
       this.focusInput(holeIndex - 1, player);
     } else {
       // First hole for current player, move to other player's last hole
       const otherPlayer = player === 'A' ? 'B' : 'A';
-      if (player === 'B') {
-        // Move from Player B hole 1 to Player A hole 9
-        this.focusInput(8, otherPlayer);
-      }
-      // If we're on Player A hole 1, we're at the beginning - don't go back
+      this.focusInput(totalHoles - 1, otherPlayer);
+      // If on Player A first hole, do not go back further
     }
   }
 

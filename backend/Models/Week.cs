@@ -14,6 +14,13 @@ namespace GolfLeagueManager
         // Scoring and handicap calculation toggles
         public bool CountsForScoring { get; set; } = true; // Whether this week counts for scoring
         public bool CountsForHandicap { get; set; } = true; // Whether this week counts for handicap calculation
+
+        // Indicates if this week is the start of a new session (for standings reset)
+        public bool SessionStart { get; set; } = false;
+
+        // Special global points for all players (admin override)
+        public int? SpecialPointsAwarded { get; set; }
+        public string? SpecialCircumstanceNote { get; set; }
         
         // Foreign key to Season
         [Required]

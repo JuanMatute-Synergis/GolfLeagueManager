@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { trigger, transition, style, animate } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -30,7 +31,18 @@ interface MatchupWithDetails extends Matchup {
   standalone: true,
   imports: [CommonModule, FormsModule, ScorecardModalComponent],
   templateUrl: './score-entry.component.html',
-  styleUrls: ['./score-entry.component.css']
+  styleUrls: ['./score-entry.component.css'],
+  animations: [
+    trigger('rowFade', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.98)' }),
+        animate('120ms cubic-bezier(.4,0,.2,1)', style({ opacity: 1, transform: 'none' }))
+      ]),
+      transition(':leave', [
+        animate('120ms cubic-bezier(.4,0,.2,1)', style({ opacity: 0, transform: 'scale(0.98)' }))
+      ])
+    ])
+  ]
 })
 export class ScoreEntryComponent implements OnInit {
   seasons: Season[] = [];
@@ -41,6 +53,18 @@ export class ScoreEntryComponent implements OnInit {
   selectedWeekId: string = '';
   selectedWeek: Week | null = null;
   isLoading: boolean = false;
+
+  // Filter for matchups
+  matchupFilter: string = '';
+  get filteredMatchups(): MatchupWithDetails[] {
+    if (!this.matchupFilter.trim()) return this.matchups;
+    const filter = this.matchupFilter.trim().toLowerCase();
+    return this.matchups.filter(m =>
+      (m.playerAName && m.playerAName.toLowerCase().includes(filter)) ||
+      (m.playerBName && m.playerBName.toLowerCase().includes(filter)) ||
+      (m.flightName && m.flightName.toLowerCase().includes(filter))
+    );
+  }
 
   // Scorecard modal properties
   showScorecardModal: boolean = false;
@@ -203,7 +227,7 @@ export class ScoreEntryComponent implements OnInit {
         this.players = players;
 
         // Then enrich matchups with player details
-        this.matchups = matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
+        this.matchups = this.sortMatchupsByFlight(matchups.map(matchup => this.enrichMatchupWithDetails(matchup)));
 
         // Load hole scores
         this.loadHoleScoresForMatchups();
@@ -229,7 +253,7 @@ export class ScoreEntryComponent implements OnInit {
 
         // Only enrich if we have players, otherwise store raw matchups
         if (this.players.length > 0) {
-          this.matchups = matchups.map(matchup => this.enrichMatchupWithDetails(matchup));
+          this.matchups = this.sortMatchupsByFlight(matchups.map(matchup => this.enrichMatchupWithDetails(matchup)));
         } else {
           // Store raw matchups and enrich later when players are loaded
           this.matchups = matchups.map(matchup => ({
@@ -244,6 +268,9 @@ export class ScoreEntryComponent implements OnInit {
           // Load players if not already loaded
           this.loadPlayers();
         }
+
+        // Sort matchups by flight name
+        this.matchups = this.sortMatchupsByFlight(this.matchups);
 
         this.loadHoleScoresForMatchups();
         this.isLoading = false;
@@ -298,6 +325,16 @@ export class ScoreEntryComponent implements OnInit {
       originalPlayerAScore: matchup.playerAScore,
       originalPlayerBScore: matchup.playerBScore
     };
+  }
+
+  // Sort matchups by flight name (default)
+  private sortMatchupsByFlight(matchups: MatchupWithDetails[]): MatchupWithDetails[] {
+    return matchups.slice().sort((a, b) => {
+      if (!a.flightName && !b.flightName) return 0;
+      if (!a.flightName) return 1;
+      if (!b.flightName) return -1;
+      return a.flightName.localeCompare(b.flightName, undefined, { numeric: true });
+    });
   }
 
   onScoreChange(matchup: MatchupWithDetails) {

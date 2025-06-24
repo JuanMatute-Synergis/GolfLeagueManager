@@ -64,7 +64,7 @@ import { Season, Week } from '../../models/week.model';
                 class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
             </div>
 
-            <div class="flex items-center space-x-4">
+            <div class="flex flex-col space-y-2">
               <label class="flex items-center space-x-2 cursor-pointer">
                 <input 
                   type="checkbox"
@@ -72,6 +72,14 @@ import { Season, Week } from '../../models/week.model';
                   name="countsForScoring"
                   class="w-4 h-4 text-primary border-border rounded focus:ring-primary focus:ring-2">
                 <span class="text-sm font-medium text-foreground">Counts for Scoring</span>
+              </label>
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input 
+                  type="checkbox"
+                  [(ngModel)]="weekForm_sessionStart"
+                  name="sessionStart"
+                  class="w-4 h-4 text-purple-600 border-border rounded focus:ring-purple-500 focus:ring-2">
+                <span class="text-sm font-medium text-foreground">Session Start</span>
               </label>
             </div>
           </div>
@@ -87,10 +95,21 @@ import { Season, Week } from '../../models/week.model';
                 <span class="text-sm font-medium text-foreground">Counts for Handicap</span>
               </label>
             </div>
-            
-            <div class="text-xs text-muted-foreground">
-              <p><strong>Counts for Scoring:</strong> Week scores contribute to season standings and average score calculations</p>
-              <p><strong>Counts for Handicap:</strong> Week scores contribute to handicap calculations</p>
+            <div class="flex flex-col space-y-2">
+              <label class="block text-sm font-medium text-foreground mb-1">Global Points (Special Circumstance)</label>
+              <input 
+                type="number"
+                [(ngModel)]="weekForm_specialPointsAwarded"
+                name="specialPointsAwarded"
+                min="0"
+                placeholder="Leave blank for none"
+                class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
+              <textarea 
+                [(ngModel)]="weekForm_specialCircumstanceNote"
+                name="specialCircumstanceNote"
+                rows="2"
+                placeholder="Optional note for special points (e.g. rainout, holiday, etc.)"
+                class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 mt-2"></textarea>
             </div>
           </div>
           
@@ -179,6 +198,7 @@ import { Season, Week } from '../../models/week.model';
                     <td class="p-4 border-b border-border text-foreground font-medium">
                       {{ week.weekNumber }}
                       <span *ngIf="isHolidayWeek(week)" class="ml-2 text-xs text-yellow-600 dark:text-yellow-400">🎄</span>
+                      <span *ngIf="week.sessionStart" class="ml-2 text-xs text-purple-600 dark:text-purple-400 font-bold">Session Start</span>
                     </td>
                     <td class="p-4 border-b border-border">
                       <div class="font-semibold text-foreground">{{ week.name }}</div>
@@ -250,6 +270,13 @@ import { Season, Week } from '../../models/week.model';
                           <span *ngIf="week.countsForHandicap" class="text-blue-500">✔️</span>
                           <span *ngIf="!week.countsForHandicap" class="text-gray-500">✖️</span>
                         </button>
+                        <button 
+                          (click)="toggleWeekSessionStart(week)"
+                          class="p-1"
+                          [title]="week.sessionStart ? 'Unset session start' : 'Mark as session start'">
+                          <span *ngIf="week.sessionStart" class="text-purple-600">★</span>
+                          <span *ngIf="!week.sessionStart" class="text-gray-400">☆</span>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -288,6 +315,9 @@ export class WeekManagementComponent implements OnInit {
   weekForm_date: string = '';
   weekForm_countsForScoring: boolean = true;
   weekForm_countsForHandicap: boolean = true;
+  weekForm_sessionStart: boolean = false;
+  weekForm_specialPointsAwarded: number | null = null;
+  weekForm_specialCircumstanceNote: string = '';
 
   constructor(
     private scoringService: ScoringService,
@@ -340,7 +370,10 @@ export class WeekManagementComponent implements OnInit {
       date: this.weekForm_date,
       isActive: true,
       countsForScoring: this.weekForm_countsForScoring,
-      countsForHandicap: this.weekForm_countsForHandicap
+      countsForHandicap: this.weekForm_countsForHandicap,
+      sessionStart: this.weekForm_sessionStart,
+      specialPointsAwarded: this.weekForm_specialPointsAwarded,
+      specialCircumstanceNote: this.weekForm_specialCircumstanceNote
     };
 
     const operation = this.editingWeek 
@@ -367,6 +400,9 @@ export class WeekManagementComponent implements OnInit {
     this.weekForm_date = this.formatDateForInput(week.date);
     this.weekForm_countsForScoring = week.countsForScoring;
     this.weekForm_countsForHandicap = week.countsForHandicap;
+    this.weekForm_sessionStart = !!week.sessionStart;
+    this.weekForm_specialPointsAwarded = week.specialPointsAwarded ?? null;
+    this.weekForm_specialCircumstanceNote = week.specialCircumstanceNote ?? '';
     this.showCreateForm = false;
   }
 
@@ -430,6 +466,21 @@ export class WeekManagementComponent implements OnInit {
     });
   }
   
+  toggleWeekSessionStart(week: Week) {
+    const updatedWeek = { ...week, sessionStart: !week.sessionStart };
+    this.scoringService.updateWeek(week.id, updatedWeek).subscribe({
+      next: () => {
+        week.sessionStart = !week.sessionStart;
+        // Show success feedback
+        console.log(`Week ${week.weekNumber} session start updated to: ${week.sessionStart ? 'Yes' : 'No'}`);
+      },
+      error: (error) => {
+        console.error('Error updating week session start:', error);
+        alert('Failed to update week session start. Please try again.');
+      }
+    });
+  }
+
   cancelEdit() {
     this.resetForm();
   }
@@ -442,6 +493,9 @@ export class WeekManagementComponent implements OnInit {
     this.weekForm_date = '';
     this.weekForm_countsForScoring = true;
     this.weekForm_countsForHandicap = true;
+    this.weekForm_sessionStart = false;
+    this.weekForm_specialPointsAwarded = null;
+    this.weekForm_specialCircumstanceNote = '';
   }
 
   getWeekStatus(week: Week): string {

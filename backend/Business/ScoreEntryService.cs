@@ -102,6 +102,10 @@ namespace GolfLeagueManager
                 .Where(m => m.WeekId == weekId)
                 .ToListAsync();
 
+            // Check for special points for this week
+            var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == weekId);
+            int? specialPoints = week?.SpecialPointsAwarded;
+
             var leaderboardEntries = new List<ScoreEntry>();
 
             foreach (var matchup in matchups)
@@ -113,7 +117,7 @@ namespace GolfLeagueManager
                     PlayerId = matchup.PlayerAId,
                     WeekId = weekId,
                     Score = matchup.PlayerAScore,
-                    PointsEarned = matchup.PlayerAPoints ?? 0,
+                    PointsEarned = specialPoints ?? (matchup.PlayerAPoints ?? 0),
                     Player = matchup.PlayerA
                 });
 
@@ -124,7 +128,7 @@ namespace GolfLeagueManager
                     PlayerId = matchup.PlayerBId,
                     WeekId = weekId,
                     Score = matchup.PlayerBScore,
-                    PointsEarned = matchup.PlayerBPoints ?? 0,
+                    PointsEarned = specialPoints ?? (matchup.PlayerBPoints ?? 0),
                     Player = matchup.PlayerB
                 });
             }
@@ -138,13 +142,13 @@ namespace GolfLeagueManager
             // Get all weeks for the season that count for scoring
             var scoringWeeks = await _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
-                .Select(w => w.Id)
                 .ToListAsync();
+            var scoringWeekIds = scoringWeeks.Select(w => w.Id).ToList();
 
             // Get score entries only from weeks that count for scoring
             var scoreEntries = await _context.ScoreEntries
                 .Include(se => se.Player)
-                .Where(se => scoringWeeks.Contains(se.WeekId))
+                .Where(se => scoringWeekIds.Contains(se.WeekId))
                 .ToListAsync();
             
             var standings = scoreEntries
@@ -154,7 +158,12 @@ namespace GolfLeagueManager
                 {
                     PlayerId = g.Key,
                     PlayerName = g.First().Player?.FirstName + " " + g.First().Player?.LastName,
-                    TotalPoints = g.Sum(se => se.PointsEarned),
+                    TotalPoints = g.Sum(se => {
+                        var week = scoringWeeks.FirstOrDefault(w => w.Id == se.WeekId);
+                        if (week != null && week.SpecialPointsAwarded.HasValue)
+                            return week.SpecialPointsAwarded.Value;
+                        return se.PointsEarned;
+                    }),
                     AverageScore = g.Where(se => se.Score.HasValue).Average(se => se.Score!.Value),
                     RoundsPlayed = g.Count(),
                     BestScore = g.Where(se => se.Score.HasValue).Min(se => se.Score!.Value),

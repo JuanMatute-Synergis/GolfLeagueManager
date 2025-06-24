@@ -1,230 +1,196 @@
 <div class="h-full flex flex-col">
-  <!-- Header -->
-  <div class="mb-8 flex-shrink-0">
-    <h2 class="text-3xl font-semibold text-foreground mb-2">Score Entry</h2>
-    <p class="text-muted-foreground">Enter scores for each matchup in the selected week</p>
-  </div>
-
-  <!-- Season and Week Selection -->
-  <div class="bg-card border border-border rounded-lg shadow-sm p-4 mb-6 flex-shrink-0">
-    <div class="flex flex-col sm:flex-row gap-4">
-      <select
-        [(ngModel)]="selectedSeasonId"
-        (change)="onSeasonChange()"
-        class="px-4 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
-        <option value="">Select Season</option>
-        <option *ngFor="let season of seasons" [value]="season.id">{{ season.name }}</option>
-      </select>
-
-      <select
-        [(ngModel)]="selectedWeekId"
-        (change)="onWeekChange()"
-        [disabled]="!selectedSeasonId || weeks.length === 0"
-        class="px-4 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-muted disabled:cursor-not-allowed">
-        <option value="">Select Week</option>
-        <option *ngFor="let week of weeks" [value]="week.id">{{ getWeekDisplayName(week) }}</option>
-      </select>
+  <!-- Compact Header Bar -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 px-2 py-3 border-b border-border bg-card/80">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+      <h2 class="text-xl font-bold text-foreground mr-2">Score Entry</h2>
+      <span *ngIf="selectedWeek" class="text-sm text-muted-foreground">{{ selectedWeek.name }} &bull; {{ formatWeekDate(selectedWeek) }}</span>
+      <span class="hidden sm:inline mx-2 text-muted-foreground">|</span>
+      <span class="text-xs text-muted-foreground flex items-center gap-2">
+        <span>⚡ {{ matchups.length }} matchups</span>
+        <span>✅ {{ getCompletedMatchupsCount() }} scored</span>
+      </span>
+    </div>
+    <div class="flex gap-2 mt-2 sm:mt-0">
+      <button
+        class="bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-blue-700 transition-colors"
+        (click)="downloadWeekScorecardPdf()"
+        [disabled]="!selectedWeekId || isLoading">
+        📝 PDF Scorecards
+      </button>
     </div>
   </div>
 
-  <div *ngIf="selectedWeekId && selectedWeek" class="flex-1 flex flex-col min-h-0">
-    <!-- Week Info & Actions -->
-    <div class="bg-card border border-border rounded-lg shadow-sm p-4 mb-6 flex-shrink-0">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <!-- Week Info & Stats -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div class="flex-shrink-0">
-            <h3 class="text-lg font-semibold text-foreground">{{ selectedWeek.name }}</h3>
-            <p class="text-sm text-muted-foreground">{{ formatWeekDate(selectedWeek) }}</p>
-          </div>
-          <div class="flex items-center gap-6 text-sm">
-            <div class="flex items-center gap-1">
-              <span class="text-muted-foreground">⚡</span>
-              <span class="font-medium text-foreground">{{ matchups.length }}</span>
-              <span class="text-muted-foreground">matchups</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <span class="text-muted-foreground">✅</span>
-              <span class="font-medium text-foreground">{{ getCompletedMatchupsCount() }}</span>
-              <span class="text-muted-foreground">scored</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0">
-          <!-- <button
-            (click)="saveAllScores()"
-            [disabled]="!hasUnsavedChanges() || isLoading"
-            class="bg-primary text-primary-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-            <span *ngIf="isLoading" class="animate-spin">⟳</span>
-            💾 Save All
-          </button> -->
-          <!-- <button
-            (click)="clearAllScores()"
-            [disabled]="matchups.length === 0"
-            class="bg-destructive text-destructive-foreground px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed">
-            🗑️ Clear All
-          </button> -->
-          <button
-            class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
-            (click)="downloadWeekScorecardPdf()"
-            [disabled]="!selectedWeekId || isLoading">
-            📝 Generate PDF Scorecards
-          </button>
-        </div>
-      </div>
+  <!-- Dropdown Row -->
+  <div class="flex items-center gap-3 mb-1 px-2">
+    <select
+      [(ngModel)]="selectedSeasonId"
+      (change)="onSeasonChange()"
+      class="w-32 h-10 px-2 border border-border rounded bg-background text-foreground text-xs focus:border-primary focus:ring-2 focus:ring-primary/20">
+      <option value="">Season</option>
+      <option *ngFor="let season of seasons" [value]="season.id">{{ season.name }}</option>
+    </select>
+    <select
+      [(ngModel)]="selectedWeekId"
+      (change)="onWeekChange()"
+      [disabled]="!selectedSeasonId || weeks.length === 0"
+      class="w-36 h-10 px-2 border border-border rounded bg-background text-foreground text-xs focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-muted disabled:cursor-not-allowed">
+      <option value="">Week</option>
+      <option *ngFor="let week of weeks" [value]="week.id">{{ getWeekDisplayName(week) }}</option>
+    </select>
+  </div>
+  <!-- Filter Input Row -->
+  <div class="px-2 mt-3 mb-0">
+    <div class="relative">
+      <input
+        type="text"
+        [(ngModel)]="matchupFilter"
+        placeholder="Filter matchups by player or flight..."
+        class="w-full h-10 px-3 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 pr-10 text-sm"
+      />
+      <button
+        *ngIf="matchupFilter"
+        (click)="matchupFilter = ''"
+        type="button"
+        class="absolute right-3 top-1/2 -translate-y-1/2 bg-muted hover:bg-primary/10 text-muted-foreground rounded-full w-6 h-6 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors opacity-60 hover:opacity-90 text-sm"
+        title="Clear filter"
+      >
+        <span>&times;</span>
+      </button>
     </div>
+  </div>
 
-    <!-- Matchups Table -->
-    <div class="bg-card border border-border rounded-lg shadow-sm flex-1 min-h-0 flex flex-col">
-      <div class="px-6 py-4 border-b border-border bg-muted/20 flex-shrink-0">
-        <h2 class="text-xl font-semibold text-foreground">Matchup Scores</h2>
-      </div>
-
-      <div *ngIf="matchups.length === 0" class="p-8 text-center flex-1 flex items-center justify-center">
-        <div>
-          <div class="text-6xl mb-4">⛳</div>
-          <h3 class="text-lg font-semibold text-foreground mb-2">No matchups scheduled</h3>
-          <p class="text-muted-foreground">No matchups have been created for this week yet.</p>
-          <p class="text-sm text-muted-foreground mt-2">Go to Scheduling Management to create matchups.</p>
+  <!-- Matchups List (main focus) -->
+  <div class="flex-1 flex flex-col min-h-0">
+    <div class="flex flex-col flex-1 min-h-0">
+      <div class="px-2 pt-2 pb-1">
+        <div class="relative">
         </div>
       </div>
-
-      <div class="flex-1 min-h-0" *ngIf="matchups.length > 0">
-        <div class="h-full overflow-y-auto">
-          <table class="w-full border-collapse">
-            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground sticky top-0 z-10">
-              <tr>
-                <th class="text-left font-semibold text-foreground p-3 border-b border-border bg-muted/50">Matchup & Scores</th>
-                <th class="text-center font-semibold text-foreground p-3 border-b border-border bg-muted/50">Flight</th>
-                <th class="text-center font-semibold text-foreground p-3 border-b border-border bg-muted/50">Result</th>
-                <th class="text-center font-semibold text-foreground p-3 border-b border-border bg-muted/50">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let matchup of matchups; trackBy: trackByMatchupId"
-                  [class]="'hover:bg-muted/20 transition-colors ' + (matchup.hasChanged ? 'bg-primary/5' : '')">
-                <!-- Matchup & Scores -->
-                <td class="p-3 border-b border-border">
-                  <div class="space-y-2">
-                    <!-- Player A -->
-                    <div class="flex items-center justify-between">
-                      <span class="font-medium text-foreground text-sm">{{ matchup.playerAName }}</span>
-                      <div class="flex items-center space-x-2">
-                        <!-- Match Play Points (Most Prominent) -->
-                        <span class="px-3 py-1 text-lg font-bold text-white bg-primary rounded-lg min-w-[3rem] text-center">
-                          {{ getPlayerMatchPoints(matchup, 'A') }}
-                        </span>
-                        <!-- Gross Score -->
-                        <span class="px-2 py-1 text-sm font-semibold text-foreground bg-muted rounded min-w-[2.5rem] text-center" title="Gross Score">
-                          {{ matchup.playerAScore || '-' }}
-                        </span>
-                        <!-- Net Score -->
-                        <span class="px-2 py-1 text-sm font-medium text-muted-foreground bg-muted/50 rounded min-w-[2.5rem] text-center" title="Net Score">
-                          {{ getPlayerNetScore(matchup, 'A') }}
-                        </span>
-                      </div>
-                    </div>
-                    <!-- Player B -->
-                    <div class="flex items-center justify-between">
-                      <span class="font-medium text-foreground text-sm">{{ matchup.playerBName }}</span>
-                      <div class="flex items-center space-x-2">
-                        <!-- Match Play Points (Most Prominent) -->
-                        <span class="px-3 py-1 text-lg font-bold text-white bg-primary rounded-lg min-w-[3rem] text-center">
-                          {{ getPlayerMatchPoints(matchup, 'B') }}
-                        </span>
-                        <!-- Gross Score -->
-                        <span class="px-2 py-1 text-sm font-semibold text-foreground bg-muted rounded min-w-[2.5rem] text-center" title="Gross Score">
-                          {{ matchup.playerBScore || '-' }}
-                        </span>
-                        <!-- Net Score -->
-                        <span class="px-2 py-1 text-sm font-medium text-muted-foreground bg-muted/50 rounded min-w-[2.5rem] text-center" title="Net Score">
-                          {{ getPlayerNetScore(matchup, 'B') }}
-                        </span>
-                      </div>
-                    </div>
-                    <!-- Score Legend (small) -->
-                    <div class="flex justify-end text-xs text-muted-foreground space-x-3 mt-1" *ngIf="matchup.playerAScore && matchup.playerBScore">
-                      <span class="text-primary font-semibold">MP</span>
-                      <span>Gross</span>
-                      <span>Net</span>
-                    </div>
-                    <!-- Player Stats (Handicap & Average Score) -->
-                    <div class="flex justify-between text-xs text-muted-foreground mt-1" *ngIf="showPlayerStats(matchup)">
-                      <div class="flex space-x-4">
-                        <span>{{ getPlayerFirstName(matchup.playerAName) }}: HC {{ getPlayerHandicapForDisplay(matchup.playerAId) }} | Avg {{ getPlayerAverageScore(matchup.playerAId) }}</span>
-                      </div>
-                      <div class="flex space-x-4">
-                        <span>{{ getPlayerFirstName(matchup.playerBName) }}: HC {{ getPlayerHandicapForDisplay(matchup.playerBId) }} | Avg {{ getPlayerAverageScore(matchup.playerBId) }}</span>
-                      </div>
+      <div class="flex-1 min-h-0 overflow-y-auto">
+        <table class="w-full border-collapse mt-2">
+          <thead class="bg-muted/50 text-xs uppercase text-muted-foreground sticky top-0 z-10">
+            <tr>
+              <th class="text-left font-semibold text-foreground p-2 border-b border-border bg-muted/50">Matchup & Scores</th>
+              <th class="text-center font-semibold text-foreground p-2 border-b border-border bg-muted/50">Flight</th>
+              <th class="text-center font-semibold text-foreground p-2 border-b border-border bg-muted/50">Result</th>
+              <th class="text-center font-semibold text-foreground p-2 border-b border-border bg-muted/50">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let matchup of filteredMatchups; trackBy: trackByMatchupId"
+                [@rowFade]
+                [class]="'hover:bg-muted/20 transition-colors ' + (matchup.hasChanged ? 'bg-primary/5' : '')">
+              <!-- Matchup & Scores -->
+              <td class="p-3 border-b border-border">
+                <div class="space-y-2">
+                  <!-- Player A -->
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium text-foreground text-sm">{{ matchup.playerAName }}</span>
+                    <div class="flex items-center space-x-2">
+                      <!-- Match Play Points (Most Prominent) -->
+                      <span class="px-3 py-1 text-lg font-bold text-white bg-primary rounded-lg min-w-[3rem] text-center">
+                        {{ getPlayerMatchPoints(matchup, 'A') }}
+                      </span>
+                      <!-- Gross Score -->
+                      <span class="px-2 py-1 text-sm font-semibold text-foreground bg-muted rounded min-w-[2.5rem] text-center" title="Gross Score">
+                        {{ matchup.playerAScore || '-' }}
+                      </span>
+                      <!-- Net Score -->
+                      <span class="px-2 py-1 text-sm font-medium text-muted-foreground bg-muted/50 rounded min-w-[2.5rem] text-center" title="Net Score">
+                        {{ getPlayerNetScore(matchup, 'A') }}
+                      </span>
                     </div>
                   </div>
-                </td>
-                <!-- Flight -->
-                <td class="p-3 border-b border-border text-center">
-                  <span class="text-sm text-muted-foreground">{{ matchup.flightName }}</span>
-                </td>
-                <!-- Result -->
-                <td class="p-3 border-b border-border text-center">
-                  <ng-container *ngIf="matchup.playerAAbsent || matchup.playerBAbsent; else normalResult">
-                    <span class="font-semibold text-foreground">{{ getMatchupStatus(matchup) }}</span>
+                  <!-- Player B -->
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium text-foreground text-sm">{{ matchup.playerBName }}</span>
+                    <div class="flex items-center space-x-2">
+                      <!-- Match Play Points (Most Prominent) -->
+                      <span class="px-3 py-1 text-lg font-bold text-white bg-primary rounded-lg min-w-[3rem] text-center">
+                        {{ getPlayerMatchPoints(matchup, 'B') }}
+                      </span>
+                      <!-- Gross Score -->
+                      <span class="px-2 py-1 text-sm font-semibold text-foreground bg-muted rounded min-w-[2.5rem] text-center" title="Gross Score">
+                        {{ matchup.playerBScore || '-' }}
+                      </span>
+                      <!-- Net Score -->
+                      <span class="px-2 py-1 text-sm font-medium text-muted-foreground bg-muted/50 rounded min-w-[2.5rem] text-center" title="Net Score">
+                        {{ getPlayerNetScore(matchup, 'B') }}
+                      </span>
+                    </div>
+                  </div>
+                  <!-- Score Legend (small) -->
+                  <div class="flex justify-end text-xs text-muted-foreground space-x-3 mt-1" *ngIf="matchup.playerAScore && matchup.playerBScore">
+                    <span class="text-primary font-semibold">MP</span>
+                    <span>Gross</span>
+                    <span>Net</span>
+                  </div>
+                  <!-- Player Stats (Handicap & Average Score) -->
+                  <div class="flex justify-between text-xs text-muted-foreground mt-1" *ngIf="showPlayerStats(matchup)">
+                    <div class="flex space-x-4">
+                      <span>{{ getPlayerFirstName(matchup.playerAName) }}: HC {{ getPlayerHandicapForDisplay(matchup.playerAId) }} | Avg {{ getPlayerAverageScore(matchup.playerAId) }}</span>
+                    </div>
+                    <div class="flex space-x-4">
+                      <span>{{ getPlayerFirstName(matchup.playerBName) }}: HC {{ getPlayerHandicapForDisplay(matchup.playerBId) }} | Avg {{ getPlayerAverageScore(matchup.playerBId) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <!-- Flight -->
+              <td class="p-3 border-b border-border text-center">
+                <span class="text-sm text-muted-foreground">{{ matchup.flightName }}</span>
+              </td>
+              <!-- Result -->
+              <td class="p-3 border-b border-border text-center">
+                <ng-container *ngIf="matchup.playerAAbsent || matchup.playerBAbsent; else normalResult">
+                  <span class="font-semibold text-foreground">{{ getMatchupStatus(matchup) }}</span>
+                  <span [class]="'block text-xs px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
+                    {{ getMatchupStatus(matchup) }}
+                  </span>
+                </ng-container>
+                <ng-template #normalResult>
+                  <div *ngIf="matchup.playerAScore && matchup.playerBScore" class="text-sm">
+                    <span class="font-semibold text-foreground">{{ getMatchupWinner(matchup) }}</span>
                     <span [class]="'block text-xs px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
                       {{ getMatchupStatus(matchup) }}
                     </span>
-                  </ng-container>
-                  <ng-template #normalResult>
-                    <div *ngIf="matchup.playerAScore && matchup.playerBScore" class="text-sm">
-                      <span class="font-semibold text-foreground">{{ getMatchupWinner(matchup) }}</span>
-                      <span [class]="'block text-xs px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
-                        {{ getMatchupStatus(matchup) }}
-                      </span>
-                    </div>
-                    <div *ngIf="!matchup.playerAScore || !matchup.playerBScore" class="text-xs text-muted-foreground">
-                      <span class="block">Pending</span>
-                      <span [class]="'block px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
-                        {{ getMatchupStatus(matchup) }}
-                      </span>
-                    </div>
-                  </ng-template>
-                </td>
-                <!-- Actions -->
-                <td class="p-3 border-b border-border">
-                  <div class="flex justify-center space-x-1">
-                    <button
-                      (click)="openScorecardModal(matchup)"
-                      class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors">
-                      📋
-                    </button>
-                    <button
-                      *ngIf="matchup.hasChanged"
-                      (click)="saveMatchupScore(matchup)"
-                      [disabled]="isLoading"
-                      class="bg-primary text-primary-foreground px-2 py-1 rounded text-xs hover:bg-primary/90 transition-colors disabled:opacity-50">
-                      💾
-                    </button>
-                    <button
-                      *ngIf="matchup.playerAScore || matchup.playerBScore"
-                      (click)="clearMatchupScores(matchup)"
-                      class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs hover:bg-destructive/90 transition-colors">
-                      🗑️
-                    </button>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <div *ngIf="!matchup.playerAScore || !matchup.playerBScore" class="text-xs text-muted-foreground">
+                    <span class="block">Pending</span>
+                    <span [class]="'block px-2 py-1 rounded-full mt-1 ' + getMatchupStatusClass(matchup)">
+                      {{ getMatchupStatus(matchup) }}
+                    </span>
+                  </div>
+                </ng-template>
+              </td>
+              <!-- Actions -->
+              <td class="p-3 border-b border-border">
+                <div class="flex justify-center space-x-1">
+                  <button
+                    (click)="openScorecardModal(matchup)"
+                    class="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors">
+                    📋
+                  </button>
+                  <button
+                    *ngIf="matchup.hasChanged"
+                    (click)="saveMatchupScore(matchup)"
+                    [disabled]="isLoading"
+                    class="bg-primary text-primary-foreground px-2 py-1 rounded text-xs hover:bg-primary/90 transition-colors disabled:opacity-50">
+                    💾
+                  </button>
+                  <button
+                    *ngIf="matchup.playerAScore || matchup.playerBScore"
+                    (click)="clearMatchupScores(matchup)"
+                    class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs hover:bg-destructive/90 transition-colors">
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="filteredMatchups.length === 0" class="p-8 text-center text-muted-foreground text-sm">No matchups found.</div>
       </div>
-    </div>
-  </div>
-
-  <!-- Select Week Message -->
-  <div *ngIf="!selectedWeekId" class="text-center mt-8 flex-1 flex items-center justify-center">
-    <div>
-      <div class="text-6xl mb-4">📝</div>
-      <h3 class="text-xl font-semibold text-foreground mb-2">Select a Week</h3>
-      <p class="text-muted-foreground">Choose a season and week from the dropdowns above to enter scores.</p>
     </div>
   </div>
 </div>

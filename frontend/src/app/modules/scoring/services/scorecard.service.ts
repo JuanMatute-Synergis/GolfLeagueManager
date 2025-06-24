@@ -73,8 +73,8 @@ export class ScorecardService {
       holeScores: scorecardData.holes.map(hole => ({
         holeNumber: hole.hole,
         par: hole.par,
-        playerAScore: hole.playerAScore,
-        playerBScore: hole.playerBScore
+        playerAScore: hole.playerAScore === null ? undefined : hole.playerAScore,
+        playerBScore: hole.playerBScore === null ? undefined : hole.playerBScore
       }))
     };
 

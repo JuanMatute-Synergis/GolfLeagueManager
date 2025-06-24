@@ -7,6 +7,9 @@ export interface Week {
   seasonId: string;
   countsForScoring: boolean; // Whether this week counts for scoring
   countsForHandicap: boolean; // Whether this week counts for handicap calculation
+  sessionStart?: boolean; // Indicates if this week is the start of a new session
+  specialPointsAwarded?: number | null; // Global points for all players (admin override)
+  specialCircumstanceNote?: string | null; // Admin note for special points
   season?: Season;
   scoreEntries?: ScoreEntry[];
   matchups?: BasicMatchup[];
