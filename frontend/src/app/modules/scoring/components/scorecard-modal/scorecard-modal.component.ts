@@ -1310,7 +1310,25 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       // Move to the other player's input for the same hole
       const otherPlayer = player === 'A' ? 'B' : 'A';
       this.focusInput(holeIndex, otherPlayer);
-    } else if (event.key === 'Backspace' || event.key === 'Delete') {
+    } else if (event.key === 'Backspace') {
+      // Clear timeout when user is editing
+      this.clearAutoAdvanceTimeout(inputId);
+      
+      // Get the current input element
+      const input = event.target as HTMLInputElement;
+      const currentValue = input.value;
+      
+      // If the input is empty or only has the value that's about to be deleted
+      if (!currentValue || currentValue.length <= 1) {
+        event.preventDefault();
+        
+        // Clear the current hole score
+        this.setPlayerScore(holeIndex, player, undefined);
+        
+        // Move to previous hole
+        this.advanceToPreviousInput(holeIndex, player);
+      }
+    } else if (event.key === 'Delete') {
       // Clear timeout when user is editing
       this.clearAutoAdvanceTimeout(inputId);
     }
