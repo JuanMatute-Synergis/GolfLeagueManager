@@ -3,6 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace GolfLeagueManager
 {
+    public enum NineHoles
+    {
+        Front = 1,
+        Back = 2
+    }
+
     public class Week
     {
         public Guid Id { get; set; }
@@ -17,6 +23,9 @@ namespace GolfLeagueManager
 
         // Indicates if this week is the start of a new session (for standings reset)
         public bool SessionStart { get; set; } = false;
+
+        // Indicates which 9 holes are played this week (Front 1-9 or Back 10-18)
+        public NineHoles NineHoles { get; set; } = NineHoles.Front;
 
         // Special global points for all players (admin override)
         public int? SpecialPointsAwarded { get; set; }

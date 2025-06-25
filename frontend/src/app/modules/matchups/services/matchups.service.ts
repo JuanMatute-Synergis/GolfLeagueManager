@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { NineHoles } from '../../scoring/models/week.model';
 
 export interface Matchup {
   id?: string;
@@ -52,6 +53,13 @@ export interface Week {
   name: string;
   isActive: boolean;
   seasonId: string;
+  countsForScoring: boolean;
+  countsForHandicap: boolean;
+  sessionStart?: boolean;
+  specialPointsAwarded?: number | null;
+  specialCircumstanceNote?: string | null;
+  nineHoles: NineHoles;
+  matchups?: Matchup[];
 }
 
 export interface Season {

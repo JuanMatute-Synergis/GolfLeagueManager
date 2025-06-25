@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using GolfLeagueManager.Models;
 
 namespace GolfLeagueManager
 {
@@ -17,6 +18,9 @@ namespace GolfLeagueManager
         public DbSet<HoleScore> HoleScores { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseHole> CourseHoles { get; set; }
+        public DbSet<PlayerSessionAverage> PlayerSessionAverages { get; set; }
+        public DbSet<PlayerSessionHandicap> PlayerSessionHandicaps { get; set; }
+        public DbSet<User> Users { get; set; } // Add DbSet for User entity
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -184,6 +188,62 @@ namespace GolfLeagueManager
                     .WithMany(c => c.CourseHoles)
                     .HasForeignKey(ch => ch.CourseId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure PlayerSessionAverage entity
+            modelBuilder.Entity<PlayerSessionAverage>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasDefaultValueSql("gen_random_uuid()");
+                    
+                // Configure relationship with Player
+                entity.HasOne(psa => psa.Player)
+                    .WithMany()
+                    .HasForeignKey(psa => psa.PlayerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Configure relationship with Season
+                entity.HasOne(psa => psa.Season)
+                    .WithMany()
+                    .HasForeignKey(psa => psa.SeasonId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Create unique index to prevent duplicate session averages for same player/season/session
+                entity.HasIndex(psa => new { psa.PlayerId, psa.SeasonId, psa.SessionStartWeekNumber })
+                    .IsUnique();
+            });
+
+            // Configure PlayerSessionHandicap entity
+            modelBuilder.Entity<PlayerSessionHandicap>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasDefaultValueSql("gen_random_uuid()");
+                    
+                // Configure relationship with Player
+                entity.HasOne(psh => psh.Player)
+                    .WithMany()
+                    .HasForeignKey(psh => psh.PlayerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Configure relationship with Season
+                entity.HasOne(psh => psh.Season)
+                    .WithMany()
+                    .HasForeignKey(psh => psh.SeasonId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    
+                // Create unique index to prevent duplicate session handicaps for same player/season/session
+                entity.HasIndex(psh => new { psh.PlayerId, psh.SeasonId, psh.SessionStartWeekNumber })
+                    .IsUnique();
+            });
+
+            // Configure User entity
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasDefaultValueSql("gen_random_uuid()");
+                entity.HasIndex(e => e.Username).IsUnique();
+                entity.Property(e => e.Username).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.PasswordHash).IsRequired();
             });
 
             base.OnModelCreating(modelBuilder);

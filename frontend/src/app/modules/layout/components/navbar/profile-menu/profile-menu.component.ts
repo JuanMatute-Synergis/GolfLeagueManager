@@ -1,9 +1,10 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ThemeService } from '../../../../../core/services/theme.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 import { ClickOutsideDirective } from '../../../../../shared/directives/click-outside.directive';
 
 @Component({
@@ -89,12 +90,25 @@ export class ProfileMenuComponent implements OnInit {
   public themeMode = ['light', 'dark'];
   public themeDirection = ['ltr', 'rtl'];
 
-  constructor(public themeService: ThemeService) {}
+  constructor(public themeService: ThemeService, private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {}
 
   public toggleMenu(): void {
     this.isOpen = !this.isOpen;
+  }
+
+  public logout(): void {
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/auth']);
+      },
+      error: (error) => {
+        console.error('Logout error:', error);
+        // Even if logout fails, redirect to auth page
+        this.router.navigate(['/auth']);
+      }
+    });
   }
 
   toggleThemeMode() {

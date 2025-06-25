@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ScoringService } from '../../services/scoring.service';
-import { Season, Week } from '../../models/week.model';
+import { Season, Week, NineHoles } from '../../models/week.model';
 
 @Component({
   selector: 'app-week-management',
@@ -64,6 +64,19 @@ import { Season, Week } from '../../models/week.model';
                 class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
             </div>
 
+            <div>
+              <label class="block text-sm font-medium text-foreground mb-2">Nine Holes</label>
+              <select 
+                [(ngModel)]="weekForm_nineHoles"
+                name="nineHoles"
+                class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
+                <option [ngValue]="NineHoles.Front">Front 9</option>
+                <option [ngValue]="NineHoles.Back">Back 9</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="flex flex-col space-y-2">
               <label class="flex items-center space-x-2 cursor-pointer">
                 <input 
@@ -186,6 +199,7 @@ import { Season, Week } from '../../models/week.model';
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Week</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Name</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Date</th>
+                    <th class="text-left font-semibold text-foreground p-4 border-b border-border">Nine Holes</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Status</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Scoring</th>
                     <th class="text-left font-semibold text-foreground p-4 border-b border-border">Scores</th>
@@ -208,6 +222,11 @@ import { Season, Week } from '../../models/week.model';
                     </td>
                     <td class="p-4 border-b border-border text-foreground">
                       <div>{{ week.date | date:'fullDate' }}</div>
+                    </td>
+                    <td class="p-4 border-b border-border text-foreground">
+                      <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                        {{ getNineHolesDisplay(week) }}
+                      </span>
                     </td>
                     <td class="p-4 border-b border-border">
                       <span [class]="'px-2 py-1 text-xs rounded-full ' + getWeekStatusClass(week)">
@@ -316,8 +335,12 @@ export class WeekManagementComponent implements OnInit {
   weekForm_countsForScoring: boolean = true;
   weekForm_countsForHandicap: boolean = true;
   weekForm_sessionStart: boolean = false;
+  weekForm_nineHoles: NineHoles = NineHoles.Front;
   weekForm_specialPointsAwarded: number | null = null;
   weekForm_specialCircumstanceNote: string = '';
+
+  // Enum for template access
+  NineHoles = NineHoles;
 
   constructor(
     private scoringService: ScoringService,
@@ -372,6 +395,7 @@ export class WeekManagementComponent implements OnInit {
       countsForScoring: this.weekForm_countsForScoring,
       countsForHandicap: this.weekForm_countsForHandicap,
       sessionStart: this.weekForm_sessionStart,
+      nineHoles: this.weekForm_nineHoles,
       specialPointsAwarded: this.weekForm_specialPointsAwarded,
       specialCircumstanceNote: this.weekForm_specialCircumstanceNote
     };
@@ -401,6 +425,7 @@ export class WeekManagementComponent implements OnInit {
     this.weekForm_countsForScoring = week.countsForScoring;
     this.weekForm_countsForHandicap = week.countsForHandicap;
     this.weekForm_sessionStart = !!week.sessionStart;
+    this.weekForm_nineHoles = week.nineHoles ?? NineHoles.Front; // Default to Front if undefined
     this.weekForm_specialPointsAwarded = week.specialPointsAwarded ?? null;
     this.weekForm_specialCircumstanceNote = week.specialCircumstanceNote ?? '';
     this.showCreateForm = false;
@@ -494,6 +519,7 @@ export class WeekManagementComponent implements OnInit {
     this.weekForm_countsForScoring = true;
     this.weekForm_countsForHandicap = true;
     this.weekForm_sessionStart = false;
+    this.weekForm_nineHoles = NineHoles.Front;
     this.weekForm_specialPointsAwarded = null;
     this.weekForm_specialCircumstanceNote = '';
   }
@@ -631,5 +657,10 @@ export class WeekManagementComponent implements OnInit {
     });
     
     return scoreCount;
+  }
+
+  getNineHolesDisplay(week: Week): string {
+    const nineHoles = week.nineHoles ?? NineHoles.Front; // Default to Front if undefined
+    return nineHoles === NineHoles.Front ? 'Front 9' : 'Back 9';
   }
 }

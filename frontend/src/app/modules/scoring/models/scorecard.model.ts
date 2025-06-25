@@ -17,6 +17,7 @@ export interface HoleScore {
 
 export interface ScorecardData {
   matchupId: string;
+  weekId?: string; // Added to track which week this scorecard belongs to
   playerAId: string;
   playerBId: string;
   playerAName: string;

@@ -1,3 +1,8 @@
+export enum NineHoles {
+  Front = 1,
+  Back = 2
+}
+
 export interface Week {
   id: string;
   weekNumber: number;
@@ -8,6 +13,7 @@ export interface Week {
   countsForScoring: boolean; // Whether this week counts for scoring
   countsForHandicap: boolean; // Whether this week counts for handicap calculation
   sessionStart?: boolean; // Indicates if this week is the start of a new session
+  nineHoles: NineHoles; // Indicates which 9 holes are played this week (Front 1-9 or Back 10-18)
   specialPointsAwarded?: number | null; // Global points for all players (admin override)
   specialCircumstanceNote?: string | null; // Admin note for special points
   season?: Season;

@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +11,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using GolfLeagueManager.Business;
 using GolfLeagueManager.Converters;
+using GolfLeagueManager.Helpers;
 
 namespace GolfLeagueManager
 {
@@ -52,30 +56,90 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<CourseService>();
             builder.Services.AddScoped<DataSeeder>();
             builder.Services.AddScoped<ScorecardService>();
-            builder.Services.AddScoped<MatchPlayService>();
-            builder.Services.AddScoped<MatchPlayScoringService>();
+            builder.Services.AddScoped<MatchPlayService>();            builder.Services.AddScoped<MatchPlayScoringService>();
             builder.Services.AddScoped<PdfScorecardService>();
             builder.Services.AddScoped<AverageScoreService>();
+            builder.Services.AddScoped<HandicapService>();
             builder.Services.AddScoped<ScoreImportService>();
             builder.Services.AddScoped<JsonImportService>();
             builder.Services.AddScoped<DatabaseCleanupService>();            // Add controllers with JSON options
-            builder.Services.AddControllers()
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter());
+            })
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
-                });// Add CORS
+                });            // Add CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAngularApp", policy =>
                 {
                     policy.WithOrigins("http://localhost:4200")
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          .AllowCredentials(); // Allow cookies to be sent
                 });
             });
+            // Add JWT authentication
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                var publicKeyPath = builder.Configuration["Jwt:PublicKeyPath"] ?? "jwt_public_key.pem";
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = RsaKeyHelper.GetPublicKey(publicKeyPath),
+                    RequireSignedTokens = true,
+                    ValidAlgorithms = new[] { SecurityAlgorithms.RsaSha256 }
+                };
+                
+                // Configure to read JWT from cookies instead of Authorization header
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        // Try to get token from cookie first
+                        if (context.Request.Cookies.ContainsKey("golf_jwt_token"))
+                        {
+                            context.Token = context.Request.Cookies["golf_jwt_token"];
+                        }
+                        // Fallback to Authorization header for backward compatibility
+                        else if (context.Request.Headers.ContainsKey("Authorization"))
+                        {
+                            var authHeader = context.Request.Headers["Authorization"].ToString();
+                            if (authHeader.StartsWith("Bearer "))
+                            {
+                                context.Token = authHeader.Substring("Bearer ".Length).Trim();
+                            }
+                        }
+                        return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = context =>
+                    {
+                        Console.WriteLine($"JWT Authentication failed: {context.Exception.Message}");
+                        if (context.Exception.InnerException != null)
+                            Console.WriteLine($"Inner exception: {context.Exception.InnerException.Message}");
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+            // Enable PII logging for debugging JWT issues (ONLY in development)
+            if (builder.Environment.IsDevelopment())
+            {
+                Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+            }
 
             var app = builder.Build();
 
@@ -90,6 +154,9 @@ namespace GolfLeagueManager
 
             app.UseHttpsRedirection();
             app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
 

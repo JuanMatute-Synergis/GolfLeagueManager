@@ -7,9 +7,10 @@ import { routes } from './app/app.routes';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { SvgHttpLoader, SvgLoader } from 'angular-svg-icon';
 import { SVG_ICON_REGISTRY_PROVIDER } from 'angular-svg-icon';
+import { jwtInterceptorProvider } from './app/core/services/jwt-interceptor.provider';
 
 if (environment.production) {
   enableProdMode();
@@ -24,7 +25,8 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(BrowserModule), 
     provideRouter(routes),
     provideAnimations(),
-    provideHttpClient(),
+    provideHttpClient(withInterceptorsFromDi()),
+    ...jwtInterceptorProvider,
     // Angular SVG Icon providers for standalone components
     { provide: SvgLoader, useClass: SvgHttpLoader },
     SVG_ICON_REGISTRY_PROVIDER

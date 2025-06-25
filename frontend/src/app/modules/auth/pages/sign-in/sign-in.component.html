@@ -22,21 +22,20 @@
       <div class="relative">
         <input
           type="text"
-          id="email"
-          [ngClass]="{ 'is__invalid-input': submitted && f['email'].errors }"
+          id="username"
+          [ngClass]="{ 'is__invalid-input': submitted && f['username'].errors }"
           class="peer block"
           placeholder=" "
-          formControlName="email" />
+          formControlName="username" />
         <label
-          for="email"
-          [ngClass]="{ 'peer-focus:text-destructive!': submitted && f['email'].errors }"
+          for="username"
+          [ngClass]="{ 'peer-focus:text-destructive!': submitted && f['username'].errors }"
           class="bg-background text-muted-foreground peer-focus:text-primary absolute top-2 z-10 origin-[0] -translate-y-4 scale-95 transform px-2 text-sm duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-95 peer-focus:px-2 ltr:left-1 rtl:right-1">
-          Email address
+          Username
         </label>
       </div>
-      <div *ngIf="submitted && f['email'].errors" class="is__invalid-error">
-        <div *ngIf="f['email'].errors['required']">Required field</div>
-        <div *ngIf="f['email'].errors['email']">Email must be an email address valid</div>
+      <div *ngIf="submitted && f['username'].errors" class="is__invalid-error">
+        <div *ngIf="f['username'].errors['required']">Required field</div>
       </div>
     </div>
 
@@ -97,4 +96,6 @@
       Sign up
     </app-button>
   </div>
+
+  <div *ngIf="error" class="is__invalid-error">{{ error }}</div>
 </form>

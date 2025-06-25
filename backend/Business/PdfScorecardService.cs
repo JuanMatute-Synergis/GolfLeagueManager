@@ -2,18 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using iText.Kernel.Pdf;
-using iText.Layout;
-using iText.Layout.Element;
-using iText.Layout.Properties;
-using iText.Kernel.Colors;
-using iText.Layout.Borders;
-using iText.Kernel.Font;
-using iText.IO.Font.Constants;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Drawing;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
-namespace GolfLeagueManager
+namespace GolfLeagueManager.Business
 {
     public class PdfScorecardService
     {
@@ -21,13 +18,17 @@ namespace GolfLeagueManager
         private readonly MatchupService _matchupService;
         private readonly PlayerFlightAssignmentService _flightAssignmentService;
         private readonly MatchPlayService _matchPlayService;
+        private readonly AverageScoreService _averageScoreService;
+        private readonly HandicapService _handicapService;
 
-        public PdfScorecardService(AppDbContext context, MatchupService matchupService, PlayerFlightAssignmentService flightAssignmentService, MatchPlayService matchPlayService)
+        public PdfScorecardService(AppDbContext context, MatchupService matchupService, PlayerFlightAssignmentService flightAssignmentService, MatchPlayService matchPlayService, AverageScoreService averageScoreService, HandicapService handicapService)
         {
             _context = context;
             _matchupService = matchupService;
             _flightAssignmentService = flightAssignmentService;
             _matchPlayService = matchPlayService;
+            _averageScoreService = averageScoreService;
+            _handicapService = handicapService;
         }
 
         /// <summary>
@@ -35,6 +36,9 @@ namespace GolfLeagueManager
         /// </summary>
         public async Task<byte[]> GenerateWeekScorecardPdfAsync(Guid weekId)
         {
+            // Configure QuestPDF license (free for commercial use)
+            QuestPDF.Settings.License = LicenseType.Community;
+
             var matchups = (await _matchupService.GetMatchupsByWeekIdAsync(weekId)).ToList();
             if (!matchups.Any()) throw new ArgumentException("No matchups found for this week.");
 
@@ -45,7 +49,29 @@ namespace GolfLeagueManager
             var flights = await _context.Flights.ToListAsync();
             var course = await _context.Courses.Include(c => c.CourseHoles).FirstOrDefaultAsync();
             if (course == null) throw new ArgumentException("No course found.");
-            var holes = course.CourseHoles.OrderBy(h => h.HoleNumber).ToList();
+            
+            // Pre-fetch session handicaps for all players in the matchups
+            var allPlayerIds = matchups.SelectMany(m => new[] { m.PlayerAId, m.PlayerBId }).Distinct().ToList();
+            var handicapData = new Dictionary<Guid, decimal>();
+            foreach (var playerId in allPlayerIds)
+            {
+                try 
+                {
+                    var handicap = await _handicapService.GetPlayerSessionHandicapAsync(playerId, seasonId, week.WeekNumber);
+                    handicapData[playerId] = handicap;
+                }
+                catch
+                {
+                    // Fallback to 0 if handicap service fails
+                    handicapData[playerId] = 0;
+                }
+            }
+            
+            // Filter holes based on the week's NineHoles setting
+            var allHoles = course.CourseHoles.OrderBy(h => h.HoleNumber).ToList();
+            var holes = week.NineHoles == NineHoles.Front 
+                ? allHoles.Where(h => h.HoleNumber >= 1 && h.HoleNumber <= 9).ToList()
+                : allHoles.Where(h => h.HoleNumber >= 10 && h.HoleNumber <= 18).ToList();
 
             // Sort flights by name (assuming names are numbers or can be sorted as 1-4)
             var orderedFlights = flights.OrderBy(f => f.Name).ToList();
@@ -61,155 +87,511 @@ namespace GolfLeagueManager
                 .Where(g => g.Matchups.Any())
                 .ToList();
 
-            using var ms = new MemoryStream();
-            using var writer = new PdfWriter(ms);
-            using var pdf = new PdfDocument(writer);
-            var document = new Document(pdf);
-            document.SetMargins(10, 10, 10, 10);
-            // Use Open Sans fonts from Fonts directory if available, else fallback to DejaVu Sans system fonts
-            string fontsDir = Path.Combine(AppContext.BaseDirectory, "Fonts");
-            string openSansFontPath = Path.Combine(fontsDir, "OpenSans-Regular.ttf");
-            string openSansBoldFontPath = Path.Combine(fontsDir, "OpenSans-Bold.ttf");
-            string fontPath = openSansFontPath;
-            string boldFontPath = openSansBoldFontPath;
-
-            var font = PdfFontFactory.CreateFont(fontPath, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
-            var boldFont = PdfFontFactory.CreateFont(boldFontPath, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
-
-            foreach (var flightGroup in matchupsByFlight)
+            var document = Document.Create(container =>
             {
-                var flight = flightGroup.Flight;
-                var flightName = $"Flight {flight.Name}";
-                var matchupsInFlight = flightGroup.Matchups;
-                if (!matchupsInFlight.Any()) continue;
-                if (pdf.GetNumberOfPages() > 0) document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-
-                // --- Add summary table as the first page for this flight ---
-                var summaryTable = await CreateFlightSummaryTableAsync(flight, matchupsInFlight, week, seasonId, font, boldFont);
-                var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
-                document.Add(new Paragraph($"{weekTitle} - {flightName} - Weekly Summary").SetFont(boldFont).SetFontSize(11).SetTextAlignment(TextAlignment.CENTER).SetMarginBottom(5));
-                document.Add(summaryTable);
-                document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-                // --- End summary page ---
-
-                document.Add(new Paragraph($"{weekTitle} - {flightName} - H.T. Lyons Golf League")
-                    .SetFont(boldFont).SetFontSize(7).SetTextAlignment(TextAlignment.CENTER));
-
-                // 4 cards per page, each on its own row
-                for (int i = 0; i < matchupsInFlight.Count; i++)
+                container.Page(page =>
                 {
-                    var cardsTable = new Table(UnitValue.CreatePercentArray(new float[] { 1f })).UseAllAvailableWidth();
-                    cardsTable.SetMarginBottom(3);
-                    var matchup = matchupsInFlight[i];
-                    var card = await CreateCompactScorecardTableAsync(matchup, holes, font, boldFont);
-                    cardsTable.AddCell(new Cell().Add(card).SetBorder(Border.NO_BORDER).SetPadding(2));
-                    document.Add(cardsTable);
-                    // Add page break after every 4 cards, but only if more cards remain
-                    if ((i + 1) % 4 == 0 && (i + 1) < matchupsInFlight.Count)
+                    page.Size(PageSizes.A4);
+                    page.Margin(10);
+                    page.PageColor(Colors.Grey.Darken4);
+                    page.DefaultTextStyle(x => x.FontColor(Colors.White));
+                    page.DefaultTextStyle(x => x.FontSize(9));
+
+                    page.Content().Column(content =>
                     {
-                        document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-                        document.Add(new Paragraph($"{weekTitle} - {flightName} - H.T. Lyons Golf League")
-                            .SetFont(boldFont).SetFontSize(7).SetTextAlignment(TextAlignment.CENTER));
-                    }
-                }
-            }
-            document.Close();
-            return ms.ToArray();
+                        bool isFirstPage = true;
+                        
+                        foreach (var flightGroup in matchupsByFlight)
+                        {
+                            var flight = flightGroup.Flight;
+                            var flightName = $"Flight {flight.Name}";
+                            var matchupsInFlight = flightGroup.Matchups;
+                            if (!matchupsInFlight.Any()) continue;
+
+                            if (!isFirstPage)
+                            {
+                                content.Item().PageBreak();
+                            }
+                            isFirstPage = false;
+
+                            var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
+                            
+                            // Header
+                            content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League")
+                                .FontSize(10).FontColor(Colors.White).Bold().AlignCenter();
+
+                            // 4 cards per page, each on its own row
+                            for (int i = 0; i < matchupsInFlight.Count; i++)
+                            {
+                                var matchup = matchupsInFlight[i];
+                                content.Item().PaddingVertical(5).Element(container => 
+                                {
+                                    CreateCompactScorecardTable(container, matchup, holes, handicapData);
+                                });
+
+                                // Add page break after every 4 cards, but only if more cards remain
+                                if ((i + 1) % 4 == 0 && (i + 1) < matchupsInFlight.Count)
+                                {
+                                    content.Item().PageBreak();
+                                    content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League")
+                                        .FontSize(10).Bold().AlignCenter();
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+
+            return document.GeneratePdf();
         }
 
-        // --- New: Create summary table for a flight ---
-        private async Task<Table> CreateFlightSummaryTableAsync(Flight flight, List<Matchup> matchupsInFlight, Week currentWeek, Guid seasonId, PdfFont font, PdfFont boldFont)
+        /// <summary>
+        /// Generates a summary PDF report for a specific week, showing only the summary tables for all flights.
+        /// </summary>
+        public async Task<byte[]> GenerateWeekSummaryPdfAsync(Guid weekId)
+        {
+            // Configure QuestPDF license (free for commercial use)
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var matchups = (await _matchupService.GetMatchupsByWeekIdAsync(weekId)).ToList();
+            if (!matchups.Any()) throw new ArgumentException("No matchups found for this week.");
+
+            var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == weekId);
+            if (week == null) throw new ArgumentException("Week not found.");
+            var seasonId = week.SeasonId;
+            var assignments = _flightAssignmentService.GetAllAssignments().ToList();
+            var flights = await _context.Flights.ToListAsync();
+
+            // Sort flights by name (assuming names are numbers or can be sorted as 1-4)
+            var orderedFlights = flights.OrderBy(f => f.Name).ToList();
+            // Group matchups by flight (using PlayerA's assignment for the season)
+            var matchupsByFlight = orderedFlights
+                .Select(flight => new {
+                    Flight = flight,
+                    Matchups = matchups.Where(m => {
+                        var assignment = assignments.FirstOrDefault(a => a.PlayerId == m.PlayerAId && a.Flight != null && a.Flight.SeasonId == seasonId);
+                        return assignment?.Flight?.Id == flight.Id;
+                    }).ToList()
+                })
+                .Where(g => g.Matchups.Any())
+                .ToList();
+
+            var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(15);
+                    page.DefaultTextStyle(x => x.FontSize(8));
+
+                    page.Content().Column(content =>
+                    {
+                        // Modern styled header
+                        content.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns => columns.RelativeColumn());
+                            table.Cell().Padding(15).Background(Colors.Blue.Darken3)
+                                .Text($"{weekTitle}\nH.T. Lyons Golf League - Weekly Summary")
+                                .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
+                        });
+
+                        content.Item().PaddingTop(10);
+
+                        // Create layout: Flights 1&2 on first page, Flights 3&4 on second page
+                        if (matchupsByFlight.Count <= 4)
+                        {
+                            // Page 1: Flights 1 & 2
+                            var page1Flights = matchupsByFlight.Take(2).ToList();
+                            if (page1Flights.Any())
+                            {
+                                content.Item().Row(row =>
+                                {
+                                    row.RelativeItem().Padding(5).Element(container =>
+                                    {
+                                        var firstFlight = page1Flights.ElementAtOrDefault(0);
+                                        if (firstFlight != null)
+                                        {
+                                            CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId);
+                                        }
+                                    });
+                                    
+                                    if (page1Flights.Count >= 2)
+                                    {
+                                        row.RelativeItem().Padding(5).Element(container =>
+                                        {
+                                            CreateCompactFlightSummaryTable(container, page1Flights[1], week, seasonId);
+                                        });
+                                    }
+                                });
+                            }
+
+                            // Page 2: Flights 3 & 4 (if they exist)
+                            var page2Flights = matchupsByFlight.Skip(2).Take(2).ToList();
+                            if (page2Flights.Any())
+                            {
+                                content.Item().PageBreak();
+                                
+                                // Add header for second page
+                                content.Item().Table(table =>
+                                {
+                                    table.ColumnsDefinition(columns => columns.RelativeColumn());
+                                    table.Cell().Padding(15).Background(Colors.Blue.Darken3)
+                                        .Text($"{weekTitle}\nH.T. Lyons Golf League - Weekly Summary (Page 2)")
+                                        .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
+                                });
+
+                                content.Item().PaddingTop(10);
+
+                                content.Item().Row(row =>
+                                {
+                                    row.RelativeItem().Padding(5).Element(container =>
+                                    {
+                                        var firstFlight = page2Flights.ElementAtOrDefault(0);
+                                        if (firstFlight != null)
+                                        {
+                                            CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId);
+                                        }
+                                    });
+                                    
+                                    if (page2Flights.Count >= 2)
+                                    {
+                                        row.RelativeItem().Padding(5).Element(container =>
+                                        {
+                                            CreateCompactFlightSummaryTable(container, page2Flights[1], week, seasonId);
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                        else
+                        {
+                            // Fallback to original layout if more than 4 flights
+                            bool isFirstFlight = true;
+                            foreach (var flightGroup in matchupsByFlight)
+                            {
+                                if (!isFirstFlight)
+                                {
+                                    content.Item().PageBreak();
+                                }
+                                isFirstFlight = false;
+
+                                content.Item().Element(container =>
+                                {
+                                    CreateCompactFlightSummaryTable(container, flightGroup, week, seasonId);
+                                });
+                            }
+                        }
+                    });
+                });
+            });
+
+            return document.GeneratePdf();
+        }
+
+        private void CreateCompactScorecardTable(IContainer container, Matchup matchup, List<CourseHole> holes, Dictionary<Guid, decimal> handicapData)
+        {
+            // Get player info
+            var playerA = matchup.PlayerA;
+            var playerB = matchup.PlayerB;
+            string playerAName = playerA != null ? $"{playerA.FirstName} {playerA.LastName}" : "Player A";
+            string playerBName = playerB != null ? $"{playerB.FirstName} {playerB.LastName}" : "Player B";
+            
+            // Get session-specific handicaps from pre-fetched data
+            var playerAHandicap = playerA != null && handicapData.ContainsKey(playerA.Id) 
+                ? handicapData[playerA.Id] 
+                : 0;
+            var playerBHandicap = playerB != null && handicapData.ContainsKey(playerB.Id) 
+                ? handicapData[playerB.Id] 
+                : 0;
+
+            // Get hole scores - use the data that's already calculated and stored
+            var holeScores = _context.HoleScores.Where(hs => hs.MatchupId == matchup.Id).OrderBy(hs => hs.HoleNumber).ToList();
+            var holeScoresOrdered = holeScores.OrderBy(hs => hs.HoleNumber).ToList();
+
+            // Calculate stroke allocation for visual highlighting only
+            var holesInPlay = holeScoresOrdered.Select(hs => new { hs.HoleNumber, hs.HoleHandicap }).ToList();
+            int playerAHandicapInt = (int)Math.Round((double)playerAHandicap);
+            int playerBHandicapInt = (int)Math.Round((double)playerBHandicap);
+            bool playerAReceivesStrokes = playerAHandicapInt > playerBHandicapInt;
+            bool playerBReceivesStrokes = playerBHandicapInt > playerAHandicapInt;
+            int handicapDiff = Math.Abs(playerAHandicapInt - playerBHandicapInt);
+            var hardestHoles = holesInPlay.OrderBy(h => h.HoleHandicap).Take(handicapDiff).Select(h => h.HoleNumber).ToHashSet();
+
+            // Determine winner
+            string winner = "Tie";
+            if (matchup.PlayerAMatchWin) winner = playerAName;
+            else if (matchup.PlayerBMatchWin) winner = playerBName;
+            
+            string winnerText = winner == "Tie" ? "Tie" : $"Winner: {winner}";
+
+            // Modern card-like container with border, background - Dark mode
+            container.Padding(4)
+                .Background(Colors.Grey.Darken4)
+                .Border(1).BorderColor(Colors.Grey.Darken2)
+                .Column(cardCol =>
+                {
+                    // Card Title/Header
+                    cardCol.Item().PaddingBottom(6).Text(winnerText)
+                        .FontSize(12).Bold().FontColor(Colors.Blue.Lighten2).AlignCenter();
+                    cardCol.Item().Text($"{playerAName} vs {playerBName}")
+                        .FontSize(9).Bold().FontColor(Colors.Grey.Lighten2).AlignCenter();
+                    cardCol.Item().Text($"Handicaps: {playerAHandicap:0.#} - {playerBHandicap:0.#}")
+                        .FontSize(9).FontColor(Colors.Grey.Lighten1).AlignCenter();
+                    cardCol.Item().PaddingTop(6).Element(cardTable =>
+                    {
+                        cardTable.Table(table =>
+                        {
+                            // Define columns: Label + holes + total
+                            var columnWidths = new float[holes.Count + 2];
+                            columnWidths[0] = 1.2f; // Label column
+                            for (int i = 1; i <= holes.Count; i++) columnWidths[i] = 1f; // Hole columns
+                            columnWidths[holes.Count + 1] = 1.2f; // Total column
+
+                            table.ColumnsDefinition(columns =>
+                            {
+                                for (int i = 0; i < columnWidths.Length; i++)
+                                {
+                                    columns.RelativeColumn(columnWidths[i]);
+                                }
+                            });
+
+                            // Hole numbers row
+                            // Center vertically and horizontally
+                            // Label cell
+                            table.Cell().Background(Colors.Grey.Darken4).Padding(4).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("HOLE").FontSize(10).Bold().FontColor(Colors.White));
+                            foreach (var hole in holes)
+                                table.Cell().Background(Colors.Grey.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(hole.HoleNumber.ToString()).FontSize(10).Bold().FontColor(Colors.White));
+                            table.Cell().Background(Colors.Grey.Darken1).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("TOTAL").FontSize(8).Bold().FontColor(Colors.White));
+
+                            // Par row
+                            table.Cell().Background(Colors.Grey.Darken4).Padding(4).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("PAR").FontSize(10).Bold().FontColor(Colors.White));
+                            int parTotal = 0;
+                            foreach (var hole in holes)
+                            {
+                                parTotal += hole.Par;
+                                table.Cell().Background(Colors.Grey.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(hole.Par.ToString()).FontSize(10).Bold().FontColor(Colors.White));
+                            }
+                            table.Cell().Background(Colors.Grey.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text(parTotal.ToString()).FontSize(11).Bold().FontColor(Colors.White));
+
+                            // Player A row
+                            table.Cell().Background(Colors.Blue.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1).Element(cell => cell.AlignCenter().AlignMiddle().Text(playerAName.Split(' ')[0]).FontSize(12).Bold().FontColor(Colors.White));
+                            int playerATotal = 0;
+                            foreach (var hole in holes)
+                            {
+                                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
+                                int playerAGross = hs?.PlayerAScore ?? 0;
+                                if (playerAGross > 0) playerATotal += playerAGross;
+                                
+                                // Determine if player A gets a stroke on this hole (for yellow background)
+                                bool playerAReceivesStrokeOnHole = playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
+                                var backgroundColor = playerAReceivesStrokeOnHole ? Colors.Yellow.Darken3 : Colors.Grey.Darken4;
+                                
+                                // Use stored match play points to determine hole winner (no recalculation needed)
+                                int playerAHolePoints = hs?.PlayerAMatchPoints ?? 0;
+                                int playerBHolePoints = hs?.PlayerBMatchPoints ?? 0;
+                                bool aWins = playerAHolePoints > playerBHolePoints;
+                                bool isTie = playerAHolePoints == playerBHolePoints && playerAHolePoints > 0;
+                                
+                                table.Cell().Background(backgroundColor).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                    .Layers(layers =>
+                                    {
+                                        layers.PrimaryLayer().AlignCenter().AlignMiddle()
+                                            .Text(playerAGross > 0 ? playerAGross.ToString() : "").FontSize(13).Bold().FontColor(Colors.White);
+                                        if (aWins || isTie)
+                                        {
+                                            string color = aWins ? "#22c55e" : "#eab308"; // Use hex colors for SVG
+                                            layers.Layer().AlignRight().AlignTop().Padding(1).Svg($"<svg width='20' height='20'><circle cx='6' cy='6' r='4' fill='{color}' /></svg>");
+                                        }
+                                        // Add net score at bottom if player receives stroke on this hole
+                                        if (playerAReceivesStrokeOnHole && playerAGross > 0)
+                                        {
+                                            int netScore = playerAGross - 1;
+                                            layers.Layer().AlignCenter().AlignBottom().Padding(1)
+                                                .Text(netScore.ToString()).FontSize(8).FontColor(Colors.Yellow.Lighten2);
+                                        }
+                                    });
+                            }
+                            var storedPlayerAScore = matchup.PlayerAScore ?? playerATotal;
+                            table.Cell().Background(Colors.Blue.Darken2).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle()
+                                    .Text(matchup.PlayerAAbsent ? "ABS" : storedPlayerAScore.ToString())
+                                    .FontSize(12).Bold().FontColor(Colors.White));
+
+                            // Player B row
+                            table.Cell().Background(Colors.Orange.Darken3).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text(playerBName.Split(' ')[0]).FontSize(12).Bold().FontColor(Colors.White));
+                            int playerBTotal = 0;
+                            foreach (var hole in holes)
+                            {
+                                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
+                                int playerBGross = hs?.PlayerBScore ?? 0;
+                                if (playerBGross > 0) playerBTotal += playerBGross;
+                                
+                                // Determine if player B gets a stroke on this hole (for yellow background)
+                                bool playerBReceivesStrokeOnHole = playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
+                                var backgroundColor = playerBReceivesStrokeOnHole ? Colors.Yellow.Darken3 : Colors.Grey.Darken4;
+                                
+                                // Use stored match play points to determine hole winner (no recalculation needed)
+                                int playerAHolePoints = hs?.PlayerAMatchPoints ?? 0;
+                                int playerBHolePoints = hs?.PlayerBMatchPoints ?? 0;
+                                bool bWins = playerBHolePoints > playerAHolePoints;
+                                bool isTie = playerAHolePoints == playerBHolePoints && playerBHolePoints > 0;
+                                
+                                table.Cell().Background(backgroundColor).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                    .Layers(layers =>
+                                    {
+                                        layers.PrimaryLayer().AlignCenter().AlignMiddle()
+                                            .Text(playerBGross > 0 ? playerBGross.ToString() : "").FontSize(13).Bold().FontColor(Colors.White);
+                                        if (bWins || isTie)
+                                        {
+                                            string color = bWins ? "#22c55e" : "#eab308"; // Use hex colors for SVG
+                                            layers.Layer().AlignRight().AlignTop().Padding(1).Svg($"<svg width='12' height='12'><circle cx='6' cy='6' r='4' fill='{color}' /></svg>");
+                                        }
+                                        // Add net score at bottom if player receives stroke on this hole
+                                        if (playerBReceivesStrokeOnHole && playerBGross > 0)
+                                        {
+                                            int netScore = playerBGross - 1;
+                                            layers.Layer().AlignCenter().AlignBottom().Padding(1)
+                                                .Text(netScore.ToString()).FontSize(8).FontColor(Colors.Yellow.Lighten2);
+                                        }
+                                    });
+                            }
+                            var storedPlayerBScore = matchup.PlayerBScore ?? playerBTotal;
+                            table.Cell().Background(Colors.Orange.Darken2).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle()
+                                    .Text(matchup.PlayerBAbsent ? "ABS" : storedPlayerBScore.ToString())
+                                    .FontSize(12).Bold().FontColor(Colors.White));
+
+                            // Matchplay Points row - Use stored calculated values instead of recalculating
+                            table.Cell().Background(Colors.Grey.Darken3).Padding(6)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("POINTS").FontSize(6).Bold().FontColor(Colors.White));
+                            
+                            // Display individual hole match play points using stored values
+                            foreach (var hole in holes)
+                            {
+                                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
+                                string holeResult = "";
+                                if (hs != null)
+                                {
+                                    int playerAPoints = hs.PlayerAMatchPoints;
+                                    int playerBPoints = hs.PlayerBMatchPoints;
+                                    if (playerAPoints > 0 || playerBPoints > 0)
+                                    {
+                                        holeResult = $"{playerAPoints}-{playerBPoints}";
+                                    }
+                                }
+                                table.Cell().Background(Colors.Grey.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(holeResult).FontSize(8).Bold().FontColor(Colors.White));
+                            }
+                            
+                            // Use stored total matchplay points from the matchup (already calculated by MatchPlayService)
+                            int playerATotalPoints = matchup.PlayerAPoints ?? 0;
+                            int playerBTotalPoints = matchup.PlayerBPoints ?? 0;
+                            
+                            // Total points cell (showing final match play points out of 20)
+                            table.Cell().Background(Colors.Grey.Darken2).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text($"{playerATotalPoints}-{playerBTotalPoints}").FontSize(10).Bold().FontColor(Colors.White));
+                        });
+                    });
+                    
+                    // Match result explanation at the bottom
+                    cardCol.Item().PaddingTop(0).Element(explanationContainer =>
+                    {
+                        string explanationText = GetMatchResultExplanation(matchup, playerAName, playerBName);
+                        explanationContainer.Text(explanationText)
+                            .FontSize(8).FontColor(Colors.Grey.Lighten1).AlignCenter().Italic();
+                    });
+                });
+        }
+
+        private void CreateCompactFlightSummaryTable(IContainer container, dynamic flightGroup, Week currentWeek, Guid seasonId)
+        {
+            if (flightGroup == null) return;
+
+            var flight = flightGroup.Flight;
+            var matchupsInFlight = (List<Matchup>)flightGroup.Matchups;
+
+            // Get all player IDs in this flight to fetch session handicaps
+            var playerIds = matchupsInFlight
+                .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
+                .Distinct()
+                .ToList();
+
+            // Fetch session handicaps for all players in this flight
+            var handicapData = new Dictionary<Guid, decimal>();
+            foreach (var playerId in playerIds)
+            {
+                var handicap = _handicapService.GetPlayerSessionHandicapAsync(playerId, seasonId, currentWeek.WeekNumber).Result;
+                handicapData[playerId] = handicap;
+            }
+
+            container.Column(column =>
+            {
+                // Flight header
+                column.Item().Table(table =>
+                {
+                    table.ColumnsDefinition(columns => columns.RelativeColumn());
+                    table.Cell().Padding(8).Background(Colors.Blue.Medium)
+                        .Text($"Flight {flight.Name}")
+                        .FontSize(11).Bold().FontColor(Colors.White).AlignCenter();
+                });
+
+                // Summary table
+                column.Item().Element(container => 
+                {
+                    CreateFlightSummaryTable(container, flight, matchupsInFlight, currentWeek, seasonId, handicapData);
+                });
+
+                // Next week matchups
+                column.Item().PaddingTop(8).Element(container => 
+                {
+                    CreateNextWeekMatchupsTable(container, flight, currentWeek, seasonId, handicapData);
+                });
+            });
+        }
+
+        private void CreateFlightSummaryTable(IContainer container, Flight flight, List<Matchup> matchupsInFlight, Week currentWeek, Guid seasonId, Dictionary<Guid, decimal> handicapData)
         {
             // Get all players in this flight for the season
             var playerIds = matchupsInFlight
                 .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
                 .Distinct()
                 .ToList();
-            var players = await _context.Players.Where(p => playerIds.Contains(p.Id)).ToListAsync();
+            var players = _context.Players.Where(p => playerIds.Contains(p.Id)).ToList();
 
-            // Get all matchups for these players in the season up to and including the current week
-            var allMatchups = await _context.Matchups
+            // Get session data
+            var allMatchups = _context.Matchups
                 .Where(m => (playerIds.Contains(m.PlayerAId) || playerIds.Contains(m.PlayerBId)))
-                .ToListAsync();
+                .ToList();
             var weekNumber = currentWeek.WeekNumber;
-            var weekIdsUpToCurrent = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber)
-                .Select(w => w.Id)
-                .ToListAsync();
-            var matchupsUpToCurrent = allMatchups.Where(m => weekIdsUpToCurrent.Contains(m.WeekId)).ToList();
-
-            // Find the most recent SessionStart week up to and including the current week
-            var sessionStartWeek = await _context.Weeks
+            
+            var sessionStartWeek = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber && w.SessionStart)
                 .OrderByDescending(w => w.WeekNumber)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
             int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
-            // Ensure the session includes the session start week and all weeks up to and including the current week
-            var weekIdsInSession = await _context.Weeks
+            
+            var weekIdsInSession = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber >= sessionStartWeekNumber && w.WeekNumber <= weekNumber)
                 .OrderBy(w => w.WeekNumber)
                 .Select(w => w.Id)
-                .ToListAsync();
+                .ToList();
 
-            // Table columns: Player, Handicap, Average, Gross, Net, Match Play Points, This Week MP, Accumulated Score
-            var table = new Table(UnitValue.CreatePercentArray(new float[] { 2f, 1f, 1f, 1f, 1f, 1f, 1f, 1.5f })).UseAllAvailableWidth();
-            table.SetFont(font).SetFontSize(9f);
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Player").SetFont(boldFont)));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("HCP").SetFont(boldFont)));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Avg").SetFont(boldFont)));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Gross").SetFont(boldFont)));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Net").SetFont(boldFont)));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("MP Pts").SetFont(boldFont)));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("This Week MP").SetFont(boldFont)));
-            table.AddHeaderCell(new Cell().Add(new Paragraph("Accum. Score").SetFont(boldFont)));
-
-            foreach (var player in players.OrderBy(p => p.LastName).ThenBy(p => p.FirstName))
+            // Calculate scores for sorting
+            var playersWithScores = new List<(Player player, int accumScore)>();
+            
+            foreach (var player in players)
             {
-                // Handicap and average from player
-                var hcp = player.CurrentHandicap;
-                var avg = player.CurrentAverageScore;
-
-                // Find this week's matchup for this player
-                var matchup = matchupsInFlight.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
-                int gross = 0, net = 0, mpPoints = 0, thisWeekMpPoints = 0;
-                bool isAbsent = false;
-                if (matchup != null)
-                {
-                    if (matchup.PlayerAId == player.Id)
-                    {
-                        gross = matchup.PlayerAScore ?? 0;
-                        net = gross;
-                        isAbsent = matchup.PlayerAAbsent;
-                        mpPoints = matchup.PlayerAPoints ?? 0;
-                        thisWeekMpPoints = matchup.PlayerAPoints ?? 0;
-                    }
-                    else if (matchup.PlayerBId == player.Id)
-                    {
-                        gross = matchup.PlayerBScore ?? 0;
-                        net = gross;
-                        isAbsent = matchup.PlayerBAbsent;
-                        mpPoints = matchup.PlayerBPoints ?? 0;
-                        thisWeekMpPoints = matchup.PlayerBPoints ?? 0;
-                    }
-                }
-                // Use special points if set for this week
-                if (currentWeek.SpecialPointsAwarded.HasValue)
-                {
-                    int special = currentWeek.SpecialPointsAwarded.Value;
-                    if (!isAbsent)
-                    {
-                        mpPoints = special;
-                        thisWeekMpPoints = special;
-                    }
-                    else
-                    {
-                        mpPoints = special / 2;
-                        thisWeekMpPoints = special / 2;
-                    }
-                }
-                // Accumulated score: sum all match points for this player in the current session (including current week)
                 var matchPoints = allMatchups
-                    .Where(m => weekIdsInSession.Contains(m.WeekId) && ((m.PlayerAId == player.Id && m.PlayerAScore.HasValue) || (m.PlayerBId == player.Id && m.PlayerBScore.HasValue)))
+                    .Where(m => weekIdsInSession.Contains(m.WeekId) && (m.PlayerAId == player.Id || m.PlayerBId == player.Id))
                     .Select(m => {
                         var week = _context.Weeks.FirstOrDefault(x => x.Id == m.WeekId);
                         bool absent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
@@ -218,319 +600,232 @@ namespace GolfLeagueManager
                             int special = week.SpecialPointsAwarded.Value;
                             return absent ? (special / 2) : special;
                         }
+                        bool hasScore = (m.PlayerAId == player.Id && m.PlayerAScore.HasValue) || (m.PlayerBId == player.Id && m.PlayerBScore.HasValue);
+                        if (!hasScore) return 0;
                         return m.PlayerAId == player.Id ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
                     })
-                    .ToList();
-                var accumScore = matchPoints.Sum();
-
-                // Previous week match points
-                int prevMpPoints = 0;
-                var prevWeek = weekIdsUpToCurrent
-                    .Where(wid => wid != currentWeek.Id)
-                    .OrderByDescending(wid =>
-                        _context.Weeks.FirstOrDefault(x => x.Id == wid)?.WeekNumber ?? 0)
-                    .FirstOrDefault();
-                if (prevWeek != Guid.Empty)
-                {
-                    var prevMatchup = allMatchups.FirstOrDefault(m => m.WeekId == prevWeek && (m.PlayerAId == player.Id || m.PlayerBId == player.Id));
-                    var prevWeekObj = _context.Weeks.FirstOrDefault(x => x.Id == prevWeek);
-                    if (prevWeekObj != null && prevWeekObj.SpecialPointsAwarded.HasValue)
-                    {
-                        prevMpPoints = prevWeekObj.SpecialPointsAwarded.Value;
-                    }
-                    else if (prevMatchup != null)
-                    {
-                        prevMpPoints = prevMatchup.PlayerAId == player.Id ? (prevMatchup.PlayerAPoints ?? 0) : (prevMatchup.PlayerBPoints ?? 0);
-                    }
-                }
-
-                table.AddCell(new Cell().Add(new Paragraph($"{player.FirstName} {player.LastName}")));
-                table.AddCell(new Cell().Add(new Paragraph(hcp.ToString("0.##"))));
-                table.AddCell(new Cell().Add(new Paragraph(avg.ToString("0.##"))));
-                table.AddCell(new Cell().Add(new Paragraph(gross > 0 ? gross.ToString() : "-")));
-                table.AddCell(new Cell().Add(new Paragraph(net > 0 ? net.ToString() : "-")));
-                table.AddCell(new Cell().Add(new Paragraph(mpPoints > 0 ? mpPoints.ToString() : "-")));
-                table.AddCell(new Cell().Add(new Paragraph(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-")));
-                table.AddCell(new Cell().Add(new Paragraph(accumScore > 0 ? accumScore.ToString() : "-")));
+                    .Sum();
+                playersWithScores.Add((player, matchPoints));
             }
-            return table;
+
+            var sortedPlayers = playersWithScores
+                .OrderByDescending(p => p.accumScore)
+                .ThenBy(p => p.player.LastName)
+                .ToList();
+
+            container.Table(table =>
+            {
+                table.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(2.5f); // Player
+                    columns.RelativeColumn(0.8f); // HCP
+                    columns.RelativeColumn(0.8f); // Avg
+                    columns.RelativeColumn(0.8f); // Gross
+                    columns.RelativeColumn(1f);   // This Week
+                    columns.RelativeColumn(1.2f); // Session Total
+                });
+
+                // Header
+                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Player").FontSize(7).Bold();
+                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("HCP").FontSize(7).Bold().AlignCenter();
+                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Avg").FontSize(7).Bold().AlignCenter();
+                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Gross").FontSize(7).Bold().AlignCenter();
+                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("This Week").FontSize(7).Bold().AlignCenter();
+                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Session Total").FontSize(7).Bold().AlignCenter();
+
+                // Player rows
+                for (int i = 0; i < sortedPlayers.Count; i++)
+                {
+                    var (player, accumScore) = sortedPlayers[i];
+                    var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten5;
+
+                    var hcp = handicapData.ContainsKey(player.Id) ? handicapData[player.Id] : player.CurrentHandicap;
+                    var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
+                        player.Id, seasonId, currentWeek.WeekNumber).Result;
+
+                    var matchup = matchupsInFlight.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
+                    int gross = 0, thisWeekMpPoints = 0;
+                    bool isAbsent = false;
+                    if (matchup != null)
+                    {
+                        if (matchup.PlayerAId == player.Id)
+                        {
+                            gross = matchup.PlayerAScore ?? 0;
+                            isAbsent = matchup.PlayerAAbsent;
+                            thisWeekMpPoints = matchup.PlayerAPoints ?? 0;
+                        }
+                        else if (matchup.PlayerBId == player.Id)
+                        {
+                            gross = matchup.PlayerBScore ?? 0;
+                            isAbsent = matchup.PlayerBAbsent;
+                            thisWeekMpPoints = matchup.PlayerBPoints ?? 0;
+                        }
+                    }
+
+                    if (currentWeek.SpecialPointsAwarded.HasValue)
+                    {
+                        int special = currentWeek.SpecialPointsAwarded.Value;
+                        thisWeekMpPoints = isAbsent ? (special / 2) : special;
+                    }
+
+                    var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
+                    
+                    table.Cell().Background(rowColor).Padding(4).Text(displayName).FontSize(7);
+                    table.Cell().Background(rowColor).Padding(4).Text(hcp.ToString("0.#")).FontSize(7).AlignCenter();
+                    table.Cell().Background(rowColor).Padding(4).Text(avg.ToString("0.#")).FontSize(7).AlignCenter();
+                    table.Cell().Background(rowColor).Padding(4).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(7).AlignCenter();
+                    table.Cell().Background(rowColor).Padding(4).Text(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-").FontSize(7).AlignCenter();
+                    
+                    var sessionTotalColor = accumScore > 0 ? Colors.Green.Lighten4 : rowColor;
+                    table.Cell().Background(sessionTotalColor).Padding(4).Text(accumScore > 0 ? accumScore.ToString() : "-").FontSize(7).Bold().AlignCenter();
+                }
+            });
         }
 
-        private async Task<Table> CreateCompactScorecardTableAsync(Matchup matchup, List<CourseHole> holes, PdfFont font, PdfFont boldFont)
+        private void CreateNextWeekMatchupsTable(IContainer container, Flight flight, Week currentWeek, Guid seasonId, Dictionary<Guid, decimal> handicapData)
         {
-            // Get player info
-            var playerA = matchup.PlayerA;
-            var playerB = matchup.PlayerB;
-            string playerAName = playerA != null ? $"{playerA.FirstName} {playerA.LastName}" : "Player A";
-            string playerBName = playerB != null ? $"{playerB.FirstName} {playerB.LastName}" : "Player B";
-            var playerAHandicap = playerA?.CurrentHandicap ?? 0;
-            var playerBHandicap = playerB?.CurrentHandicap ?? 0;
-
-            // Get hole scores - use the data that's already calculated and stored
-            var holeScores = await _context.HoleScores.Where(hs => hs.MatchupId == matchup.Id).OrderBy(hs => hs.HoleNumber).ToListAsync();
+            var nextWeek = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber == currentWeek.WeekNumber + 1)
+                .FirstOrDefault();
             
-            // Get the updated matchup data with all calculated scores
-            var updatedMatchup = await _context.Matchups
+            if (nextWeek == null) return;
+
+            // Get ALL matchups for next week, then filter by flight
+            var allNextWeekMatchups = _context.Matchups
                 .Include(m => m.PlayerA)
                 .Include(m => m.PlayerB)
-                .FirstOrDefaultAsync(m => m.Id == matchup.Id);
-            if (updatedMatchup != null) matchup = updatedMatchup;
+                .Where(m => m.WeekId == nextWeek.Id)
+                .ToList();
 
-            // --- Use proper 9-hole stroke allocation matching backend logic ---
-            var holeScoresOrdered = holeScores.OrderBy(hs => hs.HoleNumber).ToList();
-            var holesInPlay = holeScoresOrdered.Select(hs => new { hs.HoleNumber, hs.HoleHandicap }).ToList();
-            int playerAHandicapInt = (int)Math.Round((double)playerAHandicap);
-            int playerBHandicapInt = (int)Math.Round((double)playerBHandicap);
-            bool playerAReceivesStrokes = playerAHandicapInt > playerBHandicapInt;
-            bool playerBReceivesStrokes = playerBHandicapInt > playerAHandicapInt;
-            int handicapDiff = Math.Abs(playerAHandicapInt - playerBHandicapInt);
-            // Find the hardest holes among the 9 in play (lowest HoleHandicap values) - matches backend logic
-            var hardestHoles = holesInPlay.OrderBy(h => h.HoleHandicap).Take(handicapDiff).Select(h => h.HoleNumber).ToHashSet();
+            // Filter matchups to only include those for this flight
+            var assignments = _flightAssignmentService.GetAllAssignments().ToList();
+            var nextWeekMatchupsForFlight = allNextWeekMatchups.Where(m => {
+                var playerAAssignment = assignments.FirstOrDefault(a => a.PlayerId == m.PlayerAId && a.Flight != null && a.Flight.SeasonId == seasonId);
+                return playerAAssignment?.Flight?.Id == flight.Id;
+            }).ToList();
 
-            // Compact horizontal layout: holes as columns + total
-            int holeCount = holes.Count;
-            var columnWidths = new float[holeCount + 2];
-            columnWidths[0] = 1.2f;
-            for (int i = 1; i <= holeCount; i++) columnWidths[i] = 1f;
-            columnWidths[holeCount + 1] = 1.2f;
-            var table = new Table(UnitValue.CreatePercentArray(columnWidths)).SetWidth(UnitValue.CreatePercentValue(100));
-            table.SetFont(boldFont).SetFontSize(9f);
+            if (!nextWeekMatchupsForFlight.Any()) return;
 
-            // Header: Player names and handicaps, with winner (if any) in red at the top center
-            string winner = "Tie";
-            if (matchup.PlayerAMatchWin) winner = playerAName;
-            else if (matchup.PlayerBMatchWin) winner = playerBName;
-            // Special case: both absent, but points are not equal
-            if (matchup.PlayerAAbsent && matchup.PlayerBAbsent && (matchup.PlayerAPoints != matchup.PlayerBPoints))
+            container.Table(table =>
             {
-                if ((matchup.PlayerAPoints ?? 0) > (matchup.PlayerBPoints ?? 0))
-                    winner = playerAName;
-                else if ((matchup.PlayerBPoints ?? 0) > (matchup.PlayerAPoints ?? 0))
-                    winner = playerBName;
-            }
-            string winnerText = winner == "Tie"
-                ? "Tie\n"
-                : $"Winner: {winner}\n";
-
-            var headerParagraph = new Paragraph()
-                .Add(new Text(winnerText).SetFont(boldFont).SetFontSize(11f).SetFontColor(ColorConstants.RED))
-                .Add(new Text($"{playerAName} (HCP: {playerAHandicap}, Avg: {playerA?.CurrentAverageScore:F1}) vs {playerBName} (HCP: {playerBHandicap}, Avg: {playerB?.CurrentAverageScore:F1})")
-                    .SetFont(boldFont).SetFontSize(9.5f))
-                .SetMarginTop(0).SetMarginBottom(0);
-            table.AddHeaderCell(new Cell(1, holeCount + 2)
-                .Add(headerParagraph)
-                .SetBackgroundColor(new DeviceRgb(220, 230, 250))
-                .SetTextAlignment(TextAlignment.CENTER));
-
-            // Row: Hole numbers
-            table.AddCell(new Cell().Add(new Paragraph("Hole").SetFont(boldFont).SetFontSize(9f))
-                .SetBackgroundColor(new DeviceRgb(220, 230, 250)));
-            foreach (var hole in holes)
-                table.AddCell(new Cell().Add(new Paragraph(hole.HoleNumber.ToString()).SetFont(boldFont).SetFontSize(9f))
-                    .SetTextAlignment(TextAlignment.CENTER)
-                    .SetBackgroundColor(new DeviceRgb(220, 230, 250)));
-            table.AddCell(new Cell().Add(new Paragraph("Total").SetFont(boldFont).SetFontSize(9f))
-                .SetBackgroundColor(new DeviceRgb(200, 220, 255)));
-
-            // Row: Par
-            table.AddCell(new Cell().Add(new Paragraph("Par").SetFont(boldFont).SetFontSize(9f))
-                .SetBackgroundColor(ColorConstants.WHITE));
-            int parTotal = 0;
-            foreach (var hole in holes)
-            {
-                parTotal += hole.Par;
-                table.AddCell(new Cell().Add(new Paragraph(hole.Par.ToString()).SetFont(boldFont).SetFontSize(9f))
-                    .SetTextAlignment(TextAlignment.CENTER));
-            }
-            table.AddCell(new Cell().Add(new Paragraph(parTotal.ToString()).SetFont(boldFont).SetFontSize(9f))
-                .SetTextAlignment(TextAlignment.CENTER)
-                .SetBackgroundColor(new DeviceRgb(240, 250, 220)));
-
-            // Row: Handicap
-            table.AddCell(new Cell().Add(new Paragraph("HCP").SetFont(boldFont).SetFontSize(9f))
-                .SetBackgroundColor(new DeviceRgb(245, 245, 245)));
-            foreach (var hole in holes)
-            {
-                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
-                var cell = new Cell().Add(new Paragraph((hs?.HoleHandicap ?? hole.HandicapIndex).ToString()).SetFont(boldFont).SetFontSize(9f))
-                    .SetTextAlignment(TextAlignment.CENTER)
-                    .SetBackgroundColor(new DeviceRgb(245, 245, 245));
-                table.AddCell(cell);
-            }
-            table.AddCell(new Cell().SetBackgroundColor(new DeviceRgb(245, 245, 245)));
-
-            // Row: Player A scores
-            table.AddCell(new Cell().Add(new Paragraph(playerAName.Split(' ')[0]).SetFont(boldFont).SetFontSize(9f))
-                .SetBackgroundColor(new DeviceRgb(235, 245, 255)));
-            int playerATotal = 0;
-            int playerANetTotal = 0;
-            foreach (var hole in holes)
-            {
-                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
-                int gross = hs?.PlayerAScore ?? 0;
-                if (gross > 0) playerATotal += gross;
+                table.ColumnsDefinition(columns => columns.RelativeColumn());
                 
-                // Use exact backend logic for stroke calculation
-                int strokes = (playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) ? 1 : 0;
-                int net = gross > 0 ? gross - strokes : 0;
-                if (gross > 0) playerANetTotal += net;
-                
-                string displayText = "";
-                if (matchup.PlayerAAbsent)
-                {
-                    displayText = "ABS";
-                }
-                else if (hs?.PlayerAScore != null)
-                {
-                    displayText = $"{gross}/{net}";
-                }
-                
-                // Highlight score cell if player A receives strokes on this hole
-                bool highlightPlayerA = playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
-                var backgroundColor = highlightPlayerA ? new DeviceRgb(255, 255, 180) : ColorConstants.WHITE;
-                
-                table.AddCell(new Cell().Add(new Paragraph(displayText)
-                    .SetFont(boldFont)
-                    .SetFontSize(9f))
-                    .SetTextAlignment(TextAlignment.CENTER)
-                    .SetBackgroundColor(backgroundColor));
-            }
+                // Header
+                table.Cell().Padding(4).Background(Colors.Blue.Darken1)
+                    .Text($"Next Week (Week {nextWeek.WeekNumber}) Matchups")
+                    .FontSize(12).Bold().FontColor(Colors.White).AlignCenter();
+
+                // Matchups content - using Column instead of single text for better line handling
+                table.Cell().Padding(5).Background(Colors.White)
+                    .Column(column =>
+                    {
+                        foreach (var matchup in nextWeekMatchupsForFlight)
+                        {
+                            var playerA = matchup.PlayerA;
+                            var playerB = matchup.PlayerB;
+
+                            if (playerA == null || playerB == null) continue;
+
+                            var playerAHandicap = playerA != null && handicapData.ContainsKey(playerA.Id) 
+                                ? handicapData[playerA.Id] 
+                                : (playerA?.CurrentHandicap ?? 0);
+                            var playerBHandicap = playerB != null && handicapData.ContainsKey(playerB.Id) 
+                                ? handicapData[playerB.Id] 
+                                : (playerB?.CurrentHandicap ?? 0);
+                            
+                            int playerAHandicapInt = (int)Math.Round((double)playerAHandicap);
+                            int playerBHandicapInt = (int)Math.Round((double)playerBHandicap);
+                            int handicapDiff = Math.Abs(playerAHandicapInt - playerBHandicapInt);
+                            
+                            string strokeInfo = "";
+                            if (handicapDiff > 0)
+                            {
+                                if (playerAHandicapInt > playerBHandicapInt)
+                                    strokeInfo = $" ({playerA!.FirstName.Substring(0, 1)}. gets {handicapDiff})";
+                                else
+                                    strokeInfo = $" ({playerB!.FirstName.Substring(0, 1)}. gets {handicapDiff})";
+                            }
+
+                            var line = $"{playerA!.FirstName} {playerA.LastName.Substring(0, 1)}. ({playerAHandicap:0.#}) vs " +
+                                      $"{playerB!.FirstName} {playerB.LastName.Substring(0, 1)}. ({playerBHandicap:0.#}){strokeInfo}";
+                            
+                            column.Item().Text(line).FontSize(12).LineHeight(1.2f);
+                        }
+                    });
+            });
+        }
+
+        /// <summary>
+        /// Generate an explanation of how the match was won, including absentee scenarios
+        /// </summary>
+        private string GetMatchResultExplanation(Matchup matchup, string playerAName, string playerBName)
+        {
+            string playerAFirstName = playerAName.Split(' ')[0];
+            string playerBFirstName = playerBName.Split(' ')[0];
             
-            // Use the stored totals from the matchup, but show calculated gross/net for display
-            var storedPlayerAScore = matchup.PlayerAScore ?? playerATotal;
-            string playerATotalText = matchup.PlayerAAbsent ? "ABSENT" : $"{storedPlayerAScore}/{playerANetTotal}";
-            table.AddCell(new Cell().Add(new Paragraph(playerATotalText)
-                .SetFont(boldFont).SetFontSize(9f))
-                .SetTextAlignment(TextAlignment.CENTER)
-                .SetBackgroundColor(new DeviceRgb(220, 255, 220)));
-
-            // Row: Player B scores
-            table.AddCell(new Cell().Add(new Paragraph(playerBName.Split(' ')[0]).SetFont(boldFont).SetFontSize(9f))
-                .SetBackgroundColor(new DeviceRgb(255, 245, 235)));
-            int playerBTotal = 0;
-            int playerBNetTotal = 0;
-            foreach (var hole in holes)
+            // Handle absence scenarios first
+            if (matchup.PlayerAAbsent && matchup.PlayerBAbsent)
             {
-                var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
-                int gross = hs?.PlayerBScore ?? 0;
-                if (gross > 0) playerBTotal += gross;
-                
-                // Use exact backend logic for stroke calculation
-                int strokes = (playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber)) ? 1 : 0;
-                int net = gross > 0 ? gross - strokes : 0;
-                if (gross > 0) playerBNetTotal += net;
-                
-                string displayText = "";
-                if (matchup.PlayerBAbsent)
+                if (matchup.PlayerAAbsentWithNotice && matchup.PlayerBAbsentWithNotice)
                 {
-                    displayText = "ABS";
+                    return "Both players absent with notice - 4 points each";
                 }
-                else if (hs?.PlayerBScore != null)
+                else if (matchup.PlayerAAbsentWithNotice)
                 {
-                    displayText = $"{gross}/{net}";
+                    return $"{playerAFirstName} absent with notice (4 pts), {playerBFirstName} absent without notice (0 pts)";
                 }
-                
-                // Highlight score cell if player B receives strokes on this hole
-                bool highlightPlayerB = playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
-                var backgroundColor = highlightPlayerB ? new DeviceRgb(255, 255, 180) : ColorConstants.WHITE;
-                
-                table.AddCell(new Cell().Add(new Paragraph(displayText)
-                    .SetFont(boldFont)
-                    .SetFontSize(9f))
-                    .SetTextAlignment(TextAlignment.CENTER)
-                    .SetBackgroundColor(backgroundColor));
-            }
-            
-            // Use the stored totals from the matchup, but show calculated gross/net for display
-            var storedPlayerBScore = matchup.PlayerBScore ?? playerBTotal;
-            string playerBTotalText = matchup.PlayerBAbsent ? "ABSENT" : $"{storedPlayerBScore}/{playerBNetTotal}";
-            table.AddCell(new Cell().Add(new Paragraph(playerBTotalText)
-                .SetFont(boldFont).SetFontSize(9f))
-                .SetTextAlignment(TextAlignment.CENTER)
-                .SetBackgroundColor(new DeviceRgb(255, 220, 220)));
-
-            // Consolidated Match Play Points Row (per hole + total)
-            table.AddCell(new Cell().Add(new Paragraph("MP/Hole").SetFont(boldFont).SetFontSize(9f))
-                .SetBackgroundColor(new DeviceRgb(240, 240, 255)));
-            
-            // Use the backend-calculated match play points that are already stored
-            int playerAMatchTotal = matchup.PlayerAPoints ?? 0;
-            int playerBMatchTotal = matchup.PlayerBPoints ?? 0;
-            
-            foreach (var hole in holes)
-            {
-                var hs = holeScores.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
-                string mp;
-                
-                if (matchup.PlayerAAbsent || matchup.PlayerBAbsent)
+                else if (matchup.PlayerBAbsentWithNotice)
                 {
-                    // For absent players, show 0-0 for each hole
-                    mp = "0-0";
-                }
-                else if (hs != null)
-                {
-                    // Use the backend-calculated hole match points
-                    mp = $"{hs.PlayerAMatchPoints}-{hs.PlayerBMatchPoints}";
+                    return $"{playerBFirstName} absent with notice (4 pts), {playerAFirstName} absent without notice (0 pts)";
                 }
                 else
                 {
-                    mp = "-";
+                    return "Both players absent without notice - 0 points each";
                 }
-                
-                table.AddCell(new Cell().Add(new Paragraph(mp).SetFont(boldFont).SetFontSize(9f))
-                    .SetTextAlignment(TextAlignment.CENTER).SetFontColor(new DeviceRgb(0, 0, 255))  // Dark blue for match points
-                    .SetBackgroundColor(new DeviceRgb(240, 240, 255)));
+            }
+            else if (matchup.PlayerAAbsent)
+            {
+                string noticeText = matchup.PlayerAAbsentWithNotice ? "with notice (4 pts)" : "without notice (0 pts)";
+                int playerBPoints = matchup.PlayerBPoints ?? 0;
+                return $"{playerAFirstName} absent {noticeText} - {playerBFirstName} played and earned {playerBPoints} pts";
+            }
+            else if (matchup.PlayerBAbsent)
+            {
+                string noticeText = matchup.PlayerBAbsentWithNotice ? "with notice (4 pts)" : "without notice (0 pts)";
+                int playerAPoints = matchup.PlayerAPoints ?? 0;
+                return $"{playerBFirstName} absent {noticeText} - {playerAFirstName} played and earned {playerAPoints} pts";
             }
             
-            // Show total match points as calculated by backend
-            table.AddCell(new Cell().Add(new Paragraph($"{playerAMatchTotal}-{playerBMatchTotal}").SetFont(boldFont).SetFontSize(9f))
-                .SetTextAlignment(TextAlignment.CENTER)
-                .SetFontColor(new DeviceRgb(0, 0, 255)) // Dark blue for totals
-                .SetBackgroundColor(new DeviceRgb(240, 240, 255)));
-
-            // Absence status explanation
-            if (matchup.PlayerAAbsent || matchup.PlayerBAbsent)
+            // Normal match scenarios - use stored match results
+            int playerATotalPoints = matchup.PlayerAPoints ?? 0;
+            int playerBTotalPoints = matchup.PlayerBPoints ?? 0;
+            
+            if (playerATotalPoints > playerBTotalPoints)
             {
-                string absenceExplanation = "";
-                if (matchup.PlayerAAbsent && matchup.PlayerBAbsent)
+                if (matchup.PlayerAMatchWin)
                 {
-                    if (matchup.PlayerAAbsentWithNotice && matchup.PlayerBAbsentWithNotice)
-                        absenceExplanation = "Both absent with notice: 10-10 points";
-                    else if (matchup.PlayerAAbsentWithNotice)
-                        absenceExplanation = $"A absent with notice (4 pts), B absent no notice (0 pts)";
-                    else if (matchup.PlayerBAbsentWithNotice)
-                        absenceExplanation = $"A absent no notice (0 pts), B absent with notice (4 pts)";
-                    else
-                        absenceExplanation = "Both absent without notice: 0-0 points";
+                    return $"{playerAFirstName} wins with lower net score + 2 bonus points ({playerATotalPoints}-{playerBTotalPoints})";
                 }
-                else if (matchup.PlayerAAbsent)
+                else
                 {
-                    var noticeText = matchup.PlayerAAbsentWithNotice ? "with notice" : "no notice";
-                    var playerAPoints = matchup.PlayerAAbsentWithNotice ? 4 : 0;
-                    var playerBPoints = matchup.PlayerBPoints ?? 8;
-                    var playerBExplanation = playerBPoints == 16 ? "beat average by whole stroke" : "did not beat average by whole stroke";
-                    absenceExplanation = $"A absent {noticeText} ({playerAPoints} pts). B played and {playerBExplanation} ({playerBPoints} pts)";
+                    return $"{playerAFirstName} wins on holes + 1 bonus point (tied net scores) ({playerATotalPoints}-{playerBTotalPoints})";
                 }
-                else if (matchup.PlayerBAbsent)
-                {
-                    var noticeText = matchup.PlayerBAbsentWithNotice ? "with notice" : "no notice";
-                    var playerBPoints = matchup.PlayerBAbsentWithNotice ? 4 : 0;
-                    var playerAPoints = matchup.PlayerAPoints ?? 8;
-                    var playerAExplanation = playerAPoints == 16 ? "beat average by whole stroke" : "did not beat average by whole stroke";
-                    absenceExplanation = $"B absent {noticeText} ({playerBPoints} pts). A played and {playerAExplanation} ({playerAPoints} pts)";
-                }
-                
-                // Add explanation row spanning all columns
-                table.AddCell(new Cell(1, holeCount + 2)
-                    .Add(new Paragraph(absenceExplanation)
-                        .SetFont(boldFont)
-                        .SetFontSize(8f))
-                    .SetFontColor(ColorConstants.RED)
-                    .SetTextAlignment(TextAlignment.CENTER)
-                    .SetBackgroundColor(new DeviceRgb(255, 240, 240)));
             }
-
-            return table;
+            else if (playerBTotalPoints > playerATotalPoints)
+            {
+                if (matchup.PlayerBMatchWin)
+                {
+                    return $"{playerBFirstName} wins with lower net score + 2 bonus points ({playerBTotalPoints}-{playerATotalPoints})";
+                }
+                else
+                {
+                    return $"{playerBFirstName} wins on holes + 1 bonus point (tied net scores) ({playerBTotalPoints}-{playerATotalPoints})";
+                }
+            }
+            else
+            {
+                return $"Complete tie - equal points and net scores ({playerATotalPoints}-{playerBTotalPoints})";
+            }
         }
     }
 }

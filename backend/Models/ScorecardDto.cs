@@ -45,5 +45,8 @@ namespace GolfLeagueManager
         public bool PlayerBAbsent { get; set; }
         public bool PlayerAAbsentWithNotice { get; set; }
         public bool PlayerBAbsentWithNotice { get; set; }
+        // Per-week averages (average up to this week, for display and absence logic)
+        public decimal? PlayerAWeekAverage { get; set; }
+        public decimal? PlayerBWeekAverage { get; set; }
     }
 }

@@ -17,6 +17,12 @@
         [disabled]="!selectedWeekId || isLoading">
         📝 PDF Scorecards
       </button>
+      <button
+        class="bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-green-700 transition-colors"
+        (click)="downloadWeekSummaryPdf()"
+        [disabled]="!selectedWeekId || isLoading">
+        📊 Summary Report
+      </button>
     </div>
   </div>
 
@@ -198,8 +204,9 @@
 <!-- Scorecard Modal -->
 <app-scorecard-modal
   #scorecardModal
-  *ngIf="showScorecardModal && currentScorecardData"
+  *ngIf="showScorecardModal && currentScorecardData && selectedWeek"
   [scorecardData]="currentScorecardData"
+  [week]="selectedWeek"
   [isOpen]="showScorecardModal"
   (save)="onScorecardSave($event)"
   (close)="closeScorecardModal()">

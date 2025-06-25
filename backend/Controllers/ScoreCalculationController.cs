@@ -9,11 +9,13 @@ namespace GolfLeagueManager.Controllers
     {
         private readonly AppDbContext _context;
         private readonly MatchPlayScoringService _scoringService;
+        private readonly HandicapService _handicapService;
 
-        public ScoreCalculationController(AppDbContext context, MatchPlayScoringService scoringService)
+        public ScoreCalculationController(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService)
         {
             _context = context;
             _scoringService = scoringService;
+            _handicapService = handicapService;
         }
 
         /// <summary>
@@ -109,6 +111,7 @@ namespace GolfLeagueManager.Controllers
                 var matchup = await _context.Matchups
                     .Include(m => m.PlayerA)
                     .Include(m => m.PlayerB)
+                    .Include(m => m.Week)
                     .FirstOrDefaultAsync(m => m.Id == matchupId);
 
                 if (matchup == null)
@@ -121,6 +124,22 @@ namespace GolfLeagueManager.Controllers
                     .OrderBy(hs => hs.HoleNumber)
                     .ToListAsync();
 
+                // Get session handicaps for both players
+                decimal playerAHandicap = 0;
+                decimal playerBHandicap = 0;
+                
+                if (matchup.PlayerA != null && matchup.Week != null)
+                {
+                    playerAHandicap = await _handicapService.GetPlayerSessionHandicapAsync(
+                        matchup.PlayerA.Id, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+                }
+                
+                if (matchup.PlayerB != null && matchup.Week != null)
+                {
+                    playerBHandicap = await _handicapService.GetPlayerSessionHandicapAsync(
+                        matchup.PlayerB.Id, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+                }
+
                 var response = new MatchupScoresResponse
                 {
                     MatchupId = matchupId,
@@ -128,8 +147,8 @@ namespace GolfLeagueManager.Controllers
                     PlayerBGrossScore = (int?)matchup.PlayerBScore,
                     PlayerANetScore = null,
                     PlayerBNetScore = null,
-                    PlayerAHandicap = (int)(matchup.PlayerA?.CurrentHandicap ?? 0),
-                    PlayerBHandicap = (int)(matchup.PlayerB?.CurrentHandicap ?? 0),
+                    PlayerAHandicap = (int)playerAHandicap,
+                    PlayerBHandicap = (int)playerBHandicap,
                     PlayerAPoints = matchup.PlayerAPoints,
                     PlayerBPoints = matchup.PlayerBPoints,
                     HoleScores = new List<HoleScoreDto>()
@@ -138,9 +157,6 @@ namespace GolfLeagueManager.Controllers
                 // Calculate net scores if we have gross scores and handicaps
                 if (matchup.PlayerAScore.HasValue && matchup.PlayerBScore.HasValue)
                 {
-                    var playerAHandicap = matchup.PlayerA?.CurrentHandicap ?? 0;
-                    var playerBHandicap = matchup.PlayerB?.CurrentHandicap ?? 0;
-                    
                     // Simple net score calculation for overall scores
                     var handicapDiff = Math.Abs(playerAHandicap - playerBHandicap);
                     
@@ -181,20 +197,20 @@ namespace GolfLeagueManager.Controllers
                         
                         if (courseHole != null)
                         {
-                            var playerAHandicap = (int)(matchup.PlayerA?.CurrentHandicap ?? 0);
-                            var playerBHandicap = (int)(matchup.PlayerB?.CurrentHandicap ?? 0);
+                            var playerAHcp = (int)playerAHandicap;
+                            var playerBHcp = (int)playerBHandicap;
 
                             holeDto.PlayerANetScore = _scoringService.CalculateNetScore(
                                 holeScore.PlayerAScore.Value, 
-                                playerAHandicap, 
-                                playerBHandicap, 
+                                playerAHcp, 
+                                playerBHcp, 
                                 courseHole.HandicapIndex
                             );
 
                             holeDto.PlayerBNetScore = _scoringService.CalculateNetScore(
                                 holeScore.PlayerBScore.Value, 
-                                playerBHandicap, 
-                                playerAHandicap, 
+                                playerBHcp, 
+                                playerAHcp, 
                                 courseHole.HandicapIndex
                             );
                         }

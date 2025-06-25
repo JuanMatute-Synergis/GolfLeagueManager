@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { Router, RouterLink } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -16,8 +17,14 @@ export class SignInComponent implements OnInit {
   form!: FormGroup;
   submitted = false;
   passwordTextType!: boolean;
+  error = '';
+  loading = false;
 
-  constructor(private readonly _formBuilder: FormBuilder, private readonly _router: Router) {}
+  constructor(
+    private readonly _formBuilder: FormBuilder,
+    private readonly _router: Router,
+    private readonly auth: AuthService
+  ) {}
 
   onClick() {
     console.log('Button clicked');
@@ -25,7 +32,7 @@ export class SignInComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this._formBuilder.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', Validators.required],
       password: ['', Validators.required],
     });
   }
@@ -40,12 +47,23 @@ export class SignInComponent implements OnInit {
 
   onSubmit() {
     this.submitted = true;
-    const { email, password } = this.form.value;
-
+    const { username, password } = this.form.value;
     if (this.form.invalid) {
       return;
     }
-
-    this._router.navigate(['/']);
+    this.loading = true;
+    this.error = '';
+    this.auth.login({ username, password }).subscribe({
+      next: () => {
+        this.loading = false;
+        this._router.navigate(['/']);
+      },
+      error: err => {
+        this.loading = false;
+        // Clear any session data on failed login
+        this.auth.logout().subscribe();
+        this.error = (err?.error?.message || err?.error || 'Invalid username or password. Please try again.');
+      }
+    });
   }
 }

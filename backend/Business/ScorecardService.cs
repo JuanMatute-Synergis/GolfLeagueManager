@@ -10,8 +10,9 @@ namespace GolfLeagueManager
         private readonly MatchPlayService _matchPlayService;
         private readonly MatchPlayScoringService _matchPlayScoringService;
         private readonly AverageScoreService _averageScoreService;
+        private readonly HandicapService _handicapService;
 
-        public ScorecardService(AppDbContext context, MatchupService matchupService, ScoreEntryService scoreEntryService, MatchPlayService matchPlayService, MatchPlayScoringService matchPlayScoringService, AverageScoreService averageScoreService)
+        public ScorecardService(AppDbContext context, MatchupService matchupService, ScoreEntryService scoreEntryService, MatchPlayService matchPlayService, MatchPlayScoringService matchPlayScoringService, AverageScoreService averageScoreService, HandicapService handicapService)
         {
             _context = context;
             _matchupService = matchupService;
@@ -19,6 +20,7 @@ namespace GolfLeagueManager
             _matchPlayService = matchPlayService;
             _matchPlayScoringService = matchPlayScoringService;
             _averageScoreService = averageScoreService;
+            _handicapService = handicapService;
         }
 
         public async Task<ScorecardResponse> SaveScorecardAsync(ScorecardSaveRequest request)
@@ -87,12 +89,32 @@ namespace GolfLeagueManager
                 }
 
                 // Update the matchup with total scores and absence information
-                matchup.PlayerAScore = request.PlayerATotalScore > 0 ? request.PlayerATotalScore : null;
-                matchup.PlayerBScore = request.PlayerBTotalScore > 0 ? request.PlayerBTotalScore : null;
                 matchup.PlayerAAbsent = request.PlayerAAbsent;
                 matchup.PlayerBAbsent = request.PlayerBAbsent;
                 matchup.PlayerAAbsentWithNotice = request.PlayerAAbsentWithNotice;
                 matchup.PlayerBAbsentWithNotice = request.PlayerBAbsentWithNotice;
+
+                // If a player is absent, set their score to their average up to this week
+                if (matchup.PlayerAAbsent && matchup.Week != null)
+                {
+                    var avgA = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
+                        matchup.PlayerAId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+                    matchup.PlayerAScore = (int)Math.Round(avgA);
+                }
+                else
+                {
+                    matchup.PlayerAScore = request.PlayerATotalScore > 0 ? request.PlayerATotalScore : null;
+                }
+                if (matchup.PlayerBAbsent && matchup.Week != null)
+                {
+                    var avgB = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
+                        matchup.PlayerBId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+                    matchup.PlayerBScore = (int)Math.Round(avgB);
+                }
+                else
+                {
+                    matchup.PlayerBScore = request.PlayerBTotalScore > 0 ? request.PlayerBTotalScore : null;
+                }
 
                 // Special circumstance points logic
                 if (matchup.Week != null && matchup.Week.SpecialPointsAwarded.HasValue)
@@ -147,11 +169,11 @@ namespace GolfLeagueManager
                 {
                     if (matchup.PlayerAScore.HasValue)
                     {
-                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerAId, matchup.Week.SeasonId);
+                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerAId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
                     }
                     if (matchup.PlayerBScore.HasValue)
                     {
-                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerBId, matchup.Week.SeasonId);
+                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerBId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
                     }
                 }
                 
@@ -159,6 +181,17 @@ namespace GolfLeagueManager
 
                 // Reload the matchup to get the calculated match play results
                 var updatedMatchup = await _context.Matchups.FindAsync(request.MatchupId);
+
+                // Calculate per-week averages for both players (for this week)
+                decimal? playerAWeekAverage = null;
+                decimal? playerBWeekAverage = null;
+                if (matchup.Week != null)
+                {
+                    playerAWeekAverage = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
+                        matchup.PlayerAId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+                    playerBWeekAverage = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
+                        matchup.PlayerBId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+                }
 
                 return new ScorecardResponse
                 {
@@ -176,7 +209,10 @@ namespace GolfLeagueManager
                     PlayerAAbsent = updatedMatchup?.PlayerAAbsent ?? false,
                     PlayerBAbsent = updatedMatchup?.PlayerBAbsent ?? false,
                     PlayerAAbsentWithNotice = updatedMatchup?.PlayerAAbsentWithNotice ?? false,
-                    PlayerBAbsentWithNotice = updatedMatchup?.PlayerBAbsentWithNotice ?? false
+                    PlayerBAbsentWithNotice = updatedMatchup?.PlayerBAbsentWithNotice ?? false,
+                    // New: per-week averages
+                    PlayerAWeekAverage = playerAWeekAverage,
+                    PlayerBWeekAverage = playerBWeekAverage
                 };
             }
             catch (Exception ex)
@@ -204,6 +240,7 @@ namespace GolfLeagueManager
             var matchup = await _context.Matchups
                 .Include(m => m.PlayerA)
                 .Include(m => m.PlayerB)
+                .Include(m => m.Week)
                 .FirstOrDefaultAsync(m => m.Id == matchupId);
                 
             if (matchup == null)
@@ -227,6 +264,22 @@ namespace GolfLeagueManager
                 holeScores = await InitializeDefaultHoleScoresAsync(matchupId);
             }
 
+            // Get session handicaps for both players
+            decimal playerAHandicap = 0;
+            decimal playerBHandicap = 0;
+            
+            if (matchup.PlayerA != null && matchup.Week != null)
+            {
+                playerAHandicap = await _handicapService.GetPlayerSessionHandicapAsync(
+                    matchup.PlayerA.Id, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+            }
+            
+            if (matchup.PlayerB != null && matchup.Week != null)
+            {
+                playerBHandicap = await _handicapService.GetPlayerSessionHandicapAsync(
+                    matchup.PlayerB.Id, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+            }
+
             return new ScorecardResponse
             {
                 MatchupId = matchupId,
@@ -240,9 +293,9 @@ namespace GolfLeagueManager
                 PlayerBHolePoints = matchup.PlayerBHolePoints,
                 PlayerAMatchWin = matchup.PlayerAMatchWin,
                 PlayerBMatchWin = matchup.PlayerBMatchWin,
-                // Include player handicaps
-                PlayerAHandicap = matchup.PlayerA?.CurrentHandicap ?? 0,
-                PlayerBHandicap = matchup.PlayerB?.CurrentHandicap ?? 0,
+                // Include session handicaps instead of current handicaps
+                PlayerAHandicap = playerAHandicap,
+                PlayerBHandicap = playerBHandicap,
                 // Include absence status
                 PlayerAAbsent = matchup.PlayerAAbsent,
                 PlayerBAbsent = matchup.PlayerBAbsent,
@@ -282,16 +335,31 @@ namespace GolfLeagueManager
         /// </summary>
         private async Task<List<HoleScore>> InitializeDefaultHoleScoresAsync(Guid matchupId)
         {
-            // Standard 9-hole pars
+            // Get the matchup and week to determine which 9 holes to initialize
+            var matchup = await _context.Matchups
+                .Include(m => m.Week)
+                .FirstOrDefaultAsync(m => m.Id == matchupId);
+                
+            if (matchup?.Week == null)
+            {
+                throw new ArgumentException("Matchup or Week not found");
+            }
+
+            // Determine which holes to initialize based on the week's NineHoles setting
+            var (startHole, endHole) = matchup.Week.NineHoles == NineHoles.Front ? (1, 9) : (10, 18);
+
+            // Standard pars for all 18 holes
             var defaultPars = new Dictionary<int, int>
             {
                 { 1, 4 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 4 },
-                { 6, 3 }, { 7, 4 }, { 8, 4 }, { 9, 5 }
+                { 6, 3 }, { 7, 4 }, { 8, 4 }, { 9, 5 },
+                { 10, 4 }, { 11, 3 }, { 12, 4 }, { 13, 5 }, { 14, 4 },
+                { 15, 3 }, { 16, 4 }, { 17, 4 }, { 18, 5 }
             };
 
             var holeScores = new List<HoleScore>();
 
-            for (int holeNumber = 1; holeNumber <= 9; holeNumber++)
+            for (int holeNumber = startHole; holeNumber <= endHole; holeNumber++)
             {
                 // Get the correct handicap for this hole from the database
                 var holeHandicap = await _matchPlayScoringService.GetHoleHandicapAsync(holeNumber);

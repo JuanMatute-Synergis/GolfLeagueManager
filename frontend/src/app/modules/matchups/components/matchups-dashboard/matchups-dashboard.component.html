@@ -281,12 +281,13 @@
 
 <!-- Scorecard Modal (View Mode) -->
 <app-scorecard-modal
-  *ngIf="selectedMatchupForScorecard"
+  *ngIf="selectedMatchupForScorecard && getSelectedWeekForScorecard()"
   [isOpen]="showScorecardViewer"
   [mode]="'view'"
   [matchupId]="selectedMatchupForScorecard.id || ''"
   [playerAName]="selectedMatchupForScorecard.playerAName"
   [playerBName]="selectedMatchupForScorecard.playerBName"
   [flightName]="selectedMatchupForScorecard.flightName"
+  [week]="getSelectedWeekForScorecard()"
   (close)="closeScorecardViewer()">
 </app-scorecard-modal>

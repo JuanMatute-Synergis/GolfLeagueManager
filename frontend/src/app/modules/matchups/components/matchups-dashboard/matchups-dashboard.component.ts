@@ -14,6 +14,8 @@ import {
 import { ScoreCalculationService } from '../../../scoring/services/score-calculation.service';
 import { ScorecardModalComponent } from '../../../scoring/components/scorecard-modal/scorecard-modal.component';
 import { DateUtilService } from '../../../../core/services/date-util.service';
+import { HandicapService } from '../../../../core/services/handicap.service';
+import { NineHoles } from '../../../scoring/models/week.model';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -49,10 +51,14 @@ export class MatchupsDashboardComponent implements OnInit {
   showScorecardViewer = false;
   selectedMatchupForScorecard: MatchupWithFlightInfo | null = null;
 
+  // Session handicaps cache
+  sessionHandicaps: { [playerId: string]: number } = {};
+
   constructor(
     private matchupsService: MatchupsService,
     private scoreCalculationService: ScoreCalculationService,
     private dateUtil: DateUtilService,
+    private handicapService: HandicapService,
   ) {}
 
   ngOnInit(): void {
@@ -151,6 +157,7 @@ export class MatchupsDashboardComponent implements OnInit {
       this.matchups = [];
       this.matchupsByFlight = {};
       this.flightOrder = [];
+      this.sessionHandicaps = {};
       return;
     }
 
@@ -161,6 +168,7 @@ export class MatchupsDashboardComponent implements OnInit {
       next: (matchups) => {
         this.matchups = matchups;
         this.processMatchupsByFlight();
+        this.loadSessionHandicaps();
         this.isLoading = false;
       },
       error: (error) => {
@@ -257,6 +265,25 @@ export class MatchupsDashboardComponent implements OnInit {
   getSelectedWeekName(): string {
     const week = this.weeks.find(w => w.id === this.selectedWeekId);
     return week ? week.name : '';
+  }
+
+  getSelectedWeek(): Week | undefined {
+    return this.weeks.find(w => w.id === this.selectedWeekId);
+  }
+
+  getSelectedWeekForScorecard(): import('../../../scoring/models/week.model').Week | undefined {
+    const week = this.getSelectedWeek();
+    if (!week) return undefined;
+    
+    // Convert matchups service Week to scoring module Week
+    return {
+      ...week,
+      nineHoles: week.nineHoles || NineHoles.Front, // Default to Front if not set
+      matchups: week.matchups?.map(m => ({
+        ...m,
+        id: m.id || '' // Ensure id is string, not string | undefined
+      })) || []
+    } as import('../../../scoring/models/week.model').Week;
   }
 
   getWeekDateRange(week: Week): string {
@@ -417,6 +444,12 @@ export class MatchupsDashboardComponent implements OnInit {
   private getPlayerHandicap(playerId: string | undefined): number | null {
     if (!playerId) return null;
 
+    // First try to get session handicap
+    if (this.sessionHandicaps[playerId] !== undefined) {
+      return this.sessionHandicaps[playerId];
+    }
+
+    // Fallback to current handicap
     const player = this.players.find(p => p.id === playerId);
     return player?.handicap || null;
   }
@@ -446,5 +479,50 @@ export class MatchupsDashboardComponent implements OnInit {
 
     const score = player === 'A' ? matchup.playerAScore : matchup.playerBScore;
     return score !== null && score !== undefined ? score.toString() : '--';
+  }
+
+  private loadSessionHandicaps(): void {
+    if (!this.selectedSeasonId || !this.selectedWeekId) {
+      return;
+    }
+
+    // Clear existing session handicaps
+    this.sessionHandicaps = {};
+
+    // Get the selected week to find the week number
+    const selectedWeek = this.weeks.find(w => w.id === this.selectedWeekId);
+    if (!selectedWeek) {
+      return;
+    }
+
+    // Collect all unique player IDs from matchups
+    const playerIds = new Set<string>();
+    this.matchups.forEach(matchup => {
+      if (matchup.playerAId) playerIds.add(matchup.playerAId);
+      if (matchup.playerBId) playerIds.add(matchup.playerBId);
+    });
+
+    // Load session handicaps for all players
+    const handicapRequests = Array.from(playerIds).map(playerId =>
+      this.handicapService.getPlayerSessionHandicap(playerId, this.selectedSeasonId, selectedWeek.weekNumber)
+    );
+
+    if (handicapRequests.length > 0) {
+      forkJoin(handicapRequests).subscribe({
+        next: (handicaps) => {
+          Array.from(playerIds).forEach((playerId, index) => {
+            this.sessionHandicaps[playerId] = handicaps[index];
+          });
+        },
+        error: (error) => {
+          console.error('Error loading session handicaps:', error);
+          // Fallback to current handicaps if session handicaps fail
+          Array.from(playerIds).forEach(playerId => {
+            const player = this.players.find(p => p.id === playerId);
+            this.sessionHandicaps[playerId] = player?.handicap || 0;
+          });
+        }
+      });
+    }
   }
 }

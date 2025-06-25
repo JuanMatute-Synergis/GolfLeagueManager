@@ -6,11 +6,13 @@ namespace GolfLeagueManager
     {
         private readonly AppDbContext _context;
         private readonly MatchPlayScoringService _scoringService;
+        private readonly HandicapService _handicapService;
 
-        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService)
+        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService)
         {
             _context = context;
             _scoringService = scoringService;
+            _handicapService = handicapService;
         }
 
         /// <summary>
@@ -44,6 +46,14 @@ namespace GolfLeagueManager
 
             Console.WriteLine("[DEBUG] No absence scenario detected, proceeding with normal match play calculation");
             
+            // Get the week for session context
+            var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == matchup.WeekId);
+            if (week == null)
+            {
+                Console.WriteLine("[DEBUG] Week not found for matchup");
+                return false;
+            }
+            
             var holeScores = await _context.HoleScores
                 .Where(hs => hs.MatchupId == matchupId)
                 .OrderBy(hs => hs.HoleNumber)
@@ -55,9 +65,9 @@ namespace GolfLeagueManager
                 return false;
             }
 
-            // Get current handicaps for both players
-            var playerAHandicap = matchup.PlayerA?.CurrentHandicap ?? 0;
-            var playerBHandicap = matchup.PlayerB?.CurrentHandicap ?? 0;
+            // Get session-specific handicaps for both players
+            var playerAHandicap = await _handicapService.GetPlayerSessionHandicapAsync(matchup.PlayerAId, week.SeasonId, week.WeekNumber);
+            var playerBHandicap = await _handicapService.GetPlayerSessionHandicapAsync(matchup.PlayerBId, week.SeasonId, week.WeekNumber);
 
             // Calculate gross totals for tie-breaking
             var playerAGrossTotal = holeScores.Where(hs => hs.PlayerAScore.HasValue).Sum(hs => hs.PlayerAScore!.Value);
@@ -91,8 +101,7 @@ namespace GolfLeagueManager
             matchup.PlayerBMatchWin = matchPlayResult.PlayerBMatchWin;
 
             // Special circumstance points logic (applies to both normal and absence scenarios)
-            var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == matchup.WeekId);
-            if (week != null && week.SpecialPointsAwarded.HasValue)
+            if (week.SpecialPointsAwarded.HasValue)
             {
                 int special = week.SpecialPointsAwarded.Value;
                 matchup.PlayerAPoints = matchup.PlayerAAbsent ? special / 2 : special;

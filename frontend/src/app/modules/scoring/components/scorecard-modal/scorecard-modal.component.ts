@@ -7,6 +7,7 @@ import { ScorecardService } from '../../services/scorecard.service';
 import { CourseService } from '../../../../core/services/course.service';
 import { ScoreCalculationService } from '../../services/score-calculation.service';
 import { Course as CourseModel } from '../../../../core/models/course.model';
+import { Week, NineHoles } from '../../models/week.model';
 
 @Component({
   selector: 'app-scorecard-modal',
@@ -19,6 +20,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   @Input() scorecardData!: ScorecardData;
   @Input() isOpen: boolean = false;
   @Input() mode: 'edit' | 'view' = 'edit'; // New input to determine mode
+  @Input() week?: Week; // Week data to determine which holes to show
   
   // For view mode, we can accept individual matchup properties as alternative inputs
   @Input() matchupId?: string;
@@ -133,6 +135,15 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   ngOnChanges(changes: SimpleChanges) {
     console.log('ngOnChanges called:', changes);
     
+    // Debug week changes
+    if (changes['week']) {
+      console.log('Week changed:', changes['week'].currentValue);
+      // Rebuild view model when week changes
+      if (this.scorecardData) {
+        this.buildViewModel();
+      }
+    }
+    
     // For view mode, initialize data from individual inputs if needed
     if (this.mode === 'view' && (changes['matchupId'] || changes['isOpen']) && this.isOpen) {
       if (!this.scorecardData || this.scorecardData.matchupId !== this.matchupId) {
@@ -144,6 +155,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
       console.log('Modal opened, loading scorecard data');
       this.loadScorecardData();
+      
+      // Auto-focus first hole for Player A after modal opens and data loads
+      if (this.mode === 'edit') {
+        setTimeout(() => {
+          this.autoFocusFirstEmptyHole();
+        }, 100);
+      }
     }
     
     // Recalculate when scorecard data changes (e.g., handicaps updated)
@@ -190,11 +208,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           if (this.mode === 'view' && !this.scorecardData) {
             this.initializeViewModeData();
           }
-          // Always display all 18 holes, assign scores to correct hole number
-          const holesArray = this.course.holes.map(hole => {
+          // Use relevant holes based on week setting, map scores by actual hole number
+          const relevantHoles = this.getRelevantHoles();
+          const holesArray = relevantHoles.map((hole) => {
+            // Map scores by actual hole number (1-9 for front 9, 10-18 for back 9)
+            // The database stores hole scores with the actual hole numbers
             const hs = (response.holeScores ?? []).find(h => h.holeNumber === hole.number);
             return {
-              hole: hole.number,
+              hole: hole.number, // Display the actual hole number (1-9 for front, 10-18 for back)
               par: hole.par,
               playerAScore: hs ? hs.playerAScore : undefined,
               playerBScore: hs ? hs.playerBScore : undefined,
@@ -245,6 +266,10 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
             this.error = 'No scorecard data available for this matchup.';
           } else {
             this.initializeHoles();
+            // Auto-focus first hole after initializing empty scorecard
+            setTimeout(() => {
+              this.autoFocusFirstEmptyHole();
+            }, 150);
           }
         }
       },
@@ -258,6 +283,10 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           console.log('No existing scorecard found, initializing empty scorecard');
           // If no scorecard exists, initialize with empty holes for edit mode
           this.initializeHoles();
+          // Auto-focus first hole after initializing empty scorecard
+          setTimeout(() => {
+            this.autoFocusFirstEmptyHole();
+          }, 150);
         }
       }
     });
@@ -269,7 +298,10 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       return;
     }
 
-    this.scorecardData.holes = this.course.holes.map(hole => ({
+    // Filter holes based on week setting
+    const relevantHoles = this.getRelevantHoles();
+    
+    this.scorecardData.holes = relevantHoles.map(hole => ({
       hole: hole.number,
       par: hole.par,
       playerAScore: undefined,
@@ -293,6 +325,31 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     
     // Calculate totals (including match play points)
     this.calculateTotals();
+  }
+
+  /**
+   * Get the relevant holes based on the week's NineHoles setting
+   */
+  private getRelevantHoles() {
+    console.log('getRelevantHoles called - week:', this.week);
+    
+    if (!this.week) {
+      console.log('No week data, returning all holes');
+      // If no week data, default to all holes for backward compatibility
+      return this.course.holes;
+    }
+
+    console.log('Week nineHoles value:', this.week.nineHoles, 'NineHoles.Front:', NineHoles.Front, 'NineHoles.Back:', NineHoles.Back);
+
+    if (this.week.nineHoles === NineHoles.Front) {
+      // Front 9: holes 1-9
+      console.log('Returning front 9 holes (1-9)');
+      return this.course.holes.filter(hole => hole.number >= 1 && hole.number <= 9);
+    } else {
+      // Back 9: holes 10-18
+      console.log('Returning back 9 holes (10-18)');
+      return this.course.holes.filter(hole => hole.number >= 10 && hole.number <= 18);
+    }
   }
 
   // Initialize scorecard data for view mode from individual inputs
@@ -335,7 +392,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   }
 
   getTotalPar(): number {
-    return this.course.holes.reduce((sum, hole) => sum + hole.par, 0);
+    const relevantHoles = this.getRelevantHoles();
+    return relevantHoles.reduce((sum, hole) => sum + hole.par, 0);
   }
 
   getPlayerFrontNineTotal(player: 'A' | 'B'): number {
@@ -678,7 +736,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     if (!playerReceivesStrokes) return 0;
     // --- 9-hole stroke allocation fix ---
     // Only allocate strokes to the hardest holes within the 9 being played
-    const holesInPlay = this.course.holes.slice(0, 9); // assumes 9-hole match, holes 1-9 or adjust as needed
+    const holesInPlay = this.getRelevantHoles(); // Use filtered holes based on week setting
     const holesWithHandicap = holesInPlay.filter(h => typeof h.handicap === 'number');
     const hardestHoles = [...holesWithHandicap]
       .sort((a, b) => (a.handicap ?? 99) - (b.handicap ?? 99))
@@ -917,18 +975,17 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       handicapDiff: handicapDiff
     });
 
-    // Determine which 9 holes to consider based on which holes have scores
-    const playingFront = this.isPlayingFrontNine();
-    const holes = playingFront ? this.course.holes.slice(0, 9) : this.course.holes.slice(9, 18);
+    // Get the relevant holes based on week's NineHoles setting
+    const holes = this.getRelevantHoles();
     
-    console.log('Playing front nine:', playingFront, 'holes considered:', holes.map(h => h.number));
+    console.log('Relevant holes for strokes:', holes.map(h => h.number));
     
     // Sort holes by handicap index (1 = hardest)
     const sortedHoles = holes
       .map((hole, index) => ({ 
         holeNumber: hole.number, 
         handicapIndex: hole.handicap || 18,
-        arrayIndex: playingFront ? index : index + 9
+        arrayIndex: index
       }))
       .sort((a, b) => a.handicapIndex - b.handicapIndex);
     
@@ -1048,7 +1105,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     this.viewModel.playerB = this.buildPlayerViewModel('B');
 
     // Build hole view models
-    this.viewModel.holes = this.course.holes.map((courseHole, index) => 
+    const relevantHoles = this.getRelevantHoles();
+    this.viewModel.holes = relevantHoles.map((courseHole, index) => 
       this.buildHoleViewModel(courseHole, index)
     );
 
@@ -1408,6 +1466,26 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         }
       }
     }, 10);
+  }
+
+  private autoFocusFirstEmptyHole(): void {
+    // Only auto-focus in edit mode when scorecard is empty or mostly empty
+    if (this.mode !== 'edit' || !this.scorecardData?.holes) {
+      return;
+    }
+
+    // Check if scorecard is empty (no scores entered yet)
+    const hasAnyScores = this.scorecardData.holes.some(hole => 
+      hole.playerAScore !== undefined || hole.playerBScore !== undefined
+    );
+
+    // If no scores have been entered, focus on Player A, Hole 1
+    if (!hasAnyScores) {
+      console.log('Auto-focusing first hole for Player A on empty scorecard');
+      setTimeout(() => {
+        this.focusInput(0, 'A'); // Focus on hole index 0 (first hole) for Player A
+      }, 200); // Slight delay to ensure DOM is fully rendered
+    }
   }
 
   ngOnDestroy(): void {

@@ -8,6 +8,7 @@ import { ScoringService } from '../../services/scoring.service';
 import { ScorecardService } from '../../services/scorecard.service';
 import { MatchupService } from '../../../settings/services/matchup.service';
 import { ScoreCalculationService } from '../../services/score-calculation.service';
+import { HandicapService } from '../../../../core/services/handicap.service';
 import { Season, Week, ScoreEntry, Player, PlayerWithFlight } from '../../models/week.model';
 import { Matchup } from '../../../settings/services/matchup.service';
 import { ScorecardModalComponent } from '../scorecard-modal/scorecard-modal.component';
@@ -54,6 +55,15 @@ export class ScoreEntryComponent implements OnInit {
   selectedWeek: Week | null = null;
   isLoading: boolean = false;
 
+  // Cache for per-week averages
+  private weekAverageCache: Map<string, number> = new Map();
+  
+  // Pre-loaded averages for display (avoids calling methods in template)
+  playerAverages: Map<string, number> = new Map();
+
+  // Session handicaps cache
+  sessionHandicaps: { [playerId: string]: number } = {};
+
   // Filter for matchups
   matchupFilter: string = '';
   get filteredMatchups(): MatchupWithDetails[] {
@@ -76,6 +86,7 @@ export class ScoreEntryComponent implements OnInit {
     private scorecardService: ScorecardService,
     private matchupService: MatchupService,
     private scoreCalculationService: ScoreCalculationService,
+    private handicapService: HandicapService,
     private route: ActivatedRoute,
     private router: Router,
     private dateUtil: DateUtilService,
@@ -182,11 +193,15 @@ export class ScoreEntryComponent implements OnInit {
   onWeekChange() {
     if (this.selectedWeekId) {
       this.selectedWeek = this.weeks.find(w => w.id === this.selectedWeekId) || null;
+      // Clear the average caches when week changes
+      this.weekAverageCache.clear();
+      this.playerAverages.clear();
       // Use the robust loading method to avoid timing issues
       this.loadPlayersAndMatchups();
     } else {
       this.selectedWeek = null;
       this.matchups = [];
+      this.playerAverages.clear();
     }
   }
 
@@ -229,6 +244,9 @@ export class ScoreEntryComponent implements OnInit {
         // Then enrich matchups with player details
         this.matchups = this.sortMatchupsByFlight(matchups.map(matchup => this.enrichMatchupWithDetails(matchup)));
 
+        // Pre-load player averages for all players in matchups
+        this.preLoadPlayerAverages();
+
         // Load hole scores
         this.loadHoleScoresForMatchups();
         this.isLoading = false;
@@ -254,6 +272,7 @@ export class ScoreEntryComponent implements OnInit {
         // Only enrich if we have players, otherwise store raw matchups
         if (this.players.length > 0) {
           this.matchups = this.sortMatchupsByFlight(matchups.map(matchup => this.enrichMatchupWithDetails(matchup)));
+          this.loadSessionHandicaps(matchups);
         } else {
           // Store raw matchups and enrich later when players are loaded
           this.matchups = matchups.map(matchup => ({
@@ -640,9 +659,9 @@ export class ScoreEntryComponent implements OnInit {
           playerAHolesWon: 0,
           playerBHolesWon: 0,
           holesHalved: 0,
-          // Include player handicaps
-          playerAHandicap: playerA?.currentHandicap || 0,
-          playerBHandicap: playerB?.currentHandicap || 0
+          // Include session handicaps
+          playerAHandicap: this.sessionHandicaps[matchup.playerAId] || playerA?.currentHandicap || 0,
+          playerBHandicap: this.sessionHandicaps[matchup.playerBId] || playerB?.currentHandicap || 0
         };
 
         this.showScorecardModal = true;
@@ -779,8 +798,72 @@ export class ScoreEntryComponent implements OnInit {
   getPlayerAverageScore(playerId: string | undefined): string {
     if (!playerId) return '-';
 
-    const player = this.players.find(p => p.id === playerId);
-    return player?.currentAverageScore?.toString() || '-';
+    // Use pre-loaded average from playerAverages map
+    const average = this.playerAverages.get(playerId);
+    if (average !== undefined) {
+      return average.toFixed(1);
+    }
+
+    // Return placeholder if not yet loaded
+    return '...';
+  }
+
+  private fetchPlayerWeekAverage(playerId: string, seasonId: string, weekNumber: number, cacheKey: string): void {
+    const url = `http://localhost:5274/api/averagescore/player/${playerId}/season/${seasonId}/uptoweek/${weekNumber}`;
+    
+    this.http.get<number>(url).subscribe({
+      next: (average) => {
+        this.weekAverageCache.set(cacheKey, average);
+      },
+      error: (error) => {
+        console.error('Error fetching player week average:', error);
+        // Cache a fallback value to avoid repeated failed requests
+        this.weekAverageCache.set(cacheKey, 0);
+      }
+    });
+  }
+
+  /**
+   * Pre-load player averages for all players in the current matchups to avoid excessive API calls
+   */
+  private preLoadPlayerAverages(): void {
+    if (!this.selectedWeek || this.matchups.length === 0) return;
+
+    // Get unique player IDs from all matchups
+    const playerIds = new Set<string>();
+    this.matchups.forEach(matchup => {
+      if (matchup.playerAId) playerIds.add(matchup.playerAId);
+      if (matchup.playerBId) playerIds.add(matchup.playerBId);
+    });
+
+    // Fetch averages for all players at once
+    const averageRequests = Array.from(playerIds).map(playerId => {
+      const cacheKey = `${playerId}-${this.selectedWeek!.id}`;
+      
+      // Check if already cached
+      if (this.weekAverageCache.has(cacheKey)) {
+        this.playerAverages.set(playerId, this.weekAverageCache.get(cacheKey)!);
+        return Promise.resolve(this.weekAverageCache.get(cacheKey)!);
+      }
+
+      // Fetch from API
+      const url = `http://localhost:5274/api/averagescore/player/${playerId}/season/${this.selectedWeek!.seasonId}/uptoweek/${this.selectedWeek!.weekNumber}`;
+      return this.http.get<number>(url).toPromise().then(average => {
+        this.weekAverageCache.set(cacheKey, average!);
+        this.playerAverages.set(playerId, average!);
+        return average!;
+      }).catch(error => {
+        console.error('Error fetching player week average:', error);
+        this.weekAverageCache.set(cacheKey, 0);
+        this.playerAverages.set(playerId, 0);
+        return 0;
+      });
+    });
+
+    // Wait for all requests to complete
+    Promise.all(averageRequests).then(() => {
+      console.log(`Pre-loaded averages for ${playerIds.size} players`);
+    });
   }
 
   showPlayerStats(matchup: MatchupWithDetails): boolean {
@@ -796,6 +879,12 @@ export class ScoreEntryComponent implements OnInit {
   private getPlayerHandicap(playerId: string | undefined): number | null {
     if (!playerId) return null;
 
+    // First try to get session handicap
+    if (this.sessionHandicaps[playerId] !== undefined) {
+      return this.sessionHandicaps[playerId];
+    }
+
+    // Fallback to current handicap
     const player = this.players.find(p => p.id === playerId);
     return player?.currentHandicap || null;
   }
@@ -824,5 +913,65 @@ export class ScoreEntryComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  downloadWeekSummaryPdf(): void {
+    if (!this.selectedWeekId) return;
+    const url = `http://localhost:5274/api/pdf/summary/week/${this.selectedWeekId}`;
+    this.isLoading = true;
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const fileName = `Summary_Week_${this.selectedWeekId}.pdf`;
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        alert('Failed to generate summary PDF: ' + (err?.error || err));
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private loadSessionHandicaps(matchups: Matchup[]): void {
+    if (!this.selectedSeasonId || !this.selectedWeek) {
+      return;
+    }
+
+    // Clear existing session handicaps
+    this.sessionHandicaps = {};
+
+    // Collect all unique player IDs from matchups
+    const playerIds = new Set<string>();
+    matchups.forEach(matchup => {
+      if (matchup.playerAId) playerIds.add(matchup.playerAId);
+      if (matchup.playerBId) playerIds.add(matchup.playerBId);
+    });
+
+    // Load session handicaps for all players
+    const handicapRequests = Array.from(playerIds).map(playerId =>
+      this.handicapService.getPlayerSessionHandicap(playerId, this.selectedSeasonId, this.selectedWeek!.weekNumber)
+    );
+
+    if (handicapRequests.length > 0) {
+      forkJoin(handicapRequests).subscribe({
+        next: (handicaps) => {
+          Array.from(playerIds).forEach((playerId, index) => {
+            this.sessionHandicaps[playerId] = handicaps[index];
+          });
+        },
+        error: (error) => {
+          console.error('Error loading session handicaps:', error);
+          // Fallback to current handicaps if session handicaps fail
+          Array.from(playerIds).forEach(playerId => {
+            const player = this.players.find(p => p.id === playerId);
+            this.sessionHandicaps[playerId] = player?.currentHandicap || 0;
+          });
+        }
+      });
+    }
   }
 }
