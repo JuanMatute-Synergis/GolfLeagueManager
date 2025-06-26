@@ -703,7 +703,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   getNetScore(holeIndex: number, player: 'A' | 'B'): string {
     // Use safe hole data access
     const hole = this.getHoleData(holeIndex);
-    const courseHole = this.course.holes[holeIndex];
+    const relevantHoles = this.getRelevantHoles();
+    const courseHole = relevantHoles[holeIndex];
     
     if (!hole || !courseHole) return '-';
     
@@ -723,16 +724,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     const strokesGiven = this.getStrokesGiven(holeIndex, playerHandicap);
     const netScore = grossScore - strokesGiven;
     
-    // Debug logging for hole 10 (index 9)
-    if (holeIndex === 9) {
-      console.log(`Hole 10 Net Score Calculation for Player ${player}:`, {
-        grossScore,
-        playerHandicap,
-        strokesGiven,
-        netScore,
-        courseHoleHandicap: courseHole.handicap
-      });
-    }
+    // Debug logging for verification
+    console.log(`[NET SCORE] Hole ${courseHole.number} Player ${player}: gross=${grossScore}, handicap=${playerHandicap}, strokes=${strokesGiven}, net=${netScore}`);
     
     return netScore.toString();
   }
@@ -786,7 +779,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   }
 
   private getStrokesGiven(holeIndex: number, playerHandicap: number): number {
-    const courseHole = this.course.holes[holeIndex];
+    const relevantHoles = this.getRelevantHoles();
+    const courseHole = relevantHoles[holeIndex];
     if (!courseHole || !courseHole.handicap) return 0;
     const playerAHandicap = this.scorecardData?.playerAHandicap || 0;
     const playerBHandicap = this.scorecardData?.playerBHandicap || 0;
@@ -998,12 +992,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   // Helper method to safely get hole data
   getHoleData(index: number): HoleScore {
     if (!this.scorecardData?.holes || !this.scorecardData.holes[index]) {
+      const relevantHoles = this.getRelevantHoles();
+      const courseHole = relevantHoles[index];
       return {
-        hole: index + 1,
-        par: this.course.holes[index]?.par || 4,
+        hole: courseHole?.number || (index + 1),
+        par: courseHole?.par || 4,
         playerAScore: undefined,
         playerBScore: undefined,
-        holeHandicap: this.course.holes[index]?.handicap || 1,
+        holeHandicap: courseHole?.handicap || 1,
         playerAMatchPoints: 0,
         playerBMatchPoints: 0,
         playerANetScore: 0,
