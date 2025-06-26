@@ -45,6 +45,13 @@ namespace GolfLeagueManager.Business
             var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == weekId);
             if (week == null) throw new ArgumentException("Week not found.");
             var seasonId = week.SeasonId;
+            
+            // Calculate session number
+            var sessionNumber = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= week.WeekNumber && w.SessionStart)
+                .Count();
+            if (sessionNumber == 0) sessionNumber = 1;
+            
             var assignments = _flightAssignmentService.GetAllAssignments().ToList();
             var flights = await _context.Flights.ToListAsync();
             var course = await _context.Courses.Include(c => c.CourseHoles).FirstOrDefaultAsync();
@@ -93,8 +100,8 @@ namespace GolfLeagueManager.Business
                 {
                     page.Size(PageSizes.A4);
                     page.Margin(10);
-                    page.PageColor(Colors.Grey.Darken4);
-                    page.DefaultTextStyle(x => x.FontColor(Colors.White));
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontColor(Colors.Black));
                     page.DefaultTextStyle(x => x.FontSize(9));
 
                     page.Content().Column(content =>
@@ -117,8 +124,8 @@ namespace GolfLeagueManager.Business
                             var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
                             
                             // Header
-                            content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League")
-                                .FontSize(10).FontColor(Colors.White).Bold().AlignCenter();
+                            content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League - Session {sessionNumber}")
+                                .FontSize(10).FontColor(Colors.Black).Bold().AlignCenter();
 
                             // 4 cards per page, each on its own row
                             for (int i = 0; i < matchupsInFlight.Count; i++)
@@ -133,7 +140,7 @@ namespace GolfLeagueManager.Business
                                 if ((i + 1) % 4 == 0 && (i + 1) < matchupsInFlight.Count)
                                 {
                                     content.Item().PageBreak();
-                                    content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League")
+                                    content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League - Session {sessionNumber}")
                                         .FontSize(10).Bold().AlignCenter();
                                 }
                             }
@@ -178,14 +185,19 @@ namespace GolfLeagueManager.Business
 
             var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
 
+            // Calculate session number
+            var sessionNumber = _context.Weeks
+                .Where(w => w.SeasonId == week.SeasonId && w.WeekNumber <= week.WeekNumber && w.SessionStart)
+                .Count();
+            if (sessionNumber == 0) sessionNumber = 1;
+
             var document = Document.Create(container =>
             {
                 container.Page(page =>
-                {
-                    page.Size(PageSizes.A4);
-                    page.Margin(15);
-                    page.PageColor(Colors.Grey.Darken4);
-                    page.DefaultTextStyle(x => x.FontColor(Colors.White));
+                {                page.Size(PageSizes.A4);
+                page.Margin(15);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontColor(Colors.Black));
                     page.DefaultTextStyle(x => x.FontSize(8));
 
                     page.Content().Column(content =>
@@ -194,9 +206,9 @@ namespace GolfLeagueManager.Business
                         content.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns => columns.RelativeColumn());
-                            table.Cell().Padding(15).Background(Colors.Grey.Darken4)
-                                .Text($"{weekTitle}\nH.T. Lyons Golf League - Weekly Summary")
-                                .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
+                            table.Cell().Padding(15).Background(Colors.White)
+                                .Text($"{weekTitle}\nH.T. Lyons Golf League - Session {sessionNumber} Weekly Summary")
+                                .FontSize(16).Bold().FontColor(Colors.Black).AlignCenter();
                         });
 
                         content.Item().PaddingTop(10);
@@ -280,9 +292,9 @@ namespace GolfLeagueManager.Business
                         content.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns => columns.RelativeColumn());
-                            table.Cell().Padding(15).Background(Colors.Grey.Darken4)
-                                .Text($"{weekTitle}\nMatch Play Points by Week - Session Breakdown")
-                                .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
+                            table.Cell().Padding(15).Background(Colors.White)
+                                .Text($"{weekTitle}\nMatch Play Points by Week - Session {sessionNumber} Breakdown")
+                                .FontSize(16).Bold().FontColor(Colors.Black).AlignCenter();
                         });
 
                         content.Item().PaddingTop(10);
@@ -304,9 +316,9 @@ namespace GolfLeagueManager.Business
                         content.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns => columns.RelativeColumn());
-                            table.Cell().Padding(15).Background(Colors.Grey.Darken4)
-                                .Text($"{weekTitle}\nRemaining Schedule")
-                                .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
+                            table.Cell().Padding(15).Background(Colors.White)
+                                .Text($"{weekTitle}\nSession {sessionNumber} - Remaining Schedule")
+                                .FontSize(16).Bold().FontColor(Colors.Black).AlignCenter();
                         });
 
                         content.Item().PaddingTop(10);
@@ -361,17 +373,17 @@ namespace GolfLeagueManager.Business
 
             // Modern card-like container with border, background - Dark mode
             container.Padding(4)
-                .Background(Colors.Grey.Darken4)
-                .Border(1).BorderColor(Colors.Grey.Darken2)
+                .Background(Colors.White)
+                .Border(1).BorderColor(Colors.Grey.Lighten1)
                 .Column(cardCol =>
                 {
                     // Card Title/Header
                     cardCol.Item().PaddingBottom(6).Text(winnerText)
-                        .FontSize(12).Bold().FontColor(Colors.Blue.Lighten2).AlignCenter();
+                        .FontSize(12).Bold().FontColor(Colors.Blue.Darken1).AlignCenter();
                     cardCol.Item().Text($"{playerAName} vs {playerBName}")
-                        .FontSize(9).Bold().FontColor(Colors.Grey.Lighten2).AlignCenter();
+                        .FontSize(9).Bold().FontColor(Colors.Grey.Darken1).AlignCenter();
                     cardCol.Item().Text($"Handicaps: {playerAHandicap:0.#} - {playerBHandicap:0.#}")
-                        .FontSize(9).FontColor(Colors.Grey.Lighten1).AlignCenter();
+                        .FontSize(9).FontColor(Colors.Grey.Darken1).AlignCenter();
                     cardCol.Item().PaddingTop(6).Element(cardTable =>
                     {
                         cardTable.Table(table =>
@@ -393,29 +405,29 @@ namespace GolfLeagueManager.Business
                             // Hole numbers row
                             // Center vertically and horizontally
                             // Label cell
-                            table.Cell().Background(Colors.Grey.Darken4).Padding(4).BorderColor(Colors.Grey.Darken1)
-                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("HOLE").FontSize(10).Bold().FontColor(Colors.White));
+                            table.Cell().Background(Colors.White).Padding(4).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("HOLE").FontSize(10).Bold().FontColor(Colors.Black));
                             foreach (var hole in holes)
-                                table.Cell().Background(Colors.Grey.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
-                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(hole.HoleNumber.ToString()).FontSize(10).Bold().FontColor(Colors.White));
-                            table.Cell().Background(Colors.Grey.Darken1).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
-                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("TOTAL").FontSize(8).Bold().FontColor(Colors.White));
+                                table.Cell().Background(Colors.White).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(hole.HoleNumber.ToString()).FontSize(10).Bold().FontColor(Colors.Black));
+                            table.Cell().Background(Colors.Grey.Lighten2).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("TOTAL").FontSize(8).Bold().FontColor(Colors.Black));
 
                             // Par row
-                            table.Cell().Background(Colors.Grey.Darken4).Padding(4).BorderColor(Colors.Grey.Darken1)
-                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("PAR").FontSize(10).Bold().FontColor(Colors.White));
+                            table.Cell().Background(Colors.White).Padding(4).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("PAR").FontSize(10).Bold().FontColor(Colors.Black));
                             int parTotal = 0;
                             foreach (var hole in holes)
                             {
                                 parTotal += hole.Par;
-                                table.Cell().Background(Colors.Grey.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
-                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(hole.Par.ToString()).FontSize(10).Bold().FontColor(Colors.White));
+                                table.Cell().Background(Colors.White).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(hole.Par.ToString()).FontSize(10).Bold().FontColor(Colors.Black));
                             }
-                            table.Cell().Background(Colors.Grey.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
-                                .Element(cell => cell.AlignCenter().AlignMiddle().Text(parTotal.ToString()).FontSize(11).Bold().FontColor(Colors.White));
+                            table.Cell().Background(Colors.White).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text(parTotal.ToString()).FontSize(11).Bold().FontColor(Colors.Black));
 
                             // Player A row
-                            table.Cell().Background(Colors.Blue.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1).Element(cell => cell.AlignCenter().AlignMiddle().Text(playerAName.Split(' ')[0]).FontSize(12).Bold().FontColor(Colors.White));
+                            table.Cell().Background(Colors.Blue.Lighten3).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1).Element(cell => cell.AlignCenter().AlignMiddle().Text(playerAName.Split(' ')[0]).FontSize(12).Bold().FontColor(Colors.Black));
                             int playerATotal = 0;
                             foreach (var hole in holes)
                             {
@@ -425,7 +437,7 @@ namespace GolfLeagueManager.Business
                                 
                                 // Determine if player A gets a stroke on this hole (for yellow background)
                                 bool playerAReceivesStrokeOnHole = playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
-                                var backgroundColor = playerAReceivesStrokeOnHole ? Colors.Yellow.Darken3 : Colors.Grey.Darken4;
+                                var backgroundColor = playerAReceivesStrokeOnHole ? Colors.Yellow.Lighten3 : Colors.White;
                                 
                                 // Use stored match play points to determine hole winner (no recalculation needed)
                                 int playerAHolePoints = hs?.PlayerAMatchPoints ?? 0;
@@ -437,7 +449,7 @@ namespace GolfLeagueManager.Business
                                     .Layers(layers =>
                                     {
                                         layers.PrimaryLayer().AlignCenter().AlignMiddle()
-                                            .Text(playerAGross > 0 ? playerAGross.ToString() : "").FontSize(13).Bold().FontColor(Colors.White);
+                                            .Text(playerAGross > 0 ? playerAGross.ToString() : "").FontSize(13).Bold().FontColor(Colors.Black);
                                         if (aWins || isTie)
                                         {
                                             string color = aWins ? "#22c55e" : "#eab308"; // Use hex colors for SVG
@@ -447,20 +459,20 @@ namespace GolfLeagueManager.Business
                                         if (playerAReceivesStrokeOnHole && playerAGross > 0)
                                         {
                                             int netScore = playerAGross - 1;
-                                            layers.Layer().AlignCenter().AlignBottom().Padding(1)
-                                                .Text(netScore.ToString()).FontSize(8).FontColor(Colors.Yellow.Lighten2);
+                                            layers.Layer().AlignCenter().AlignBottom().Padding(0)
+                                                .Text(netScore.ToString()).FontSize(8).Bold().FontColor(Colors.Red.Darken2);
                                         }
                                     });
                             }
                             var storedPlayerAScore = matchup.PlayerAScore ?? playerATotal;
-                            table.Cell().Background(Colors.Blue.Darken2).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                            table.Cell().Background(Colors.Blue.Lighten2).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
                                 .Element(cell => cell.AlignCenter().AlignMiddle()
                                     .Text(matchup.PlayerAAbsent ? "ABS" : storedPlayerAScore.ToString())
-                                    .FontSize(12).Bold().FontColor(Colors.White));
+                                    .FontSize(12).Bold().FontColor(Colors.Black));
 
                             // Player B row
-                            table.Cell().Background(Colors.Orange.Darken3).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
-                                .Element(cell => cell.AlignCenter().AlignMiddle().Text(playerBName.Split(' ')[0]).FontSize(12).Bold().FontColor(Colors.White));
+                            table.Cell().Background(Colors.Orange.Lighten2).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text(playerBName.Split(' ')[0]).FontSize(12).Bold().FontColor(Colors.Black));
                             int playerBTotal = 0;
                             foreach (var hole in holes)
                             {
@@ -470,7 +482,7 @@ namespace GolfLeagueManager.Business
                                 
                                 // Determine if player B gets a stroke on this hole (for yellow background)
                                 bool playerBReceivesStrokeOnHole = playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
-                                var backgroundColor = playerBReceivesStrokeOnHole ? Colors.Yellow.Darken3 : Colors.Grey.Darken4;
+                                var backgroundColor = playerBReceivesStrokeOnHole ? Colors.Yellow.Lighten3 : Colors.White;
                                 
                                 // Use stored match play points to determine hole winner (no recalculation needed)
                                 int playerAHolePoints = hs?.PlayerAMatchPoints ?? 0;
@@ -482,7 +494,7 @@ namespace GolfLeagueManager.Business
                                     .Layers(layers =>
                                     {
                                         layers.PrimaryLayer().AlignCenter().AlignMiddle()
-                                            .Text(playerBGross > 0 ? playerBGross.ToString() : "").FontSize(13).Bold().FontColor(Colors.White);
+                                            .Text(playerBGross > 0 ? playerBGross.ToString() : "").FontSize(13).Bold().FontColor(Colors.Black);
                                         if (bWins || isTie)
                                         {
                                             string color = bWins ? "#22c55e" : "#eab308"; // Use hex colors for SVG
@@ -492,20 +504,20 @@ namespace GolfLeagueManager.Business
                                         if (playerBReceivesStrokeOnHole && playerBGross > 0)
                                         {
                                             int netScore = playerBGross - 1;
-                                            layers.Layer().AlignCenter().AlignBottom().Padding(1)
-                                                .Text(netScore.ToString()).FontSize(8).FontColor(Colors.Yellow.Lighten2);
+                                            layers.Layer().AlignCenter().AlignBottom().Padding(0)
+                                                .Text(netScore.ToString()).FontSize(8).Bold().FontColor(Colors.Red.Darken2);
                                         }
                                     });
                             }
                             var storedPlayerBScore = matchup.PlayerBScore ?? playerBTotal;
-                            table.Cell().Background(Colors.Orange.Darken2).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                            table.Cell().Background(Colors.Orange.Lighten3).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
                                 .Element(cell => cell.AlignCenter().AlignMiddle()
                                     .Text(matchup.PlayerBAbsent ? "ABS" : storedPlayerBScore.ToString())
-                                    .FontSize(12).Bold().FontColor(Colors.White));
+                                    .FontSize(12).Bold().FontColor(Colors.Black));
 
                             // Matchplay Points row - Use stored calculated values instead of recalculating
-                            table.Cell().Background(Colors.Grey.Darken3).Padding(6)
-                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("POINTS").FontSize(6).Bold().FontColor(Colors.White));
+                            table.Cell().Background(Colors.Grey.Lighten2).Padding(6)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text("POINTS").FontSize(6).Bold().FontColor(Colors.Black));
                             
                             // Display individual hole match play points using stored values
                             foreach (var hole in holes)
@@ -521,8 +533,8 @@ namespace GolfLeagueManager.Business
                                         holeResult = $"{playerAPoints}-{playerBPoints}";
                                     }
                                 }
-                                table.Cell().Background(Colors.Grey.Darken4).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
-                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(holeResult).FontSize(8).Bold().FontColor(Colors.White));
+                                table.Cell().Background(Colors.White).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                    .Element(cell => cell.AlignCenter().AlignMiddle().Text(holeResult).FontSize(8).Bold().FontColor(Colors.Black));
                             }
                             
                             // Use stored total matchplay points from the matchup (already calculated by MatchPlayService)
@@ -530,8 +542,8 @@ namespace GolfLeagueManager.Business
                             int playerBTotalPoints = matchup.PlayerBPoints ?? 0;
                             
                             // Total points cell (showing final match play points out of 20)
-                            table.Cell().Background(Colors.Grey.Darken2).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
-                                .Element(cell => cell.AlignCenter().AlignMiddle().Text($"{playerATotalPoints}-{playerBTotalPoints}").FontSize(10).Bold().FontColor(Colors.White));
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
+                                .Element(cell => cell.AlignCenter().AlignMiddle().Text($"{playerATotalPoints}-{playerBTotalPoints}").FontSize(10).Bold().FontColor(Colors.Black));
                         });
                     });
                     
@@ -540,7 +552,7 @@ namespace GolfLeagueManager.Business
                     {
                         string explanationText = GetMatchResultExplanation(matchup, playerAName, playerBName);
                         explanationContainer.Text(explanationText)
-                            .FontSize(8).FontColor(Colors.Grey.Lighten1).AlignCenter().Italic();
+                            .FontSize(8).FontColor(Colors.Grey.Darken1).AlignCenter().Italic();
                     });
                 });
         }
@@ -572,9 +584,9 @@ namespace GolfLeagueManager.Business
                 column.Item().Table(table =>
                 {
                     table.ColumnsDefinition(columns => columns.RelativeColumn());
-                    table.Cell().Padding(6).Background(Colors.Grey.Darken4)
+                    table.Cell().Padding(6).Background(Colors.White)
                         .Text($"Flight {flight.Name}")
-                        .FontSize(9).Bold().FontColor(Colors.White).AlignCenter();
+                        .FontSize(9).Bold().FontColor(Colors.Black).AlignCenter();
                 });
 
                 // Summary table
@@ -659,18 +671,18 @@ namespace GolfLeagueManager.Business
                 });
 
                 // Header
-                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("Player").FontSize(6).Bold().FontColor(Colors.White);
-                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("HCP").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
-                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("Avg").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
-                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("Gross").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
-                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("This Week").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
-                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("Session Total").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
+                table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Player").FontSize(6).Bold().FontColor(Colors.Black);
+                table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("HCP").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
+                table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Avg").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
+                table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Gross").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
+                table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("This Week").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
+                table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Session Total").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
 
                 // Player rows
                 for (int i = 0; i < sortedPlayers.Count; i++)
                 {
                     var (player, accumScore) = sortedPlayers[i];
-                    var rowColor = i % 2 == 0 ? Colors.Grey.Darken4 : Colors.Grey.Darken3;
+                    var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
 
                     var hcp = handicapData.ContainsKey(player.Id) ? handicapData[player.Id] : player.CurrentHandicap;
                     var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
@@ -703,14 +715,14 @@ namespace GolfLeagueManager.Business
 
                     var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
                     
-                    table.Cell().Background(rowColor).Padding(3).Text(displayName).FontSize(6).FontColor(Colors.White);
-                    table.Cell().Background(rowColor).Padding(3).Text(hcp.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.White);
-                    table.Cell().Background(rowColor).Padding(3).Text(avg.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.White);
-                    table.Cell().Background(rowColor).Padding(3).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(6).AlignCenter().FontColor(Colors.White);
-                    table.Cell().Background(rowColor).Padding(3).Text(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-").FontSize(6).AlignCenter().FontColor(Colors.White);
+                    table.Cell().Background(rowColor).Padding(3).Text(displayName).FontSize(6).FontColor(Colors.Black);
+                    table.Cell().Background(rowColor).Padding(3).Text(hcp.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.Black);
+                    table.Cell().Background(rowColor).Padding(3).Text(avg.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.Black);
+                    table.Cell().Background(rowColor).Padding(3).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(6).AlignCenter().FontColor(Colors.Black);
+                    table.Cell().Background(rowColor).Padding(3).Text(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-").FontSize(6).AlignCenter().FontColor(Colors.Black);
                     
-                    var sessionTotalColor = accumScore > 0 ? Colors.Grey.Darken3 : rowColor;
-                    table.Cell().Background(sessionTotalColor).Padding(3).Text(accumScore > 0 ? accumScore.ToString() : "-").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
+                    var sessionTotalColor = accumScore > 0 ? Colors.Grey.Lighten2 : rowColor;
+                    table.Cell().Background(sessionTotalColor).Padding(3).Text(accumScore > 0 ? accumScore.ToString() : "-").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
                 }
             });
         }
@@ -744,12 +756,12 @@ namespace GolfLeagueManager.Business
                 table.ColumnsDefinition(columns => columns.RelativeColumn());
                 
                 // Header
-                table.Cell().Padding(3).Background(Colors.Grey.Darken4)
+                table.Cell().Padding(3).Background(Colors.White)
                     .Text($"Next Matchups - {nextWeek.Date:dddd, MMMM d}")
-                    .FontSize(8).Bold().FontColor(Colors.White).AlignCenter();
+                    .FontSize(8).Bold().FontColor(Colors.Black).AlignCenter();
 
                 // Matchups content - using Column instead of single text for better line handling
-                table.Cell().Padding(3).Background(Colors.Grey.Darken4)
+                table.Cell().Padding(3).Background(Colors.White)
                     .Column(column =>
                     {
                         foreach (var matchup in nextWeekMatchupsForFlight)
@@ -782,7 +794,7 @@ namespace GolfLeagueManager.Business
                             var line = $"{playerA!.FirstName} {playerA.LastName.Substring(0, 1)}. ({playerAHandicap:0.#}) vs " +
                                       $"{playerB!.FirstName} {playerB.LastName.Substring(0, 1)}. ({playerBHandicap:0.#}){strokeInfo}";
                             
-                            column.Item().Text(line).FontSize(8).LineHeight(1.0f).FontColor(Colors.White);
+                            column.Item().Text(line).FontSize(8).LineHeight(1.0f).FontColor(Colors.Black);
                         }
                     });
             });
@@ -900,9 +912,9 @@ namespace GolfLeagueManager.Business
                 column.Item().Table(table =>
                 {
                     table.ColumnsDefinition(columns => columns.RelativeColumn());
-                    table.Cell().Padding(4).Background(Colors.Grey.Darken4)
+                    table.Cell().Padding(4).Background(Colors.White)
                         .Text($"Flight {flight.Name}")
-                        .FontSize(8).Bold().FontColor(Colors.White).AlignCenter();
+                        .FontSize(8).Bold().FontColor(Colors.Black).AlignCenter();
                 });
 
                 // Create table with players as rows and weeks as columns
@@ -923,27 +935,22 @@ namespace GolfLeagueManager.Business
                         });
 
                         // Header row
-                        table.Cell().Background(Colors.Grey.Darken3).Padding(4)
-                            .Text("Player").FontSize(7).Bold().FontColor(Colors.White);
+                        table.Cell().Background(Colors.Grey.Lighten2).Padding(4)
+                            .Text("Player").FontSize(7).Bold().FontColor(Colors.Black);
                         foreach (var week in weeksInSession)
                         {
-                            table.Cell().Background(Colors.Grey.Darken3).Padding(4)
-                                .Text($"W{week.WeekNumber}").FontSize(7).Bold().AlignCenter().FontColor(Colors.White);
+                            table.Cell().Background(Colors.Grey.Lighten2).Padding(4)
+                                .Text($"W{week.WeekNumber}").FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
                         }
-                        table.Cell().Background(Colors.Grey.Darken3).Padding(4)
-                            .Text("Total").FontSize(7).Bold().AlignCenter().FontColor(Colors.White);
+                        table.Cell().Background(Colors.Grey.Lighten2).Padding(4)
+                            .Text("Total").FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
 
                         // Player rows
-                        var sortedPlayers = players.OrderBy(p => p.LastName).ToList();
-                        for (int i = 0; i < sortedPlayers.Count; i++)
+                        var playersWithTotals = new List<(Player player, int totalPoints)>();
+                        
+                        // Calculate total points for each player
+                        foreach (var player in players)
                         {
-                            var player = sortedPlayers[i];
-                            var rowColor = i % 2 == 0 ? Colors.Grey.Darken4 : Colors.Grey.Darken3;
-                            var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
-                            
-                            table.Cell().Background(rowColor).Padding(4)
-                                .Text(displayName).FontSize(7).FontColor(Colors.White);
-
                             int totalPoints = 0;
                             foreach (var week in weeksInSession)
                             {
@@ -972,19 +979,64 @@ namespace GolfLeagueManager.Business
                                         weekPoints = isAbsent ? (special / 2) : special;
                                     }
                                 }
-
                                 totalPoints += weekPoints;
+                            }
+                            playersWithTotals.Add((player, totalPoints));
+                        }
+                        
+                        // Sort by total points (descending), then by last name
+                        var sortedPlayers = playersWithTotals
+                            .OrderByDescending(p => p.totalPoints)
+                            .ThenBy(p => p.player.LastName)
+                            .ToList();
+                        
+                        for (int i = 0; i < sortedPlayers.Count; i++)
+                        {
+                            var (player, playerTotalPoints) = sortedPlayers[i];
+                            var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
+                            var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
+                            
+                            table.Cell().Background(rowColor).Padding(4)
+                                .Text(displayName).FontSize(7).FontColor(Colors.Black);
+
+                            foreach (var week in weeksInSession)
+                            {
+                                var matchup = allMatchups.FirstOrDefault(m => m.WeekId == week.Id && 
+                                    (m.PlayerAId == player.Id || m.PlayerBId == player.Id));
+                                
+                                int weekPoints = 0;
+                                bool isAbsent = false;
+                                if (matchup != null)
+                                {
+                                    if (matchup.PlayerAId == player.Id)
+                                    {
+                                        weekPoints = matchup.PlayerAPoints ?? 0;
+                                        isAbsent = matchup.PlayerAAbsent;
+                                    }
+                                    else if (matchup.PlayerBId == player.Id)
+                                    {
+                                        weekPoints = matchup.PlayerBPoints ?? 0;
+                                        isAbsent = matchup.PlayerBAbsent;
+                                    }
+
+                                    // Handle special points weeks
+                                    if (week.SpecialPointsAwarded.HasValue)
+                                    {
+                                        int special = week.SpecialPointsAwarded.Value;
+                                        weekPoints = isAbsent ? (special / 2) : special;
+                                    }
+                                }
                                 
                                 var cellText = weekPoints > 0 ? weekPoints.ToString() : (isAbsent ? "ABS" : "-");
                                 table.Cell().Background(rowColor).Padding(4)
-                                    .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.White);
+                                    .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
                             }
 
                             // Total column
-                            var totalColor = totalPoints > 0 ? Colors.Grey.Darken2 : rowColor;
+                            var totalColor = playerTotalPoints > 0 ? Colors.Grey.Lighten3 : rowColor;
                             table.Cell().Background(totalColor).Padding(4)
-                                .Text(totalPoints > 0 ? totalPoints.ToString() : "-")
-                                .FontSize(7).Bold().AlignCenter().FontColor(Colors.White);
+                                .Text(playerTotalPoints > 0 ? playerTotalPoints.ToString() : "-")
+                                .FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
                         }
                     });
                 });
@@ -993,16 +1045,26 @@ namespace GolfLeagueManager.Business
 
         private void CreateRemainingScheduleTable(IContainer container, Week currentWeek, Guid seasonId, List<Flight> orderedFlights, List<PlayerFlightAssignment> assignments)
         {
-            // Get all remaining weeks in the season
+            // Find the current session end (next session start or end of season)
+            var nextSessionStartWeek = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber > currentWeek.WeekNumber && w.SessionStart)
+                .OrderBy(w => w.WeekNumber)
+                .FirstOrDefault();
+            
+            int sessionEndWeekNumber = nextSessionStartWeek?.WeekNumber - 1 ?? int.MaxValue;
+            
+            // Get remaining weeks in the current session only
             var remainingWeeks = _context.Weeks
-                .Where(w => w.SeasonId == seasonId && w.WeekNumber > currentWeek.WeekNumber)
+                .Where(w => w.SeasonId == seasonId && 
+                           w.WeekNumber > currentWeek.WeekNumber && 
+                           w.WeekNumber <= sessionEndWeekNumber)
                 .OrderBy(w => w.WeekNumber)
                 .ToList();
 
             if (!remainingWeeks.Any())
             {
-                container.Text("No remaining weeks in the schedule.")
-                    .FontSize(12).FontColor(Colors.White).AlignCenter();
+                container.Text("No remaining weeks in the current session.")
+                    .FontSize(12).FontColor(Colors.Black).AlignCenter();
                 return;
             }
 
@@ -1015,83 +1077,114 @@ namespace GolfLeagueManager.Business
                 .OrderBy(m => m.Week!.WeekNumber)
                 .ToList();
 
-            // Get all players who have remaining matchups
-            var allPlayerIds = remainingMatchups
-                .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
-                .Distinct()
-                .ToList();
-            var allPlayers = _context.Players
-                .Where(p => allPlayerIds.Contains(p.Id))
-                .OrderBy(p => p.LastName)
-                .ThenBy(p => p.FirstName)
-                .ToList();
-
-            // Create matrix data structure: player -> week -> opponent
-            var scheduleMatrix = new Dictionary<Guid, Dictionary<int, string>>();
-            foreach (var player in allPlayers)
+            container.Column(column =>
             {
-                scheduleMatrix[player.Id] = new Dictionary<int, string>();
-            }
-
-            // Populate the matrix
-            foreach (var matchup in remainingMatchups)
-            {
-                if (matchup.Week == null || matchup.PlayerA == null || matchup.PlayerB == null) continue;
-                
-                var weekNum = matchup.Week.WeekNumber;
-                var playerAName = $"{matchup.PlayerA.FirstName} {matchup.PlayerA.LastName.Substring(0, 1)}.";
-                var playerBName = $"{matchup.PlayerB.FirstName} {matchup.PlayerB.LastName.Substring(0, 1)}.";
-                
-                scheduleMatrix[matchup.PlayerAId][weekNum] = playerBName;
-                scheduleMatrix[matchup.PlayerBId][weekNum] = playerAName;
-            }
-
-            container.Table(table =>
-            {
-                // Dynamic column definition: Player name + one column per remaining week
-                table.ColumnsDefinition(columns =>
+                // Create a schedule matrix for each flight
+                foreach (var flight in orderedFlights)
                 {
-                    columns.RelativeColumn(2f); // Player name column
-                    foreach (var week in remainingWeeks)
+                    // Get players in this flight
+                    var flightPlayerIds = assignments
+                        .Where(a => a.Flight != null && a.Flight.Id == flight.Id && a.Flight.SeasonId == seasonId)
+                        .Select(a => a.PlayerId)
+                        .ToList();
+
+                    // Get players who have remaining matchups in this flight
+                    var flightPlayers = _context.Players
+                        .Where(p => flightPlayerIds.Contains(p.Id))
+                        .OrderBy(p => p.LastName)
+                        .ThenBy(p => p.FirstName)
+                        .ToList();
+
+                    if (!flightPlayers.Any()) continue;
+
+                    // Get matchups for this flight
+                    var flightMatchups = remainingMatchups
+                        .Where(m => flightPlayerIds.Contains(m.PlayerAId) && flightPlayerIds.Contains(m.PlayerBId))
+                        .ToList();
+
+                    if (!flightMatchups.Any()) continue;
+
+                    // Create matrix data structure for this flight: player -> week -> opponent
+                    var scheduleMatrix = new Dictionary<Guid, Dictionary<int, string>>();
+                    foreach (var player in flightPlayers)
                     {
-                        columns.RelativeColumn(1.2f); // Week columns
+                        scheduleMatrix[player.Id] = new Dictionary<int, string>();
                     }
-                });
 
-                // Header row
-                table.Cell().Background(Colors.Grey.Darken3).Padding(3)
-                    .Text("Player").FontSize(7).Bold().FontColor(Colors.White);
-                foreach (var week in remainingWeeks)
-                {
-                    table.Cell().Background(Colors.Grey.Darken3).Padding(3)
-                        .Column(col =>
-                        {
-                            col.Item().Text($"Week {week.WeekNumber}").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
-                            col.Item().Text(week.Date.ToString("MM/dd")).FontSize(6).AlignCenter().FontColor(Colors.White);
-                        });
-                }
-
-                // Player rows
-                for (int i = 0; i < allPlayers.Count; i++)
-                {
-                    var player = allPlayers[i];
-                    var rowColor = i % 2 == 0 ? Colors.Grey.Darken4 : Colors.Grey.Darken3;
-                    var playerDisplayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
-                    
-                    // Player name cell
-                    table.Cell().Background(rowColor).Padding(3)
-                        .Text(playerDisplayName).FontSize(7).FontColor(Colors.White);
-
-                    // Opponent cells for each week
-                    foreach (var week in remainingWeeks)
+                    // Populate the matrix for this flight
+                    foreach (var matchup in flightMatchups)
                     {
-                        var opponent = scheduleMatrix[player.Id].ContainsKey(week.WeekNumber) 
-                            ? scheduleMatrix[player.Id][week.WeekNumber] 
-                            : "-";
+                        if (matchup.Week == null || matchup.PlayerA == null || matchup.PlayerB == null) continue;
                         
-                        table.Cell().Background(rowColor).Padding(3)
-                            .Text(opponent).FontSize(6).AlignCenter().FontColor(Colors.White);
+                        var weekNum = matchup.Week.WeekNumber;
+                        var playerAName = $"{matchup.PlayerA.FirstName} {matchup.PlayerA.LastName.Substring(0, 1)}.";
+                        var playerBName = $"{matchup.PlayerB.FirstName} {matchup.PlayerB.LastName.Substring(0, 1)}.";
+                        
+                        scheduleMatrix[matchup.PlayerAId][weekNum] = playerBName;
+                        scheduleMatrix[matchup.PlayerBId][weekNum] = playerAName;
                     }
+
+                    // Flight header
+                    column.Item().PaddingTop(10).Table(table =>
+                    {
+                        table.ColumnsDefinition(columns => columns.RelativeColumn());
+                        table.Cell().Padding(6).Background(Colors.White)
+                            .Text($"Flight {flight.Name} - Remaining Schedule")
+                            .FontSize(10).Bold().FontColor(Colors.Black).AlignCenter();
+                    });
+
+                    // Flight schedule table
+                    column.Item().PaddingTop(5).Element(flightContainer =>
+                    {
+                        flightContainer.Table(table =>
+                        {
+                            // Dynamic column definition: Player name + one column per remaining week
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2f); // Player name column
+                                foreach (var week in remainingWeeks)
+                                {
+                                    columns.RelativeColumn(1.2f); // Week columns
+                                }
+                            });
+
+                            // Header row
+                            table.Cell().Background(Colors.Grey.Lighten2).Padding(3)
+                                .Text("Player").FontSize(7).Bold().FontColor(Colors.Black);
+                            foreach (var week in remainingWeeks)
+                            {
+                                table.Cell().Background(Colors.Grey.Lighten2).Padding(3)
+                                    .Column(col =>
+                                    {
+                                        col.Item().Text($"Week {week.WeekNumber}").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
+                                        col.Item().Text(week.Date.ToString("MM/dd")).FontSize(6).AlignCenter().FontColor(Colors.Black);
+                                    });
+                            }
+
+                            // Player rows for this flight
+                            for (int i = 0; i < flightPlayers.Count; i++)
+                            {
+                                var player = flightPlayers[i];
+                                var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
+                                var playerDisplayName = $"{player.FirstName} {player.LastName}";
+                                
+                                // Player name cell
+                                table.Cell().Background(rowColor).Padding(3)
+                                    .Text(playerDisplayName).FontSize(7).FontColor(Colors.Black);
+
+                                // Opponent cells for each week
+                                foreach (var week in remainingWeeks)
+                                {
+                                    var opponent = scheduleMatrix[player.Id].ContainsKey(week.WeekNumber) 
+                                        ? scheduleMatrix[player.Id][week.WeekNumber] 
+                                        : "-";
+                                    
+                                    table.Cell().Background(rowColor).Padding(3)
+                                        .Text(opponent).FontSize(6).AlignCenter().FontColor(Colors.Black);
+                                }
+                            }
+                        });
+                    });
                 }
             });
         }

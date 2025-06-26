@@ -981,7 +981,8 @@ export class ScoreEntryComponent implements OnInit {
     this.isLoading = true;
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
-        const fileName = `Scorecard_Week_${this.selectedWeekId}.pdf`;
+        const weekNumber = this.selectedWeek?.weekNumber || 'Unknown';
+        const fileName = `Scorecard_Week_${weekNumber}.pdf`;
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
         link.download = fileName;
@@ -1002,7 +1003,8 @@ export class ScoreEntryComponent implements OnInit {
     this.isLoading = true;
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
-        const fileName = `Summary_Week_${this.selectedWeekId}.pdf`;
+        const weekNumber = this.selectedWeek?.weekNumber || 'Unknown';
+        const fileName = `Summary_Week_${weekNumber}.pdf`;
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
         link.download = fileName;

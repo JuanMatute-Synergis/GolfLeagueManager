@@ -261,7 +261,9 @@ export class LeagueSummaryComponent implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `week_${this.selectedWeekId}_summary.pdf`;
+        const week = this.weeks.find(w => w.id === this.selectedWeekId);
+        const weekNumber = week?.weekNumber || 'Unknown';
+        link.download = `week_${weekNumber}_summary.pdf`;
         link.click();
         window.URL.revokeObjectURL(url);
         this.isLoading = false;
