@@ -13,9 +13,57 @@ export interface LoginResponse {
   username: string;
 }
 
+export interface PlayerAccountStatus {
+  playerId: string;
+  firstName: string;
+  lastName: string;
+  imageUrl?: string;
+  email: string;
+  hasUserAccount: boolean;
+  username?: string;
+  userId?: string;
+  isAdmin?: boolean;
+}
+
+export interface CreateUserForPlayerRequest {
+  playerId: string;
+  username: string;
+  password: string;
+  isAdmin: boolean;
+}
+
+export interface ResetUserPasswordRequest {
+  userId: string;
+  newPassword: string;
+}
+
+export interface LinkUserToPlayerRequest {
+  userId: string;
+  playerId: string;
+}
+
+export interface UpdateUserAccountRequest {
+  userId: string;
+  username: string;
+  isAdmin: boolean;
+}
+
+export interface UserProfile {
+  username: string;
+  isAdmin: boolean;
+  player?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    imageUrl?: string;
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = '/api/auth';
+  private userAdminApiUrl = '/api/UserAdmin';
   private userKey = 'golf_user';
   private loggedIn$ = new BehaviorSubject<boolean>(this.hasValidSession());
 
@@ -61,6 +109,32 @@ export class AuthService {
     return this.loggedIn$.asObservable();
   }
 
+  // Public method for guards/components
+  // isAuthenticated(): boolean {
+  //   // Instead of just checking localStorage, make a synchronous call to the server
+  //   // (Note: Guards require a synchronous return, so this is a limitation of Angular's CanActivate)
+  //   // For best UX, use an async guard or resolve, or update the guard to support Observable<boolean>.
+  //   // Here, we fallback to localStorage for now, but you should use checkAuthStatus() in your app shell or on navigation events.
+  //   return !!localStorage.getItem(this.userKey);
+  // }
+
+  // Async version for app shell or components
+  isAuthenticatedAsync(): Observable<boolean> {
+    return this.checkAuthStatus().pipe(
+      // If the server returns authenticated: true, return true
+      // Otherwise, return false
+      tap((res: any) => {
+        if (res && res.authenticated) {
+          this.loggedIn$.next(true);
+        } else {
+          this.loggedIn$.next(false);
+        }
+      }),
+      // Map to boolean
+      // (You can use map from rxjs/operators if you want to return just boolean)
+    );
+  }
+
   private hasValidSession(): boolean {
     // Check if we have a username stored (indicates potential valid session)
     // The actual JWT validation will happen on the server via cookies
@@ -72,5 +146,38 @@ export class AuthService {
     return this.http.get(`${this.apiUrl}/status`, { 
       withCredentials: true 
     });
+  }
+
+  // Player account management methods (migrated from AdminService)
+  getPlayersWithAccountStatus(): Observable<PlayerAccountStatus[]> {
+    return this.http.get<PlayerAccountStatus[]>(`${this.userAdminApiUrl}/players-with-account-status`);
+  }
+
+  createUserForPlayer(request: CreateUserForPlayerRequest): Observable<any> {
+    return this.http.post(`${this.userAdminApiUrl}/create-for-player`, request);
+  }
+
+  resetUserPassword(request: ResetUserPasswordRequest): Observable<any> {
+    return this.http.post(`${this.userAdminApiUrl}/reset-password`, request);
+  }
+
+  linkUserToPlayer(request: LinkUserToPlayerRequest): Observable<any> {
+    return this.http.post(`${this.userAdminApiUrl}/link-user-to-player`, request);
+  }
+
+  updateUserAccount(request: UpdateUserAccountRequest): Observable<any> {
+    return this.http.post(`${this.userAdminApiUrl}/update-account`, request);
+  }
+
+  getDebugUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.userAdminApiUrl}/debug-users`);
+  }
+
+  getDebugPlayers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.userAdminApiUrl}/debug-players`);
+  }
+
+  getUserProfile(): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.apiUrl}/profile`);
   }
 }

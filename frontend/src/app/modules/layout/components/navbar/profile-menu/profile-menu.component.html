@@ -2,12 +2,25 @@
   <!-- Profile Button -->
   <button (click)="toggleMenu()" class="bg-card relative flex rounded-full text-sm" type="button">
     <span class="sr-only">Open user menu</span>
-    <img
-      clickOutside
-      (clickOutside)="isOpen = false"
-      class="size-9 shrink-0 rounded-md"
-      src="https://avatars.githubusercontent.com/u/12519008?v=4"
-      alt="" />
+    
+    <!-- User avatar or default icon -->
+    <div class="size-9 shrink-0 rounded-md overflow-hidden flex items-center justify-center bg-muted">
+      <img
+        *ngIf="userProfile?.player?.imageUrl"
+        clickOutside
+        (clickOutside)="isOpen = false"
+        class="size-full object-cover"
+        [src]="userProfile!.player!.imageUrl"
+        [alt]="getDisplayName()" />
+      
+      <svg-icon
+        *ngIf="!userProfile?.player?.imageUrl"
+        clickOutside
+        (clickOutside)="isOpen = false"
+        src="assets/icons/heroicons/outline/user-circle.svg"
+        [svgClass]="'size-8 text-muted-foreground'">
+      </svg-icon>
+    </div>
   </button>
   <!-- Dropdown -->
   <div
@@ -15,11 +28,24 @@
     class="bg-background shadow-custom border-muted absolute z-20 mt-2 w-60 origin-top-right transform rounded-md border border-dashed py-4 ring-1 ring-transparent ring-opacity-5 transition focus:outline-hidden ltr:right-0 rtl:left-0">
     <div class="flext-row flex items-center px-4 pb-4">
       <div class="w-10 shrink-0">
-        <img class="rounded-md" src="https://avatars.githubusercontent.com/u/12519008?v=4" alt="" />
+        <!-- User avatar or default icon in dropdown -->
+        <div class="w-10 h-10 rounded-md overflow-hidden flex items-center justify-center bg-muted">
+          <img 
+            *ngIf="userProfile?.player?.imageUrl" 
+            class="w-full h-full object-cover" 
+            [src]="userProfile!.player!.imageUrl" 
+            [alt]="getDisplayName()" />
+          
+          <svg-icon
+            *ngIf="!userProfile?.player?.imageUrl"
+            src="assets/icons/heroicons/outline/user-circle.svg"
+            [svgClass]="'w-8 h-8 text-muted-foreground'">
+          </svg-icon>
+        </div>
       </div>
       <div class="text-foreground overflow-hidden px-2 text-sm font-semibold">
-        Luciano Oliveira
-        <p class="text-muted-foreground truncate text-ellipsis text-xs font-semibold">me&#64;lanno.dev</p>
+        {{ getDisplayName() }}
+        <p class="text-muted-foreground truncate text-ellipsis text-xs font-normal">{{ '@' + getUsername() }}</p>
       </div>
     </div>
 
@@ -28,15 +54,19 @@
     <ul class="my-2 mx-2 flex flex-col">
       @for (item of profileMenu; track $index) {
       <li
+        [class]="'text-muted-foreground hover:bg-card hover:text-primary inline-flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-xs font-semibold'"
+        [attr.data-index]="$index">
         @if (item.title === 'Log out') {
-          (click)="logout()"
+          <div (click)="logout()" class="inline-flex cursor-pointer items-center gap-2 w-full">
+            <svg-icon src="{{ item.icon }}" [svgClass]="'h-5 w-5 text-muted-foreground/50'"> </svg-icon>
+            {{ item.title }}
+          </div>
         } @else {
-          routerLink="{{ item.link }}"
+          <a routerLink="{{ item.link }}" class="inline-flex cursor-pointer items-center gap-2 w-full">
+            <svg-icon src="{{ item.icon }}" [svgClass]="'h-5 w-5 text-muted-foreground/50'"> </svg-icon>
+            {{ item.title }}
+          </a>
         }
-        :key="$index"
-        class="text-muted-foreground hover:bg-card hover:text-primary inline-flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-xs font-semibold">
-        <svg-icon src="{{ item.icon }}" [svgClass]="'h-5 w-5 text-muted-foreground/50'"> </svg-icon>
-        {{ item.title }}
       </li>
       }
     </ul>
@@ -46,7 +76,7 @@
       <div class="mt-2 grid grid-cols-2 gap-2">
         @for (item of themeColors; track $index) {
         <div
-          :key="$index"
+          [attr.data-index]="$index"
           (click)="toggleThemeColor(item.name)"
           [ngClass]="{ 'border-muted-foreground/30 bg-card': item.name == themeService.theme().color }"
           class="focus-visible:ring-ring border-border bg-background text-muted-foreground hover:bg-card hover:text-foreground shadow-xs inline-flex h-8 cursor-pointer items-center justify-start space-x-2 whitespace-nowrap rounded-md border border-dashed px-3 text-xs font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
@@ -63,7 +93,7 @@
       <div class="mt-2 grid grid-cols-2 gap-2">
         @for (item of themeMode; track $index) {
         <div
-          :key="$index"
+          [attr.data-index]="$index"
           (click)="toggleThemeMode()"
           [ngClass]="{ 'border-muted-foreground/30 bg-card': item == themeService.theme().mode }"
           class="focus-visible:ring-ring border-border bg-background text-muted-foreground hover:bg-card hover:text-foreground shadow-xs inline-flex h-8 cursor-pointer items-center justify-start space-x-2 whitespace-nowrap rounded-md border border-dashed px-3 text-xs font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">
@@ -83,7 +113,7 @@
       <div class="mt-2 grid grid-cols-2 gap-2">
         @for (item of themeDirection; track $index) {
         <div
-          :key="$index"
+          [attr.data-index]="$index"
           (click)="setDirection(item)"
           [ngClass]="{ 'border-muted-foreground/30 bg-card': item == themeService.theme().direction }"
           class="focus-visible:ring-ring border-border bg-background text-muted-foreground hover:bg-card hover:text-foreground shadow-xs inline-flex h-8 cursor-pointer items-center justify-start space-x-2 whitespace-nowrap rounded-md border border-dashed px-3 text-xs font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50">

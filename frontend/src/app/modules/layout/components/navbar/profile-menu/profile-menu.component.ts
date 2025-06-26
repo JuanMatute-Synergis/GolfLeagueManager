@@ -1,10 +1,11 @@
 import { animate, state, style, transition, trigger } from '@angular/animations';
-import { NgClass } from '@angular/common';
+import { NgClass, CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AngularSvgIconModule } from 'angular-svg-icon';
 import { ThemeService } from '../../../../../core/services/theme.service';
-import { AuthService } from '../../../../../core/services/auth.service';
+import { AuthService, UserProfile } from '../../../../../core/services/auth.service';
+import { UserProfileService } from '../../../../../core/services/user-profile.service';
 import { ClickOutsideDirective } from '../../../../../shared/directives/click-outside.directive';
 
 @Component({
@@ -12,7 +13,7 @@ import { ClickOutsideDirective } from '../../../../../shared/directives/click-ou
   standalone: true,
   templateUrl: './profile-menu.component.html',
   styleUrls: ['./profile-menu.component.css'],
-  imports: [ClickOutsideDirective, NgClass, RouterLink, AngularSvgIconModule],
+  imports: [ClickOutsideDirective, NgClass, RouterLink, AngularSvgIconModule, CommonModule],
   animations: [
     trigger('openClose', [
       state(
@@ -38,6 +39,9 @@ import { ClickOutsideDirective } from '../../../../../shared/directives/click-ou
 })
 export class ProfileMenuComponent implements OnInit {
   public isOpen = false;
+  public userProfile: UserProfile | null = null;
+  public defaultAvatarUrl = 'assets/icons/heroicons/outline/user-circle.svg';
+
   public profileMenu = [
     {
       title: 'Your Profile',
@@ -90,9 +94,44 @@ export class ProfileMenuComponent implements OnInit {
   public themeMode = ['light', 'dark'];
   public themeDirection = ['ltr', 'rtl'];
 
-  constructor(public themeService: ThemeService, private authService: AuthService, private router: Router) {}
+  constructor(
+    public themeService: ThemeService, 
+    private authService: AuthService, 
+    private userProfileService: UserProfileService,
+    private router: Router
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadUserProfile();
+    
+    // Subscribe to profile updates
+    this.userProfileService.profile$.subscribe(profile => {
+      this.userProfile = profile;
+    });
+  }
+
+  private loadUserProfile(): void {
+    this.userProfileService.loadProfile().subscribe({
+      error: (error) => {
+        console.error('Error loading user profile:', error);
+      }
+    });
+  }
+
+  public getDisplayName(): string {
+    if (this.userProfile?.player?.firstName && this.userProfile?.player?.lastName) {
+      return `${this.userProfile.player.firstName} ${this.userProfile.player.lastName}`;
+    }
+    return this.userProfile?.username || 'User';
+  }
+
+  public getAvatarUrl(): string {
+    return this.userProfile?.player?.imageUrl || this.defaultAvatarUrl;
+  }
+
+  public getUsername(): string {
+    return this.userProfile?.username || '';
+  }
 
   public toggleMenu(): void {
     this.isOpen = !this.isOpen;
@@ -128,5 +167,9 @@ export class ProfileMenuComponent implements OnInit {
     this.themeService.theme.update((theme) => {
       return { ...theme, direction: value };
     });
+  }
+
+  public refreshProfile(): void {
+    this.userProfileService.refreshProfile();
   }
 }

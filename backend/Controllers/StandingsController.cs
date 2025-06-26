@@ -19,6 +19,7 @@ namespace GolfLeagueManager.Controllers
         private readonly ScorecardService _scorecardService;
         private readonly MatchPlayService _matchPlayService;
         private readonly AverageScoreService _averageScoreService;
+        private readonly AppDbContext _context;
 
         public StandingsController(
             PlayerFlightAssignmentService flightAssignmentService,
@@ -27,7 +28,8 @@ namespace GolfLeagueManager.Controllers
             WeekService weekService,
             ScorecardService scorecardService,
             MatchPlayService matchPlayService,
-            AverageScoreService averageScoreService)
+            AverageScoreService averageScoreService,
+            AppDbContext context)
         {
             _flightAssignmentService = flightAssignmentService;
             _flightService = flightService;
@@ -36,6 +38,7 @@ namespace GolfLeagueManager.Controllers
             _scorecardService = scorecardService;
             _matchPlayService = matchPlayService;
             _averageScoreService = averageScoreService;
+            _context = context;
         }
 
         [HttpGet("weekly")]
@@ -135,6 +138,168 @@ namespace GolfLeagueManager.Controllers
                 });
             }
             return Ok(new { flights = result });
+        }
+
+        [HttpGet("session")]
+        public async Task<IActionResult> GetSessionStandings(Guid seasonId, Guid weekId)
+        {
+            // Get the selected week to determine session
+            var allWeeks = await _weekService.GetWeeksBySeasonIdAsync(seasonId);
+            var selectedWeek = allWeeks.FirstOrDefault(w => w.Id == weekId);
+            if (selectedWeek == null)
+                return BadRequest("Invalid weekId");
+
+            // Find the current session start week
+            var currentWeekNumber = selectedWeek.WeekNumber;
+            var sessionStartWeek = allWeeks
+                .Where(w => w.WeekNumber <= currentWeekNumber && w.SessionStart)
+                .OrderByDescending(w => w.WeekNumber)
+                .FirstOrDefault();
+            
+            var sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
+            
+            // Get all weeks in the current session up to the selected week
+            var weekIdsInSession = allWeeks
+                .Where(w => w.WeekNumber >= sessionStartWeekNumber && w.WeekNumber <= currentWeekNumber)
+                .Select(w => w.Id)
+                .ToList();
+
+            // Get all flights for the season
+            var flights = await _flightService.GetFlightsBySeasonIdAsync(seasonId);
+            var assignments = _flightAssignmentService.GetAllAssignments()
+                .Where(a => a.Flight != null && a.Flight.SeasonId == seasonId)
+                .ToList();
+            var players = await _playerService.GetAllPlayersAsync();
+
+            // Get all matchups for the session
+            var allMatchups = await _scorecardService.GetAllMatchupsForSeasonAsync(seasonId);
+            var sessionMatchups = allMatchups.Where(m => weekIdsInSession.Contains(m.WeekId)).ToList();
+            var thisWeekMatchups = allMatchups.Where(m => m.WeekId == weekId).ToList();
+
+            // Get all hole scores for the session
+            var allHoleScores = await _scorecardService.GetAllHoleScoresForSeasonAsync(seasonId);
+
+            // Build session standings per flight
+            var result = new List<object>();
+            foreach (var flight in flights.OrderBy(f => f.Name))
+            {
+                var flightPlayers = assignments.Where(a => a.FlightId == flight.Id)
+                    .Select(a => players.FirstOrDefault(p => p.Id == a.PlayerId))
+                    .Where(p => p != null)
+                    .ToList();
+
+                var playerStats = new List<object>();
+                foreach (var player in flightPlayers)
+                {
+                    if (player == null) continue;
+
+                    // Calculate session points - sum of all match play points in the session
+                    var sessionTotal = sessionMatchups
+                        .Where(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id)
+                        .Sum(m => {
+                            // Check if this week has special points
+                            var matchWeek = allWeeks.FirstOrDefault(w => w.Id == m.WeekId);
+                            var playerAbsent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
+                            
+                            // Handle special points weeks
+                            if (matchWeek?.SpecialPointsAwarded != null && matchWeek.SpecialPointsAwarded > 0)
+                            {
+                                return playerAbsent ? (matchWeek.SpecialPointsAwarded / 2) : matchWeek.SpecialPointsAwarded.Value;
+                            }
+                            
+                            // Regular match play points
+                            var hasScore = (m.PlayerAId == player.Id && m.PlayerAScore.HasValue) || 
+                                          (m.PlayerBId == player.Id && m.PlayerBScore.HasValue);
+                            if (!hasScore) return 0;
+                            
+                            return (m.PlayerAId == player.Id) ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+                        });
+
+                    // This week's points
+                    var thisWeekPoints = thisWeekMatchups
+                        .Where(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id)
+                        .Sum(m => {
+                            // Handle special points for this week
+                            if (selectedWeek.SpecialPointsAwarded != null && selectedWeek.SpecialPointsAwarded > 0)
+                            {
+                                var playerAbsent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
+                                return playerAbsent ? (selectedWeek.SpecialPointsAwarded / 2) : selectedWeek.SpecialPointsAwarded.Value;
+                            }
+                            
+                            return (m.PlayerAId == player.Id) ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+                        });
+
+                    // This week's gross score
+                    var thisWeekMatchup = thisWeekMatchups.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
+                    int? grossScore = null;
+                    bool isAbsent = false;
+                    
+                    if (thisWeekMatchup != null)
+                    {
+                        if (thisWeekMatchup.PlayerAId == player.Id)
+                        {
+                            grossScore = thisWeekMatchup.PlayerAScore;
+                            isAbsent = thisWeekMatchup.PlayerAAbsent;
+                        }
+                        else if (thisWeekMatchup.PlayerBId == player.Id)
+                        {
+                            grossScore = thisWeekMatchup.PlayerBScore;
+                            isAbsent = thisWeekMatchup.PlayerBAbsent;
+                        }
+                    }
+
+                    // Calculate average score up to this week
+                    var averageScore = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
+                        player.Id, seasonId, currentWeekNumber);
+
+                    playerStats.Add(new {
+                        id = player.Id,
+                        name = $"{player.FirstName} {player.LastName.Substring(0, 1)}.",
+                        displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.",
+                        handicap = player.CurrentHandicap,
+                        averageScore = averageScore,
+                        grossScore = grossScore ?? 0,
+                        thisWeekPoints = thisWeekPoints,
+                        sessionTotal = sessionTotal,
+                        isAbsent = isAbsent
+                    });
+                }
+
+                // Sort by session total (descending), then by last name
+                var sortedPlayers = playerStats
+                    .OrderByDescending(p => ((dynamic)p).sessionTotal)
+                    .ThenBy(p => players.FirstOrDefault(pl => pl.Id == ((dynamic)p).id)?.LastName ?? "")
+                    .ToList();
+
+                result.Add(new {
+                    id = flight.Id,
+                    name = flight.Name,
+                    players = sortedPlayers
+                });
+            }
+
+            // Calculate session number
+            var sessionNumber = allWeeks
+                .Where(w => w.WeekNumber <= currentWeekNumber && w.SessionStart)
+                .Count();
+            
+            // If no session starts found, it's session 1
+            if (sessionNumber == 0) sessionNumber = 1;
+
+            return Ok(new { 
+                week = new {
+                    id = selectedWeek.Id,
+                    name = $"Week {selectedWeek.WeekNumber}",
+                    weekNumber = selectedWeek.WeekNumber,
+                    date = selectedWeek.Date
+                },
+                session = new {
+                    number = sessionNumber,
+                    startWeekNumber = sessionStartWeekNumber,
+                    currentWeekNumber = currentWeekNumber
+                },
+                flights = result 
+            });
         }
     }
 }

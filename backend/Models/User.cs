@@ -11,6 +11,10 @@ namespace GolfLeagueManager.Models
         [Required]
         public required string PasswordHash { get; set; }
         public bool IsAdmin { get; set; } = false;
+
+        // Link to Player profile (optional)
+        public Guid? PlayerId { get; set; }
+        public Player? Player { get; set; }
         // Optionally add roles, email, etc.
     }
 }

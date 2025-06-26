@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, Input } from '@angular/core';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -46,6 +46,8 @@ interface MatchupWithDetails extends Matchup {
   ]
 })
 export class ScoreEntryComponent implements OnInit {
+  @Input() mode: 'score-entry' | 'matchups' = 'score-entry';
+  
   seasons: Season[] = [];
   weeks: Week[] = [];
   matchups: MatchupWithDetails[] = [];
@@ -63,6 +65,10 @@ export class ScoreEntryComponent implements OnInit {
 
   // Session handicaps cache
   sessionHandicaps: { [playerId: string]: number } = {};
+
+  // Cache for hole scores to prevent redundant API calls
+  private holeScoresCache: Map<string, HoleScoreBackend[]> = new Map();
+  private isLoadingHoleScores = false;
 
   // Filter for matchups
   matchupFilter: string = '';
@@ -94,6 +100,14 @@ export class ScoreEntryComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Detect mode from route
+    this.route.url.subscribe(url => {
+      const path = url.map(segment => segment.path).join('/');
+      if (path.includes('matchups')) {
+        this.mode = 'matchups';
+      }
+    });
+
     this.loadSeasons();
 
     // Check if weekId was passed as query parameter
@@ -123,6 +137,10 @@ export class ScoreEntryComponent implements OnInit {
       this.selectedWeekId = '';
       this.selectedWeek = null;
       this.matchups = [];
+      // Clear caches when season changes
+      this.weekAverageCache.clear();
+      this.playerAverages.clear();
+      this.holeScoresCache.clear();
       // Only load weeks - players will be loaded when week is selected
       this.loadWeeks();
     }
@@ -193,15 +211,17 @@ export class ScoreEntryComponent implements OnInit {
   onWeekChange() {
     if (this.selectedWeekId) {
       this.selectedWeek = this.weeks.find(w => w.id === this.selectedWeekId) || null;
-      // Clear the average caches when week changes
+      // Clear the caches when week changes
       this.weekAverageCache.clear();
       this.playerAverages.clear();
+      this.holeScoresCache.clear();
       // Use the robust loading method to avoid timing issues
       this.loadPlayersAndMatchups();
     } else {
       this.selectedWeek = null;
       this.matchups = [];
       this.playerAverages.clear();
+      this.holeScoresCache.clear();
     }
   }
 
@@ -291,7 +311,7 @@ export class ScoreEntryComponent implements OnInit {
         // Sort matchups by flight name
         this.matchups = this.sortMatchupsByFlight(this.matchups);
 
-        this.loadHoleScoresForMatchups();
+        // Note: loadHoleScoresForMatchups is called by loadPlayersAndMatchups, so we don't call it here
         this.isLoading = false;
       },
       error: (error) => {
@@ -301,20 +321,77 @@ export class ScoreEntryComponent implements OnInit {
     });
   }
 
-  loadHoleScoresForMatchups() {
-    // Load hole scores for all matchups
-    this.matchups.forEach(matchup => {
-      if (matchup.id) {
-        this.scorecardService.getScorecard(matchup.id).subscribe({
-          next: (holeScores) => {
-            matchup.holeScores = holeScores;
-          },
-          error: (error) => {
-            // Silently handle errors - matchup may not have hole scores yet
-            matchup.holeScores = [];
-          }
-        });
+  // Helper method to refresh hole scores for a specific matchup
+  private refreshMatchupHoleScores(matchupId: string): Promise<HoleScoreBackend[]> {
+    return this.scorecardService.getScorecard(matchupId).toPromise().then(holeScores => {
+      // Update cache
+      this.holeScoresCache.set(matchupId, holeScores || []);
+      
+      // Update matchup if it exists in current list
+      const matchup = this.matchups.find(m => m.id === matchupId);
+      if (matchup) {
+        matchup.holeScores = holeScores || [];
       }
+      
+      return holeScores || [];
+    }).catch(error => {
+      console.error('Error refreshing hole scores for matchup:', matchupId, error);
+      return [];
+    });
+  }
+
+  loadHoleScoresForMatchups() {
+    console.log('loadHoleScoresForMatchups called, isLoading:', this.isLoadingHoleScores);
+    
+    // Prevent multiple simultaneous loads
+    if (this.isLoadingHoleScores) {
+      console.log('Already loading hole scores, skipping duplicate call');
+      return;
+    }
+
+    // Filter matchups that need hole scores and aren't already cached
+    const matchupsToLoad = this.matchups.filter(matchup => {
+      if (!matchup.id) return false;
+      
+      // Check if already cached
+      if (this.holeScoresCache.has(matchup.id)) {
+        matchup.holeScores = this.holeScoresCache.get(matchup.id)!;
+        return false;
+      }
+      
+      return true;
+    });
+
+    if (matchupsToLoad.length === 0) {
+      console.log('All hole scores already cached');
+      return;
+    }
+
+    console.log(`Loading hole scores for ${matchupsToLoad.length} matchups`);
+    this.isLoadingHoleScores = true;
+
+    // Load hole scores for matchups that need them
+    const requests = matchupsToLoad.map(matchup => 
+      this.scorecardService.getScorecard(matchup.id!).toPromise().then(holeScores => {
+        // Cache the result
+        this.holeScoresCache.set(matchup.id!, holeScores || []);
+        matchup.holeScores = holeScores || [];
+        return { matchupId: matchup.id!, holeScores: holeScores || [] };
+      }).catch(error => {
+        // Cache empty result for failed requests to avoid retry
+        this.holeScoresCache.set(matchup.id!, []);
+        matchup.holeScores = [];
+        console.warn(`Failed to load hole scores for matchup ${matchup.id}:`, error);
+        return { matchupId: matchup.id!, holeScores: [] };
+      })
+    );
+
+    Promise.all(requests).then(results => {
+      console.log(`Loaded hole scores for ${results.length} matchups`);
+      this.isLoadingHoleScores = false;
+    }).catch(error => {
+      console.error('Error loading hole scores:', error);
+      this.isLoadingHoleScores = false;
     });
   }
 
@@ -550,6 +627,8 @@ export class ScoreEntryComponent implements OnInit {
     // Clear scorecard data from backend
     this.scorecardService.deleteScorecard(matchup.id).subscribe({
       next: () => {
+        // Clear cache
+        this.holeScoresCache.delete(matchup.id!);
         // Clear cached hole scores
         matchup.holeScores = [];
         // Clear total scores
@@ -562,6 +641,7 @@ export class ScoreEntryComponent implements OnInit {
       error: (error) => {
         // Even if backend delete fails, clear the frontend data
         console.warn('Failed to clear scorecard from backend, clearing frontend data only:', error);
+        this.holeScoresCache.delete(matchup.id!);
         matchup.holeScores = [];
         matchup.playerAScore = undefined;
         matchup.playerBScore = undefined;
@@ -583,6 +663,8 @@ export class ScoreEntryComponent implements OnInit {
         // Clear scorecard data from backend
         this.scorecardService.deleteScorecard(matchup.id).subscribe({
           next: () => {
+            // Clear cache
+            this.holeScoresCache.delete(matchup.id!);
             // Clear cached hole scores and total scores
             matchup.holeScores = [];
             matchup.playerAScore = undefined;
@@ -598,6 +680,7 @@ export class ScoreEntryComponent implements OnInit {
           error: (error) => {
             // Even if backend delete fails, clear the frontend data
             console.warn(`Failed to clear scorecard for matchup ${matchup.id}, clearing frontend data only:`, error);
+            this.holeScoresCache.delete(matchup.id!);
             matchup.holeScores = [];
             matchup.playerAScore = undefined;
             matchup.playerBScore = undefined;
@@ -610,7 +693,8 @@ export class ScoreEntryComponent implements OnInit {
           }
         });
       } else {
-        // If no matchup ID, just clear frontend data
+        // If no matchup ID, just clear frontend data and cache
+        this.holeScoresCache.delete(matchup.id!);
         matchup.holeScores = [];
         matchup.playerAScore = undefined;
         matchup.playerBScore = undefined;
@@ -715,12 +799,9 @@ export class ScoreEntryComponent implements OnInit {
       matchup.playerBScore = scorecardData.playerBTotalScore;
       this.onScoreChange(matchup);
 
-      // Reload hole scores for this matchup to update status
-      this.scorecardService.getScorecard(scorecardData.matchupId).subscribe({
-        next: (holeScores) => {
-          matchup.holeScores = holeScores;
-        },
-        error: (error) => console.error('Error reloading hole scores:', error)
+      // Refresh hole scores for this matchup using cached method
+      this.refreshMatchupHoleScores(scorecardData.matchupId).then(() => {
+        console.log('Hole scores refreshed for matchup:', scorecardData.matchupId);
       });
     }
 

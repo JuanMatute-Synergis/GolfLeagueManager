@@ -9,6 +9,9 @@ namespace GolfLeagueManager
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
+
+        // Player avatar or profile picture (URL or path)
+        public string? ImageUrl { get; set; }
         
         // Handicap system
         public decimal InitialHandicap { get; set; } = 0; // Starting handicap for the season

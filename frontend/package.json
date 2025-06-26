@@ -1,12 +1,12 @@
 {
-  "name": "angular-tailwind",
-  "displayName": "Angular Tailwind",
+  "name": "golf-league-manager",
+  "displayName": "Golf League Manager",
   "version": "0.10.1",
-  "description": "Angular & Tailwind CSS Admin Dashboard Starter Kit, Free and Open Source",
-  "homepage": "https://github.com/lannodev/angular-tailwind#readme",
+  "description": "Golf League Manager - Full-Stack Golf League Management System with Angular & .NET Core",
+  "homepage": "https://github.com/juanmatute/GolfLeagueManager#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lannodev/angular-tailwind.git"
+    "url": "git+https://github.com/juanmatute/GolfLeagueManager.git"
   },
   "keywords": [
     "angular",

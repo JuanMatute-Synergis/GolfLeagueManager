@@ -20,8 +20,8 @@ Please note that we have a [Code of Conduct](CODE_OF_CONDUCT.md), which we expec
 4. Make your changes and commit them following the commit standards below.
 
 ## How to Contribute
-- **Report Issues:** Found a bug or have a suggestion? Feel free to [open an issue](https://github.com/lannodev/angular-tailwind).
-- **Submit Enhancements:** If you have an idea for improving the project, please [open an issue](https://github.com/lannodev/angular-tailwind) to discuss it before implementing changes.
+- **Report Issues:** Found a bug or have a suggestion? Feel free to [open an issue](https://github.com/juanmatute/GolfLeagueManager).
+- **Submit Enhancements:** If you have an idea for improving the project, please [open an issue](https://github.com/juanmatute/GolfLeagueManager) to discuss it before implementing changes.
 - **Help with Documentation:** Improvements to our documentation are always welcome.
 
 ## Commit Standards

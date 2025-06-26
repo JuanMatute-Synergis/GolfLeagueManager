@@ -237,12 +237,17 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("PlayerId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -270,6 +275,10 @@ namespace backend.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
 
                     b.Property<decimal>("InitialAverageScore")
                         .HasColumnType("numeric");
@@ -551,6 +560,16 @@ namespace backend.Migrations
                     b.Navigation("PlayerB");
 
                     b.Navigation("Week");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.Models.User", b =>
+                {
+                    b.HasOne("GolfLeagueManager.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.PlayerFlightAssignment", b =>

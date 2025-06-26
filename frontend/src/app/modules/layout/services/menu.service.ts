@@ -3,6 +3,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Menu } from 'src/app/core/constants/menu';
 import { MenuItem, SubMenuItem } from 'src/app/core/models/menu.model';
+import { UserProfileService } from 'src/app/core/services/user-profile.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,11 +14,20 @@ export class MenuService implements OnDestroy {
   private _pagesMenu = signal<MenuItem[]>([]);
   private _subscription = new Subscription();
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private userProfileService: UserProfileService
+  ) {
     /** Set dynamic menu */
-    this._pagesMenu.set(Menu.pages);
+    this.updateMenu();
 
-    let sub = this.router.events.subscribe((event) => {
+    // Subscribe to profile changes to update menu
+    let profileSub = this.userProfileService.profile$.subscribe(() => {
+      this.updateMenu();
+    });
+    this._subscription.add(profileSub);
+
+    let routerSub = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         /** Expand menu base on active route */
         this._pagesMenu().forEach((menu) => {
@@ -35,7 +45,23 @@ export class MenuService implements OnDestroy {
         });
       }
     });
-    this._subscription.add(sub);
+    this._subscription.add(routerSub);
+  }
+
+  private updateMenu() {
+    const profile = this.userProfileService.getProfile();
+    const isAdmin = profile?.isAdmin || false;
+    
+    // Filter menu groups based on admin status
+    const filteredMenu = Menu.pages.filter(group => {
+      // Hide entire "League Settings" group for non-admin users
+      if (group.group === 'League Settings' && !isAdmin) {
+        return false;
+      }
+      return true;
+    });
+    
+    this._pagesMenu.set(filteredMenu);
   }
 
   get showSideBar() {

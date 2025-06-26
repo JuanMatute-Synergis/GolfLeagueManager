@@ -191,13 +191,9 @@
                 (paste)="onPaste($event, i, 'A')"
                 [class]="hole.playerAScoreClass"
                 class="absolute inset-0 w-full h-full text-center border-0 bg-transparent text-foreground focus:bg-primary/10 focus:ring-2 focus:ring-primary/20 focus:outline-none leading-none placeholder:text-xl placeholder:font-bold placeholder:text-muted-foreground/50 hover:bg-muted/50 transition-colors"
-                [class.!bg-green-100]="hole.playerAIsStrokeHole"
-                [class.!border-green-400]="hole.playerAIsStrokeHole"
-                [class.!text-green-900]="hole.playerAIsStrokeHole"
-                [class.dark:!text-green-900]="hole.playerAIsStrokeHole"
-                [class.dark:!bg-green-300]="hole.playerAIsStrokeHole"
-                [class.hover:!bg-green-200]="hole.playerAIsStrokeHole"
-                [class.dark:hover:!bg-green-400]="hole.playerAIsStrokeHole"
+                [style.background-color]="hole.playerAIsStrokeHole ? '#dcfce7' : null"
+                [style.border]="hole.playerAIsStrokeHole ? '2px solid #4ade80' : null"
+                [style.color]="hole.playerAIsStrokeHole ? '#166534' : null"
                 [readonly]="isViewMode()"
                 [tabindex]="isViewMode() ? -1 : 0"
                 min="1"
@@ -244,13 +240,9 @@
                 (paste)="onPaste($event, i, 'B')"
                 [class]="hole.playerBScoreClass"
                 class="absolute inset-0 w-full h-full text-center border-0 bg-transparent text-foreground focus:bg-primary/10 focus:ring-2 focus:ring-primary/20 focus:outline-none leading-none placeholder:text-xl placeholder:font-bold placeholder:text-muted-foreground/50 hover:bg-muted/50 transition-colors"
-                [class.!bg-green-100]="hole.playerBIsStrokeHole"
-                [class.!border-green-400]="hole.playerBIsStrokeHole"
-                [class.!text-green-900]="hole.playerBIsStrokeHole"
-                [class.dark:!text-green-900]="hole.playerBIsStrokeHole"
-                [class.dark:!bg-green-300]="hole.playerBIsStrokeHole"
-                [class.hover:!bg-green-200]="hole.playerBIsStrokeHole"
-                [class.dark:hover:!bg-green-400]="hole.playerBIsStrokeHole"
+                [style.background-color]="hole.playerBIsStrokeHole ? '#dcfce7' : null"
+                [style.border]="hole.playerBIsStrokeHole ? '2px solid #4ade80' : null"
+                [style.color]="hole.playerBIsStrokeHole ? '#166534' : null"
                 [readonly]="isViewMode()"
                 [tabindex]="isViewMode() ? -1 : 0"
                 min="1"
@@ -264,6 +256,7 @@
               <!-- Compact Net Score Display -->
               <div class="absolute bottom-0 left-0 right-0 text-xs text-muted-foreground text-center leading-none pointer-events-none">
                 {{ hole.playerBNetScore }}
+                
               </div>
             </td>
             <td class="border border-border p-1 text-center font-bold text-foreground bg-muted/50 sm:p-2">

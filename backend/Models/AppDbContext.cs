@@ -29,6 +29,10 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()"); // PostgreSQL UUID generation
+                // Configure ImageUrl as optional, max length 512
+                entity.Property(e => e.ImageUrl)
+                    .HasMaxLength(512)
+                    .IsRequired(false);
             });
 
             // Configure Season entity
@@ -244,6 +248,12 @@ namespace GolfLeagueManager
                 entity.HasIndex(e => e.Username).IsUnique();
                 entity.Property(e => e.Username).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.PasswordHash).IsRequired();
+
+                // Configure optional relationship to Player
+                entity.HasOne(u => u.Player)
+                    .WithMany()
+                    .HasForeignKey(u => u.PlayerId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
             base.OnModelCreating(modelBuilder);

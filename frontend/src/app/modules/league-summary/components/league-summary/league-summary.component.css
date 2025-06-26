@@ -1,0 +1,122 @@
+/* Component-specific styles following the style guide */
+
+/* Ensure proper table layout */
+.flight-table {
+  table-layout: fixed;
+}
+
+/* Custom scrollbar for tables */
+.overflow-auto::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.1);
+  border-radius: 3px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Ensure consistent grid heights */
+@media (min-width: 1024px) {
+  .flight-grid-item {
+    height: calc((100vh - 400px) / 2);
+    min-height: 300px;
+  }
+}
+
+/* Ranking badges animation */
+.ranking-badge {
+  transition: transform 0.2s ease-in-out;
+}
+
+.ranking-badge:hover {
+  transform: scale(1.1);
+}
+
+/* Sticky header enhancement */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  background: hsl(var(--muted) / 0.9);
+}
+
+/* Loading state improvements */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Enhanced focus states for accessibility */
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  .mobile-stack {
+    display: block;
+  }
+  
+  .mobile-stack > * {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-stack > *:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break {
+    page-break-after: always;
+  }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .overflow-auto::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.2);
+  }
+  
+  .overflow-auto::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.4);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border-border {
+    border-width: 2px;
+  }
+  
+  .bg-primary\/10 {
+    background-color: hsl(var(--primary) / 0.2);
+  }
+}

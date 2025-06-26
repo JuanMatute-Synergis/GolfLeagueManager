@@ -1,0 +1,308 @@
+<!-- Player & Account Management -->
+<div class="h-full flex flex-col">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 flex-shrink-0 gap-4">
+    <div>
+      <h2 class="text-3xl font-semibold text-foreground">Player & Account Management</h2>
+      <p class="text-muted-foreground">Manage players and their user accounts</p>
+    </div>
+    <button 
+      *ngIf="activeView === 'list'"
+      class="bg-primary text-primary-foreground px-6 py-3 sm:px-4 sm:py-2 rounded-md font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-sm" 
+      (click)="showAddPlayerForm()" 
+      [disabled]="isLoading">
+      Add Player
+    </button>
+  </div>
+
+  <!-- View Toggle -->
+  <div class="mb-6 flex-shrink-0">
+    <div class="flex gap-2 bg-muted p-1 rounded-lg w-fit">
+      <button
+        class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        [class]="activeView === 'list' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+        (click)="setActiveView('list')">
+        <i class="fas fa-users mr-2"></i>Player List
+      </button>
+      <button
+        class="px-4 py-2 rounded-md text-sm font-medium transition-colors"
+        [class]="activeView === 'accounts' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+        (click)="setActiveView('accounts')">
+        <i class="fas fa-user-shield mr-2"></i>Account Management
+      </button>
+    </div>
+  </div>
+
+  <!-- Error/Success Messages -->
+  <div *ngIf="errorMessage" class="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-md mb-6 flex justify-between items-center flex-shrink-0">
+    {{ errorMessage }}
+    <button class="bg-muted text-muted-foreground px-3 py-1 rounded text-sm hover:bg-muted/80" (click)="clearMessages()">Dismiss</button>
+  </div>
+  <div *ngIf="successMessage" class="bg-primary/10 border border-primary/20 text-primary p-4 rounded-md mb-6 flex justify-between items-center flex-shrink-0">
+    {{ successMessage }}
+    <button class="bg-muted text-muted-foreground px-3 py-1 rounded text-sm hover:bg-muted/80" (click)="clearMessages()">Dismiss</button>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div class="text-center p-8 text-muted-foreground text-lg flex-shrink-0" *ngIf="isLoading">
+    <p>Loading...</p>
+  </div>
+
+  <!-- Player Form -->
+  <div class="bg-card border border-border rounded-lg p-8 mb-8 shadow-sm flex-shrink-0" *ngIf="showPlayerForm && activeView === 'list'">
+    <h3 class="text-2xl font-semibold text-foreground mb-6">{{ editingPlayerId ? 'Edit Player' : 'Add New Player' }}</h3>
+    <form [formGroup]="playerForm" (ngSubmit)="savePlayer()">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="mb-4">
+          <label for="firstName" class="block font-medium text-foreground mb-2">First Name</label>
+          <input 
+            type="text" 
+            id="firstName" 
+            formControlName="firstName" 
+            class="w-full p-3 border border-border rounded-md text-foreground bg-background transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            [class]="(playerForm.get('firstName')?.invalid && playerForm.get('firstName')?.touched) ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''">
+          <div class="text-destructive text-sm mt-1" *ngIf="playerForm.get('firstName')?.invalid && playerForm.get('firstName')?.touched">
+            First name is required
+          </div>
+        </div>
+        <div class="mb-4">
+          <label for="lastName" class="block font-medium text-foreground mb-2">Last Name</label>
+          <input 
+            type="text" 
+            id="lastName" 
+            formControlName="lastName" 
+            class="w-full p-3 border border-border rounded-md text-foreground bg-background transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            [class]="(playerForm.get('lastName')?.invalid && playerForm.get('lastName')?.touched) ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''">
+          <div class="text-destructive text-sm mt-1" *ngIf="playerForm.get('lastName')?.invalid && playerForm.get('lastName')?.touched">
+            Last name is required
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="mb-4">
+          <label for="email" class="block font-medium text-foreground mb-2">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            formControlName="email" 
+            class="w-full p-3 border border-border rounded-md text-foreground bg-background transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            [class]="(playerForm.get('email')?.invalid && playerForm.get('email')?.touched) ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''">
+          <div class="text-destructive text-sm mt-1" *ngIf="playerForm.get('email')?.invalid && playerForm.get('email')?.touched">
+            Valid email is required
+          </div>
+        </div>
+        <div class="mb-4">
+          <label for="phone" class="block font-medium text-foreground mb-2">Phone</label>
+          <input 
+            type="tel" 
+            id="phone" 
+            formControlName="phone" 
+            class="w-full p-3 border border-border rounded-md text-foreground bg-background transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            [class]="(playerForm.get('phone')?.invalid && playerForm.get('phone')?.touched) ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''">
+          <div class="text-destructive text-sm mt-1" *ngIf="playerForm.get('phone')?.invalid && playerForm.get('phone')?.touched">
+            Phone number is required
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-4 mt-6">
+        <button type="submit" class="bg-primary text-primary-foreground px-6 py-3 sm:px-4 sm:py-2 rounded-md font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-sm" [disabled]="playerForm.invalid || isLoading">
+          {{ isLoading ? 'Saving...' : (editingPlayerId ? 'Update' : 'Add') }} Player
+        </button>
+        <button type="button" class="bg-muted text-muted-foreground px-6 py-3 sm:px-4 sm:py-2 rounded-md font-medium transition-colors hover:bg-muted/80 disabled:opacity-50 text-base sm:text-sm" (click)="resetForm()" [disabled]="isLoading">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Account Form -->
+  <div class="bg-card border border-border rounded-lg p-8 mb-8 shadow-sm flex-shrink-0" *ngIf="showAccountForm && activeView === 'accounts'">
+    <h3 class="text-2xl font-semibold text-foreground mb-6">
+      {{ isPasswordResetMode ? 'Reset Password' : (isAccountEditMode ? 'Edit Account' : 'Create Account') }}
+    </h3>
+    <form [formGroup]="accountForm" (ngSubmit)="saveAccount()">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="mb-4" *ngIf="!isPasswordResetMode">
+          <label for="username" class="block font-medium text-foreground mb-2">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            formControlName="username" 
+            class="w-full p-3 border border-border rounded-md text-foreground bg-background transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            [class]="(accountForm.get('username')?.invalid && accountForm.get('username')?.touched) ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''">
+          <div class="text-destructive text-sm mt-1" *ngIf="accountForm.get('username')?.invalid && accountForm.get('username')?.touched">
+            Username is required
+          </div>
+        </div>
+        <div class="mb-4" [ngClass]="{'md:col-span-2': isPasswordResetMode}">
+          <label for="password" class="block font-medium text-foreground mb-2">
+            {{ isPasswordResetMode ? 'New Password' : 'Password' }}
+          </label>
+          <input 
+            type="password" 
+            id="password" 
+            formControlName="password" 
+            class="w-full p-3 border border-border rounded-md text-foreground bg-background transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            [class]="(accountForm.get('password')?.invalid && accountForm.get('password')?.touched) ? 'border-destructive focus:border-destructive focus:ring-destructive/20' : ''"
+            [placeholder]="isPasswordResetMode ? 'Enter new password' : (isAccountEditMode ? 'Leave blank to keep current password' : 'Password')">
+          <div class="text-destructive text-sm mt-1" *ngIf="accountForm.get('password')?.invalid && accountForm.get('password')?.touched">
+            {{ isPasswordResetMode ? 'New password is required' : 'Password is required' }}
+          </div>
+        </div>
+      </div>
+      <div class="mb-6" *ngIf="!isPasswordResetMode">
+        <label class="flex items-center gap-3">
+          <input 
+            type="checkbox" 
+            formControlName="isAdmin" 
+            class="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2">
+          <span class="text-foreground font-medium">Administrator Access</span>
+        </label>
+        <p class="text-sm text-muted-foreground mt-1">Administrators can manage players, accounts, and system settings</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button 
+          type="submit" 
+          class="bg-primary text-primary-foreground px-6 py-3 sm:px-4 sm:py-2 rounded-md font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-sm" 
+          [disabled]="!isAccountFormValid || isLoading">
+          {{ isPasswordResetMode ? 'Reset Password' : (isAccountEditMode ? 'Update Account' : 'Create Account') }}
+        </button>
+        <button type="button" class="bg-muted text-muted-foreground px-6 py-3 sm:px-4 sm:py-2 rounded-md font-medium transition-colors hover:bg-muted/80 disabled:opacity-50 text-base sm:text-sm" (click)="resetAccountForm()" [disabled]="isLoading">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Content Area -->
+  <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex-1 flex flex-col min-h-0">
+    
+    <!-- Player List View -->
+    <div class="flex-1 min-h-0 overflow-y-auto" *ngIf="activeView === 'list' && !isLoading">
+      <div class="p-4 border-b border-border bg-muted/20 flex-shrink-0">
+        <h3 class="text-lg font-semibold text-foreground">Players List</h3>
+      </div>
+      
+      <!-- Desktop Table View - Hidden on mobile -->
+      <div class="hidden lg:block">
+        <table class="w-full border-collapse">
+          <thead class="bg-muted/50 text-xs uppercase text-muted-foreground sticky top-0">
+            <tr>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border">Name</th>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border">Email</th>
+              <th class="text-left font-semibold text-foreground p-4 border-b border-border">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let player of players" class="hover:bg-muted/20 transition-colors">
+              <td class="p-4 border-b border-border text-foreground">{{ player.firstName }} {{ player.lastName }}</td>
+              <td class="p-4 border-b border-border text-foreground">{{ player.email }}</td>
+              <td class="p-4 border-b border-border">
+                <div class="flex gap-2">
+                  <button class="bg-muted text-muted-foreground px-3 py-1 rounded text-sm font-medium transition-colors hover:bg-muted/80 disabled:opacity-50" (click)="editPlayer(player)" [disabled]="isLoading">
+                    Edit
+                  </button>
+                  <button class="bg-destructive text-destructive-foreground px-3 py-1 rounded text-sm font-medium transition-colors hover:bg-destructive/90 disabled:opacity-50" (click)="deletePlayer(player.playerId)" [disabled]="isLoading">
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Card View - Visible only on mobile -->
+      <div class="lg:hidden">
+        <div class="p-4 space-y-4">
+          <div *ngFor="let player of players" class="border border-border rounded-lg p-4 bg-background">
+            <div class="flex flex-col space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-lg font-semibold text-foreground">{{ player.firstName }} {{ player.lastName }}</h4>
+              </div>
+              
+              <div class="space-y-2 text-sm">
+                <div class="flex items-center">
+                  <span class="text-muted-foreground font-medium w-16">Email:</span>
+                  <span class="text-foreground ml-2">{{ player.email }}</span>
+                </div>
+              </div>
+              
+              <div class="flex gap-3 pt-2">
+                <button class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-muted/80 disabled:opacity-50" (click)="editPlayer(player)" [disabled]="isLoading">
+                  Edit Player
+                </button>
+                <button class="flex-1 bg-destructive text-destructive-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-destructive/90 disabled:opacity-50" (click)="deletePlayer(player.playerId)" [disabled]="isLoading">
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Empty state -->
+      <div class="text-center p-12 text-muted-foreground italic" *ngIf="players.length === 0">
+        <p class="text-lg">No players found. Add your first player to get started.</p>
+      </div>
+    </div>
+
+    <!-- Account Management View -->
+    <div class="flex-1 min-h-0 overflow-y-auto" *ngIf="activeView === 'accounts'">
+      <table class="w-full border-collapse mt-2">
+        <thead class="bg-muted/50 text-xs uppercase text-muted-foreground sticky top-0 z-10">
+          <tr>
+            <th class="text-left font-semibold text-foreground p-2 border-b border-border bg-muted/50">Player</th>
+            <th class="text-left font-semibold text-foreground p-2 border-b border-border bg-muted/50">Email</th>
+            <th class="text-center font-semibold text-foreground p-2 border-b border-border bg-muted/50">Account Status</th>
+            <th class="text-center font-semibold text-foreground p-2 border-b border-border bg-muted/50">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of players" class="hover:bg-muted/20 transition-colors">
+            <!-- Player Info -->
+            <td class="p-3 border-b border-border flex items-center gap-3">
+              <img *ngIf="player.imageUrl" [src]="player.imageUrl" alt="Avatar" class="w-8 h-8 rounded-full border border-border object-cover" />
+              <span class="font-medium text-foreground text-sm">{{ player.firstName }} {{ player.lastName }}</span>
+            </td>
+            <!-- Email -->
+            <td class="p-3 border-b border-border text-sm text-foreground">{{ player.email }}</td>
+            <!-- Account Status -->
+            <td class="p-3 border-b border-border text-center">
+              <span *ngIf="player.hasUserAccount" class="inline-flex items-center px-2 py-1 rounded bg-primary/10 text-primary text-xs font-medium">
+                Linked{{ player.username ? ' (' + player.username + ')' : '' }}
+                <span *ngIf="player.isAdmin" class="ml-1 inline-flex items-center px-1 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs font-medium">Admin</span>
+              </span>
+              <span *ngIf="!player.hasUserAccount" class="inline-flex items-center px-2 py-1 rounded bg-muted text-muted-foreground text-xs font-medium">No Account</span>
+            </td>
+            <!-- Action: Create or Edit Account -->
+            <td class="p-3 border-b border-border text-center">
+              <ng-container *ngIf="!player.hasUserAccount">
+                <button 
+                  class="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium text-xs hover:bg-primary/90 transition-colors"
+                  (click)="showCreateAccountForm(player)">
+                  Create Account
+                </button>
+              </ng-container>
+              <ng-container *ngIf="player.hasUserAccount">
+                <div class="flex flex-col sm:flex-row gap-2 items-center justify-center">
+                  <button 
+                    class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-blue-700 transition-colors" 
+                    (click)="showEditAccountForm(player)">
+                    Edit Account
+                  </button>
+                  <button 
+                    class="bg-orange-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-orange-700 transition-colors" 
+                    (click)="showResetPasswordForm(player)">
+                    Reset Password
+                  </button>
+                </div>
+              </ng-container>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="players.length === 0" class="p-8 text-center text-muted-foreground text-sm">No players found.</div>
+    </div>
+  </div>
+</div>

@@ -6,61 +6,82 @@ export class Menu {
       group: 'League',
       separator: false,
       items: [
-        {
-          icon: 'assets/icons/heroicons/outline/bookmark.svg',
-          label: 'Schedule',
-          route: '/schedule',
-        },
-        {
-          icon: 'assets/icons/heroicons/outline/shield-check.svg',
-          label: 'Standings',
-          route: '/standings',
-        },
-        {
-          icon: 'assets/icons/heroicons/outline/users.svg',
-          label: 'Players',
-          route: '/players',
-        },
+        // {
+        //   icon: 'assets/icons/heroicons/outline/bookmark.svg',
+        //   label: 'Schedule',
+        //   route: '/schedule',
+        // },
+        // {
+        //   icon: 'assets/icons/heroicons/outline/shield-check.svg',
+        //   label: 'Standings',
+        //   route: '/standings',
+        // },
+        // {
+        //   icon: 'assets/icons/heroicons/outline/users.svg',
+        //   label: 'Players',
+        //   route: '/players',
+        // },
         {
           icon: 'assets/icons/tablericons/arrows-shuffle-2.svg',
           label: 'Matchups',
           route: '/matchups',
         },
         {
-          icon: 'assets/icons/heroicons/outline/cog-6-tooth.svg',
-          label: 'Settings',
-          route: '/settings',
+          icon: 'assets/icons/heroicons/outline/document-text.svg',
+          label: 'League Summary',
+          route: '/league-summary',
         },
       ],
     },
+    // {
+    //   group: 'Scoring',
+    //   separator: false,
+    //   items: [
+    //     {
+    //       icon: 'assets/icons/heroicons/outline/chart-bar.svg',
+    //       label: 'Scoring Dashboard',
+    //       route: '/scoring',
+    //     },
+    //     {
+    //       icon: 'assets/icons/heroicons/outline/chart-pie.svg',
+    //       label: 'Leaderboard',
+    //       route: '/scoring/leaderboard',
+    //     },
+    //     {
+    //       icon: 'assets/icons/heroicons/outline/users.svg',
+    //       label: 'Season Standings',
+    //       route: '/scoring/standings',
+    //     },
+    //   ],
+    // },
     {
-      group: 'Scoring',
+      group: 'League Settings',
       separator: false,
       items: [
         {
-          icon: 'assets/icons/heroicons/outline/chart-bar.svg',
-          label: 'Scoring Dashboard',
-          route: '/scoring',
+          icon: 'assets/icons/heroicons/outline/users.svg',
+          label: 'Players & Accounts',
+          route: '/settings/players-accounts',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/calendar.svg',
+          label: 'Seasons',
+          route: '/settings/seasons',
+        },
+        {
+          icon: 'assets/icons/heroicons/outline/clock.svg',
+          label: 'Scheduling',
+          route: '/settings/scheduling',
         },
         {
           icon: 'assets/icons/heroicons/outline/calendar-days.svg',
           label: 'Week Management',
-          route: '/scoring/weeks',
+          route: '/settings/weeks',
         },
         {
           icon: 'assets/icons/heroicons/outline/pencil-square.svg',
           label: 'Score Entry',
-          route: '/scoring/score-entry',
-        },
-        {
-          icon: 'assets/icons/heroicons/outline/chart-pie.svg',
-          label: 'Leaderboard',
-          route: '/scoring/leaderboard',
-        },
-        {
-          icon: 'assets/icons/heroicons/outline/users.svg',
-          label: 'Season Standings',
-          route: '/scoring/standings',
+          route: '/settings/score-entry',
         },
       ],
     },

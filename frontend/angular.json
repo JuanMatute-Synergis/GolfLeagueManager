@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-tailwind": {
+    "golf-league-manager": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -21,7 +21,7 @@
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": {
-              "base": "dist/angular-tailwind"
+              "base": "dist/golf-league-manager"
             },
             "index": "src/index.html",
             "polyfills": [
@@ -82,10 +82,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "angular-tailwind:build:production"
+              "buildTarget": "golf-league-manager:build:production"
             },
             "development": {
-              "buildTarget": "angular-tailwind:build:development"
+              "buildTarget": "golf-league-manager:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -93,7 +93,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "angular-tailwind:build"
+            "buildTarget": "golf-league-manager:build"
           }
         },
         "test": {
