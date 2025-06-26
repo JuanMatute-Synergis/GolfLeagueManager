@@ -740,7 +740,10 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Use safe hole data access
     const hole = this.getHoleData(holeIndex);
     
-    if (!hole || !hole.playerAScore || !hole.playerBScore) return null;
+    if (!hole || !hole.playerAScore || !hole.playerBScore) {
+      console.log(`[HOLE WINNER] Hole ${holeIndex + 1}: No winner - playerAScore: ${hole?.playerAScore}, playerBScore: ${hole?.playerBScore}`);
+      return null;
+    }
     
     // Get handicaps
     const playerAHandicap = this.scorecardData?.playerAHandicap || 0;
@@ -748,18 +751,20 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     
     // If both players have 0 handicap, use gross scores
     if (playerAHandicap === 0 && playerBHandicap === 0) {
-      if (hole.playerAScore < hole.playerBScore) return 'playerA';
-      if (hole.playerBScore < hole.playerAScore) return 'playerB';
-      return 'tie';
+      const winner = hole.playerAScore < hole.playerBScore ? 'playerA' : 
+                     hole.playerBScore < hole.playerAScore ? 'playerB' : 'tie';
+      console.log(`[HOLE WINNER] Hole ${holeIndex + 1}: Gross scores - A: ${hole.playerAScore}, B: ${hole.playerBScore}, Winner: ${winner}`);
+      return winner;
     }
     
     // Otherwise use net scores with handicap adjustments
     const playerANet = this.getNetScoreValue(holeIndex, 'A');
     const playerBNet = this.getNetScoreValue(holeIndex, 'B');
     
-    if (playerANet < playerBNet) return 'playerA';
-    if (playerBNet < playerANet) return 'playerB';
-    return 'tie';
+    const winner = playerANet < playerBNet ? 'playerA' : 
+                   playerBNet < playerANet ? 'playerB' : 'tie';
+    console.log(`[HOLE WINNER] Hole ${holeIndex + 1}: Net scores - A: ${playerANet}, B: ${playerBNet}, Winner: ${winner}`);
+    return winner;
   }
 
   private getNetScoreValue(holeIndex: number, player: 'A' | 'B'): number {
@@ -1339,17 +1344,16 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Update the underlying scorecard data
     this.setPlayerScore(holeIndex, player, score);
     
-    // Rebuild only the affected hole view model for efficiency
-    const relevantHoles = this.getRelevantHoles();
-    const courseHole = relevantHoles[holeIndex];
-    console.log(`[DEBUG] onScoreChange - holeIndex: ${holeIndex}, courseHole.number: ${courseHole?.number}, player: ${player}, score: ${score}`);
-    
-    if (this.viewModel.holes[holeIndex]) {
-      this.viewModel.holes[holeIndex] = this.buildHoleViewModel(courseHole, holeIndex);
-    }
-    
-    // Update player totals without triggering full recalculation
+    // Calculate match play points first (affects all holes)
     this.updatePlayerTotals();
+    
+    // Rebuild all hole view models to ensure match points are updated everywhere
+    const relevantHoles = this.getRelevantHoles();
+    this.viewModel.holes = relevantHoles.map((courseHole, index) => 
+      this.buildHoleViewModel(courseHole, index)
+    );
+    
+    console.log(`[DEBUG] onScoreChange - holeIndex: ${holeIndex}, courseHole.number: ${relevantHoles[holeIndex]?.number}, player: ${player}, score: ${score}`);
     
     // Update summary
     this.viewModel.summary = this.buildSummaryViewModel();

@@ -184,6 +184,8 @@ namespace GolfLeagueManager.Business
                 {
                     page.Size(PageSizes.A4);
                     page.Margin(15);
+                    page.PageColor(Colors.Grey.Darken4);
+                    page.DefaultTextStyle(x => x.FontColor(Colors.White));
                     page.DefaultTextStyle(x => x.FontSize(8));
 
                     page.Content().Column(content =>
@@ -192,74 +194,61 @@ namespace GolfLeagueManager.Business
                         content.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns => columns.RelativeColumn());
-                            table.Cell().Padding(15).Background(Colors.Blue.Darken3)
+                            table.Cell().Padding(15).Background(Colors.Grey.Darken4)
                                 .Text($"{weekTitle}\nH.T. Lyons Golf League - Weekly Summary")
                                 .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
                         });
 
                         content.Item().PaddingTop(10);
 
-                        // Create layout: Flights 1&2 on first page, Flights 3&4 on second page
+                        // Create single page layout with all flights
                         if (matchupsByFlight.Count <= 4)
                         {
-                            // Page 1: Flights 1 & 2
-                            var page1Flights = matchupsByFlight.Take(2).ToList();
-                            if (page1Flights.Any())
+                            // First row: Flights 1 & 2
+                            var firstRowFlights = matchupsByFlight.Take(2).ToList();
+                            if (firstRowFlights.Any())
                             {
                                 content.Item().Row(row =>
                                 {
-                                    row.RelativeItem().Padding(5).Element(container =>
+                                    row.RelativeItem().Padding(3).Element(container =>
                                     {
-                                        var firstFlight = page1Flights.ElementAtOrDefault(0);
+                                        var firstFlight = firstRowFlights.ElementAtOrDefault(0);
                                         if (firstFlight != null)
                                         {
                                             CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId);
                                         }
                                     });
                                     
-                                    if (page1Flights.Count >= 2)
+                                    if (firstRowFlights.Count >= 2)
                                     {
-                                        row.RelativeItem().Padding(5).Element(container =>
+                                        row.RelativeItem().Padding(3).Element(container =>
                                         {
-                                            CreateCompactFlightSummaryTable(container, page1Flights[1], week, seasonId);
+                                            CreateCompactFlightSummaryTable(container, firstRowFlights[1], week, seasonId);
                                         });
                                     }
                                 });
                             }
 
-                            // Page 2: Flights 3 & 4 (if they exist)
-                            var page2Flights = matchupsByFlight.Skip(2).Take(2).ToList();
-                            if (page2Flights.Any())
+                            // Second row: Flights 3 & 4 (if they exist)
+                            var secondRowFlights = matchupsByFlight.Skip(2).Take(2).ToList();
+                            if (secondRowFlights.Any())
                             {
-                                content.Item().PageBreak();
-                                
-                                // Add header for second page
-                                content.Item().Table(table =>
+                                content.Item().PaddingTop(5).Row(row =>
                                 {
-                                    table.ColumnsDefinition(columns => columns.RelativeColumn());
-                                    table.Cell().Padding(15).Background(Colors.Blue.Darken3)
-                                        .Text($"{weekTitle}\nH.T. Lyons Golf League - Weekly Summary (Page 2)")
-                                        .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
-                                });
-
-                                content.Item().PaddingTop(10);
-
-                                content.Item().Row(row =>
-                                {
-                                    row.RelativeItem().Padding(5).Element(container =>
+                                    row.RelativeItem().Padding(3).Element(container =>
                                     {
-                                        var firstFlight = page2Flights.ElementAtOrDefault(0);
+                                        var firstFlight = secondRowFlights.ElementAtOrDefault(0);
                                         if (firstFlight != null)
                                         {
                                             CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId);
                                         }
                                     });
                                     
-                                    if (page2Flights.Count >= 2)
+                                    if (secondRowFlights.Count >= 2)
                                     {
-                                        row.RelativeItem().Padding(5).Element(container =>
+                                        row.RelativeItem().Padding(3).Element(container =>
                                         {
-                                            CreateCompactFlightSummaryTable(container, page2Flights[1], week, seasonId);
+                                            CreateCompactFlightSummaryTable(container, secondRowFlights[1], week, seasonId);
                                         });
                                     }
                                 });
@@ -283,6 +272,50 @@ namespace GolfLeagueManager.Business
                                 });
                             }
                         }
+
+                        // Page 2: Detailed Match Play Points Breakdown by Week
+                        content.Item().PageBreak();
+                        
+                        // Header for page 2
+                        content.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns => columns.RelativeColumn());
+                            table.Cell().Padding(15).Background(Colors.Grey.Darken4)
+                                .Text($"{weekTitle}\nMatch Play Points by Week - Session Breakdown")
+                                .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
+                        });
+
+                        content.Item().PaddingTop(10);
+
+                        // Create detailed weekly breakdown for each flight
+                        foreach (var flightGroup in matchupsByFlight)
+                        {
+                            content.Item().Element(container => 
+                            {
+                                CreateWeeklyPointsBreakdownTable(container, flightGroup, week, seasonId);
+                            });
+                            content.Item().PaddingTop(10);
+                        }
+
+                        // Page 3: Remaining Schedule
+                        content.Item().PageBreak();
+                        
+                        // Header for page 3
+                        content.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns => columns.RelativeColumn());
+                            table.Cell().Padding(15).Background(Colors.Grey.Darken4)
+                                .Text($"{weekTitle}\nRemaining Schedule")
+                                .FontSize(16).Bold().FontColor(Colors.White).AlignCenter();
+                        });
+
+                        content.Item().PaddingTop(10);
+
+                        // Create remaining schedule table
+                        content.Item().Element(container => 
+                        {
+                            CreateRemainingScheduleTable(container, week, seasonId, orderedFlights, assignments);
+                        });
                     });
                 });
             });
@@ -539,9 +572,9 @@ namespace GolfLeagueManager.Business
                 column.Item().Table(table =>
                 {
                     table.ColumnsDefinition(columns => columns.RelativeColumn());
-                    table.Cell().Padding(8).Background(Colors.Blue.Medium)
+                    table.Cell().Padding(6).Background(Colors.Grey.Darken4)
                         .Text($"Flight {flight.Name}")
-                        .FontSize(11).Bold().FontColor(Colors.White).AlignCenter();
+                        .FontSize(9).Bold().FontColor(Colors.White).AlignCenter();
                 });
 
                 // Summary table
@@ -551,7 +584,7 @@ namespace GolfLeagueManager.Business
                 });
 
                 // Next week matchups
-                column.Item().PaddingTop(8).Element(container => 
+                column.Item().PaddingTop(4).Element(container => 
                 {
                     CreateNextWeekMatchupsTable(container, flight, currentWeek, seasonId, handicapData);
                 });
@@ -626,18 +659,18 @@ namespace GolfLeagueManager.Business
                 });
 
                 // Header
-                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Player").FontSize(7).Bold();
-                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("HCP").FontSize(7).Bold().AlignCenter();
-                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Avg").FontSize(7).Bold().AlignCenter();
-                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Gross").FontSize(7).Bold().AlignCenter();
-                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("This Week").FontSize(7).Bold().AlignCenter();
-                table.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Session Total").FontSize(7).Bold().AlignCenter();
+                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("Player").FontSize(6).Bold().FontColor(Colors.White);
+                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("HCP").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
+                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("Avg").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
+                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("Gross").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
+                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("This Week").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
+                table.Cell().Background(Colors.Grey.Darken3).Padding(3).Text("Session Total").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
 
                 // Player rows
                 for (int i = 0; i < sortedPlayers.Count; i++)
                 {
                     var (player, accumScore) = sortedPlayers[i];
-                    var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten5;
+                    var rowColor = i % 2 == 0 ? Colors.Grey.Darken4 : Colors.Grey.Darken3;
 
                     var hcp = handicapData.ContainsKey(player.Id) ? handicapData[player.Id] : player.CurrentHandicap;
                     var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
@@ -670,14 +703,14 @@ namespace GolfLeagueManager.Business
 
                     var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
                     
-                    table.Cell().Background(rowColor).Padding(4).Text(displayName).FontSize(7);
-                    table.Cell().Background(rowColor).Padding(4).Text(hcp.ToString("0.#")).FontSize(7).AlignCenter();
-                    table.Cell().Background(rowColor).Padding(4).Text(avg.ToString("0.#")).FontSize(7).AlignCenter();
-                    table.Cell().Background(rowColor).Padding(4).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(7).AlignCenter();
-                    table.Cell().Background(rowColor).Padding(4).Text(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-").FontSize(7).AlignCenter();
+                    table.Cell().Background(rowColor).Padding(3).Text(displayName).FontSize(6).FontColor(Colors.White);
+                    table.Cell().Background(rowColor).Padding(3).Text(hcp.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.White);
+                    table.Cell().Background(rowColor).Padding(3).Text(avg.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.White);
+                    table.Cell().Background(rowColor).Padding(3).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(6).AlignCenter().FontColor(Colors.White);
+                    table.Cell().Background(rowColor).Padding(3).Text(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-").FontSize(6).AlignCenter().FontColor(Colors.White);
                     
-                    var sessionTotalColor = accumScore > 0 ? Colors.Green.Lighten4 : rowColor;
-                    table.Cell().Background(sessionTotalColor).Padding(4).Text(accumScore > 0 ? accumScore.ToString() : "-").FontSize(7).Bold().AlignCenter();
+                    var sessionTotalColor = accumScore > 0 ? Colors.Grey.Darken3 : rowColor;
+                    table.Cell().Background(sessionTotalColor).Padding(3).Text(accumScore > 0 ? accumScore.ToString() : "-").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
                 }
             });
         }
@@ -711,12 +744,12 @@ namespace GolfLeagueManager.Business
                 table.ColumnsDefinition(columns => columns.RelativeColumn());
                 
                 // Header
-                table.Cell().Padding(4).Background(Colors.Blue.Darken1)
-                    .Text($"Next Week (Week {nextWeek.WeekNumber}) Matchups")
-                    .FontSize(12).Bold().FontColor(Colors.White).AlignCenter();
+                table.Cell().Padding(3).Background(Colors.Grey.Darken4)
+                    .Text($"Next Matchups - {nextWeek.Date:dddd, MMMM d}")
+                    .FontSize(8).Bold().FontColor(Colors.White).AlignCenter();
 
                 // Matchups content - using Column instead of single text for better line handling
-                table.Cell().Padding(5).Background(Colors.White)
+                table.Cell().Padding(3).Background(Colors.Grey.Darken4)
                     .Column(column =>
                     {
                         foreach (var matchup in nextWeekMatchupsForFlight)
@@ -749,7 +782,7 @@ namespace GolfLeagueManager.Business
                             var line = $"{playerA!.FirstName} {playerA.LastName.Substring(0, 1)}. ({playerAHandicap:0.#}) vs " +
                                       $"{playerB!.FirstName} {playerB.LastName.Substring(0, 1)}. ({playerBHandicap:0.#}){strokeInfo}";
                             
-                            column.Item().Text(line).FontSize(12).LineHeight(1.2f);
+                            column.Item().Text(line).FontSize(8).LineHeight(1.0f).FontColor(Colors.White);
                         }
                     });
             });
@@ -826,6 +859,241 @@ namespace GolfLeagueManager.Business
             {
                 return $"Complete tie - equal points and net scores ({playerATotalPoints}-{playerBTotalPoints})";
             }
+        }
+
+        private void CreateWeeklyPointsBreakdownTable(IContainer container, dynamic flightGroup, Week currentWeek, Guid seasonId)
+        {
+            if (flightGroup == null) return;
+
+            var flight = flightGroup.Flight;
+            var matchupsInFlight = (List<Matchup>)flightGroup.Matchups;
+
+            // Get all player IDs in this flight
+            var playerIds = matchupsInFlight
+                .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
+                .Distinct()
+                .ToList();
+            var players = _context.Players.Where(p => playerIds.Contains(p.Id)).ToList();
+
+            // Get session data
+            var sessionStartWeek = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= currentWeek.WeekNumber && w.SessionStart)
+                .OrderByDescending(w => w.WeekNumber)
+                .FirstOrDefault();
+            int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
+            
+            var weeksInSession = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber >= sessionStartWeekNumber && w.WeekNumber <= currentWeek.WeekNumber)
+                .OrderBy(w => w.WeekNumber)
+                .ToList();
+
+            // Get all matchups for these players in the session
+            var allMatchups = _context.Matchups
+                .Include(m => m.Week)
+                .Where(m => (playerIds.Contains(m.PlayerAId) || playerIds.Contains(m.PlayerBId)) 
+                           && weeksInSession.Select(w => w.Id).Contains(m.WeekId))
+                .ToList();
+
+            container.Column(column =>
+            {
+                // Flight header
+                column.Item().Table(table =>
+                {
+                    table.ColumnsDefinition(columns => columns.RelativeColumn());
+                    table.Cell().Padding(4).Background(Colors.Grey.Darken4)
+                        .Text($"Flight {flight.Name}")
+                        .FontSize(8).Bold().FontColor(Colors.White).AlignCenter();
+                });
+
+                // Create table with players as rows and weeks as columns
+                column.Item().Element(container => 
+                {
+                    container.Table(table =>
+                    {
+                        // Dynamic column definition: Player name + one column per week + total
+                        var columnCount = weeksInSession.Count + 2;
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(2f); // Player name
+                            foreach (var week in weeksInSession)
+                            {
+                                columns.RelativeColumn(1f); // Week column
+                            }
+                            columns.RelativeColumn(1.2f); // Total column
+                        });
+
+                        // Header row
+                        table.Cell().Background(Colors.Grey.Darken3).Padding(4)
+                            .Text("Player").FontSize(7).Bold().FontColor(Colors.White);
+                        foreach (var week in weeksInSession)
+                        {
+                            table.Cell().Background(Colors.Grey.Darken3).Padding(4)
+                                .Text($"W{week.WeekNumber}").FontSize(7).Bold().AlignCenter().FontColor(Colors.White);
+                        }
+                        table.Cell().Background(Colors.Grey.Darken3).Padding(4)
+                            .Text("Total").FontSize(7).Bold().AlignCenter().FontColor(Colors.White);
+
+                        // Player rows
+                        var sortedPlayers = players.OrderBy(p => p.LastName).ToList();
+                        for (int i = 0; i < sortedPlayers.Count; i++)
+                        {
+                            var player = sortedPlayers[i];
+                            var rowColor = i % 2 == 0 ? Colors.Grey.Darken4 : Colors.Grey.Darken3;
+                            var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
+                            
+                            table.Cell().Background(rowColor).Padding(4)
+                                .Text(displayName).FontSize(7).FontColor(Colors.White);
+
+                            int totalPoints = 0;
+                            foreach (var week in weeksInSession)
+                            {
+                                var matchup = allMatchups.FirstOrDefault(m => m.WeekId == week.Id && 
+                                    (m.PlayerAId == player.Id || m.PlayerBId == player.Id));
+                                
+                                int weekPoints = 0;
+                                bool isAbsent = false;
+                                if (matchup != null)
+                                {
+                                    if (matchup.PlayerAId == player.Id)
+                                    {
+                                        weekPoints = matchup.PlayerAPoints ?? 0;
+                                        isAbsent = matchup.PlayerAAbsent;
+                                    }
+                                    else if (matchup.PlayerBId == player.Id)
+                                    {
+                                        weekPoints = matchup.PlayerBPoints ?? 0;
+                                        isAbsent = matchup.PlayerBAbsent;
+                                    }
+
+                                    // Handle special points weeks
+                                    if (week.SpecialPointsAwarded.HasValue)
+                                    {
+                                        int special = week.SpecialPointsAwarded.Value;
+                                        weekPoints = isAbsent ? (special / 2) : special;
+                                    }
+                                }
+
+                                totalPoints += weekPoints;
+                                
+                                var cellText = weekPoints > 0 ? weekPoints.ToString() : (isAbsent ? "ABS" : "-");
+                                table.Cell().Background(rowColor).Padding(4)
+                                    .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.White);
+                            }
+
+                            // Total column
+                            var totalColor = totalPoints > 0 ? Colors.Grey.Darken2 : rowColor;
+                            table.Cell().Background(totalColor).Padding(4)
+                                .Text(totalPoints > 0 ? totalPoints.ToString() : "-")
+                                .FontSize(7).Bold().AlignCenter().FontColor(Colors.White);
+                        }
+                    });
+                });
+            });
+        }
+
+        private void CreateRemainingScheduleTable(IContainer container, Week currentWeek, Guid seasonId, List<Flight> orderedFlights, List<PlayerFlightAssignment> assignments)
+        {
+            // Get all remaining weeks in the season
+            var remainingWeeks = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber > currentWeek.WeekNumber)
+                .OrderBy(w => w.WeekNumber)
+                .ToList();
+
+            if (!remainingWeeks.Any())
+            {
+                container.Text("No remaining weeks in the schedule.")
+                    .FontSize(12).FontColor(Colors.White).AlignCenter();
+                return;
+            }
+
+            // Get all remaining matchups
+            var remainingMatchups = _context.Matchups
+                .Include(m => m.PlayerA)
+                .Include(m => m.PlayerB)
+                .Include(m => m.Week)
+                .Where(m => remainingWeeks.Select(w => w.Id).Contains(m.WeekId))
+                .OrderBy(m => m.Week!.WeekNumber)
+                .ToList();
+
+            // Get all players who have remaining matchups
+            var allPlayerIds = remainingMatchups
+                .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
+                .Distinct()
+                .ToList();
+            var allPlayers = _context.Players
+                .Where(p => allPlayerIds.Contains(p.Id))
+                .OrderBy(p => p.LastName)
+                .ThenBy(p => p.FirstName)
+                .ToList();
+
+            // Create matrix data structure: player -> week -> opponent
+            var scheduleMatrix = new Dictionary<Guid, Dictionary<int, string>>();
+            foreach (var player in allPlayers)
+            {
+                scheduleMatrix[player.Id] = new Dictionary<int, string>();
+            }
+
+            // Populate the matrix
+            foreach (var matchup in remainingMatchups)
+            {
+                if (matchup.Week == null || matchup.PlayerA == null || matchup.PlayerB == null) continue;
+                
+                var weekNum = matchup.Week.WeekNumber;
+                var playerAName = $"{matchup.PlayerA.FirstName} {matchup.PlayerA.LastName.Substring(0, 1)}.";
+                var playerBName = $"{matchup.PlayerB.FirstName} {matchup.PlayerB.LastName.Substring(0, 1)}.";
+                
+                scheduleMatrix[matchup.PlayerAId][weekNum] = playerBName;
+                scheduleMatrix[matchup.PlayerBId][weekNum] = playerAName;
+            }
+
+            container.Table(table =>
+            {
+                // Dynamic column definition: Player name + one column per remaining week
+                table.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(2f); // Player name column
+                    foreach (var week in remainingWeeks)
+                    {
+                        columns.RelativeColumn(1.2f); // Week columns
+                    }
+                });
+
+                // Header row
+                table.Cell().Background(Colors.Grey.Darken3).Padding(3)
+                    .Text("Player").FontSize(7).Bold().FontColor(Colors.White);
+                foreach (var week in remainingWeeks)
+                {
+                    table.Cell().Background(Colors.Grey.Darken3).Padding(3)
+                        .Column(col =>
+                        {
+                            col.Item().Text($"Week {week.WeekNumber}").FontSize(6).Bold().AlignCenter().FontColor(Colors.White);
+                            col.Item().Text(week.Date.ToString("MM/dd")).FontSize(6).AlignCenter().FontColor(Colors.White);
+                        });
+                }
+
+                // Player rows
+                for (int i = 0; i < allPlayers.Count; i++)
+                {
+                    var player = allPlayers[i];
+                    var rowColor = i % 2 == 0 ? Colors.Grey.Darken4 : Colors.Grey.Darken3;
+                    var playerDisplayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
+                    
+                    // Player name cell
+                    table.Cell().Background(rowColor).Padding(3)
+                        .Text(playerDisplayName).FontSize(7).FontColor(Colors.White);
+
+                    // Opponent cells for each week
+                    foreach (var week in remainingWeeks)
+                    {
+                        var opponent = scheduleMatrix[player.Id].ContainsKey(week.WeekNumber) 
+                            ? scheduleMatrix[player.Id][week.WeekNumber] 
+                            : "-";
+                        
+                        table.Cell().Background(rowColor).Padding(3)
+                            .Text(opponent).FontSize(6).AlignCenter().FontColor(Colors.White);
+                    }
+                }
+            });
         }
     }
 }
