@@ -609,12 +609,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Calculate total net scores for both players
     let playerANetTotal = 0;
     let playerBNetTotal = 0;
+    let completedHoles = 0;
     
     for (let i = 0; i < this.scorecardData.holes.length; i++) {
       const hole = this.scorecardData.holes[i];
       if (hole?.playerAScore && hole?.playerBScore) {
         playerANetTotal += this.getNetScoreValue(i, 'A');
         playerBNetTotal += this.getNetScoreValue(i, 'B');
+        completedHoles++;
       }
     }
 
@@ -622,20 +624,27 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     let playerAMatchPoints = playerAHolePoints;
     let playerBMatchPoints = playerBHolePoints;
 
-    if (playerANetTotal < playerBNetTotal) {
-      // Player A has lower net total - wins match
-      playerAMatchPoints += 2;
-      this.scorecardData.playerAMatchWin = true;
-      this.scorecardData.playerBMatchWin = false;
-    } else if (playerBNetTotal < playerANetTotal) {
-      // Player B has lower net total - wins match
-      playerBMatchPoints += 2;
-      this.scorecardData.playerAMatchWin = false;
-      this.scorecardData.playerBMatchWin = true;
+    // Only award match points if there are actually completed holes
+    if (completedHoles > 0) {
+      if (playerANetTotal < playerBNetTotal) {
+        // Player A has lower net total - wins match
+        playerAMatchPoints += 2;
+        this.scorecardData.playerAMatchWin = true;
+        this.scorecardData.playerBMatchWin = false;
+      } else if (playerBNetTotal < playerANetTotal) {
+        // Player B has lower net total - wins match
+        playerBMatchPoints += 2;
+        this.scorecardData.playerAMatchWin = false;
+        this.scorecardData.playerBMatchWin = true;
+      } else {
+        // Tie in net total scores - each player gets 1 point instead of 2-point bonus
+        playerAMatchPoints += 1;
+        playerBMatchPoints += 1;
+        this.scorecardData.playerAMatchWin = false;
+        this.scorecardData.playerBMatchWin = false;
+      }
     } else {
-      // Tie in net total scores - each player gets 1 point instead of 2-point bonus
-      playerAMatchPoints += 1;
-      playerBMatchPoints += 1;
+      // No completed holes - no match points awarded
       this.scorecardData.playerAMatchWin = false;
       this.scorecardData.playerBMatchWin = false;
     }
@@ -723,9 +732,6 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     const strokesGiven = this.getStrokesGiven(holeIndex, playerHandicap);
     const netScore = grossScore - strokesGiven;
-    
-    // Debug logging for verification
-    console.log(`[NET SCORE] Hole ${courseHole.number} Player ${player}: gross=${grossScore}, handicap=${playerHandicap}, strokes=${strokesGiven}, net=${netScore}`);
     
     return netScore.toString();
   }

@@ -75,24 +75,36 @@ namespace GolfLeagueManager
                 playerBNetTotal += holeResult.PlayerBNetScore;
             }
 
-            if (playerANetTotal < playerBNetTotal)
+            // Only award match points if there are actually completed holes
+            if (result.HoleResults.Any())
             {
-                result.PlayerAMatchWin = true;
-                result.PlayerATotalPoints = result.PlayerAHolePoints + 2;
-                result.PlayerBTotalPoints = result.PlayerBHolePoints;
-            }
-            else if (playerBNetTotal < playerANetTotal)
-            {
-                result.PlayerBMatchWin = true;
-                result.PlayerBTotalPoints = result.PlayerBHolePoints + 2;
-                result.PlayerATotalPoints = result.PlayerAHolePoints;
+                if (playerANetTotal < playerBNetTotal)
+                {
+                    result.PlayerAMatchWin = true;
+                    result.PlayerATotalPoints = result.PlayerAHolePoints + 2;
+                    result.PlayerBTotalPoints = result.PlayerBHolePoints;
+                }
+                else if (playerBNetTotal < playerANetTotal)
+                {
+                    result.PlayerBMatchWin = true;
+                    result.PlayerBTotalPoints = result.PlayerBHolePoints + 2;
+                    result.PlayerATotalPoints = result.PlayerAHolePoints;
+                }
+                else
+                {
+                    result.PlayerAMatchWin = false;
+                    result.PlayerBMatchWin = false;
+                    result.PlayerATotalPoints = result.PlayerAHolePoints + 1;
+                    result.PlayerBTotalPoints = result.PlayerBHolePoints + 1;
+                }
             }
             else
             {
+                // No completed holes - no match points awarded
                 result.PlayerAMatchWin = false;
                 result.PlayerBMatchWin = false;
-                result.PlayerATotalPoints = result.PlayerAHolePoints + 1;
-                result.PlayerBTotalPoints = result.PlayerBHolePoints + 1;
+                result.PlayerATotalPoints = 0;
+                result.PlayerBTotalPoints = 0;
             }
 
             return result;
