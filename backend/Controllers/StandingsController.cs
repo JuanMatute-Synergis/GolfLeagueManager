@@ -248,9 +248,9 @@ namespace GolfLeagueManager.Controllers
                         }
                     }
 
-                    // Calculate average score up to this week
+                    // Calculate average score up to and including this week (for display)
                     var averageScore = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
-                        player.Id, seasonId, currentWeekNumber);
+                        player.Id, seasonId, currentWeekNumber + 1);
 
                     playerStats.Add(new {
                         id = player.Id,
