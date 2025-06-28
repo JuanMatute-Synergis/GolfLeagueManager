@@ -1027,7 +1027,14 @@ namespace GolfLeagueManager.Business
                                     }
                                 }
                                 
-                                var cellText = weekPoints > 0 ? weekPoints.ToString() : (isAbsent ? "ABS" : "-");
+                                // Calculate average score up to this week (including this week)
+                                var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
+                                    player.Id, seasonId, week.WeekNumber + 1).Result;
+                                
+                                var avgText = avg > 0 ? avg.ToString("F1") : "-";
+                                var pointsText = weekPoints > 0 ? weekPoints.ToString() : (isAbsent ? "ABS" : "-");
+                                var cellText = $"{avgText}. {pointsText}";
+                                
                                 table.Cell().Background(rowColor).Padding(4)
                                     .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
                             }
