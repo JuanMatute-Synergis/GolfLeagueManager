@@ -165,15 +165,16 @@ namespace GolfLeagueManager
                 await _context.SaveChangesAsync();
                 
                 // Update average scores for both players after scores are saved
+                // Use WeekNumber + 1 to ensure the current week is included in the average calculation
                 if (matchup.Week != null && matchup.Week.CountsForScoring)
                 {
                     if (matchup.PlayerAScore.HasValue)
                     {
-                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerAId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerAId, matchup.Week.SeasonId, matchup.Week.WeekNumber + 1);
                     }
                     if (matchup.PlayerBScore.HasValue)
                     {
-                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerBId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
+                        await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerBId, matchup.Week.SeasonId, matchup.Week.WeekNumber + 1);
                     }
                 }
                 
