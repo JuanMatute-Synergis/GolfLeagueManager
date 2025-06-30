@@ -64,12 +64,12 @@ namespace GolfLeagueManager.Business
             {
                 try 
                 {
-                    var handicap = await _handicapService.GetPlayerSessionHandicapAsync(playerId, seasonId, week.WeekNumber);
+                    var handicap = await _handicapService.CalculatePlayerHandicapAsync(playerId, 35, 113, 20);
                     handicapData[playerId] = handicap;
                 }
                 catch
                 {
-                    // Fallback to 0 if handicap service fails
+                    // Fallback to 0 if handicap calculation fails
                     handicapData[playerId] = 0;
                 }
             }
@@ -297,7 +297,7 @@ namespace GolfLeagueManager.Business
                                 .FontSize(16).Bold().FontColor(Colors.Black).AlignCenter();
                         });
 
-                        content.Item().PaddingTop(10);
+                        content.Item().PaddingTop(3);
 
                         // Create detailed weekly breakdown for each flight
                         foreach (var flightGroup in matchupsByFlight)
@@ -306,7 +306,7 @@ namespace GolfLeagueManager.Business
                             {
                                 CreateWeeklyPointsBreakdownTable(container, flightGroup, week, seasonId);
                             });
-                            content.Item().PaddingTop(10);
+                            content.Item().PaddingTop(5);
                         }
 
                         // Page 3: Remaining Schedule
@@ -574,7 +574,7 @@ namespace GolfLeagueManager.Business
             var handicapData = new Dictionary<Guid, decimal>();
             foreach (var playerId in playerIds)
             {
-                var handicap = _handicapService.GetPlayerSessionHandicapAsync(playerId, seasonId, currentWeek.WeekNumber).Result;
+                var handicap = _handicapService.CalculatePlayerHandicapAsync(playerId, 35, 113, 20).Result;
                 handicapData[playerId] = handicap;
             }
 
@@ -662,7 +662,8 @@ namespace GolfLeagueManager.Business
             {
                 table.ColumnsDefinition(columns =>
                 {
-                    columns.RelativeColumn(2.5f); // Player
+                    columns.RelativeColumn(2.0f); // Player (reduced slightly)
+                    columns.RelativeColumn(1.6f); // Phone (increased)
                     columns.RelativeColumn(0.8f); // HCP
                     columns.RelativeColumn(0.8f); // Avg
                     columns.RelativeColumn(0.8f); // Gross
@@ -672,6 +673,7 @@ namespace GolfLeagueManager.Business
 
                 // Header
                 table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Player").FontSize(6).Bold().FontColor(Colors.Black);
+                table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Phone").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
                 table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("HCP").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
                 table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Avg").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
                 table.Cell().Background(Colors.Grey.Lighten2).Padding(3).Text("Gross").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
@@ -686,7 +688,7 @@ namespace GolfLeagueManager.Business
 
                     var hcp = handicapData.ContainsKey(player.Id) ? handicapData[player.Id] : player.CurrentHandicap;
                     var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
-                        player.Id, seasonId, currentWeek.WeekNumber).Result;
+                        player.Id, seasonId, currentWeek.WeekNumber + 1).Result;
 
                     var matchup = matchupsInFlight.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
                     int gross = 0, thisWeekMpPoints = 0;
@@ -714,8 +716,10 @@ namespace GolfLeagueManager.Business
                     }
 
                     var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
+                    var phoneDisplay = FormatPhoneNumber(player.Phone);
                     
                     table.Cell().Background(rowColor).Padding(3).Text(displayName).FontSize(6).FontColor(Colors.Black);
+                    table.Cell().Background(rowColor).Padding(2).Text(phoneDisplay).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(hcp.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(avg.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(6).AlignCenter().FontColor(Colors.Black);
@@ -912,7 +916,7 @@ namespace GolfLeagueManager.Business
                 column.Item().Table(table =>
                 {
                     table.ColumnsDefinition(columns => columns.RelativeColumn());
-                    table.Cell().Padding(4).Background(Colors.White)
+                    table.Cell().Padding(2).Background(Colors.White)
                         .Text($"Flight {flight.Name}")
                         .FontSize(8).Bold().FontColor(Colors.Black).AlignCenter();
                 });
@@ -934,16 +938,27 @@ namespace GolfLeagueManager.Business
                             columns.RelativeColumn(1.2f); // Total column
                         });
 
-                        // Header row
-                        table.Cell().Background(Colors.Grey.Lighten2).Padding(4)
+                        // Header row 1 - Week numbers
+                        table.Cell().Background(Colors.Grey.Lighten2).Padding(2)
                             .Text("Player").FontSize(7).Bold().FontColor(Colors.Black);
                         foreach (var week in weeksInSession)
                         {
-                            table.Cell().Background(Colors.Grey.Lighten2).Padding(4)
+                            table.Cell().Background(Colors.Grey.Lighten2).Padding(2)
                                 .Text($"W{week.WeekNumber}").FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
                         }
-                        table.Cell().Background(Colors.Grey.Lighten2).Padding(4)
+                        table.Cell().Background(Colors.Grey.Lighten2).Padding(2)
                             .Text("Total").FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
+
+                        // Header row 2 - Data labels
+                        table.Cell().Background(Colors.Grey.Lighten3).Padding(2)
+                            .Text("Name").FontSize(6).FontColor(Colors.Black);
+                        foreach (var week in weeksInSession)
+                        {
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(2)
+                                .Text("Avg  |  Score  |  HC  |  Pts").FontSize(6).AlignCenter().FontColor(Colors.Black);
+                        }
+                        table.Cell().Background(Colors.Grey.Lighten3).Padding(2)
+                            .Text("Points").FontSize(6).AlignCenter().FontColor(Colors.Black);
 
                         // Player rows
                         var playersWithTotals = new List<(Player player, int totalPoints)>();
@@ -996,7 +1011,7 @@ namespace GolfLeagueManager.Business
                             var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
                             var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
                             
-                            table.Cell().Background(rowColor).Padding(4)
+                            table.Cell().Background(rowColor).Padding(2)
                                 .Text(displayName).FontSize(7).FontColor(Colors.Black);
 
                             foreach (var week in weeksInSession)
@@ -1005,17 +1020,21 @@ namespace GolfLeagueManager.Business
                                     (m.PlayerAId == player.Id || m.PlayerBId == player.Id));
                                 
                                 int weekPoints = 0;
+                                int? grossScore = null;
                                 bool isAbsent = false;
+                                
                                 if (matchup != null)
                                 {
                                     if (matchup.PlayerAId == player.Id)
                                     {
                                         weekPoints = matchup.PlayerAPoints ?? 0;
+                                        grossScore = matchup.PlayerAScore;
                                         isAbsent = matchup.PlayerAAbsent;
                                     }
                                     else if (matchup.PlayerBId == player.Id)
                                     {
                                         weekPoints = matchup.PlayerBPoints ?? 0;
+                                        grossScore = matchup.PlayerBScore;
                                         isAbsent = matchup.PlayerBAbsent;
                                     }
 
@@ -1027,21 +1046,38 @@ namespace GolfLeagueManager.Business
                                     }
                                 }
                                 
-                                // Calculate average score up to this week (including this week)
-                                var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
-                                    player.Id, seasonId, week.WeekNumber + 1).Result;
-                                
-                                var avgText = avg > 0 ? avg.ToString("F1") : "-";
-                                var pointsText = weekPoints > 0 ? weekPoints.ToString() : (isAbsent ? "ABS" : "-");
-                                var cellText = $"{avgText}. {pointsText}";
-                                
-                                table.Cell().Background(rowColor).Padding(4)
-                                    .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
+                                if (isAbsent)
+                                {
+                                    var cellText = "-  |  -  |  -  |  ABS";
+                                    table.Cell().Background(rowColor).Padding(2)
+                                        .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
+                                }
+                                else
+                                {
+                                    // Calculate average score up to this week (including this week)
+                                    var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
+                                        player.Id, seasonId, week.WeekNumber + 1).Result;
+                                    
+                                    // Get player's calculated handicap based on recent scores
+                                    var handicap = _handicapService.CalculatePlayerHandicapAsync(
+                                        player.Id, 35, 113, 20).Result;
+                                    
+                                    var avgText = avg > 0 ? avg.ToString("F1") : "-";
+                                    var grossText = grossScore?.ToString() ?? "-";
+                                    var handicapText = handicap > 0 ? Math.Round(handicap).ToString() : "-";
+                                    var pointsText = weekPoints > 0 ? weekPoints.ToString() : "-";
+                                    
+                                    // Format horizontally with better separation for readability
+                                    var cellText = $"{avgText}  |  {grossText}  |  {handicapText}  |  {pointsText}";
+                                    
+                                    table.Cell().Background(rowColor).Padding(2)
+                                        .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
+                                }
                             }
 
                             // Total column
                             var totalColor = playerTotalPoints > 0 ? Colors.Grey.Lighten3 : rowColor;
-                            table.Cell().Background(totalColor).Padding(4)
+                            table.Cell().Background(totalColor).Padding(2)
                                 .Text(playerTotalPoints > 0 ? playerTotalPoints.ToString() : "-")
                                 .FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
                         }
@@ -1194,6 +1230,26 @@ namespace GolfLeagueManager.Business
                     });
                 }
             });
+        }
+
+        /// <summary>
+        /// Format phone number for display in PDF, ensuring it stays on one line
+        /// </summary>
+        private string FormatPhoneNumber(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone)) return "-";
+            
+            // Remove all non-numeric characters
+            var digits = new string(phone.Where(char.IsDigit).ToArray());
+            
+            // Format as (XXX) XXX-XXXX for 10-digit numbers
+            if (digits.Length == 10)
+            {
+                return $"({digits.Substring(0, 3)}) {digits.Substring(3, 3)}-{digits.Substring(6, 4)}";
+            }
+            
+            // For other lengths, just return the original phone number without extra spaces
+            return phone.Replace(" ", " ").Trim(); // Replace multiple spaces with single space
         }
     }
 }

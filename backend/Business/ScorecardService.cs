@@ -165,14 +165,13 @@ namespace GolfLeagueManager
                 await _context.SaveChangesAsync();
                 
                 // Update average scores for both players after scores are saved
-                // Only update averages for players who actually played (not absent)
                 if (matchup.Week != null && matchup.Week.CountsForScoring)
                 {
-                    if (matchup.PlayerAScore.HasValue && !matchup.PlayerAAbsent)
+                    if (matchup.PlayerAScore.HasValue)
                     {
                         await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerAId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
                     }
-                    if (matchup.PlayerBScore.HasValue && !matchup.PlayerBAbsent)
+                    if (matchup.PlayerBScore.HasValue)
                     {
                         await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerBId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
                     }

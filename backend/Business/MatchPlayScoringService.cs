@@ -172,31 +172,69 @@ namespace GolfLeagueManager
         }
 
         /// <summary>
-        /// Calculate a player's handicap based on their recent scores
-        /// This is a simplified handicap calculation - in real golf, it's more complex
+        /// Calculate a player's handicap index based on their recent scores using World Handicap System (WHS)
+        /// </summary>
+        public decimal CalculateHandicapIndex(List<(int score, int courseRating, decimal slopeRating)> recentRounds)
+        {
+            if (!recentRounds.Any()) return 0;
+
+            // Calculate score differentials for each round
+            var differentials = recentRounds
+                .Select(round => (decimal)(round.score - round.courseRating) * 113m / round.slopeRating)
+                .OrderBy(d => d)
+                .ToList();
+
+            // Determine how many differentials to use based on WHS rules
+            int differentialsToUse = GetDifferentialsCount(differentials.Count);
+            
+            if (differentialsToUse == 0) return 0;
+
+            // Take the lowest differentials and average them
+            var selectedDifferentials = differentials.Take(differentialsToUse);
+            var averageDifferential = selectedDifferentials.Average();
+
+            // Multiply by 0.96 to get handicap index
+            var handicapIndex = averageDifferential * 0.96m;
+
+            // Cap at reasonable limits (WHS allows up to 54.0)
+            return Math.Max(0, Math.Min(36, Math.Round(handicapIndex, 1)));
+        }
+
+        /// <summary>
+        /// Simplified handicap calculation for existing code compatibility
         /// </summary>
         public decimal CalculateHandicap(List<int> recentScores, int courseRating = 72, decimal slopeRating = 113)
         {
-            if (!recentScores.Any()) return 0;
+            var rounds = recentScores.Select(score => (score, courseRating, slopeRating)).ToList();
+            return CalculateHandicapIndex(rounds);
+        }
 
-            // Take the best 8 scores from the last 20 rounds (simplified)
-            var bestScores = recentScores
-                .OrderBy(s => s)
-                .Take(Math.Min(8, recentScores.Count))
-                .ToList();
+        /// <summary>
+        /// Get number of differentials to use based on total available (WHS rules)
+        /// </summary>
+        private int GetDifferentialsCount(int totalDifferentials)
+        {
+            return totalDifferentials switch
+            {
+                >= 20 => 8,
+                19 => 7,
+                >= 17 => 6,
+                >= 15 => 5,
+                >= 12 => 4,
+                >= 9 => 3,
+                >= 6 => 2,
+                >= 3 => 1,
+                _ => 0
+            };
+        }
 
-            if (!bestScores.Any()) return 0;
-
-            // Calculate differential for each score
-            var differentials = bestScores
-                .Select(score => (score - courseRating) * 113 / slopeRating)
-                .ToList();
-
-            // Average the differentials and multiply by 0.96
-            var handicap = differentials.Average() * 0.96m;
-
-            // Cap at reasonable limits
-            return Math.Max(0, Math.Min(36, Math.Round(handicap, 1)));
+        /// <summary>
+        /// Convert handicap index to course handicap for play
+        /// </summary>
+        public int GetCourseHandicap(decimal handicapIndex, decimal slopeRating = 113, int courseRating = 72, int par = 72)
+        {
+            var courseHandicap = handicapIndex * (slopeRating / 113m) + (courseRating - par);
+            return (int)Math.Round(courseHandicap);
         }
 
         /// <summary>
