@@ -1,0 +1,95 @@
+name: Emergency Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      rollback_type:
+        description: 'Type of rollback'
+        required: true
+        default: 'quick'
+        type: choice
+        options:
+        - quick
+        - specific
+        - backup_only
+      backend_backup:
+        description: 'Backend backup tag (for specific rollback)'
+        required: false
+        type: string
+      frontend_backup:
+        description: 'Frontend backup tag (for specific rollback)'
+        required: false
+        type: string
+      reason:
+        description: 'Reason for rollback'
+        required: true
+        type: string
+
+jobs:
+  emergency-rollback:
+    name: Emergency Rollback
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Display rollback info
+      run: |
+        echo "🚨 Emergency Rollback Initiated"
+        echo "Type: ${{ github.event.inputs.rollback_type }}"
+        echo "Reason: ${{ github.event.inputs.reason }}"
+        echo "Initiated by: ${{ github.actor }}"
+        echo "Timestamp: $(date)"
+
+    - name: Create emergency backup
+      if: github.event.inputs.rollback_type != 'backup_only'
+      run: |
+        chmod +x ./rollback-deployment.sh
+        ./rollback-deployment.sh backup
+
+    - name: List available backups
+      run: |
+        echo "📋 Available backup images:"
+        ./rollback-deployment.sh list
+
+    - name: Quick rollback
+      if: github.event.inputs.rollback_type == 'quick'
+      run: |
+        echo "🔄 Performing quick rollback..."
+        ./rollback-deployment.sh quick
+
+    - name: Specific rollback
+      if: github.event.inputs.rollback_type == 'specific'
+      run: |
+        echo "🔄 Performing specific rollback..."
+        if [ -z "${{ github.event.inputs.backend_backup }}" ] || [ -z "${{ github.event.inputs.frontend_backup }}" ]; then
+          echo "❌ Both backend and frontend backup tags must be provided for specific rollback"
+          exit 1
+        fi
+        ./rollback-deployment.sh rollback "${{ github.event.inputs.backend_backup }}" "${{ github.event.inputs.frontend_backup }}"
+
+    - name: Backup only
+      if: github.event.inputs.rollback_type == 'backup_only'
+      run: |
+        echo "📦 Creating backup only (no rollback)..."
+        ./rollback-deployment.sh backup
+
+    - name: Verify rollback
+      if: github.event.inputs.rollback_type != 'backup_only'
+      run: |
+        echo "🔍 Verifying rollback deployment..."
+        chmod +x ./verify-deployment.sh
+        ./verify-deployment.sh
+
+    - name: Rollback complete
+      run: |
+        echo "✅ Emergency rollback completed!"
+        echo "Type: ${{ github.event.inputs.rollback_type }}"
+        echo "Reason: ${{ github.event.inputs.reason }}"
+        echo "Status: $([ '${{ github.event.inputs.rollback_type }}' = 'backup_only' ] && echo 'Backup created' || echo 'Rollback successful')"
+        echo ""
+        echo "⚠️  Remember to:"
+        echo "1. Investigate the issue that caused the rollback"
+        echo "2. Fix the problem in the code"
+        echo "3. Test thoroughly before the next deployment"
