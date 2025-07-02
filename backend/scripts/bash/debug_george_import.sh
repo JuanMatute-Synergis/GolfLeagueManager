@@ -31,7 +31,7 @@ echo ""
 
 echo "🚀 Sending George Hutson import request to API..."
 
-curl -X POST "http://localhost:5274/api/import/formatted-scores" \
+curl -X POST "http://localhost:5505/api/import/formatted-scores" \
   -H "Content-Type: application/json" \
   -d @/tmp/george_import.json \
   --max-time 300 \

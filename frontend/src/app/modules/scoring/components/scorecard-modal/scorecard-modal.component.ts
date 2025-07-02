@@ -8,6 +8,7 @@ import { CourseService } from '../../../../core/services/course.service';
 import { ScoreCalculationService } from '../../services/score-calculation.service';
 import { Course as CourseModel } from '../../../../core/models/course.model';
 import { Week, NineHoles } from '../../models/week.model';
+import { LeagueSettingsService, LeagueSettings } from '../../../settings/services/league-settings.service';
 
 @Component({
   selector: 'app-scorecard-modal',
@@ -45,10 +46,15 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   private cachedStrokeHoles: number[] | null = null;
   private cachedHandicapKey: string | undefined = undefined;
 
+  // League settings
+  private leagueSettings: LeagueSettings | null = null;
+  private isLoadingLeagueSettings = false;
+
   constructor(
     private scorecardService: ScorecardService,
     private courseService: CourseService,
-    private scoreCalculationService: ScoreCalculationService
+    private scoreCalculationService: ScoreCalculationService,
+    private leagueSettingsService: LeagueSettingsService
   ) {}
 
   // Convenience getters for backward compatibility
@@ -95,6 +101,11 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Load course data first
     this.loadCourseData();
     
+    // Load league settings if week is available
+    if (this.week?.seasonId) {
+      this.loadLeagueSettings();
+    }
+    
     // For view mode, create scorecardData from individual inputs if not provided
     if (this.mode === 'view' && !this.scorecardData && this.matchupId) {
       this.initializeViewModeData();
@@ -139,6 +150,34 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     });
   }
 
+  private loadLeagueSettings(): void {
+    if (!this.week?.seasonId || this.isLoadingLeagueSettings) {
+      return;
+    }
+
+    this.isLoadingLeagueSettings = true;
+    
+    this.leagueSettingsService.getLeagueSettings(this.week.seasonId).subscribe({
+      next: (settings) => {
+        console.log('League settings loaded:', settings);
+        this.leagueSettings = settings;
+        this.isLoadingLeagueSettings = false;
+        
+        // Recalculate match play points if scorecard data is already loaded
+        if (this.scorecardData?.holes) {
+          this.calculateMatchPlayPoints();
+          this.buildViewModel();
+        }
+      },
+      error: (error) => {
+        console.error('Error loading league settings:', error);
+        this.isLoadingLeagueSettings = false;
+        // Fall back to default values if league settings can't be loaded
+        this.leagueSettings = null;
+      }
+    });
+  }
+
   ngAfterViewInit(): void {
     // ViewChildren are now available
     console.log('ngAfterViewInit called - score inputs available:', this.scoreInputs?.length);
@@ -152,6 +191,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       console.log('Week changed:', changes['week'].currentValue);
       // Clear all caches when week changes
       this.clearAllCaches();
+      // Load league settings for the new week's season
+      this.loadLeagueSettings();
       // Rebuild view model when week changes
       if (this.scorecardData) {
         this.buildViewModel();
@@ -576,20 +617,20 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         
         switch (winner) {
           case 'playerA':
-            hole.playerAMatchPoints = 2;
+            hole.playerAMatchPoints = this.getHoleWinPoints();
             hole.playerBMatchPoints = 0;
-            playerAHolePoints += 2;
+            playerAHolePoints += this.getHoleWinPoints();
             break;
           case 'playerB':
             hole.playerAMatchPoints = 0;
-            hole.playerBMatchPoints = 2;
-            playerBHolePoints += 2;
+            hole.playerBMatchPoints = this.getHoleWinPoints();
+            playerBHolePoints += this.getHoleWinPoints();
             break;
           case 'tie':
-            hole.playerAMatchPoints = 1;
-            hole.playerBMatchPoints = 1;
-            playerAHolePoints += 1;
-            playerBHolePoints += 1;
+            hole.playerAMatchPoints = this.getHoleHalvePoints();
+            hole.playerBMatchPoints = this.getHoleHalvePoints();
+            playerAHolePoints += this.getHoleHalvePoints();
+            playerBHolePoints += this.getHoleHalvePoints();
             break;
           default:
             hole.playerAMatchPoints = 0;
@@ -628,18 +669,18 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     if (completedHoles > 0) {
       if (playerANetTotal < playerBNetTotal) {
         // Player A has lower net total - wins match
-        playerAMatchPoints += 2;
+        playerAMatchPoints += this.getMatchWinBonus();
         this.scorecardData.playerAMatchWin = true;
         this.scorecardData.playerBMatchWin = false;
       } else if (playerBNetTotal < playerANetTotal) {
         // Player B has lower net total - wins match
-        playerBMatchPoints += 2;
+        playerBMatchPoints += this.getMatchWinBonus();
         this.scorecardData.playerAMatchWin = false;
         this.scorecardData.playerBMatchWin = true;
       } else {
-        // Tie in net total scores - each player gets 1 point instead of 2-point bonus
-        playerAMatchPoints += 1;
-        playerBMatchPoints += 1;
+        // Tie in net total scores - each player gets tie points instead of win bonus
+        playerAMatchPoints += this.getMatchTiePoints();
+        playerBMatchPoints += this.getMatchTiePoints();
         this.scorecardData.playerAMatchWin = false;
         this.scorecardData.playerBMatchWin = false;
       }
@@ -651,6 +692,23 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     this.scorecardData.playerAMatchPoints = playerAMatchPoints;
     this.scorecardData.playerBMatchPoints = playerBMatchPoints;
+  }
+
+  // Helper methods for league settings with fallback to default values
+  private getHoleWinPoints(): number {
+    return this.leagueSettings?.holeWinPoints ?? 2;
+  }
+
+  private getHoleHalvePoints(): number {
+    return this.leagueSettings?.holeHalvePoints ?? 1;
+  }
+
+  private getMatchWinBonus(): number {
+    return this.leagueSettings?.matchWinBonus ?? 2;
+  }
+
+  private getMatchTiePoints(): number {
+    return this.leagueSettings?.matchTiePoints ?? 1;
   }
 
   onPlayerAbsenceChange(player: 'A' | 'B') {

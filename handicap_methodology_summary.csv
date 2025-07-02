@@ -1,0 +1,12 @@
+Player Name,Sheet Handicap,System Handicap,Difference,Methodology Explanation,Previous System Calculation
+Kevin Kelhart JR,9,7,2,System shows improvement trend,Overall average of all rounds
+Ray Ballinger,7,9,-2,Recent improvement not captured in sheet,Overall average of all rounds  
+Tom Haeusler,15,17,-2,High variability favors WHS,Overall average of all rounds
+Jax Haeusler,15,17,-2,Improvement trend over time,Overall average of all rounds
+George Hutson,4,5,-1,Minor WHS adjustment,Overall average of all rounds
+Bob Gross,8,8,0,Perfect match between systems,Overall average of all rounds
+John Perry,6,6,0,Perfect match between systems,Overall average of all rounds
+Jeff Dilcher,5,5,0,Perfect match between systems,Overall average of all rounds
+Bill Stein,5,5,0,Perfect match between systems,Overall average of all rounds
+Alex Peck,5,5,0,Perfect match between systems,Overall average of all rounds
+Analysis Summary,22 matches,10 differences,1.3 avg diff,Previous used simple average,Current uses World Handicap System

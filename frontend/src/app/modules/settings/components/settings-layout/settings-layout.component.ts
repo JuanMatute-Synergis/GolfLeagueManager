@@ -32,6 +32,12 @@ export class SettingsLayoutComponent implements OnInit {
       route: '/settings/seasons'
     },
     {
+      id: 'league-settings',
+      label: 'League Settings',
+      icon: 'fas fa-cog',
+      route: '/settings/league-settings'
+    },
+    {
       id: 'scheduling',
       label: 'Scheduling',
       icon: 'fas fa-clock',

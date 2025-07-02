@@ -1,0 +1,246 @@
+<div class="h-full flex flex-col">
+  <!-- Header -->
+  <div class="flex-shrink-0 mb-6">
+    <h2 class="text-3xl font-semibold text-foreground mb-2">League Settings</h2>
+    <p class="text-muted-foreground">Configure scoring methodologies and league-specific settings</p>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 overflow-auto">
+    <div class="space-y-6">
+      <!-- Season Selection -->
+      <div class="bg-card border border-border rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-foreground mb-4">Select Season</h3>
+        <div class="space-y-2">
+          <label for="seasonSelect" class="block text-sm font-medium text-foreground">Season</label>
+          <select id="seasonSelect" [(ngModel)]="selectedSeasonId" (ngModelChange)="onSeasonChange()" 
+                  class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
+            <option value="">-- Select a Season --</option>
+            <option *ngFor="let season of seasons" [value]="season.id">
+              {{ season.name }} ({{ season.year }})
+            </option>
+          </select>
+          <p class="text-xs text-muted-foreground">
+            Choose the season to configure league settings for
+          </p>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="flex items-center justify-center p-12">
+        <div class="text-center">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p class="text-muted-foreground">Loading league settings...</p>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error" class="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-md">
+        {{ error }}
+      </div>
+
+      <!-- Settings Form -->
+      <form *ngIf="!isLoading && settingsForm && selectedSeasonId" [formGroup]="settingsForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        
+        <!-- Handicap Calculation Settings -->
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-foreground mb-4">Handicap Calculation</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label for="handicapMethod" class="block text-sm font-medium text-foreground mb-2">Handicap Calculation Method</label>
+              <select id="handicapMethod" formControlName="handicapMethod" 
+                      class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
+                <option *ngFor="let method of handicapMethods" [value]="method.value">
+                  {{ getHandicapMethodDisplayName(method.name) }}
+                </option>
+              </select>
+              <p class="text-xs text-muted-foreground mt-1">
+                <span *ngIf="settingsForm.get('handicapMethod')?.value === 0">
+                  Uses World Handicap System with course rating and slope rating
+                </span>
+                <span *ngIf="settingsForm.get('handicapMethod')?.value === 1">
+                  Simple average: Handicap = Average Score - Course Par
+                </span>
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label for="coursePar" class="block text-sm font-medium text-foreground mb-2">Course Par</label>
+                <input type="number" id="coursePar" formControlName="coursePar" 
+                       class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                       min="30" max="45">
+                <p class="text-xs text-muted-foreground mt-1">9-hole course par (typically 36)</p>
+              </div>
+              
+              <div *ngIf="settingsForm.get('handicapMethod')?.value === 0">
+                <label for="courseRating" class="block text-sm font-medium text-foreground mb-2">Course Rating</label>
+                <input type="number" id="courseRating" formControlName="courseRating" 
+                       class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                       step="0.1" min="25" max="45">
+                <p class="text-xs text-muted-foreground mt-1">9-hole course rating</p>
+              </div>
+              
+              <div *ngIf="settingsForm.get('handicapMethod')?.value === 0">
+                <label for="slopeRating" class="block text-sm font-medium text-foreground mb-2">Slope Rating</label>
+                <input type="number" id="slopeRating" formControlName="slopeRating" 
+                       class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                       step="1" min="55" max="155">
+                <p class="text-xs text-muted-foreground mt-1">Slope rating (113 is standard)</p>
+              </div>
+            </div>
+
+            <div>
+              <label for="maxRoundsForHandicap" class="block text-sm font-medium text-foreground mb-2">Maximum Rounds for Handicap</label>
+              <input type="number" id="maxRoundsForHandicap" formControlName="maxRoundsForHandicap" 
+                     class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                     min="5" max="30">
+              <p class="text-xs text-muted-foreground mt-1">Maximum number of recent rounds to consider for handicap calculation</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scoring Method Settings -->
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-foreground mb-4">Scoring Method</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label for="scoringMethod" class="block text-sm font-medium text-foreground mb-2">Scoring Method</label>
+              <select id="scoringMethod" formControlName="scoringMethod" 
+                      class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
+                <option *ngFor="let method of scoringMethods" [value]="method.value">
+                  {{ getScoringMethodDisplayName(method.name) }}
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label for="pointsSystem" class="block text-sm font-medium text-foreground mb-2">Points System</label>
+              <select id="pointsSystem" formControlName="pointsSystem" 
+                      class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20">
+                <option *ngFor="let system of pointsSystems" [value]="system.value">
+                  {{ getPointsSystemDisplayName(system.name) }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Points Configuration -->
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-foreground mb-4">Points Configuration</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label for="holeWinPoints" class="block text-sm font-medium text-foreground mb-2">Hole Win Points</label>
+              <input type="number" id="holeWinPoints" formControlName="holeWinPoints" 
+                     class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                     min="0" max="5">
+              <p class="text-xs text-muted-foreground mt-1">Points for winning a hole</p>
+            </div>
+            
+            <div>
+              <label for="holeHalvePoints" class="block text-sm font-medium text-foreground mb-2">Hole Halve Points</label>
+              <input type="number" id="holeHalvePoints" formControlName="holeHalvePoints" 
+                     class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                     min="0" max="3">
+              <p class="text-xs text-muted-foreground mt-1">Points for tying a hole</p>
+            </div>
+            
+            <div>
+              <label for="matchWinBonus" class="block text-sm font-medium text-foreground mb-2">Match Win Bonus</label>
+              <input type="number" id="matchWinBonus" formControlName="matchWinBonus" 
+                     class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                     min="0" max="10">
+              <p class="text-xs text-muted-foreground mt-1">Bonus points for winning the match</p>
+            </div>
+            
+            <div>
+              <label for="matchTiePoints" class="block text-sm font-medium text-foreground mb-2">Match Tie Points</label>
+              <input type="number" id="matchTiePoints" formControlName="matchTiePoints" 
+                     class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                     min="0" max="5">
+              <p class="text-xs text-muted-foreground mt-1">Points for each player when match ties</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Handicap Management -->
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-foreground mb-4">Handicap Management</h3>
+          
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3">
+              <input type="checkbox" id="useSessionHandicaps" formControlName="useSessionHandicaps" 
+                     class="mt-1 h-4 w-4 text-primary border-border rounded focus:ring-2 focus:ring-primary/20">
+              <div>
+                <label for="useSessionHandicaps" class="block text-sm font-medium text-foreground">
+                  Use Session-Specific Handicaps
+                </label>
+                <p class="text-xs text-muted-foreground">
+                  Allow setting different initial handicaps for each session within the season
+                </p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-3">
+              <input type="checkbox" id="allowHandicapUpdates" formControlName="allowHandicapUpdates" 
+                     class="mt-1 h-4 w-4 text-primary border-border rounded focus:ring-2 focus:ring-primary/20">
+              <div>
+                <label for="allowHandicapUpdates" class="block text-sm font-medium text-foreground">
+                  Allow Real-time Handicap Updates
+                </label>
+                <p class="text-xs text-muted-foreground">
+                  Update player handicaps automatically after each round
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Rules -->
+        <div class="bg-card border border-border rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-foreground mb-4">Custom Rules</h3>
+          
+          <div>
+            <label for="customRules" class="block text-sm font-medium text-foreground mb-2">Custom League Rules</label>
+            <textarea id="customRules" formControlName="customRules" 
+                      class="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20" 
+                      rows="4" maxlength="2000" 
+                      placeholder="Enter any custom rules or notes for this league..."></textarea>
+            <p class="text-xs text-muted-foreground mt-1">
+              Optional custom rules or special conditions for this league (max 2000 characters)
+            </p>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center space-x-4 pt-6 border-t border-border">
+          <button type="submit" 
+                  class="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+                  [disabled]="!settingsForm.valid || isSaving">
+            <span *ngIf="isSaving" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></span>
+            {{ isSaving ? 'Saving...' : 'Save Settings' }}
+          </button>
+          
+          <button type="button" 
+                  class="bg-muted hover:bg-muted/80 text-muted-foreground px-6 py-2 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" 
+                  (click)="resetToDefaults()" [disabled]="isSaving">
+            Reset to Defaults
+          </button>
+        </div>
+      </form>
+
+      <!-- No Season Selected Message -->
+      <div *ngIf="!selectedSeasonId && !isLoading" class="flex items-center justify-center p-12">
+        <div class="text-center">
+          <i class="fas fa-cog text-4xl text-muted-foreground mb-4"></i>
+          <h3 class="text-lg font-semibold text-foreground mb-2">Select a Season</h3>
+          <p class="text-muted-foreground">Choose a season from the dropdown above to configure its league settings.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

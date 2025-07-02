@@ -7,7 +7,7 @@ first_names=("John" "Emma" "Michael" "Olivia" "William" "Sophia" "James" "Isabel
 last_names=("Smith" "Johnson" "Williams" "Brown" "Jones" "Garcia" "Miller" "Davis" "Rodriguez" "Martinez" "Hernandez" "Lopez" "Gonzalez" "Wilson" "Anderson" "Thomas" "Taylor" "Moore" "Jackson" "Martin" "Lee" "Perez" "Thompson" "White" "Harris" "Sanchez" "Clark" "Ramirez" "Lewis" "Robinson" "Walker" "Young" "Allen" "King" "Wright" "Scott" "Torres" "Nguyen" "Hill" "Flores")
 
 # API URL
-API_URL="http://localhost:5274/api/players"
+API_URL="http://localhost:5505/api/players"
 
 # Function to create a random email
 create_email() {

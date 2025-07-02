@@ -3,7 +3,7 @@
 # Regenerate weeks for the current season
 # This will delete all existing weeks and regenerate them using the correct logic
 
-API_BASE="http://localhost:5274/api"
+API_BASE="http://localhost:5505/api"
 
 echo "=== Regenerating weeks for the season ==="
 

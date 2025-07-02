@@ -17,9 +17,9 @@ export interface Flight {
   providedIn: 'root'
 })
 export class FlightService {
-  private readonly apiUrl = 'http://localhost:5274/api/flights';
+  private readonly apiUrl = '/api/flights';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getFlights(): Observable<Flight[]> {
     return this.http.get<Flight[]>(this.apiUrl);
@@ -28,7 +28,7 @@ export class FlightService {
   getFlightById(id: string): Observable<Flight> {
     return this.http.get<Flight>(`${this.apiUrl}/${id}`);
   }
-  
+
   getFlightsBySeason(seasonId: string): Observable<Flight[]> {
     return this.http.get<Flight[]>(`${this.apiUrl}/season/${seasonId}`);
   }

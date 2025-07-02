@@ -37,9 +37,9 @@ export interface MatchupWithPlayers extends Matchup {
   providedIn: 'root'
 })
 export class MatchupService {
-  private readonly apiUrl = 'http://localhost:5274/api/matchups';
+  private readonly apiUrl = '/api/matchups';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Get all matchups
   getMatchups(): Observable<Matchup[]> {

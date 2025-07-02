@@ -7,12 +7,14 @@ namespace GolfLeagueManager
         private readonly AppDbContext _context;
         private readonly MatchPlayScoringService _scoringService;
         private readonly HandicapService _handicapService;
+        private readonly LeagueSettingsService _leagueSettingsService;
 
-        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService)
+        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService, LeagueSettingsService leagueSettingsService)
         {
             _context = context;
             _scoringService = scoringService;
             _handicapService = handicapService;
+            _leagueSettingsService = leagueSettingsService;
         }
 
         /// <summary>
@@ -69,15 +71,19 @@ namespace GolfLeagueManager
             var playerAHandicap = await _handicapService.GetPlayerSessionHandicapAsync(matchup.PlayerAId, week.SeasonId, week.WeekNumber);
             var playerBHandicap = await _handicapService.GetPlayerSessionHandicapAsync(matchup.PlayerBId, week.SeasonId, week.WeekNumber);
 
+            // Get league settings for the season
+            var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(week.SeasonId);
+
             // Calculate gross totals for tie-breaking
             var playerAGrossTotal = holeScores.Where(hs => hs.PlayerAScore.HasValue).Sum(hs => hs.PlayerAScore!.Value);
             var playerBGrossTotal = holeScores.Where(hs => hs.PlayerBScore.HasValue).Sum(hs => hs.PlayerBScore!.Value);
 
-            // Use the new match play scoring service
+            // Use the new match play scoring service with league settings
             var matchPlayResult = _scoringService.CalculateMatchPlayResult(
                 holeScores, 
                 playerAHandicap, 
                 playerBHandicap,
+                leagueSettings,
                 playerAGrossTotal,
                 playerBGrossTotal);
 
@@ -124,6 +130,21 @@ namespace GolfLeagueManager
             Console.WriteLine($"[DEBUG] PlayerAAbsent: {matchup.PlayerAAbsent}, PlayerBAbsent: {matchup.PlayerBAbsent}");
             Console.WriteLine($"[DEBUG] PlayerAAbsentWithNotice: {matchup.PlayerAAbsentWithNotice}, PlayerBAbsentWithNotice: {matchup.PlayerBAbsentWithNotice}");
 
+            // Get the week and league settings for absence point calculations
+            var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == matchup.WeekId);
+            if (week == null)
+            {
+                Console.WriteLine("[DEBUG] Week not found for absence scenario");
+                return false;
+            }
+
+            var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(week.SeasonId);
+            
+            // Calculate absence notice points based on league settings
+            // Standard absence with notice gets 1/5 of total possible points (20% of max points)
+            var maxPossiblePoints = (leagueSettings.HoleWinPoints * 9) + leagueSettings.MatchWinBonus; // 9 holes + match bonus
+            var absenceNoticePoints = Math.Max(1, maxPossiblePoints / 5); // At least 1 point, typically 4 for standard 2-1-2 system
+
             if (matchup.PlayerAAbsent && matchup.PlayerBAbsent)
             {
                 Console.WriteLine("[DEBUG] Both players absent scenario");
@@ -131,25 +152,23 @@ namespace GolfLeagueManager
                 if (matchup.PlayerAAbsentWithNotice && matchup.PlayerBAbsentWithNotice)
                 {
                     // Both gave notice - split points evenly
-                    matchup.PlayerAPoints = 4;
-                    matchup.PlayerBPoints = 4;
-                    Console.WriteLine("[DEBUG] Both gave notice: A=10, B=10");
+                    matchup.PlayerAPoints = absenceNoticePoints;
+                    matchup.PlayerBPoints = absenceNoticePoints;
+                    Console.WriteLine($"[DEBUG] Both gave notice: A={absenceNoticePoints}, B={absenceNoticePoints}");
                 }
                 else if (matchup.PlayerAAbsentWithNotice)
                 {
                     // Only A gave notice
-                    matchup.PlayerAPoints = 4;
+                    matchup.PlayerAPoints = absenceNoticePoints;
                     matchup.PlayerBPoints = 0;
-                    Console.WriteLine("[DEBUG] Only A gave notice: A=4, B=0");
-                    // Remaining 16 points are forfeited
+                    Console.WriteLine($"[DEBUG] Only A gave notice: A={absenceNoticePoints}, B=0");
                 }
                 else if (matchup.PlayerBAbsentWithNotice)
                 {
                     // Only B gave notice
                     matchup.PlayerAPoints = 0;
-                    matchup.PlayerBPoints = 4;
-                    Console.WriteLine("[DEBUG] Only B gave notice: A=0, B=4");
-                    // Remaining 16 points are forfeited
+                    matchup.PlayerBPoints = absenceNoticePoints;
+                    Console.WriteLine($"[DEBUG] Only B gave notice: A=0, B={absenceNoticePoints}");
                 }
                 else
                 {
@@ -157,7 +176,6 @@ namespace GolfLeagueManager
                     matchup.PlayerAPoints = 0;
                     matchup.PlayerBPoints = 0;
                     Console.WriteLine("[DEBUG] Neither gave notice: A=0, B=0");
-                    // All 20 points are forfeited
                 }
                 matchup.PlayerAHolePoints = 0;
                 matchup.PlayerBHolePoints = 0;
@@ -168,16 +186,16 @@ namespace GolfLeagueManager
             {
                 Console.WriteLine("[DEBUG] Player A absent, Player B present");
                 // Player A absent, Player B present
-                var playerAPoints = matchup.PlayerAAbsentWithNotice ? 4 : 0;
+                var playerAPoints = matchup.PlayerAAbsentWithNotice ? absenceNoticePoints : 0;
                 var playerBHandicap = await GetPlayerHandicapAsync(matchup.PlayerBId);
-                var playerBPoints = await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerBId, playerBHandicap);
+                var playerBPoints = await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerBId, playerBHandicap, leagueSettings);
                 
                 Console.WriteLine($"[DEBUG] Player A points: {playerAPoints}, Player B points: {playerBPoints}");
                 
                 matchup.PlayerAPoints = playerAPoints;
                 matchup.PlayerBPoints = playerBPoints;
                 matchup.PlayerAHolePoints = 0;
-                matchup.PlayerBHolePoints = Math.Max(0, playerBPoints - 2); // Subtract match bonus to get hole points
+                matchup.PlayerBHolePoints = Math.Max(0, playerBPoints - leagueSettings.MatchWinBonus); // Subtract match bonus to get hole points
                 matchup.PlayerAMatchWin = false;
                 matchup.PlayerBMatchWin = playerBPoints > playerAPoints;
                 
@@ -188,15 +206,15 @@ namespace GolfLeagueManager
             {
                 Console.WriteLine("[DEBUG] Player B absent, Player A present");
                 // Player B absent, Player A present
-                var playerBPoints = matchup.PlayerBAbsentWithNotice ? 4 : 0;
+                var playerBPoints = matchup.PlayerBAbsentWithNotice ? absenceNoticePoints : 0;
                 var playerAHandicap = await GetPlayerHandicapAsync(matchup.PlayerAId);
-                var playerAPoints = await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerAId, playerAHandicap);
+                var playerAPoints = await CalculateNoOpponentScoringAsync(matchup, matchup.PlayerAId, playerAHandicap, leagueSettings);
                 
                 Console.WriteLine($"[DEBUG] Player A points: {playerAPoints}, Player B points: {playerBPoints}");
                 
                 matchup.PlayerAPoints = playerAPoints;
                 matchup.PlayerBPoints = playerBPoints;
-                matchup.PlayerAHolePoints = Math.Max(0, playerAPoints - 2); // Subtract match bonus to get hole points
+                matchup.PlayerAHolePoints = Math.Max(0, playerAPoints - leagueSettings.MatchWinBonus); // Subtract match bonus to get hole points
                 matchup.PlayerBHolePoints = 0;
                 matchup.PlayerAMatchWin = playerAPoints > playerBPoints;
                 matchup.PlayerBMatchWin = false;
@@ -213,19 +231,24 @@ namespace GolfLeagueManager
 
         /// <summary>
         /// Calculate points when player has no opponent (absence scenario)
-        /// Rules: Present player gets 16 points if they beat their average by a whole number, otherwise 8 points
+        /// Rules: Present player gets higher points if they beat their average by a whole number, otherwise lower points
         /// No additional match win bonus is awarded in absence scenarios
         /// </summary>
-        private async Task<int> CalculateNoOpponentScoringAsync(Matchup matchup, Guid playerId, double handicap)
+        private async Task<int> CalculateNoOpponentScoringAsync(Matchup matchup, Guid playerId, double handicap, LeagueSettings leagueSettings)
         {
             Console.WriteLine($"[DEBUG] CalculateNoOpponentScoringAsync called for player {playerId}");
+            
+            // Calculate scoring thresholds based on league settings
+            var maxHolePoints = leagueSettings.HoleWinPoints * 9; // Maximum points from holes (9 holes)
+            var highScorePoints = maxHolePoints; // Points for beating average (16 with standard 2-point system)
+            var lowScorePoints = maxHolePoints / 2; // Points for not beating average (8 with standard 2-point system)
             
             // Get the player's current average score
             var player = await _context.Players.FindAsync(playerId);
             if (player == null)
             {
-                Console.WriteLine($"[DEBUG] Player {playerId} not found, returning default 8 points");
-                return 8; // Default fallback: 8 points (no match bonus in absence scenario)
+                Console.WriteLine($"[DEBUG] Player {playerId} not found, returning default {lowScorePoints} points");
+                return lowScorePoints; // Default fallback: low points (no match bonus in absence scenario)
             }
 
             Console.WriteLine($"[DEBUG] Player found: {player.FirstName} {player.LastName}, CurrentAverageScore: {player.CurrentAverageScore}");
@@ -265,9 +288,9 @@ namespace GolfLeagueManager
 
             if (!hasValidScore)
             {
-                Console.WriteLine("[DEBUG] No valid scores found, returning 8 points");
-                // No valid scores found, award minimum points: 8 points (no match bonus in absence scenario)
-                return 8;
+                Console.WriteLine($"[DEBUG] No valid scores found, returning {lowScorePoints} points");
+                // No valid scores found, award minimum points: low points (no match bonus in absence scenario)
+                return lowScorePoints;
             }
 
             // Check if player beat their average by a whole number
@@ -275,18 +298,18 @@ namespace GolfLeagueManager
             var averageScore = player.CurrentAverageScore;
             var requiredScore = Math.Floor(averageScore); // This gives us the whole number threshold
             
-            Console.WriteLine($"[DEBUG] Player average: {averageScore}, Required score to get 16 points: {requiredScore}, Actual score: {totalScore}");
+            Console.WriteLine($"[DEBUG] Player average: {averageScore}, Required score to get {highScorePoints} points: {requiredScore}, Actual score: {totalScore}");
             
             int totalPoints;
             if (totalScore < requiredScore)
             {
-                Console.WriteLine("[DEBUG] Player beat their average by a whole number - awarding 16 points");
-                totalPoints = 16;
+                Console.WriteLine($"[DEBUG] Player beat their average by a whole number - awarding {highScorePoints} points");
+                totalPoints = highScorePoints;
             }
             else
             {
-                Console.WriteLine("[DEBUG] Player did not beat their average by a whole number - awarding 8 points");
-                totalPoints = 8;
+                Console.WriteLine($"[DEBUG] Player did not beat their average by a whole number - awarding {lowScorePoints} points");
+                totalPoints = lowScorePoints;
             }
             
             // In absence scenario, no match win bonus is awarded

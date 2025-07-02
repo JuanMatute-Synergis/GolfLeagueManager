@@ -31,9 +31,9 @@ export interface BulkSetSessionHandicapsRequest {
   providedIn: 'root'
 })
 export class HandicapService {
-  private readonly apiUrl = 'http://localhost:5274/api/handicap';
+  private readonly apiUrl = '/api/handicap';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Get a player's session-specific handicap for a given season and week

@@ -20,6 +20,7 @@ namespace GolfLeagueManager
         public DbSet<CourseHole> CourseHoles { get; set; }
         public DbSet<PlayerSessionAverage> PlayerSessionAverages { get; set; }
         public DbSet<PlayerSessionHandicap> PlayerSessionHandicaps { get; set; }
+        public DbSet<LeagueSettings> LeagueSettings { get; set; }
         public DbSet<User> Users { get; set; } // Add DbSet for User entity
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -254,6 +255,37 @@ namespace GolfLeagueManager
                     .WithMany()
                     .HasForeignKey(u => u.PlayerId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // Configure LeagueSettings entity
+            modelBuilder.Entity<LeagueSettings>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasDefaultValueSql("gen_random_uuid()");
+
+                entity.Property(e => e.CustomRules)
+                    .HasMaxLength(2000);
+
+                // Configure relationship with Season (one-to-one)
+                entity.HasOne(ls => ls.Season)
+                    .WithMany()
+                    .HasForeignKey(ls => ls.SeasonId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Create unique index to ensure one settings per season
+                entity.HasIndex(ls => ls.SeasonId)
+                    .IsUnique();
+
+                // Configure DateTime properties as UTC
+                entity.Property(e => e.CreatedDate)
+                    .HasConversion(
+                        v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+                entity.Property(e => e.ModifiedDate)
+                    .HasConversion(
+                        v => v.HasValue ? (v.Value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v.Value.ToUniversalTime()) : v,
+                        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
             });
 
             base.OnModelCreating(modelBuilder);

@@ -69,6 +69,11 @@ export class Menu {
           route: '/settings/seasons',
         },
         {
+          icon: 'assets/icons/heroicons/outline/cog-6-tooth.svg',
+          label: 'League Settings',
+          route: '/settings/league-settings',
+        },
+        {
           icon: 'assets/icons/heroicons/outline/clock.svg',
           label: 'Scheduling',
           route: '/settings/scheduling',

@@ -6,7 +6,7 @@ echo "========================================"
 echo "⚠️  WARNING: This will delete ALL hole scores and reset ALL matchups!"
 echo "⏳ Sending cleanup request to API..."
 
-curl -X DELETE "http://localhost:5274/api/cleanup/all-scores" \
+curl -X DELETE "http://localhost:5505/api/cleanup/all-scores" \
   -H "Content-Type: application/json" \
   --max-time 60 \
   -w "\nHTTP Status: %{http_code}\nTime: %{time_total}s\n"

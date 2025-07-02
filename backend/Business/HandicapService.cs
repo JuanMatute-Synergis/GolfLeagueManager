@@ -5,10 +5,12 @@ namespace GolfLeagueManager
     public class HandicapService
     {
         private readonly AppDbContext _context;
+        private readonly LeagueSettingsService _leagueSettingsService;
 
-        public HandicapService(AppDbContext context)
+        public HandicapService(AppDbContext context, LeagueSettingsService leagueSettingsService)
         {
             _context = context;
+            _leagueSettingsService = leagueSettingsService;
         }
 
         /// <summary>
@@ -181,11 +183,60 @@ namespace GolfLeagueManager
         }
 
         /// <summary>
-        /// Calculate and update a player's current handicap based on recent scores using WHS principles
+        /// Calculate and update a player's current handicap based on recent scores using configured method
+        /// </summary>
+        /// <param name="playerId">The player's ID</param>
+        /// <param name="seasonId">The season ID to get league settings from</param>
+        /// <param name="maxRounds">Maximum number of recent rounds to consider (default 20)</param>
+        /// <returns>The updated handicap index</returns>
+        public async Task<decimal> CalculateAndUpdateCurrentHandicapAsync(Guid playerId, Guid seasonId, int maxRounds = 20)
+        {
+            var player = await _context.Players.FindAsync(playerId);
+            if (player == null)
+                throw new ArgumentException($"Player with ID {playerId} not found");
+
+            // Get league settings to determine calculation method
+            var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
+            
+            // Get recent scores from matchups
+            var recentScores = await GetRecentPlayerScoresAsync(playerId, maxRounds);
+            
+            if (!recentScores.Any())
+            {
+                return player.CurrentHandicap; // No scores available, keep current handicap
+            }
+
+            decimal newHandicap;
+
+            if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
+            {
+                // Simple Average Method: Handicap = Average Score - Course Par
+                var averageScore = (decimal)recentScores.Average(s => s.score);
+                newHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 1);
+                newHandicap = Math.Max(0, Math.Min(36, newHandicap)); // Cap between 0 and 36
+            }
+            else
+            {
+                // World Handicap System Method
+                // Override the scores with league settings for course rating and slope
+                var adjustedScores = recentScores.Select(s => (s.score, (int)leagueSettings.CourseRating, leagueSettings.SlopeRating)).ToList();
+                newHandicap = CalculateHandicapIndex(adjustedScores);
+            }
+
+            // Update player's current handicap
+            player.CurrentHandicap = newHandicap;
+            await _context.SaveChangesAsync();
+
+            return newHandicap;
+        }
+
+        /// <summary>
+        /// Calculate and update a player's current handicap based on recent scores using WHS principles (legacy method)
         /// </summary>
         /// <param name="playerId">The player's ID</param>
         /// <param name="maxRounds">Maximum number of recent rounds to consider (default 20)</param>
         /// <returns>The updated handicap index</returns>
+        [Obsolete("Use CalculateAndUpdateCurrentHandicapAsync(playerId, seasonId, maxRounds) instead")]
         public async Task<decimal> CalculateAndUpdateCurrentHandicapAsync(Guid playerId, int maxRounds = 20)
         {
             var player = await _context.Players.FindAsync(playerId);
@@ -302,7 +353,7 @@ namespace GolfLeagueManager
 
             foreach (var playerId in playersInSeason)
             {
-                var currentHandicap = await CalculateAndUpdateCurrentHandicapAsync(playerId);
+                var currentHandicap = await CalculateAndUpdateCurrentHandicapAsync(playerId, seasonId);
                 suggestions[playerId] = currentHandicap;
             }
 
@@ -310,12 +361,56 @@ namespace GolfLeagueManager
         }
 
         /// <summary>
-        /// Calculate handicaps for all players in a season based on their scores
+        /// Bulk calculate and update handicaps for all players in a season using league settings
+        /// </summary>
+        /// <param name="seasonId">Season ID</param>
+        /// <param name="maxRounds">Maximum number of rounds to consider per player</param>
+        /// <returns>Dictionary of player ID to calculated handicap</returns>
+        public async Task<Dictionary<Guid, decimal>> BulkCalculateSeasonHandicapsAsync(Guid seasonId, int maxRounds = 20)
+        {
+            var results = new Dictionary<Guid, decimal>();
+            
+            // Get league settings for this season
+            var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
+            
+            // Get all players who have played in this season
+            var seasonWeeks = await _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
+                .Select(w => w.Id)
+                .ToListAsync();
+
+            var playersInSeason = await _context.Matchups
+                .Where(m => seasonWeeks.Contains(m.WeekId) &&
+                           (m.PlayerAScore.HasValue || m.PlayerBScore.HasValue))
+                .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var playerId in playersInSeason)
+            {
+                try
+                {
+                    var handicap = await CalculateAndUpdateCurrentHandicapAsync(playerId, seasonId, maxRounds);
+                    results[playerId] = handicap;
+                }
+                catch (Exception ex)
+                {
+                    // Log error but continue with other players
+                    Console.WriteLine($"Error calculating handicap for player {playerId}: {ex.Message}");
+                }
+            }
+            
+            return results;
+        }
+
+        /// <summary>
+        /// Calculate handicaps for all players in a season based on their scores (legacy method)
         /// </summary>
         /// <param name="seasonId">The season ID</param>
         /// <param name="courseRating">9-hole course rating (default 35)</param>
         /// <param name="slopeRating">Slope rating (default 113)</param>
         /// <returns>Dictionary of player IDs and their calculated handicaps</returns>
+        [Obsolete("Use BulkCalculateSeasonHandicapsAsync instead for season-specific settings")]
         public async Task<Dictionary<Guid, decimal>> CalculateAllPlayerHandicapsAsync(Guid seasonId, int courseRating = 35, decimal slopeRating = 113)
         {
             var results = new Dictionary<Guid, decimal>();

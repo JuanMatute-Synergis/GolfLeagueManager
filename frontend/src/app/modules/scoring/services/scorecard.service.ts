@@ -57,7 +57,7 @@ export interface HoleScoreBackend {
   providedIn: 'root'
 })
 export class ScorecardService {
-  private readonly apiUrl = 'http://localhost:5274/api/scorecard';
+  private readonly apiUrl = '/api/scorecard';
 
   constructor(private http: HttpClient) { }
 
@@ -95,7 +95,7 @@ export class ScorecardService {
 
   // Convert backend hole scores to frontend scorecard format
   convertToScorecardData(
-    holeScores: HoleScoreBackend[], 
+    holeScores: HoleScoreBackend[],
     matchupId: string,
     playerAId: string,
     playerBId: string,

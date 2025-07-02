@@ -6,9 +6,9 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ScoreCalculationService {
-  private readonly apiUrl = 'http://localhost:5274/api/score-calculation';
+  private readonly apiUrl = '/api/score-calculation';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Calculate net score for a specific hole

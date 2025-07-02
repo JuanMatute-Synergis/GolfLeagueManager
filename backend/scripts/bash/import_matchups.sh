@@ -3,7 +3,7 @@
 # Golf League Matchups Import Script
 # This script creates matchups from the CSV file
 
-API_BASE="http://localhost:5274/api"
+API_BASE="http://localhost:5505/api"
 CSV_FILE="/Users/juanmatute/Downloads/golf_league_named_matchups.csv"
 
 # Function to get player ID by name

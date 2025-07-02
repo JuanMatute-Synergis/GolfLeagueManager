@@ -1,13 +1,13 @@
 # Season API Test Requests
 
 ### Get all seasons
-GET http://localhost:5274/api/seasons
+GET http://localhost:5505/api/seasons
 
 ### Get active seasons only
-GET http://localhost:5274/api/seasons/active
+GET http://localhost:5505/api/seasons/active
 
 ### Create a new season
-POST http://localhost:5274/api/seasons
+POST http://localhost:5505/api/seasons
 Content-Type: application/json
 
 {
@@ -19,7 +19,7 @@ Content-Type: application/json
 }
 
 ### Create another season
-POST http://localhost:5274/api/seasons
+POST http://localhost:5505/api/seasons
 Content-Type: application/json
 
 {
@@ -31,10 +31,10 @@ Content-Type: application/json
 }
 
 ### Get season by ID (replace {id} with actual ID)
-GET http://localhost:5274/api/seasons/{id}
+GET http://localhost:5505/api/seasons/{id}
 
 ### Update season (replace {id} with actual ID)
-PUT http://localhost:5274/api/seasons/{id}
+PUT http://localhost:5505/api/seasons/{id}
 Content-Type: application/json
 
 {
@@ -47,4 +47,4 @@ Content-Type: application/json
 }
 
 ### Delete season (replace {id} with actual ID)
-DELETE http://localhost:5274/api/seasons/{id}
+DELETE http://localhost:5505/api/seasons/{id}

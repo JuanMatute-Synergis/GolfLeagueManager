@@ -11,7 +11,7 @@ cat > /tmp/import_test.json << 'EOF'
 EOF
 
 echo "Sending request to import API..."
-curl -X POST "http://localhost:5274/api/import/scores" \
+curl -X POST "http://localhost:5505/api/import/scores" \
   -H "Content-Type: application/json" \
   -d @/tmp/import_test.json \
   --max-time 30

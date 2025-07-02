@@ -18,9 +18,9 @@ export interface PlayerScoringStats {
   providedIn: 'root'
 })
 export class AverageScoreService {
-  private readonly baseUrl = 'http://localhost:5274/api';
+  private readonly baseUrl = '/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Get scoring statistics for a player in a specific season
@@ -32,22 +32,22 @@ export class AverageScoreService {
   /**
    * Update average score for a specific player in a season
    */
-  updatePlayerAverageScore(playerId: string, seasonId: string): Observable<{playerId: string, seasonId: string, currentAverageScore: number}> {
-    return this.http.post<{playerId: string, seasonId: string, currentAverageScore: number}>(`${this.baseUrl}/AverageScore/player/${playerId}/season/${seasonId}/update`, {});
+  updatePlayerAverageScore(playerId: string, seasonId: string): Observable<{ playerId: string, seasonId: string, currentAverageScore: number }> {
+    return this.http.post<{ playerId: string, seasonId: string, currentAverageScore: number }>(`${this.baseUrl}/AverageScore/player/${playerId}/season/${seasonId}/update`, {});
   }
 
   /**
    * Update average scores for all players who played in a specific week
    */
-  updateAverageScoresForWeek(weekId: string): Observable<{[playerId: string]: number}> {
-    return this.http.post<{[playerId: string]: number}>(`${this.baseUrl}/AverageScore/week/${weekId}/update-all`, {});
+  updateAverageScoresForWeek(weekId: string): Observable<{ [playerId: string]: number }> {
+    return this.http.post<{ [playerId: string]: number }>(`${this.baseUrl}/AverageScore/week/${weekId}/update-all`, {});
   }
 
   /**
    * Recalculate all player average scores for a season
    */
-  recalculateAllAverageScoresForSeason(seasonId: string): Observable<{[playerId: string]: number}> {
-    return this.http.post<{[playerId: string]: number}>(`${this.baseUrl}/AverageScore/season/${seasonId}/recalculate-all`, {});
+  recalculateAllAverageScoresForSeason(seasonId: string): Observable<{ [playerId: string]: number }> {
+    return this.http.post<{ [playerId: string]: number }>(`${this.baseUrl}/AverageScore/season/${seasonId}/recalculate-all`, {});
   }
 
   /**

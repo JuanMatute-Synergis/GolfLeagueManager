@@ -10,12 +10,14 @@ namespace GolfLeagueManager.Controllers
         private readonly AppDbContext _context;
         private readonly MatchPlayScoringService _scoringService;
         private readonly HandicapService _handicapService;
+        private readonly LeagueSettingsService _leagueSettingsService;
 
-        public ScoreCalculationController(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService)
+        public ScoreCalculationController(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService, LeagueSettingsService leagueSettingsService)
         {
             _context = context;
             _scoringService = scoringService;
             _handicapService = handicapService;
+            _leagueSettingsService = leagueSettingsService;
         }
 
         /// <summary>
@@ -54,10 +56,13 @@ namespace GolfLeagueManager.Controllers
         /// Calculate match play results for hole scores
         /// </summary>
         [HttpPost("match-play")]
-        public ActionResult<MatchPlayCalculationResponse> CalculateMatchPlay([FromBody] MatchPlayCalculationRequest request)
+        public async Task<ActionResult<MatchPlayCalculationResponse>> CalculateMatchPlay([FromBody] MatchPlayCalculationRequest request)
         {
             try
             {
+                // Get league settings for the season
+                var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(request.SeasonId);
+
                 // Convert request to HoleScore objects for calculation
                 var holeScores = request.HoleScores.Select(h => new HoleScore
                 {
@@ -73,6 +78,7 @@ namespace GolfLeagueManager.Controllers
                     holeScores,
                     request.PlayerAHandicap,
                     request.PlayerBHandicap,
+                    leagueSettings,
                     playerAGrossTotal,
                     playerBGrossTotal
                 );
@@ -248,6 +254,7 @@ namespace GolfLeagueManager.Controllers
         public List<HoleScoreInput> HoleScores { get; set; } = new();
         public int PlayerAHandicap { get; set; }
         public int PlayerBHandicap { get; set; }
+        public Guid SeasonId { get; set; } // Added to get league settings
     }
 
     public class HoleScoreInput

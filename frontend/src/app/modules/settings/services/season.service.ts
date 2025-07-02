@@ -15,9 +15,9 @@ export interface Season {
   providedIn: 'root'
 })
 export class SeasonService {
-  private readonly apiUrl = 'http://localhost:5274/api/seasons';
+  private readonly apiUrl = '/api/seasons';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getSeasons(): Observable<Season[]> {
     return this.http.get<Season[]>(this.apiUrl);
@@ -26,7 +26,7 @@ export class SeasonService {
   getSeasonById(id: string): Observable<Season> {
     return this.http.get<Season>(`${this.apiUrl}/${id}`);
   }
-  
+
   getActiveSeasons(): Observable<Season[]> {
     return this.http.get<Season[]>(`${this.apiUrl}/active`);
   }

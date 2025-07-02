@@ -38,6 +38,7 @@ namespace GolfLeagueManager
             List<HoleScore> holeScores,
             decimal playerAHandicap,
             decimal playerBHandicap,
+            LeagueSettings leagueSettings,
             int playerAGrossTotal = 0,
             int playerBGrossTotal = 0)
         {
@@ -60,7 +61,8 @@ namespace GolfLeagueManager
                 var holeResult = CalculateHoleResult9Hole(
                     hole,
                     playerAReceivesStrokes,
-                    hardestHoles
+                    hardestHoles,
+                    leagueSettings
                 );
                 result.HoleResults.Add(holeResult);
                 result.PlayerAHolePoints += holeResult.PlayerAPoints;
@@ -81,21 +83,21 @@ namespace GolfLeagueManager
                 if (playerANetTotal < playerBNetTotal)
                 {
                     result.PlayerAMatchWin = true;
-                    result.PlayerATotalPoints = result.PlayerAHolePoints + 2;
+                    result.PlayerATotalPoints = result.PlayerAHolePoints + leagueSettings.MatchWinBonus;
                     result.PlayerBTotalPoints = result.PlayerBHolePoints;
                 }
                 else if (playerBNetTotal < playerANetTotal)
                 {
                     result.PlayerBMatchWin = true;
-                    result.PlayerBTotalPoints = result.PlayerBHolePoints + 2;
+                    result.PlayerBTotalPoints = result.PlayerBHolePoints + leagueSettings.MatchWinBonus;
                     result.PlayerATotalPoints = result.PlayerAHolePoints;
                 }
                 else
                 {
                     result.PlayerAMatchWin = false;
                     result.PlayerBMatchWin = false;
-                    result.PlayerATotalPoints = result.PlayerAHolePoints + 1;
-                    result.PlayerBTotalPoints = result.PlayerBHolePoints + 1;
+                    result.PlayerATotalPoints = result.PlayerAHolePoints + leagueSettings.MatchTiePoints;
+                    result.PlayerBTotalPoints = result.PlayerBHolePoints + leagueSettings.MatchTiePoints;
                 }
             }
             else
@@ -114,7 +116,8 @@ namespace GolfLeagueManager
         private HoleResult CalculateHoleResult9Hole(
             HoleScore hole,
             bool playerAReceivesStrokes,
-            HashSet<int> hardestHoles
+            HashSet<int> hardestHoles,
+            LeagueSettings leagueSettings
         )
         {
             var result = new HoleResult { HoleNumber = hole.HoleNumber };
@@ -131,20 +134,20 @@ namespace GolfLeagueManager
             }
             if (result.PlayerANetScore < result.PlayerBNetScore)
             {
-                result.PlayerAPoints = 2;
+                result.PlayerAPoints = leagueSettings.HoleWinPoints;
                 result.PlayerBPoints = 0;
                 result.Winner = "PlayerA";
             }
             else if (result.PlayerBNetScore < result.PlayerANetScore)
             {
                 result.PlayerAPoints = 0;
-                result.PlayerBPoints = 2;
+                result.PlayerBPoints = leagueSettings.HoleWinPoints;
                 result.Winner = "PlayerB";
             }
             else
             {
-                result.PlayerAPoints = 1;
-                result.PlayerBPoints = 1;
+                result.PlayerAPoints = leagueSettings.HoleHalvePoints;
+                result.PlayerBPoints = leagueSettings.HoleHalvePoints;
                 result.Winner = "Tie";
             }
             return result;

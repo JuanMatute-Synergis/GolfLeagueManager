@@ -7,8 +7,8 @@ export interface HoleScore {
   playerBHolesWon?: number;
   // Match play fields
   holeHandicap?: number; // Stroke index (1-9)
-  playerAMatchPoints?: number; // 0, 1, or 2 points for this hole
-  playerBMatchPoints?: number; // 0, 1, or 2 points for this hole
+  playerAMatchPoints?: number; // Points for this hole (configurable via league settings)
+  playerBMatchPoints?: number; // Points for this hole (configurable via league settings)
   playerANetScore?: number; // Net score after handicap
   playerBNetScore?: number; // Net score after handicap
   winner?: 'playerA' | 'playerB' | 'tie'; // Who won this hole

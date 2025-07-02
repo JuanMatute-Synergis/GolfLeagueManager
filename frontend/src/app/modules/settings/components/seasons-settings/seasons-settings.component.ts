@@ -39,7 +39,7 @@ export class SeasonsSettingsComponent implements OnInit {
   isEditMode = false;
   
   // Mobile state
-  mobileActiveTab: 'seasons' | 'flights' | 'players' = 'seasons';
+  mobileActiveTab: 'seasons' | 'flights' | 'players' | 'league-settings' = 'seasons';
 
   // Editing state
   editingSeasonId: string | null = null;

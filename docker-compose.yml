@@ -11,5 +11,28 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: golfleague_backend
+    depends_on:
+      - postgres
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=golfdb;Username=golfuser;Password=golfpassword
+      - ASPNETCORE_URLS=http://+:5505
+    ports:
+      - "5505:5505"
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: golfleague_frontend
+    depends_on:
+      - backend
+    ports:
+      - "4500:80"
+
 volumes:
   postgres_data:

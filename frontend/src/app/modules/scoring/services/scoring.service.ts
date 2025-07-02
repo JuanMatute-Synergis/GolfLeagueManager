@@ -1,23 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { 
-  Week, 
-  ScoreEntry, 
-  PlayerSeasonStats, 
+import {
+  Week,
+  ScoreEntry,
+  PlayerSeasonStats,
   BulkScoreEntry,
   Season,
   Player,
-  PlayerWithFlight 
+  PlayerWithFlight
 } from '../models/week.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScoringService {
-  private readonly baseUrl = 'http://localhost:5274/api';
+  private readonly baseUrl = '/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Week Management
   getWeeks(): Observable<Week[]> {

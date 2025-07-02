@@ -3,7 +3,7 @@
 # Golf League Players Flight Assignment Script
 # This script assigns existing players to their respective flights
 
-API_BASE="http://localhost:5274/api"
+API_BASE="http://localhost:5505/api"
 
 # Function to get flight ID by name (only flights with seasonId)
 get_flight_id() {

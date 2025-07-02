@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Clean up duplicate Week 24 entries
-API_BASE="http://localhost:5274/api"
+API_BASE="http://localhost:5505/api"
 
 echo "Cleaning up duplicate Week 24 entries..."
 

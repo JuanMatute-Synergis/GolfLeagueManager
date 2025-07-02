@@ -2,7 +2,7 @@
 
 # Script to update existing weeks to enable scoring and handicap calculation by default
 
-API_BASE="http://localhost:5000/api"
+API_BASE="http://localhost:5505/api"
 
 echo "=== Updating Existing Weeks to Enable Scoring and Handicap Calculation ==="
 

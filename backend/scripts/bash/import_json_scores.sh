@@ -27,7 +27,7 @@ EOF
 echo "�🚀 Sending JSON import request to API..."
 echo "⏳ This may take a while as it processes all players and rounds..."
 
-curl -X POST "http://localhost:5274/api/import/json-scores" \
+curl -X POST "http://localhost:5505/api/import/json-scores" \
   -H "Content-Type: application/json" \
   --data-binary @/tmp/json_import_payload.json \
   --max-time 300 \

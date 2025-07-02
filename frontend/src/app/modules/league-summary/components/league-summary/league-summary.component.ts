@@ -79,9 +79,9 @@ export class LeagueSummaryComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
 
-  private readonly apiUrl = 'http://localhost:5274/api';
+  private readonly apiUrl = '/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.loadSeasons();
@@ -95,10 +95,10 @@ export class LeagueSummaryComponent implements OnInit {
       next: (seasons) => {
         this.seasons = seasons;
         this.isLoading = false;
-        
+
         // Auto-select current season - first try by isCurrent flag, then by date
         let currentSeason = seasons.find(s => s.isCurrent);
-        
+
         if (!currentSeason && seasons.length > 0) {
           // Fallback: find season that contains today's date
           const today = new Date();
@@ -107,13 +107,13 @@ export class LeagueSummaryComponent implements OnInit {
             const endDate = new Date(season.endDate);
             return today >= startDate && today <= endDate;
           });
-          
+
           // If still no current season, use the most recent one
           if (!currentSeason) {
             currentSeason = seasons.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())[0];
           }
         }
-        
+
         if (currentSeason) {
           this.selectedSeasonId = currentSeason.id;
           this.onSeasonChange();
@@ -139,11 +139,11 @@ export class LeagueSummaryComponent implements OnInit {
       next: (weeks) => {
         this.weeks = weeks.sort((a, b) => b.weekNumber - a.weekNumber); // Most recent first
         this.isLoading = false;
-        
+
         // Auto-select current week based on today's date
         if (weeks.length > 0) {
           const today = new Date();
-          
+
           // Find the week that contains today's date or the closest past week
           const currentWeek = weeks
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // Sort by date ascending
@@ -153,12 +153,12 @@ export class LeagueSummaryComponent implements OnInit {
               const weekEndDate = new Date(weekDate.getTime() + (7 * 24 * 60 * 60 * 1000));
               return today >= weekDate && today <= weekEndDate;
             });
-          
+
           // If no current week found, find the most recent past week
           const selectedWeek = currentWeek || weeks
             .filter(week => new Date(week.date) <= today)
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
-          
+
           if (selectedWeek) {
             this.selectedWeekId = selectedWeek.id;
             this.onWeekChange();
@@ -230,11 +230,11 @@ export class LeagueSummaryComponent implements OnInit {
 
   getSessionDisplayText(): string {
     if (!this.summaryData?.session) return '';
-    
+
     const sessionNumber = this.summaryData.session.number;
     const startWeek = this.summaryData.session.startWeekNumber;
     const currentWeek = this.summaryData.session.currentWeekNumber;
-    
+
     if (startWeek === currentWeek) {
       return `Session ${sessionNumber} (Week ${startWeek})`;
     } else {

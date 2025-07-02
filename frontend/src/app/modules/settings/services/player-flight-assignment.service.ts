@@ -16,9 +16,9 @@ export interface PlayerFlightAssignment {
   providedIn: 'root'
 })
 export class PlayerFlightAssignmentService {
-  private readonly apiUrl = 'http://localhost:5274/api/player-flight-assignments';
+  private readonly apiUrl = '/api/player-flight-assignments';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAssignmentsByFlight(flightId: string): Observable<PlayerFlightAssignment[]> {
     return this.http.get<PlayerFlightAssignment[]>(`${this.apiUrl}/flight/${flightId}`);

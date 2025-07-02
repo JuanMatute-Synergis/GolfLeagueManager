@@ -47,7 +47,7 @@ interface MatchupWithDetails extends Matchup {
 })
 export class ScoreEntryComponent implements OnInit {
   @Input() mode: 'score-entry' | 'matchups' = 'score-entry';
-  
+
   seasons: Season[] = [];
   weeks: Week[] = [];
   matchups: MatchupWithDetails[] = [];
@@ -59,7 +59,7 @@ export class ScoreEntryComponent implements OnInit {
 
   // Cache for per-week averages
   private weekAverageCache: Map<string, number> = new Map();
-  
+
   // Pre-loaded averages for display (avoids calling methods in template)
   playerAverages: Map<string, number> = new Map();
 
@@ -97,7 +97,7 @@ export class ScoreEntryComponent implements OnInit {
     private router: Router,
     private dateUtil: DateUtilService,
     private http: HttpClient // <-- add HttpClient
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Detect mode from route
@@ -326,13 +326,13 @@ export class ScoreEntryComponent implements OnInit {
     return this.scorecardService.getScorecard(matchupId).toPromise().then(holeScores => {
       // Update cache
       this.holeScoresCache.set(matchupId, holeScores || []);
-      
+
       // Update matchup if it exists in current list
       const matchup = this.matchups.find(m => m.id === matchupId);
       if (matchup) {
         matchup.holeScores = holeScores || [];
       }
-      
+
       return holeScores || [];
     }).catch(error => {
       console.error('Error refreshing hole scores for matchup:', matchupId, error);
@@ -342,7 +342,7 @@ export class ScoreEntryComponent implements OnInit {
 
   loadHoleScoresForMatchups() {
     console.log('loadHoleScoresForMatchups called, isLoading:', this.isLoadingHoleScores);
-    
+
     // Prevent multiple simultaneous loads
     if (this.isLoadingHoleScores) {
       console.log('Already loading hole scores, skipping duplicate call');
@@ -352,13 +352,13 @@ export class ScoreEntryComponent implements OnInit {
     // Filter matchups that need hole scores and aren't already cached
     const matchupsToLoad = this.matchups.filter(matchup => {
       if (!matchup.id) return false;
-      
+
       // Check if already cached
       if (this.holeScoresCache.has(matchup.id)) {
         matchup.holeScores = this.holeScoresCache.get(matchup.id)!;
         return false;
       }
-      
+
       return true;
     });
 
@@ -371,7 +371,7 @@ export class ScoreEntryComponent implements OnInit {
     this.isLoadingHoleScores = true;
 
     // Load hole scores for matchups that need them
-    const requests = matchupsToLoad.map(matchup => 
+    const requests = matchupsToLoad.map(matchup =>
       this.scorecardService.getScorecard(matchup.id!).toPromise().then(holeScores => {
         // Cache the result
         this.holeScoresCache.set(matchup.id!, holeScores || []);
@@ -453,8 +453,8 @@ export class ScoreEntryComponent implements OnInit {
 
     // Use match play points if available (this is the correct way for match play scoring)
     if (matchup.playerAPoints !== null && matchup.playerAPoints !== undefined &&
-        matchup.playerBPoints !== null && matchup.playerBPoints !== undefined) {
-      
+      matchup.playerBPoints !== null && matchup.playerBPoints !== undefined) {
+
       if (matchup.playerAPoints > matchup.playerBPoints) {
         return matchup.playerAName || 'Player A';
       } else if (matchup.playerBPoints > matchup.playerAPoints) {
@@ -856,7 +856,7 @@ export class ScoreEntryComponent implements OnInit {
     // --- 9-hole stroke allocation fix ---
     // Only allocate strokes to the hardest holes within the 9 being played
     // For score-entry, assume holes 1-9 (adjust if back 9 is supported)
-    const holesInPlay = Array.from({length: 9}, (_, i) => ({ number: i + 1, handicap: i + 1 })); // Replace with real hole data if available
+    const holesInPlay = Array.from({ length: 9 }, (_, i) => ({ number: i + 1, handicap: i + 1 })); // Replace with real hole data if available
     const holesWithHandicap = holesInPlay.filter(h => typeof h.handicap === 'number');
     const handicapDifference = Math.abs(playerHandicap - opponentHandicap);
     const playerReceivesStrokes = playerHandicap > opponentHandicap;
@@ -890,8 +890,8 @@ export class ScoreEntryComponent implements OnInit {
   }
 
   private fetchPlayerWeekAverage(playerId: string, seasonId: string, weekNumber: number, cacheKey: string): void {
-    const url = `http://localhost:5274/api/averagescore/player/${playerId}/season/${seasonId}/uptoweek/${weekNumber}`;
-    
+    const url = `/api/averagescore/player/${playerId}/season/${seasonId}/uptoweek/${weekNumber}`;
+
     this.http.get<number>(url).subscribe({
       next: (average) => {
         this.weekAverageCache.set(cacheKey, average);
@@ -920,7 +920,7 @@ export class ScoreEntryComponent implements OnInit {
     // Fetch averages for all players at once
     const averageRequests = Array.from(playerIds).map(playerId => {
       const cacheKey = `${playerId}-${this.selectedWeek!.id}`;
-      
+
       // Check if already cached
       if (this.weekAverageCache.has(cacheKey)) {
         this.playerAverages.set(playerId, this.weekAverageCache.get(cacheKey)!);
@@ -928,7 +928,7 @@ export class ScoreEntryComponent implements OnInit {
       }
 
       // Fetch from API
-      const url = `http://localhost:5274/api/averagescore/player/${playerId}/season/${this.selectedWeek!.seasonId}/uptoweek/${this.selectedWeek!.weekNumber}`;
+      const url = `/api/averagescore/player/${playerId}/season/${this.selectedWeek!.seasonId}/uptoweek/${this.selectedWeek!.weekNumber}`;
       return this.http.get<number>(url).toPromise().then(average => {
         this.weekAverageCache.set(cacheKey, average!);
         this.playerAverages.set(playerId, average!);
@@ -977,7 +977,7 @@ export class ScoreEntryComponent implements OnInit {
 
   downloadWeekScorecardPdf(): void {
     if (!this.selectedWeekId) return;
-    const url = `http://localhost:5274/api/pdf/scorecard/week/${this.selectedWeekId}`;
+    const url = `/api/pdf/scorecard/week/${this.selectedWeekId}`;
     this.isLoading = true;
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {
@@ -999,7 +999,7 @@ export class ScoreEntryComponent implements OnInit {
 
   downloadWeekSummaryPdf(): void {
     if (!this.selectedWeekId) return;
-    const url = `http://localhost:5274/api/pdf/summary/week/${this.selectedWeekId}`;
+    const url = `/api/pdf/summary/week/${this.selectedWeekId}`;
     this.isLoading = true;
     this.http.get(url, { responseType: 'blob' }).subscribe({
       next: (blob) => {

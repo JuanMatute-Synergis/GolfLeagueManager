@@ -14,9 +14,9 @@ export interface Player {
   providedIn: 'root'
 })
 export class PlayerService {
-  private readonly apiUrl = 'http://localhost:5274/api/players';
+  private readonly apiUrl = '/api/players';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getPlayers(): Observable<Player[]> {
     return this.http.get<Player[]>(this.apiUrl);

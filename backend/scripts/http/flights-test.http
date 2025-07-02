@@ -1,16 +1,26 @@
-# Flight API Test Requests
+# ### Get all flights
+GET http://localhost:5505/api/flights
 
-### Get all flights
-GET http://localhost:5274/api/flights
-
-### Get active flights only
-GET http://localhost:5274/api/flights/active
+### Get active flights
+GET http://localhost:5505/api/flights/active
 
 ### Get upcoming flights
-GET http://localhost:5274/api/flights/upcoming
+GET http://localhost:5505/api/flights/upcoming
 
 ### Create a new flight
-POST http://localhost:5274/api/flights
+POST http://localhost:5505/api/flightsTest Requests
+
+### Get all flights
+GET http://localhost:5505/api/flights
+
+### Get active flights only
+GET http://localhost:5505/api/flights/active
+
+### Get upcoming flights
+GET http://localhost:5505/api/flights/upcoming
+
+### Create a new flight
+POST http://localhost:5505/api/flights
 Content-Type: application/json
 
 {
@@ -24,7 +34,7 @@ Content-Type: application/json
 }
 
 ### Create another flight
-POST http://localhost:5274/api/flights
+POST http://localhost:5505/api/flights
 Content-Type: application/json
 
 {
@@ -38,13 +48,13 @@ Content-Type: application/json
 }
 
 ### Get flights by date range
-GET http://localhost:5274/api/flights/date-range?startDate=2025-06-01&endDate=2025-06-30
+GET http://localhost:5505/api/flights/date-range?startDate=2025-06-01&endDate=2025-06-30
 
 ### Get flight by ID (replace {id} with actual ID)
-GET http://localhost:5274/api/flights/1
+GET http://localhost:5505/api/flights/1
 
 ### Update flight (replace {id} with actual ID)
-PUT http://localhost:5274/api/flights/1
+PUT http://localhost:5505/api/flights/1
 Content-Type: application/json
 
 {
@@ -59,4 +69,4 @@ Content-Type: application/json
 }
 
 ### Delete flight (replace {id} with actual ID)
-DELETE http://localhost:5274/api/flights/1
+DELETE http://localhost:5505/api/flights/1

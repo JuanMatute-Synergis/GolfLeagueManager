@@ -3,7 +3,7 @@
 # Test script to verify week deletion and renumbering
 # This script will test deleting a week and check if renumbering works correctly
 
-API_BASE="http://localhost:5000/api"
+API_BASE="http://localhost:5001/api"
 
 echo "=== Testing Week Deletion and Renumbering ==="
 

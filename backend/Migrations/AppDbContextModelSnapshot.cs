@@ -160,6 +160,73 @@ namespace backend.Migrations
                     b.ToTable("HoleScores");
                 });
 
+            modelBuilder.Entity("GolfLeagueManager.LeagueSettings", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<bool>("AllowHandicapUpdates")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("CoursePar")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("CourseRating")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CustomRules")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<int>("HandicapMethod")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HoleHalvePoints")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HoleWinPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MatchTiePoints")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MatchWinBonus")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MaxRoundsForHandicap")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PointsSystem")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScoringMethod")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("SeasonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("SlopeRating")
+                        .HasColumnType("numeric");
+
+                    b.Property<bool>("UseSessionHandicaps")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeasonId")
+                        .IsUnique();
+
+                    b.ToTable("LeagueSettings");
+                });
+
             modelBuilder.Entity("GolfLeagueManager.Matchup", b =>
                 {
                     b.Property<Guid>("Id")
@@ -533,6 +600,17 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Matchup");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.LeagueSettings", b =>
+                {
+                    b.HasOne("GolfLeagueManager.Season", "Season")
+                        .WithMany()
+                        .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Season");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Matchup", b =>

@@ -31,24 +31,28 @@ namespace GolfLeagueManager.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
+            // Debug: Print connection string information
+            Console.WriteLine($"DbContext Connection String: {_context.Database.GetConnectionString()}");
+            Console.WriteLine($"Config Connection String: {_config.GetConnectionString("DefaultConnection")}");
+            
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
             if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
                 return Unauthorized("Invalid username or password");
 
             var token = GenerateJwtToken(user);
-            
+
             // Set HttpOnly cookie for JWT
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, // Only over HTTPS in production
+                Secure = false, // Set to true for HTTPS in production
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddDays(7), // Match JWT expiration
                 Path = "/"
             };
-            
+
             Response.Cookies.Append("golf_jwt_token", token, cookieOptions);
-            
+
             // Return success without the token in the response body
             return Ok(new LoginResponse { Token = "", Username = user.Username });
         }
@@ -66,7 +70,7 @@ namespace GolfLeagueManager.Controllers
                 Expires = DateTime.UtcNow.AddDays(-1), // Expire immediately
                 Path = "/"
             };
-            
+
             Response.Cookies.Append("golf_jwt_token", "", cookieOptions);
             return Ok(new { message = "Logged out successfully" });
         }

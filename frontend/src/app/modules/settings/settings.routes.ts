@@ -11,6 +11,10 @@ export const settingsRoutes: Routes = [
     loadComponent: () => import('./components/seasons-settings/seasons-settings.component').then(m => m.SeasonsSettingsComponent)
   },
   { 
+    path: 'league-settings', 
+    loadComponent: () => import('./components/league-settings/league-settings.component').then(m => m.LeagueSettingsComponent)
+  },
+  { 
     path: 'scheduling', 
     loadComponent: () => import('./components/scheduling-settings/scheduling-settings.component').then(m => m.SchedulingSettingsComponent)
   },

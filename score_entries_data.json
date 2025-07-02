@@ -1,0 +1,5093 @@
+[
+    {
+        "id": "54ac73f3-c4d3-4bb6-b78d-64c95db82f95",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 40,
+        "pointsEarned": 14,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "5995fa07-3eb8-4fa3-bd8a-bc5acf93e273",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 42,
+        "pointsEarned": 9,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "5ef999f9-5218-4b7c-b1e9-03ed53da5334",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 42,
+        "pointsEarned": 3,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "e9800b98-7892-41c6-a2df-fd99b9ab2c1f",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 43,
+        "pointsEarned": 3,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "2e53e75f-f7a9-480c-9797-113d05fee3bf",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 43,
+        "pointsEarned": 4,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "cb18771c-e13e-41ae-bee8-103c05b7916e",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 44,
+        "pointsEarned": 12,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "f9e51b87-fbd1-4ddd-a4b8-c99a6cb798a2",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 44,
+        "pointsEarned": 17,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "c13eeb27-bbb8-44ba-9541-28438203ab0d",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 45,
+        "pointsEarned": 10,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "24804bc8-ae6b-4055-9d5b-13004e6d82ae",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 45,
+        "pointsEarned": 16,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "432eeea3-4671-4b66-b8c0-ae5f95429e3f",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 45,
+        "pointsEarned": 24,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "1d8c0295-b2f0-464b-bebe-28c66cfb3b31",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 45,
+        "pointsEarned": 3,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "37c6e060-b6d5-48b5-bbb1-effe60347646",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 46,
+        "pointsEarned": 20,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "c404a0ed-3709-47d3-b38a-e5d1eb6e4f45",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 46,
+        "pointsEarned": 17,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "d841f6b7-fb4f-4177-8459-8ad6f1cfad55",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 47,
+        "pointsEarned": 12,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "2cfafe65-6059-455a-8828-566f8cdfeff3",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 47,
+        "pointsEarned": 13,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "6ef42b74-511d-4c9f-99ac-25395b30c036",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 47,
+        "pointsEarned": 9,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "b35e0a55-3d0c-491d-8ce4-cc0c801ce82c",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 48,
+        "pointsEarned": 12,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "90281493-9b84-47df-bffc-c86b007fabda",
+        "playerId": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 48,
+        "pointsEarned": 14,
+        "player": {
+            "id": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+            "firstName": "Jim",
+            "lastName": "Eck",
+            "email": "jim.eck@golfleague.com",
+            "phone": "610-858-6264",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 46.8,
+            "currentAverageScore": 46.77
+        }
+    },
+    {
+        "id": "45baa56b-56b6-443f-995c-90eac95bb846",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 49,
+        "pointsEarned": 11,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "c82ab268-7b02-47ff-8d65-d07ccd2e0a98",
+        "playerId": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 49,
+        "pointsEarned": 6,
+        "player": {
+            "id": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+            "firstName": "Steve",
+            "lastName": "Hampton",
+            "email": "steve.hampton@golfleague.com",
+            "phone": "610-442-2483",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.62,
+            "currentAverageScore": 47.69
+        }
+    },
+    {
+        "id": "9ba5db00-5534-4aef-868c-99fb5f433b0d",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 52,
+        "pointsEarned": 5,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "fb9ad51e-016a-446c-86d5-ed1f84cab378",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 52,
+        "pointsEarned": 10,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "06f176d2-70c6-4f5d-a9fe-0b1bc39f066c",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 55,
+        "pointsEarned": 5,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "46952ba0-dedc-434e-b217-5ff713463377",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 55,
+        "pointsEarned": 4,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "eb0f9d23-009a-4310-91c7-2f5b0fcbc896",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 56,
+        "pointsEarned": 2,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "4384ef0d-0215-4af9-97c0-001bb7b66f90",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 57,
+        "pointsEarned": 2,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    },
+    {
+        "id": "526be84f-f419-4cf7-9f96-ac4a4b9072c2",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 57,
+        "pointsEarned": 1,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "0a09aabc-8127-48fb-b672-75cab035e1a4",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 58,
+        "pointsEarned": 2,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "fe69fccf-b9ac-45e8-9d93-fd7972c02d9c",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 60,
+        "pointsEarned": 1,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "820375b2-9bbb-403c-946b-93e8ec438852",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "score": 65,
+        "pointsEarned": 1,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "698b3902-1206-45bd-bd0c-d84771bee241",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "pointsEarned": 4,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "8d51d2fb-4eb6-4be6-af0f-128669e41c46",
+        "playerId": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+        "weekId": "28e66e25-251d-4abf-ae49-d4578c165447",
+        "pointsEarned": 0,
+        "player": {
+            "id": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+            "firstName": "Jay",
+            "lastName": "Sullivan",
+            "email": "jay.sullivan@golfleague.com",
+            "phone": "610-476-4418",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.1,
+            "currentAverageScore": 44.1
+        }
+    },
+    {
+        "id": "a63d5cce-0a4b-4f8b-8c1b-e208494eb0ca",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 42,
+        "pointsEarned": 5,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "69bb6e73-8b6b-48d3-9393-71fe011fd859",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 43,
+        "pointsEarned": 17,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "184275c6-73d8-4c42-9e1c-1532ba5fccac",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 43,
+        "pointsEarned": 9,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "edda17a0-b56c-4aae-87c9-769fe9d113a6",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 43,
+        "pointsEarned": 22,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "a4f6492e-9cb5-4477-aeb9-5eecf50d4881",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 44,
+        "pointsEarned": 12,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "9302e51d-19f3-48d9-a510-f7399a91a393",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 44,
+        "pointsEarned": 4,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "bcf2b8d8-b766-4e94-8a00-ff7a53ae29ea",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 45,
+        "pointsEarned": 11,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "c1568902-4037-4550-b9a7-aa7dbe637656",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 45,
+        "pointsEarned": 2,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "360823a7-05bc-4ca0-9071-216aaf112c27",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 45,
+        "pointsEarned": 17,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "df664533-d53c-4bc1-9cf7-b8c97ec3f5af",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 46,
+        "pointsEarned": 15,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "a13f1040-39a8-4bf9-99e4-d1dc625df9d6",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 47,
+        "pointsEarned": 3,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "8ef0f451-062f-4cf4-9415-865dbd17472d",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 47,
+        "pointsEarned": 12,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "c667fa7a-f23f-4b0b-9df0-a30c5b4188de",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 47,
+        "pointsEarned": 2,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "0a8d1348-9daf-44c8-8f2a-1066b45b22be",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 48,
+        "pointsEarned": 8,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "e69a133d-e394-428e-8d31-70214f415051",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 48,
+        "pointsEarned": 12,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "e8463b2b-0d51-4386-b5ae-08f3eb2e4234",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 50,
+        "pointsEarned": 6,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "ee6866a5-eb4c-49e4-b450-0e32170d948d",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 50,
+        "pointsEarned": 1,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "0290ad29-f358-425e-a7b8-bd044ff0a45e",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 50,
+        "pointsEarned": 9,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "56064317-12d4-47c2-bf79-8df51814213f",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 51,
+        "pointsEarned": 3,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "19b6b4f3-dc9d-48bc-9235-1c7378ab856f",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 52,
+        "pointsEarned": 4,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "636e51d5-830e-46a7-8159-c3e98380fe0c",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 53,
+        "pointsEarned": 5,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "eedd57ee-8900-4286-92fa-0c692503b450",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 57,
+        "pointsEarned": 3,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "d5f5247d-30ab-48b4-8ec8-b137a8f849a8",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 59,
+        "pointsEarned": 1,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "f0e70ef8-5750-4918-b069-91a1c51e98b8",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 59,
+        "pointsEarned": 3,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "3b5a891e-17f2-4c5e-9458-511fbe838c72",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "score": 61,
+        "pointsEarned": 1,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "ba80e70b-6b2f-4915-829a-209df7cca893",
+        "playerId": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "pointsEarned": 10,
+        "player": {
+            "id": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+            "firstName": "Jay",
+            "lastName": "Sullivan",
+            "email": "jay.sullivan@golfleague.com",
+            "phone": "610-476-4418",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.1,
+            "currentAverageScore": 44.1
+        }
+    },
+    {
+        "id": "14089925-7b00-45cf-ab7c-c9a0102696bb",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "pointsEarned": 10,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "fb9ff82e-e2b7-4285-b78b-dc57e1e8562e",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "pointsEarned": 0,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "20508bc3-afcf-4aff-803c-895b3e8d480c",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "pointsEarned": 0,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    },
+    {
+        "id": "8fdf3564-bd8f-49ac-b244-d6aa44a2e862",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "fbb56ea2-0f3d-4fcb-b84e-51c00ff86cdc",
+        "pointsEarned": 4,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "c947edf2-24b6-465b-b4b8-61870d0ebc07",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 39,
+        "pointsEarned": 16,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "da21e749-1eab-491f-bfff-64807989ac85",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 40,
+        "pointsEarned": 27,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "333f544d-143d-4a6e-b9de-3155cbcee598",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 40,
+        "pointsEarned": 16,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "bda4162a-8aac-47b2-88c9-1df756063e8b",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 42,
+        "pointsEarned": 3,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "aa52822c-7cb6-4726-949d-381d89cbf347",
+        "playerId": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 42,
+        "pointsEarned": 10,
+        "player": {
+            "id": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+            "firstName": "Steve",
+            "lastName": "Hampton",
+            "email": "steve.hampton@golfleague.com",
+            "phone": "610-442-2483",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.62,
+            "currentAverageScore": 47.69
+        }
+    },
+    {
+        "id": "026cf4e1-698b-445a-aa53-5e46ef3d3b0d",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 43,
+        "pointsEarned": 24,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "fa7353ae-e2b4-4b5a-aee9-d43838e51926",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 43,
+        "pointsEarned": 26,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "faec9419-cc01-460e-bc40-63c1a2c417cd",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 43,
+        "pointsEarned": 9,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "1b51d772-e773-408b-91d7-fb913a98a65b",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 43,
+        "pointsEarned": 15,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "8d2539c5-1536-4fb8-8a59-3fbfd9eb08f3",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 44,
+        "pointsEarned": 9,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "7303bc2c-d99c-4399-993b-4097a2f8cd71",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 45,
+        "pointsEarned": 20,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "45860411-970b-47e1-8dbf-81c9cf68b1ad",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 46,
+        "pointsEarned": 6,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "5f94af48-ac69-46d4-9bf2-13b32cbf6503",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 46,
+        "pointsEarned": 20,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "da26417d-0a01-4f54-8b93-1752006b7481",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 46,
+        "pointsEarned": 19,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "90325667-1f71-4718-a89c-e042ea3c9122",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 46,
+        "pointsEarned": 7,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "24917e98-b944-45c7-9471-05cd5cd471b1",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 46,
+        "pointsEarned": 3,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "079824ce-1f7f-401c-9a16-78d5c3da2082",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 47,
+        "pointsEarned": 4,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "2aabd461-2b60-4437-90f6-d1bff6d150b0",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 48,
+        "pointsEarned": 11,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    },
+    {
+        "id": "de5f5a1f-aed8-4b95-8273-77df9e5db86c",
+        "playerId": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 48,
+        "pointsEarned": 3,
+        "player": {
+            "id": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+            "firstName": "Jim",
+            "lastName": "Eck",
+            "email": "jim.eck@golfleague.com",
+            "phone": "610-858-6264",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 46.8,
+            "currentAverageScore": 46.77
+        }
+    },
+    {
+        "id": "e03485e2-209f-426c-87b9-f3d724d59f45",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 48,
+        "pointsEarned": 14,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "9f6197a9-bbbb-4003-a68b-d4a6dcc556d6",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 48,
+        "pointsEarned": 7,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "be73e1b5-ddbe-4f6c-a081-6f40beb520f2",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 49,
+        "pointsEarned": 1,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "b1302829-1e7b-4111-883b-520416261d00",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 49,
+        "pointsEarned": 4,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "24fe76a8-6d30-46b9-8eb7-195b4eea87b5",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 49,
+        "pointsEarned": 4,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "094501f2-c6ae-4168-bdc2-aedb8c4c8007",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 49,
+        "pointsEarned": 2,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "4fc04db4-d34e-4205-b26e-e914357680d3",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 50,
+        "pointsEarned": 5,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "f5973593-e583-41fa-ba38-6772ad6624aa",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 51,
+        "pointsEarned": 3,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "6e942fbc-bee4-41da-82aa-5ee51f969c54",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 52,
+        "pointsEarned": 3,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "537af6d4-dda1-4606-a8c1-632ae0edd0e8",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 54,
+        "pointsEarned": 1,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "22fedf53-5c69-4359-8de4-a13478ec8776",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "score": 56,
+        "pointsEarned": 1,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "0104bf0a-2e1f-4270-a627-7b645e26674e",
+        "playerId": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "pointsEarned": 4,
+        "player": {
+            "id": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+            "firstName": "Jay",
+            "lastName": "Sullivan",
+            "email": "jay.sullivan@golfleague.com",
+            "phone": "610-476-4418",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.1,
+            "currentAverageScore": 44.1
+        }
+    },
+    {
+        "id": "140a93f0-0b8d-43e0-9bfa-825aa0dcfed0",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "28712772-8857-4cda-b5c6-97243ceb8b8d",
+        "pointsEarned": 4,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "1003aca1-726d-435c-b490-b778690d6885",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 41,
+        "pointsEarned": 14,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "97f3e1bd-8d33-495d-a397-64973865e32b",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 42,
+        "pointsEarned": 21,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "dc3e6886-14f1-4e50-a93d-090f9f5b8070",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 42,
+        "pointsEarned": 10,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "168dc885-a813-4955-bf94-185386be8fa3",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 43,
+        "pointsEarned": 17,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "60295d75-9ce9-4d54-97a9-2443972d9745",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 43,
+        "pointsEarned": 4,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "7ccb9f0c-f17c-40b8-9652-75c9b6058675",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 43,
+        "pointsEarned": 13,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "5e718901-8894-43f1-b2b5-f77b7eff4e56",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 43,
+        "pointsEarned": 23,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "2aa6953f-d5da-43e0-9b2d-eae87e28464c",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 44,
+        "pointsEarned": 23,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "d0a52683-6b75-4bb2-8f4a-10ad5768a3cd",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 44,
+        "pointsEarned": 19,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "30b84a7d-050c-4b64-9a1f-07eb51889e3a",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 44,
+        "pointsEarned": 18,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "decdcb06-894f-4281-91e6-4c3cd7dd31af",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 45,
+        "pointsEarned": 20,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "f5cee893-b0ef-4a40-9766-835d9e49b9a8",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 45,
+        "pointsEarned": 17,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "2452c80a-c369-4ad4-a6ef-6b0548baf15c",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 47,
+        "pointsEarned": 3,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "9d71a8c8-4308-4971-b08f-4a729ba863ce",
+        "playerId": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 47,
+        "pointsEarned": 4,
+        "player": {
+            "id": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+            "firstName": "Jim",
+            "lastName": "Eck",
+            "email": "jim.eck@golfleague.com",
+            "phone": "610-858-6264",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 46.8,
+            "currentAverageScore": 46.77
+        }
+    },
+    {
+        "id": "0436ba9f-853a-4047-a587-788291c9bc0d",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 48,
+        "pointsEarned": 1,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "96e4399c-2578-4615-bea6-bb4be6aeb275",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 48,
+        "pointsEarned": 7,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "f10d5d68-32e6-4b97-9b3d-b46c937d1661",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 49,
+        "pointsEarned": 10,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "0766000b-a9f9-4604-af97-b24a7e767e0c",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 50,
+        "pointsEarned": 12,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "e40afa91-6515-4f91-a4f6-19a5204ab649",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 50,
+        "pointsEarned": 2,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "d324021a-8367-4ddf-9ae0-13bf4bf70fc4",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 50,
+        "pointsEarned": 7,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "e0ecccba-7926-4216-9a9d-90ec9a1c52dd",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 50,
+        "pointsEarned": 10,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "6bfeb576-92b3-4b2d-b1b8-e9aeace7aa82",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 51,
+        "pointsEarned": 5,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "7a3dc001-8510-4bf3-8ca2-b59c3c8e0253",
+        "playerId": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 51,
+        "pointsEarned": 7,
+        "player": {
+            "id": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+            "firstName": "Steve",
+            "lastName": "Hampton",
+            "email": "steve.hampton@golfleague.com",
+            "phone": "610-442-2483",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.62,
+            "currentAverageScore": 47.69
+        }
+    },
+    {
+        "id": "b92ff209-ac26-43d6-a4ef-4be0caffbf99",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 52,
+        "pointsEarned": 2,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    },
+    {
+        "id": "67f189b9-6ac6-4c34-a7f1-c47e3de74d04",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 52,
+        "pointsEarned": 4,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "2ea0e978-3ca5-4131-9d08-62533ab38d0f",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 54,
+        "pointsEarned": 1,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "e78cc2ac-fdc7-4c28-a8b7-c1b5cb9e604c",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 55,
+        "pointsEarned": 3,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "eff8584b-b55d-4ea4-b624-d733cc5237fc",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 57,
+        "pointsEarned": 2,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "48c4afa4-15bf-4411-9476-6ee22b92bf08",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "score": 61,
+        "pointsEarned": 1,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "0bca6d40-1741-4f85-b3e8-12e4318a5726",
+        "playerId": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "pointsEarned": 4,
+        "player": {
+            "id": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+            "firstName": "Jay",
+            "lastName": "Sullivan",
+            "email": "jay.sullivan@golfleague.com",
+            "phone": "610-476-4418",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.1,
+            "currentAverageScore": 44.1
+        }
+    },
+    {
+        "id": "45f01efd-6b1a-469e-9288-149819cbea88",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "pointsEarned": 4,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "2769b5a7-ad24-46a3-9685-c58644d99648",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "15889a6d-02e1-430d-8ec7-6fd230f7ac6d",
+        "pointsEarned": 4,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "444a6378-fd15-4780-979a-7b53d7d76d9b",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 40,
+        "pointsEarned": 14,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "dcdc35b8-31b9-496f-bd40-0d9806c40b5b",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 41,
+        "pointsEarned": 13,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "ec0d4619-9a95-40df-b59c-50a240c39a7a",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 42,
+        "pointsEarned": 10,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "16354e7d-fc3e-4af2-abfc-9d1ebbbba209",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 43,
+        "pointsEarned": 1,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "06218827-602a-4550-b70b-da7477a4e4ae",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 43,
+        "pointsEarned": 26,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "03557813-34d7-4f3d-8ddc-a3c82a0de3b7",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 44,
+        "pointsEarned": 4,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "96077aa9-d080-4c28-a074-0acfa1eda6cf",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 44,
+        "pointsEarned": 24,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "c23a5bcc-6fb4-4cee-8d11-0b671667048f",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 44,
+        "pointsEarned": 2,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "5636afed-9725-493f-ba04-bdcc442195ff",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 45,
+        "pointsEarned": 12,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "f2612600-1936-4aa1-8464-6dc043f8541e",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 45,
+        "pointsEarned": 6,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "d51f2b1a-e3fa-4da3-86a0-acf6c0b60975",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 45,
+        "pointsEarned": 13,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "eae0025a-a06e-4dbf-864d-4f617ee7016f",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 45,
+        "pointsEarned": 21,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "4bf3e41d-3a3e-4e36-a2b4-da141b324d80",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 46,
+        "pointsEarned": 15,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "6f282a2e-53a1-465e-8704-95a388fc568e",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 46,
+        "pointsEarned": 2,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "e4e09dd6-8f33-4e0b-b33d-f60fa0fda1ae",
+        "playerId": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 46,
+        "pointsEarned": 5,
+        "player": {
+            "id": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+            "firstName": "Steve",
+            "lastName": "Hampton",
+            "email": "steve.hampton@golfleague.com",
+            "phone": "610-442-2483",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.62,
+            "currentAverageScore": 47.69
+        }
+    },
+    {
+        "id": "5b586281-d50f-42c9-bf79-82be609450b6",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 46,
+        "pointsEarned": 9,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "ceab5719-b153-438f-a00f-45cd95dabfcf",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 47,
+        "pointsEarned": 12,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "b4104611-417e-4364-be8b-46aff59483cf",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 48,
+        "pointsEarned": 3,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "01207733-ecc1-4783-9a3e-1c65c1342092",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 48,
+        "pointsEarned": 9,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "f944b12e-07e3-44a0-997c-1ca10c100ce4",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 48,
+        "pointsEarned": 11,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "2228ec5a-e792-4bde-9311-0a765f222bec",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 48,
+        "pointsEarned": 11,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "6f44e4a5-fe26-48c1-ac85-c750c0689b50",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 49,
+        "pointsEarned": 7,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "e1349bd5-34b5-459f-907d-8f14843243f4",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 50,
+        "pointsEarned": 2,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "105d8f72-daad-4d9e-924e-a046cf3bbc21",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 50,
+        "pointsEarned": 3,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "9375629a-7826-46c4-9e70-236ce0aa46f3",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 51,
+        "pointsEarned": 1,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "d2a17282-6f20-4189-abd3-4718b6b42beb",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 52,
+        "pointsEarned": 1,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    },
+    {
+        "id": "72c0e93b-1685-4bca-935b-23aae5e3b7e1",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 53,
+        "pointsEarned": 1,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "5b590c6c-de48-4c9e-a770-2bda06946a85",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "score": 57,
+        "pointsEarned": 1,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "813f1399-4b5e-4900-95d0-0757bf158355",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "pointsEarned": 4,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "f4c62c8b-9afc-4462-9d01-6fd8e4fbe56d",
+        "playerId": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "pointsEarned": 4,
+        "player": {
+            "id": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+            "firstName": "Jay",
+            "lastName": "Sullivan",
+            "email": "jay.sullivan@golfleague.com",
+            "phone": "610-476-4418",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.1,
+            "currentAverageScore": 44.1
+        }
+    },
+    {
+        "id": "8534936b-f35e-4b6c-ac34-2896a767e6db",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "pointsEarned": 4,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "d285ed93-0ecc-4f7f-acb4-1f910774d30b",
+        "playerId": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+        "weekId": "7ba4f060-e7bc-4aa3-8574-e167b4c8712e",
+        "pointsEarned": 4,
+        "player": {
+            "id": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+            "firstName": "Jim",
+            "lastName": "Eck",
+            "email": "jim.eck@golfleague.com",
+            "phone": "610-858-6264",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 46.8,
+            "currentAverageScore": 46.77
+        }
+    },
+    {
+        "id": "14be3d62-fae0-4cbf-a51b-09d4a6f8fe8c",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 37,
+        "pointsEarned": 33,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "74118b61-c0fd-413c-94ee-0beacee43cf0",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 39,
+        "pointsEarned": 32,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "929a1105-493d-4d38-9483-fe9c65cd9f1f",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 40,
+        "pointsEarned": 31,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "cb913c7d-a374-4a64-a401-e8e528842aaf",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 41,
+        "pointsEarned": 30,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "ec0ec9b0-a758-42cc-8df2-b5e385ad14aa",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 41,
+        "pointsEarned": 30,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "1b4842ce-51fd-42a8-8c0e-58ace31eadb4",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 41,
+        "pointsEarned": 30,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "dae48c2b-fd1b-4fc8-aa12-775ea2cc9e0b",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 42,
+        "pointsEarned": 27,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "02323b84-e27f-449f-b82b-e663b9adc077",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 42,
+        "pointsEarned": 26,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "20107834-1410-42a3-8ca6-ed555dd71388",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 43,
+        "pointsEarned": 24,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "a0929494-d56d-4e9c-a6cf-0d0f882c6e3f",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 43,
+        "pointsEarned": 25,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "ee3ad047-2ced-48b5-bbb5-9228735ad9b6",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 43,
+        "pointsEarned": 25,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "9522087e-ad89-478c-a66b-d73a098714a1",
+        "playerId": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 44,
+        "pointsEarned": 22,
+        "player": {
+            "id": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+            "firstName": "Jay",
+            "lastName": "Sullivan",
+            "email": "jay.sullivan@golfleague.com",
+            "phone": "610-476-4418",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.1,
+            "currentAverageScore": 44.1
+        }
+    },
+    {
+        "id": "2260f833-96fe-4df0-b715-cfc258576665",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 44,
+        "pointsEarned": 22,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "72f0dc91-4681-4e8c-8cce-3a5a50bc5577",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 44,
+        "pointsEarned": 21,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "cce8c9a1-01a0-4338-a643-0144fc94f742",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 45,
+        "pointsEarned": 19,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "2e753468-8e1f-4625-8d8e-64f362f98df5",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 46,
+        "pointsEarned": 18,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "b9726b6e-7489-4b29-ae18-59c1d1cb0362",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 46,
+        "pointsEarned": 18,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "ba438a34-8569-4272-82ea-1ec53654bdfe",
+        "playerId": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 46,
+        "pointsEarned": 18,
+        "player": {
+            "id": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+            "firstName": "Steve",
+            "lastName": "Hampton",
+            "email": "steve.hampton@golfleague.com",
+            "phone": "610-442-2483",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.62,
+            "currentAverageScore": 47.69
+        }
+    },
+    {
+        "id": "1f67944b-1e52-42aa-b7fb-0d04c7f31122",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 47,
+        "pointsEarned": 15,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "945e4f2c-2278-4606-8cc3-a8aa41833d3f",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 47,
+        "pointsEarned": 15,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "ece94b2d-7ef4-4b8a-ac4a-facdcbff0cda",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 47,
+        "pointsEarned": 15,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "6c9cfa1e-0063-484c-9272-0ecfdf27d1ad",
+        "playerId": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 48,
+        "pointsEarned": 12,
+        "player": {
+            "id": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+            "firstName": "Jim",
+            "lastName": "Eck",
+            "email": "jim.eck@golfleague.com",
+            "phone": "610-858-6264",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 46.8,
+            "currentAverageScore": 46.77
+        }
+    },
+    {
+        "id": "59310597-48a0-4d30-8401-d4a6b81fbdde",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 48,
+        "pointsEarned": 12,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "68f37f2e-81d8-4c27-8320-99fcdc1204e4",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 49,
+        "pointsEarned": 8,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "1d0be7e3-a53e-4fe7-9a3c-f0fc7e13e8df",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 51,
+        "pointsEarned": 9,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "b0c2005b-0256-4ab0-9c6a-235f85b502af",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 51,
+        "pointsEarned": 9,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "0b857294-7baf-424c-8091-1fbfea3f2261",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 51,
+        "pointsEarned": 8,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "f50f17db-d091-4405-a054-7bcb541cc69a",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 52,
+        "pointsEarned": 6,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "e1769847-71a2-4235-9b92-f70a225f34ee",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 53,
+        "pointsEarned": 5,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "aa812109-bd50-4212-923f-25b99fb763ba",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 55,
+        "pointsEarned": 4,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "29892c33-c521-4789-8a32-1faa1ad867d8",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 56,
+        "pointsEarned": 3,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "81160221-71bf-4186-9b99-c474ed46a2e4",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "73ac012e-8eea-48d8-b40f-9fabca024d68",
+        "score": 63,
+        "pointsEarned": 2,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    },
+    {
+        "id": "8ba69e3b-9a5b-48ae-afb4-4fe59c51699a",
+        "playerId": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+            "firstName": "Steve",
+            "lastName": "Hampton",
+            "email": "steve.hampton@golfleague.com",
+            "phone": "610-442-2483",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.62,
+            "currentAverageScore": 47.69
+        }
+    },
+    {
+        "id": "973ae5a9-9d9d-4c97-9c31-efa1a80589c6",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "d69efab6-c358-4a97-ba35-d6a0e4930685",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "16def0f0-ad9e-4637-88b0-1fdc8243e847",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "62d3feab-571d-4c5b-b327-145e6eac6951",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "cfcb7707-917c-484c-8916-2aad59ca58be",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    },
+    {
+        "id": "404a6639-2b4b-4932-a8f5-3b9e8f19adaa",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "091db117-4d77-484a-a5e6-43bb0f9f1748",
+        "playerId": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+            "firstName": "Jim",
+            "lastName": "Eck",
+            "email": "jim.eck@golfleague.com",
+            "phone": "610-858-6264",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 46.8,
+            "currentAverageScore": 46.77
+        }
+    },
+    {
+        "id": "19fbcfbc-6ec5-4f7c-8ffa-d7f6d9399c08",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "33998196-2347-4d18-bd6b-c92786edad89",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "79528c28-35db-4fec-998d-04c05ea92124",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "1fdecc58-f4b6-4c26-9fe8-af98d8a89805",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "a043da2f-d7b7-429d-8742-714a2c82f720",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "fc3f4cbc-40ee-4bc1-9797-e433da89f625",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "efa8fc74-7640-4f6c-9a51-99372c5f4c01",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "e73d3b82-0d91-4f5e-bca1-f99bd253c795",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "8e104f2d-9e9b-44e4-87cc-bf830a516fe3",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "c13313f2-9617-425b-b59c-25cac7d2525c",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "560a7634-6292-46af-8c59-0111a2462d07",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "c3b0a7d3-7d72-4a74-bf9b-73265d4c01c5",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "9e9b485d-539d-40f1-a856-3b060713b093",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "f9cada77-366d-4f3b-ba07-caf2f9811b0b",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "560de60f-d7e9-4360-a6bd-d6a053998896",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 0,
+        "pointsEarned": 0,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "57c0a7c7-ad72-4377-9eb5-7a29d27438d3",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 1,
+        "pointsEarned": 5,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "5735565e-a10b-4335-8b7e-2f058cf0756b",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 4,
+        "pointsEarned": 6,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "b70b563b-f539-4e89-9d5b-b9436c7d1b3e",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 11,
+        "pointsEarned": 5,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "d3316c39-fea5-42ad-881b-d99b0327b823",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 44,
+        "pointsEarned": 4,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "7cd4afdb-9f8f-4886-9c0a-417faea08e51",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 44,
+        "pointsEarned": 4,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "cbc440f8-8af6-4175-ae69-2803a9e3e14f",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "score": 46,
+        "pointsEarned": 2,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "103ef45b-0f35-4444-bf7a-a8a1fec91bd6",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "pointsEarned": 0,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "5d47a713-c112-4f96-82e1-b30707546068",
+        "playerId": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "pointsEarned": 0,
+        "player": {
+            "id": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+            "firstName": "Jay",
+            "lastName": "Sullivan",
+            "email": "jay.sullivan@golfleague.com",
+            "phone": "610-476-4418",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.1,
+            "currentAverageScore": 44.1
+        }
+    },
+    {
+        "id": "9e540567-9941-4aac-a0ec-c6a04e6e301c",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "03952e32-9a6c-4101-b959-7cb099cfafed",
+        "pointsEarned": 0,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "54004a31-7474-4c88-9d57-b8298e7a45a3",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 37,
+        "pointsEarned": 22,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "b971b77a-1268-4f89-a08c-d95eb7669078",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 38,
+        "pointsEarned": 22,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "75c4ceaf-68af-48b3-92f8-219ef1368f06",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 41,
+        "pointsEarned": 3,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "9571a560-019a-4e82-9bdf-27258c3008fb",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 41,
+        "pointsEarned": 21,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "6e519453-5985-4473-b34e-59324d612384",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 42,
+        "pointsEarned": 25,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "370919b0-f6b4-4fcc-a82c-d89f8b07ed66",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 42,
+        "pointsEarned": 19,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "47821457-4c18-48e3-8bbe-60a0aaca2a3f",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 42,
+        "pointsEarned": 4,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "9f3f3995-7640-493a-8a02-e81a62a9e704",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 43,
+        "pointsEarned": 10,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "8dc47eee-fe5d-4cb6-af30-1d3511bd4b1b",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 43,
+        "pointsEarned": 19,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "ceeca0b6-eda7-4599-ab30-dbeea2428cd4",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 43,
+        "pointsEarned": 17,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "4b4e0d7f-0521-4f01-8280-e68eacac61d4",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 43,
+        "pointsEarned": 6,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "1b2f07cf-61f9-466d-b0e2-deb11a0f9aca",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 44,
+        "pointsEarned": 2,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "67db1168-bbda-4b6c-845f-3428a9ec0bc4",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 44,
+        "pointsEarned": 15,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "bd126593-7227-4dff-9f6d-4fc3a410376f",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 44,
+        "pointsEarned": 13,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "c2a657da-12a7-48e1-ad97-a7f21df18ead",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 46,
+        "pointsEarned": 10,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "8b50cd96-b37c-433e-9f16-f7c57302bc51",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 47,
+        "pointsEarned": 11,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "38260561-654d-4caf-8cc0-5baff18ad6a3",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 47,
+        "pointsEarned": 14,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "66ce012b-72d1-4a72-9ebd-7e58f2cf393b",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 47,
+        "pointsEarned": 12,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "53eae9f2-f3fc-463b-868c-7125be598666",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 47,
+        "pointsEarned": 14,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "22ef374a-9347-4005-9af6-41be53a4815d",
+        "playerId": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 48,
+        "pointsEarned": 3,
+        "player": {
+            "id": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+            "firstName": "Steve",
+            "lastName": "Hampton",
+            "email": "steve.hampton@golfleague.com",
+            "phone": "610-442-2483",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.62,
+            "currentAverageScore": 47.69
+        }
+    },
+    {
+        "id": "92e118ac-2a69-4d56-bc5b-fd053570b386",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 48,
+        "pointsEarned": 2,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "49c545f7-500d-4e2a-b6a3-18754e743eaa",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 49,
+        "pointsEarned": 8,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "c8d9ade6-e6ea-43d9-9933-582dcc5b1d12",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 50,
+        "pointsEarned": 2,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "b373530a-c417-4b37-85ba-b17f991a999a",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 51,
+        "pointsEarned": 5,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "bef9d16b-d610-4c45-8aa0-0ead89093212",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 53,
+        "pointsEarned": 3,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "63d3f581-c7af-4107-80f8-742709acd52d",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 55,
+        "pointsEarned": 4,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "85645b71-6660-47bc-aa11-e317569fdd6e",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 55,
+        "pointsEarned": 2,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    },
+    {
+        "id": "b3ae7280-6d26-4946-b4fe-f669af1805ea",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "score": 57,
+        "pointsEarned": 2,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "d0ee9963-47ff-4c0c-b748-5a6709bd94b0",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "pointsEarned": 0,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "3ff44e21-2644-4867-8800-f685553372cb",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "d12fc4ef-d944-42c9-9854-94f52554b8fe",
+        "pointsEarned": 4,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "48c6b6c5-cd75-4a0e-b57b-9595e6db8c27",
+        "playerId": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 36,
+        "pointsEarned": 15,
+        "player": {
+            "id": "2c8b669d-8b6c-4951-880f-a3d607415f8c",
+            "firstName": "George",
+            "lastName": "Hutson",
+            "email": "george.hutson@golfleague.com",
+            "phone": "610-428-4032",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.24,
+            "currentAverageScore": 40.68
+        }
+    },
+    {
+        "id": "d8b164c1-aa23-4e34-9edd-52e80761141a",
+        "playerId": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 37,
+        "pointsEarned": 22,
+        "player": {
+            "id": "8c24e1d3-50bf-49b0-956f-3843ab1d9bf7",
+            "firstName": "John",
+            "lastName": "Perry",
+            "email": "john.perry@golfleague.com",
+            "phone": "610-530-9092",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 42.63,
+            "currentAverageScore": 38.03
+        }
+    },
+    {
+        "id": "ce05e570-754d-42f8-8fa2-8aa7dc7ddac8",
+        "playerId": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 40,
+        "pointsEarned": 31,
+        "player": {
+            "id": "354f62e4-a538-4eaa-b7e4-5f9bd60e777f",
+            "firstName": "Ray",
+            "lastName": "Ballinger",
+            "email": "ray.ballinger@golfleague.com",
+            "phone": "484-554-9044",
+            "initialHandicap": 9,
+            "currentHandicap": 9,
+            "initialAverageScore": 46.96,
+            "currentAverageScore": 46.3
+        }
+    },
+    {
+        "id": "626cbedd-0d1b-4e26-a5f3-ba1f4a68f6ee",
+        "playerId": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 41,
+        "pointsEarned": 11,
+        "player": {
+            "id": "7d6db2a5-480b-4e68-a0f7-bd5d24db8999",
+            "firstName": "Stu",
+            "lastName": "Silfies",
+            "email": "stu.silfies@golfleague.com",
+            "phone": "484-547-9553",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.75,
+            "currentAverageScore": 44.87
+        }
+    },
+    {
+        "id": "099c88ab-2a8a-449f-a5a8-3d832fe9987d",
+        "playerId": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 44,
+        "pointsEarned": 19,
+        "player": {
+            "id": "d971efb9-8e8c-4e91-87e9-f79c74391455",
+            "firstName": "Jeff",
+            "lastName": "Dilcher",
+            "email": "jeff.dilcher@golfleague.com",
+            "phone": "215-804-7664",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 41.96,
+            "currentAverageScore": 42.45
+        }
+    },
+    {
+        "id": "8ce1a933-c494-4729-9dcd-2bb9b6980c91",
+        "playerId": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 44,
+        "pointsEarned": 18,
+        "player": {
+            "id": "52369d98-5f1b-4c9d-9859-3d4a2a183439",
+            "firstName": "Frank",
+            "lastName": "Frankenfield",
+            "email": "frank.frankenfield@golfleague.com",
+            "phone": "484-375-9035",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.55,
+            "currentAverageScore": 45.61
+        }
+    },
+    {
+        "id": "60de05f6-8790-4410-b8b0-d3e26fa1c1c1",
+        "playerId": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 44,
+        "pointsEarned": 27,
+        "player": {
+            "id": "28fca147-da6f-4fbb-a4bd-67e51f17c2a2",
+            "firstName": "Jay",
+            "lastName": "Sullivan",
+            "email": "jay.sullivan@golfleague.com",
+            "phone": "610-476-4418",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.1,
+            "currentAverageScore": 44.1
+        }
+    },
+    {
+        "id": "531a53b3-32df-4b01-abab-892cb03d095e",
+        "playerId": "731fbc13-0f87-497a-9674-1bceaa67b395",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 44,
+        "pointsEarned": 25,
+        "player": {
+            "id": "731fbc13-0f87-497a-9674-1bceaa67b395",
+            "firstName": "Carl",
+            "lastName": "Hardner",
+            "email": "carl.hardner@golfleague.com",
+            "phone": "484-664-9193",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.73,
+            "currentAverageScore": 43.5
+        }
+    },
+    {
+        "id": "dbba3264-71ef-42c7-a815-bf915602f0b8",
+        "playerId": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 44,
+        "pointsEarned": 16,
+        "player": {
+            "id": "9deacc93-f9ed-49e6-ab68-c89b056af0fe",
+            "firstName": "Danny",
+            "lastName": "Washurn",
+            "email": "danny.washurn@golfleague.com",
+            "phone": "484-357-8773",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.69,
+            "currentAverageScore": 47.41
+        }
+    },
+    {
+        "id": "889c2e7a-725d-4fb5-82b3-27f4864a9406",
+        "playerId": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 44,
+        "pointsEarned": 11,
+        "player": {
+            "id": "459e64fe-a08e-4f1b-8546-91b9cb10ed95",
+            "firstName": "Steve",
+            "lastName": "Bedek",
+            "email": "steve.bedek@golfleague.com",
+            "phone": "484-274-1325",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.53,
+            "currentAverageScore": 45.6
+        }
+    },
+    {
+        "id": "7c7e220a-2101-4a22-968e-42f9c5a53b50",
+        "playerId": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 44,
+        "pointsEarned": 14,
+        "player": {
+            "id": "9548bbdf-f6ea-447d-988b-fe1e21bd2080",
+            "firstName": "Joe",
+            "lastName": "Mahachanh",
+            "email": "joe.mahachanh@golfleague.com",
+            "phone": "267-382-8223",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.61,
+            "currentAverageScore": 43.63
+        }
+    },
+    {
+        "id": "f1c6a407-3ed4-4101-9d0c-44c0608c22dc",
+        "playerId": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 45,
+        "pointsEarned": 12,
+        "player": {
+            "id": "dd5a8bd3-0bf1-436e-9484-74b40d6e83fc",
+            "firstName": "Bill",
+            "lastName": "Stein",
+            "email": "bill.stein@golfleague.com",
+            "phone": "484-695-9692",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.32,
+            "currentAverageScore": 42.11
+        }
+    },
+    {
+        "id": "f950cf3e-64e1-4a55-a288-5733631717a8",
+        "playerId": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 45,
+        "pointsEarned": 9,
+        "player": {
+            "id": "3a58bd78-1074-4c5c-b43e-605a8efc3a35",
+            "firstName": "Bob",
+            "lastName": "Gross",
+            "email": "bob.gross@golfleague.com",
+            "phone": "484-866-5195",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.57,
+            "currentAverageScore": 42.57
+        }
+    },
+    {
+        "id": "b9f5640c-81b5-460e-ba29-55848bf6a13f",
+        "playerId": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 45,
+        "pointsEarned": 13,
+        "player": {
+            "id": "ac3946ff-48eb-4479-ad63-92136e7c2f7f",
+            "firstName": "Curt",
+            "lastName": "Saeger",
+            "email": "curt.saeger@golfleague.com",
+            "phone": "610-392-8228",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.88,
+            "currentAverageScore": 43.92
+        }
+    },
+    {
+        "id": "ebcb891b-2dc9-4f7d-abc4-6f5876d6fc56",
+        "playerId": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 45,
+        "pointsEarned": 17,
+        "player": {
+            "id": "238b9732-4a0f-4922-8d5c-26e33fd8ac95",
+            "firstName": "Juan",
+            "lastName": "Matute",
+            "email": "juan.matute@golfleague.com",
+            "phone": "610-417-7659",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.69,
+            "currentAverageScore": 47.06
+        }
+    },
+    {
+        "id": "1d63badb-9c77-4606-9429-7230d7c98bd5",
+        "playerId": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 45,
+        "pointsEarned": 19,
+        "player": {
+            "id": "878f2662-b5bb-4474-aaa5-d2b4b179e070",
+            "firstName": "Lou",
+            "lastName": "Gabrielle",
+            "email": "lou.gabrielle@golfleague.com",
+            "phone": "484-951-0821",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 45.91,
+            "currentAverageScore": 46.19
+        }
+    },
+    {
+        "id": "e55700f6-0230-466c-8299-e29ad47f7894",
+        "playerId": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 45,
+        "pointsEarned": 21,
+        "player": {
+            "id": "a51ea62e-4a3f-4741-b43c-56e3feae7e70",
+            "firstName": "Kenny",
+            "lastName": "Palladino",
+            "email": "kenny.palladino@golfleague.com",
+            "phone": "(610) 657-9977",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 44.33,
+            "currentAverageScore": 44.53
+        }
+    },
+    {
+        "id": "4121830a-6e79-46d2-ace7-425f46ab5ec9",
+        "playerId": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 46,
+        "pointsEarned": 8,
+        "player": {
+            "id": "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee",
+            "firstName": "Kevin",
+            "lastName": "Kelhart",
+            "email": "kevin.kelhart@golfleague.com",
+            "phone": "610-597-3315",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.3,
+            "currentAverageScore": 43.68
+        }
+    },
+    {
+        "id": "53bfa4f5-fc3a-4952-a4a6-6f90461dce31",
+        "playerId": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 46,
+        "pointsEarned": 13,
+        "player": {
+            "id": "9e7a3048-2254-46ae-a16a-a90cc8dbd962",
+            "firstName": "Matt",
+            "lastName": "Speth",
+            "email": "matt.speth@golfleague.com",
+            "phone": "484-788-3417",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 45.85,
+            "currentAverageScore": 45.74
+        }
+    },
+    {
+        "id": "774ecdaa-3817-4e2b-9a5f-84154e90aff6",
+        "playerId": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 46,
+        "pointsEarned": 10,
+        "player": {
+            "id": "c80aef4d-db47-493e-b1ae-9d09a734a094",
+            "firstName": "Alex",
+            "lastName": "Peck",
+            "email": "alex.peck@golfleague.com",
+            "phone": "908-442-2036",
+            "initialHandicap": 5,
+            "currentHandicap": 5,
+            "initialAverageScore": 42.86,
+            "currentAverageScore": 42.73
+        }
+    },
+    {
+        "id": "bea4540c-75c3-412d-b69c-814af8f6cc73",
+        "playerId": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 47,
+        "pointsEarned": 8,
+        "player": {
+            "id": "4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc",
+            "firstName": "Jim",
+            "lastName": "Eck",
+            "email": "jim.eck@golfleague.com",
+            "phone": "610-858-6264",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 46.8,
+            "currentAverageScore": 46.77
+        }
+    },
+    {
+        "id": "cc94ed9c-095c-488d-b284-385affadbf95",
+        "playerId": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 48,
+        "pointsEarned": 10,
+        "player": {
+            "id": "c43faa83-23d6-4d09-9ffb-9548361480bc",
+            "firstName": "Kevin",
+            "lastName": "Kelhart JR",
+            "email": "kevin.kelhart.jr@golfleague.com",
+            "phone": "484-821-8295",
+            "initialHandicap": 7,
+            "currentHandicap": 7,
+            "initialAverageScore": 48.22,
+            "currentAverageScore": 48.34
+        }
+    },
+    {
+        "id": "b4ff4257-ab97-4d9e-99a7-be70f740044c",
+        "playerId": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 48,
+        "pointsEarned": 11,
+        "player": {
+            "id": "155adf40-c73d-4c46-b2e2-f6b2471563dd",
+            "firstName": "Steve",
+            "lastName": "Hampton",
+            "email": "steve.hampton@golfleague.com",
+            "phone": "610-442-2483",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 47.62,
+            "currentAverageScore": 47.69
+        }
+    },
+    {
+        "id": "d1554045-250d-4684-9ec5-5c48f2272ed2",
+        "playerId": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 49,
+        "pointsEarned": 7,
+        "player": {
+            "id": "4ef1e93d-be97-42f6-9721-3c1ddd256c60",
+            "firstName": "Tim",
+            "lastName": "Seyler",
+            "email": "tim.seyler@golfleague.com",
+            "phone": "(484) 343-4123",
+            "initialHandicap": 6,
+            "currentHandicap": 6,
+            "initialAverageScore": 43.98,
+            "currentAverageScore": 44.0
+        }
+    },
+    {
+        "id": "cae5fdc0-ad0f-4d0c-92fb-82216cc06cbe",
+        "playerId": "1e083524-cc5e-436b-a911-63c4607f5a33",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 50,
+        "pointsEarned": 9,
+        "player": {
+            "id": "1e083524-cc5e-436b-a911-63c4607f5a33",
+            "firstName": "Mike",
+            "lastName": "Schaefer",
+            "email": "mike.schaefer@golfleague.com",
+            "phone": "484-553-0734",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.53,
+            "currentAverageScore": 50.17
+        }
+    },
+    {
+        "id": "d8fa73e5-84a7-49a1-847a-15b67a531b8d",
+        "playerId": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 50,
+        "pointsEarned": 6,
+        "player": {
+            "id": "74d4dd50-3a5a-4e14-8e06-a37704cddd71",
+            "firstName": "Matt",
+            "lastName": "Donahue",
+            "email": "matt.donahue@golfleague.com",
+            "phone": "570-851-7148",
+            "initialHandicap": 8,
+            "currentHandicap": 8,
+            "initialAverageScore": 48.97,
+            "currentAverageScore": 44.68
+        }
+    },
+    {
+        "id": "86b11a13-a392-420d-b6e6-bcabe740c94b",
+        "playerId": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 50,
+        "pointsEarned": 9,
+        "player": {
+            "id": "b1046572-8971-425b-9dbd-cdfdc80bbdd7",
+            "firstName": "Steve",
+            "lastName": "Kerns",
+            "email": "steve.kerns@golfleague.com",
+            "phone": "484-256-4012",
+            "initialHandicap": 13,
+            "currentHandicap": 13,
+            "initialAverageScore": 53.18,
+            "currentAverageScore": 52.88
+        }
+    },
+    {
+        "id": "d776ec8d-cbd5-4f55-9a20-afcb36ab10cb",
+        "playerId": "a16dd095-e46d-4f47-8767-50b02226dca4",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 53,
+        "pointsEarned": 6,
+        "player": {
+            "id": "a16dd095-e46d-4f47-8767-50b02226dca4",
+            "firstName": "Andrew",
+            "lastName": "Kerns",
+            "email": "andrew.kerns@golfleague.com",
+            "phone": "484-401-1000",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 54.21,
+            "currentAverageScore": 53.49
+        }
+    },
+    {
+        "id": "6c664937-ca65-4944-ae44-16a8c09ac824",
+        "playerId": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 55,
+        "pointsEarned": 3,
+        "player": {
+            "id": "ed6799bc-76d6-43fd-9301-f4fa9effaee6",
+            "firstName": "Rich",
+            "lastName": "Hart",
+            "email": "rich.hart@golfleague.com",
+            "phone": "610-533-7423",
+            "initialHandicap": 11,
+            "currentHandicap": 11,
+            "initialAverageScore": 50.83,
+            "currentAverageScore": 51.28
+        }
+    },
+    {
+        "id": "4aabfe4c-454c-4624-8e7a-39e5d5456f41",
+        "playerId": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 57,
+        "pointsEarned": 3,
+        "player": {
+            "id": "c7de2e43-847d-4b73-bb40-cf268fa7c301",
+            "firstName": "Jax",
+            "lastName": "Haeusler",
+            "email": "jax.haeusler@golfleague.com",
+            "phone": "484-635-9062",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 57.17,
+            "currentAverageScore": 57.17
+        }
+    },
+    {
+        "id": "1f0525e2-78fb-477e-abb9-54bfb34ef8cf",
+        "playerId": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 57,
+        "pointsEarned": 4,
+        "player": {
+            "id": "67a0c954-df29-45ec-a183-08ff7cb3678b",
+            "firstName": "Tom",
+            "lastName": "Haeusler",
+            "email": "tom.haeusler@golfleague.com",
+            "phone": "610-217-7491",
+            "initialHandicap": 17,
+            "currentHandicap": 17,
+            "initialAverageScore": 58.5,
+            "currentAverageScore": 57.94
+        }
+    },
+    {
+        "id": "b4c47c11-439d-4b8d-b201-134dbd584d04",
+        "playerId": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+        "weekId": "bf21e110-094c-4ca8-95de-da5d21ae340f",
+        "score": 61,
+        "pointsEarned": 2,
+        "player": {
+            "id": "9d4ab9eb-6c6f-4fdd-be6b-2396202eb645",
+            "firstName": "Steve",
+            "lastName": "Filipovits",
+            "email": "steve.filipovits@golfleague.com",
+            "phone": "610-823-2206",
+            "initialHandicap": 14,
+            "currentHandicap": 14,
+            "initialAverageScore": 55.4,
+            "currentAverageScore": 55.88
+        }
+    }
+]

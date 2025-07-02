@@ -24,7 +24,7 @@ EOF
 echo "🚀 Sending corrected import request to API..."
 echo "⏳ This may take a while as it processes all players and weeks..."
 
-curl -X POST "http://localhost:5274/api/import/formatted-scores" \
+curl -X POST "http://localhost:5505/api/import/formatted-scores" \
   -H "Content-Type: application/json" \
   -d @/tmp/corrected_import.json \
   --max-time 300 \

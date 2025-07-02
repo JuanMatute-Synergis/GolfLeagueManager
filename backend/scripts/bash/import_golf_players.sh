@@ -3,7 +3,7 @@
 # Golf League Players Import Script
 # This script adds players from the CSV file and assigns them to flights
 
-API_BASE="http://localhost:5274/api"
+API_BASE="http://localhost:5505/api"
 
 # Function to add a player
 add_player() {

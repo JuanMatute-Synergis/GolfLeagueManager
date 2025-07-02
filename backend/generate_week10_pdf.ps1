@@ -15,7 +15,7 @@ if (Test-Path $oldPdf) {
 }
 
 # Download the new PDF using curl
-$apiUrl = "http://localhost:5274/api/pdf/scorecard/week/d12fc4ef-d944-42c9-9854-94f52554b8fe"
+$apiUrl = "http://localhost:5505/api/pdf/scorecard/week/d12fc4ef-d944-42c9-9854-94f52554b8fe"
 Write-Host "Downloading new PDF from $apiUrl..."
 curl -v -o $oldPdf $apiUrl
 
