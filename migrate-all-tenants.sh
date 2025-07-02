@@ -19,6 +19,10 @@ echo "$TENANT_DBS"
 # Run migrations for each tenant database
 cd backend
 
+# Ensure the project is restored first
+echo "🔄 Restoring .NET project..."
+dotnet restore
+
 while IFS= read -r db; do
     if [ "$db" != "" ]; then
         tenant_id=${db#golfdb_}
@@ -27,8 +31,8 @@ while IFS= read -r db; do
         # Temporarily set connection string for this tenant
         export ConnectionStrings__DefaultConnection="Host=localhost;Database=$db;Username=golfuser;Password=golfpassword"
         
-        # Run migrations
-        dotnet ef database update --no-build
+        # Run migrations (remove --no-build flag to allow building)
+        dotnet ef database update
         
         if [ $? -eq 0 ]; then
             echo "✅ Successfully migrated $tenant_id"

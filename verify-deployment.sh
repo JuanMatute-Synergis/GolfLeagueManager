@@ -12,13 +12,21 @@ check_service() {
     
     echo "Checking $service_name at $url..."
     
-    if timeout ${timeout}s bash -c "until curl -sf $url >/dev/null 2>&1; do sleep 2; done"; then
-        echo "✅ $service_name is responding"
-        return 0
-    else
-        echo "❌ $service_name is not responding"
-        return 1
-    fi
+    # macOS compatible timeout using background process
+    local count=0
+    local max_attempts=$((timeout/2))
+    
+    while [ $count -lt $max_attempts ]; do
+        if curl -sf $url >/dev/null 2>&1; then
+            echo "✅ $service_name is responding"
+            return 0
+        fi
+        sleep 2
+        count=$((count + 1))
+    done
+    
+    echo "❌ $service_name is not responding after ${timeout}s"
+    return 1
 }
 
 # Function to check container status
@@ -49,13 +57,13 @@ echo ""
 echo "🌐 Checking service endpoints..."
 services_ok=true
 
-# Check database connectivity through backend
-if ! check_service "Database (via backend)" "http://localhost:5505/api/health" 60; then
+# Check backend health endpoint
+if ! check_service "Backend Health" "http://localhost:5505/health" 30; then
     services_ok=false
 fi
 
-# Check backend API
-if ! check_service "Backend API" "http://localhost:5505" 30; then
+# Check backend API with auth status endpoint
+if ! check_service "Backend API" "http://localhost:5505/api/auth/status" 30; then
     services_ok=false
 fi
 
