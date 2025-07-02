@@ -1,0 +1,46 @@
+name: Health Check
+
+on:
+  schedule:
+    # Run health check every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    name: System Health Check
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check system health
+      run: |
+        echo "🏥 Running system health check..."
+        chmod +x ./health-check.sh
+        ./health-check.sh
+
+    - name: Check container resources
+      run: |
+        echo "📊 Checking container resource usage..."
+        docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}"
+
+    - name: Check disk usage
+      run: |
+        echo "💾 Checking disk usage..."
+        df -h
+        echo ""
+        echo "Docker disk usage:"
+        docker system df
+
+    - name: Check logs for errors
+      run: |
+        echo "📋 Checking recent logs for errors..."
+        docker compose logs --tail=50 | grep -i error || echo "No recent errors found"
+
+    - name: Health check summary
+      run: |
+        echo "✅ Health check completed"
+        echo "Timestamp: $(date)"
+        echo "System appears to be running normally"

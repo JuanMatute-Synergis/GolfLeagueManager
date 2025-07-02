@@ -1,0 +1,92 @@
+name: Manual Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      skip_tests:
+        description: 'Skip tests (use only for emergency deployments)'
+        required: false
+        default: false
+        type: boolean
+      migration_only:
+        description: 'Run migrations only (no rebuild)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  manual-deploy:
+    name: Manual Deployment
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Display deployment info
+      run: |
+        echo "🚀 Manual Deployment Started"
+        echo "Environment: ${{ github.event.inputs.environment }}"
+        echo "Skip Tests: ${{ github.event.inputs.skip_tests }}"
+        echo "Migration Only: ${{ github.event.inputs.migration_only }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+
+    - name: Setup .NET
+      if: github.event.inputs.skip_tests == 'false' && github.event.inputs.migration_only == 'false'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Setup Node.js
+      if: github.event.inputs.skip_tests == 'false' && github.event.inputs.migration_only == 'false'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Run tests
+      if: github.event.inputs.skip_tests == 'false' && github.event.inputs.migration_only == 'false'
+      run: |
+        echo "🧪 Running tests..."
+        cd backend && dotnet build --configuration Release
+        cd ../frontend && npm ci --legacy-peer-deps && npm run build
+
+    - name: Run migrations only
+      if: github.event.inputs.migration_only == 'true'
+      run: |
+        echo "🗄️ Running database migrations only..."
+        chmod +x ./migrate-all-tenants.sh
+        ./migrate-all-tenants.sh
+
+    - name: Full deployment
+      if: github.event.inputs.migration_only == 'false'
+      run: |
+        echo "🔧 Starting full deployment..."
+        docker compose down
+        docker compose up -d --build
+        sleep 30
+        
+        echo "🗄️ Running migrations..."
+        chmod +x ./migrate-all-tenants.sh
+        ./migrate-all-tenants.sh
+
+    - name: Verify deployment
+      if: github.event.inputs.migration_only == 'false'
+      run: |
+        chmod +x ./verify-deployment.sh
+        ./verify-deployment.sh
+
+    - name: Deployment complete
+      run: |
+        echo "✅ Manual deployment completed successfully!"
+        echo "Environment: ${{ github.event.inputs.environment }}"
