@@ -64,14 +64,14 @@ export class SettingsLayoutComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private userProfileService: UserProfileService
-  ) {}
+  ) { }
 
   ngOnInit() {
     // Track active route
     this.router.events.subscribe(() => {
       this.activeRoute = this.router.url;
     });
-    
+
     // Set initial active route
     this.activeRoute = this.router.url;
   }

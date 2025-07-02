@@ -22,13 +22,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   @Input() isOpen: boolean = false;
   @Input() mode: 'edit' | 'view' = 'edit'; // New input to determine mode
   @Input() week?: Week; // Week data to determine which holes to show
-  
+
   // For view mode, we can accept individual matchup properties as alternative inputs
   @Input() matchupId?: string;
   @Input() playerAName?: string;
   @Input() playerBName?: string;
   @Input() flightName?: string;
-  
+
   @Output() save = new EventEmitter<ScorecardData>();
   @Output() close = new EventEmitter<void>();
 
@@ -37,11 +37,11 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   // Loading guard to prevent multiple simultaneous loads
   private isLoadingScorecard = false;
-  
+
   // Cache for relevant holes to avoid redundant calculations
   private cachedRelevantHoles: any[] | null = null;
   private cachedWeekId: string | undefined = undefined;
-  
+
   // Cache for stroke holes calculation
   private cachedStrokeHoles: number[] | null = null;
   private cachedHandicapKey: string | undefined = undefined;
@@ -55,15 +55,15 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     private courseService: CourseService,
     private scoreCalculationService: ScoreCalculationService,
     private leagueSettingsService: LeagueSettingsService
-  ) {}
+  ) { }
 
   // Convenience getters for backward compatibility
   get isLoading(): boolean { return this.viewModel.isLoading; }
   set isLoading(value: boolean) { this.viewModel.isLoading = value; }
-  
+
   get error(): string | null { return this.viewModel.error; }
   set error(value: string | null) { this.viewModel.error = value; }
-  
+
   get saveError(): string | null { return this.viewModel.saveError; }
   set saveError(value: string | null) { this.viewModel.saveError = value; }
 
@@ -97,31 +97,31 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   ngOnInit() {
     console.log('ngOnInit called, initializing scorecard modal, mode:', this.mode);
-    
+
     // Load course data first
     this.loadCourseData();
-    
+
     // Load league settings if week is available
     if (this.week?.seasonId) {
       this.loadLeagueSettings();
     }
-    
+
     // For view mode, create scorecardData from individual inputs if not provided
     if (this.mode === 'view' && !this.scorecardData && this.matchupId) {
       this.initializeViewModeData();
     }
-    
+
     // Always ensure holes array is initialized to prevent template errors
     if (!this.scorecardData?.holes) {
       this.initializeHoles();
     }
-    
+
     // Only build initial view model if modal is not open
     // If modal is open, ngOnChanges will handle the scorecard loading
     if (!this.isOpen) {
       this.buildViewModel();
     }
-    
+
     // Note: We don't call loadScorecardData here anymore to avoid duplication
     // ngOnChanges will handle loading when the modal opens
   }
@@ -156,13 +156,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     }
 
     this.isLoadingLeagueSettings = true;
-    
+
     this.leagueSettingsService.getLeagueSettings(this.week.seasonId).subscribe({
       next: (settings) => {
         console.log('League settings loaded:', settings);
         this.leagueSettings = settings;
         this.isLoadingLeagueSettings = false;
-        
+
         // Recalculate match play points if scorecard data is already loaded
         if (this.scorecardData?.holes) {
           this.calculateMatchPlayPoints();
@@ -185,7 +185,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('ngOnChanges called:', changes);
-    
+
     // Debug week changes
     if (changes['week']) {
       console.log('Week changed:', changes['week'].currentValue);
@@ -198,19 +198,19 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         this.buildViewModel();
       }
     }
-    
+
     // For view mode, initialize data from individual inputs if needed
     if (this.mode === 'view' && (changes['matchupId'] || changes['isOpen']) && this.isOpen) {
       if (!this.scorecardData || this.scorecardData.matchupId !== this.matchupId) {
         this.initializeViewModeData();
       }
     }
-    
+
     // Load scorecard data when modal opens (but only once)
     if (changes['isOpen'] && changes['isOpen'].currentValue === true && !this.isLoadingScorecard) {
       console.log('Modal opened, loading scorecard data');
       this.loadScorecardData();
-      
+
       // Auto-focus first hole for Player A after modal opens and data loads
       if (this.mode === 'edit') {
         setTimeout(() => {
@@ -218,7 +218,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         }, 100);
       }
     }
-    
+
     // Only recalculate when scorecard data changes if modal is not currently loading
     if (changes['scorecardData'] && changes['scorecardData'].currentValue && !this.isLoading && !this.isLoadingScorecard) {
       console.log('Scorecard data changed externally, recalculating totals');
@@ -227,7 +227,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         this.calculateTotals();
       }, 0);
     }
-    
+
     // Only recalculate when player/matchup data changes if not currently loading
     if ((changes['playerAName'] || changes['playerBName'] || changes['matchupId']) && this.isOpen && !this.isLoading && !this.isLoadingScorecard) {
       console.log('Player or matchup data changed, may need to reload scorecard');
@@ -243,13 +243,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     console.log('loadScorecardData called with matchupId:', matchupId, 'isLoadingScorecard:', this.isLoadingScorecard);
     console.log('Mode:', this.mode);
     console.log('Scorecard data at load:', this.scorecardData);
-    
+
     // Prevent multiple simultaneous loads
     if (this.isLoadingScorecard) {
       console.log('Already loading scorecard data, skipping duplicate call');
       return;
     }
-    
+
     if (!matchupId) {
       console.log('No matchupId, initializing holes');
       this.initializeHoles();
@@ -259,13 +259,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     this.isLoadingScorecard = true;
     this.isLoading = true;
     this.error = null; // Clear any previous errors
-    
+
     this.scorecardService.getCompleteScorecard(matchupId).subscribe({
       next: (response) => {
         console.log('Scorecard loaded from backend:', response);
         this.isLoading = false;
         this.isLoadingScorecard = false;
-        
+
         if (response.success && response.holeScores && response.holeScores.length > 0) {
           // Ensure scorecardData exists for view mode
           if (this.mode === 'view' && !this.scorecardData) {
@@ -287,13 +287,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
             };
           });
           this.scorecardData.holes = holesArray;
-          
+
           // Update absence status FIRST before calculating totals
           this.scorecardData.playerAAbsent = response.playerAAbsent;
           this.scorecardData.playerBAbsent = response.playerBAbsent;
           this.scorecardData.playerAAbsentWithNotice = response.playerAAbsentWithNotice;
           this.scorecardData.playerBAbsentWithNotice = response.playerBAbsentWithNotice;
-          
+
           // Update match play data from backend response BEFORE calculating totals
           this.scorecardData.playerAMatchPoints = response.playerAMatchPoints ?? 0;
           this.scorecardData.playerBMatchPoints = response.playerBMatchPoints ?? 0;
@@ -301,10 +301,10 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           this.scorecardData.playerBHolePoints = response.playerBHolePoints ?? 0;
           this.scorecardData.playerAMatchWin = response.playerAMatchWin ?? false;
           this.scorecardData.playerBMatchWin = response.playerBMatchWin ?? false;
-          
+
           // Calculate total scores and match play points AFTER setting backend values
           this.calculateTotals();
-          
+
           console.log('[DEBUG] Backend response match points:', {
             playerAMatchPoints: response.playerAMatchPoints,
             playerBMatchPoints: response.playerBMatchPoints,
@@ -315,14 +315,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
             playerAMatchPoints: this.scorecardData.playerAMatchPoints,
             playerBMatchPoints: this.scorecardData.playerBMatchPoints
           });
-          
+
           // Update player handicaps from backend response
           this.scorecardData.playerAHandicap = response.playerAHandicap;
           this.scorecardData.playerBHandicap = response.playerBHandicap;
-          
+
           // Clear stroke holes cache when handicaps change
           this.clearStrokeHolesCache();
-          
+
           // Build view model with updated backend data (this already includes all calculations)
           this.buildViewModel();
         } else {
@@ -342,7 +342,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         this.isLoading = false;
         this.isLoadingScorecard = false;
         console.log('Error loading scorecard:', error);
-        
+
         if (this.mode === 'view') {
           this.error = 'Failed to load scorecard data.';
         } else {
@@ -366,7 +366,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     // Filter holes based on week setting
     const relevantHoles = this.getRelevantHoles();
-    
+
     this.scorecardData.holes = relevantHoles.map(hole => ({
       hole: hole.number,
       par: hole.par,
@@ -380,7 +380,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       winner: undefined,
       strokesGiven: 0
     }));
-    
+
     // Initialize match play data
     this.scorecardData.playerAMatchPoints = 0;
     this.scorecardData.playerBMatchPoints = 0;
@@ -388,7 +388,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     this.scorecardData.playerBHolePoints = 0;
     this.scorecardData.playerAMatchWin = false;
     this.scorecardData.playerBMatchWin = false;
-    
+
     // Only calculate totals if we're in edit mode and creating a new scorecard
     // Don't trigger calculations during component initialization
     if (this.mode === 'edit' && this.isOpen) {
@@ -421,16 +421,16 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   }
   private getRelevantHoles() {
     const currentWeekId = this.week?.id || 'no-week';
-    
+
     // Return cached result if week hasn't changed
     if (this.cachedRelevantHoles && this.cachedWeekId === currentWeekId) {
       return this.cachedRelevantHoles;
     }
-    
+
     console.log('getRelevantHoles called - calculating for week:', this.week);
-    
+
     let relevantHoles: any[];
-    
+
     if (!this.week) {
       console.log('No week data, returning all holes');
       // If no week data, default to all holes for backward compatibility
@@ -448,11 +448,11 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         relevantHoles = this.course.holes.filter(hole => hole.number >= 10 && hole.number <= 18);
       }
     }
-    
+
     // Cache the result
     this.cachedRelevantHoles = relevantHoles;
     this.cachedWeekId = currentWeekId;
-    
+
     return relevantHoles;
   }
 
@@ -474,7 +474,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       playerAHandicap: 0,
       playerBHandicap: 0
     };
-    
+
     // Initialize holes to prevent template errors
     this.initializeHoles();
   }
@@ -502,7 +502,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   getPlayerFrontNineTotal(player: 'A' | 'B'): number {
     if (!this.scorecardData?.holes) return 0;
-    
+
     const scores = this.scorecardData.holes.slice(0, 9);
     return scores.reduce((sum, hole) => {
       if (!hole) return sum;
@@ -513,7 +513,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   getPlayerBackNineTotal(player: 'A' | 'B'): number {
     if (!this.scorecardData?.holes) return 0;
-    
+
     const scores = this.scorecardData.holes.slice(9, 18);
     return scores.reduce((sum, hole) => {
       if (!hole) return sum;
@@ -559,16 +559,16 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         playerAAbsentWithNotice: this.scorecardData.playerAAbsentWithNotice,
         playerBAbsentWithNotice: this.scorecardData.playerBAbsentWithNotice
       });
-      
+
       // Alert for testing - can be removed once confirmed working
       console.warn('🚨 ABSENCE SCENARIO POINTS TEST: Player A=' + this.scorecardData.playerAMatchPoints + ', Player B=' + this.scorecardData.playerBMatchPoints);
     } else {
       // Only calculate match play points if we don't already have backend-calculated values
       // This prevents redundant calculations when loading from backend
-      const hasBackendMatchPoints = this.scorecardData.playerAMatchPoints !== undefined && 
-                                   this.scorecardData.playerBMatchPoints !== undefined &&
-                                   (this.scorecardData.playerAMatchPoints > 0 || this.scorecardData.playerBMatchPoints > 0);
-      
+      const hasBackendMatchPoints = this.scorecardData.playerAMatchPoints !== undefined &&
+        this.scorecardData.playerBMatchPoints !== undefined &&
+        (this.scorecardData.playerAMatchPoints > 0 || this.scorecardData.playerBMatchPoints > 0);
+
       if (!hasBackendMatchPoints) {
         console.log('No backend match points found, calculating locally');
         this.calculateMatchPlayPoints();
@@ -576,7 +576,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         console.log('Using backend-calculated match points, skipping local calculation');
       }
     }
-    
+
     // Build view model after calculations (but don't trigger more calculations)
     this.buildViewModel();
   }
@@ -599,14 +599,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Calculate points for each hole
     for (let i = 0; i < this.scorecardData.holes.length; i++) {
       const hole = this.scorecardData.holes[i];
-      
+
       if (!hole) {
         continue; // Skip undefined holes
       }
-      
+
       if (hole.playerAScore && hole.playerBScore) {
         const winner = this.getHoleWinner(i);
-        
+
         console.log(`Hole ${i + 1}:`, {
           playerAScore: hole.playerAScore,
           playerBScore: hole.playerBScore,
@@ -614,7 +614,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           playerBNet: this.getNetScoreValue(i, 'B'),
           winner: winner
         });
-        
+
         switch (winner) {
           case 'playerA':
             hole.playerAMatchPoints = this.getHoleWinPoints();
@@ -651,7 +651,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     let playerANetTotal = 0;
     let playerBNetTotal = 0;
     let completedHoles = 0;
-    
+
     for (let i = 0; i < this.scorecardData.holes.length; i++) {
       const hole = this.scorecardData.holes[i];
       if (hole?.playerAScore && hole?.playerBScore) {
@@ -753,11 +753,11 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   getScoreClass(score: number | undefined, par: number): string {
     // Always include large font size with !important, even for empty inputs
     const baseClasses = '!text-xl !font-bold';
-    
+
     if (!score) return baseClasses;
-    
+
     const toPar = score - par;
-    
+
     // Return Tailwind classes for score performance colors with consistent large font
     if (toPar <= -2) return `${baseClasses} bg-primary text-primary-foreground rounded px-1 py-0.5`;
     if (toPar === -1) return `${baseClasses} bg-primary/80 text-primary-foreground rounded px-1 py-0.5`;
@@ -772,16 +772,16 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     const hole = this.getHoleData(holeIndex);
     const relevantHoles = this.getRelevantHoles();
     const courseHole = relevantHoles[holeIndex];
-    
+
     if (!hole || !courseHole) return '-';
-    
+
     const grossScore = player === 'A' ? hole.playerAScore : hole.playerBScore;
     if (!grossScore) return '-';
-    
-    const playerHandicap = player === 'A' ? 
-      (this.scorecardData?.playerAHandicap || 0) : 
+
+    const playerHandicap = player === 'A' ?
+      (this.scorecardData?.playerAHandicap || 0) :
       (this.scorecardData?.playerBHandicap || 0);
-    
+
     // Use the same logic as getNetScoreValue for consistency
     // If handicap is 0, return gross score
     if (playerHandicap === 0) {
@@ -790,37 +790,37 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     const strokesGiven = this.getStrokesGiven(holeIndex, playerHandicap);
     const netScore = grossScore - strokesGiven;
-    
+
     return netScore.toString();
   }
 
   getHoleWinner(holeIndex: number): 'playerA' | 'playerB' | 'tie' | null {
     // Use safe hole data access
     const hole = this.getHoleData(holeIndex);
-    
+
     if (!hole || !hole.playerAScore || !hole.playerBScore) {
       console.log(`[HOLE WINNER] Hole ${holeIndex + 1}: No winner - playerAScore: ${hole?.playerAScore}, playerBScore: ${hole?.playerBScore}`);
       return null;
     }
-    
+
     // Get handicaps
     const playerAHandicap = this.scorecardData?.playerAHandicap || 0;
     const playerBHandicap = this.scorecardData?.playerBHandicap || 0;
-    
+
     // If both players have 0 handicap, use gross scores
     if (playerAHandicap === 0 && playerBHandicap === 0) {
-      const winner = hole.playerAScore < hole.playerBScore ? 'playerA' : 
-                     hole.playerBScore < hole.playerAScore ? 'playerB' : 'tie';
+      const winner = hole.playerAScore < hole.playerBScore ? 'playerA' :
+        hole.playerBScore < hole.playerAScore ? 'playerB' : 'tie';
       console.log(`[HOLE WINNER] Hole ${holeIndex + 1}: Gross scores - A: ${hole.playerAScore}, B: ${hole.playerBScore}, Winner: ${winner}`);
       return winner;
     }
-    
+
     // Otherwise use net scores with handicap adjustments
     const playerANet = this.getNetScoreValue(holeIndex, 'A');
     const playerBNet = this.getNetScoreValue(holeIndex, 'B');
-    
-    const winner = playerANet < playerBNet ? 'playerA' : 
-                   playerBNet < playerANet ? 'playerB' : 'tie';
+
+    const winner = playerANet < playerBNet ? 'playerA' :
+      playerBNet < playerANet ? 'playerB' : 'tie';
     console.log(`[HOLE WINNER] Hole ${holeIndex + 1}: Net scores - A: ${playerANet}, B: ${playerBNet}, Winner: ${winner}`);
     return winner;
   }
@@ -828,21 +828,21 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   private getNetScoreValue(holeIndex: number, player: 'A' | 'B'): number {
     // Use safe hole data access
     const hole = this.getHoleData(holeIndex);
-    
+
     if (!hole) return 999; // High number for missing scores
-    
+
     const grossScore = player === 'A' ? hole.playerAScore : hole.playerBScore;
     if (!grossScore) return 999;
-    
-    const playerHandicap = player === 'A' ? 
-      (this.scorecardData?.playerAHandicap || 0) : 
+
+    const playerHandicap = player === 'A' ?
+      (this.scorecardData?.playerAHandicap || 0) :
       (this.scorecardData?.playerBHandicap || 0);
-    
+
     // If handicap is 0, return gross score
     if (playerHandicap === 0) {
       return grossScore;
     }
-    
+
     const strokesGiven = this.getStrokesGiven(holeIndex, playerHandicap);
     return grossScore - strokesGiven;
   }
@@ -858,7 +858,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     const playerAReceivesStrokes = playerAHandicap > playerBHandicap;
     const playerBReceivesStrokes = playerBHandicap > playerAHandicap;
     const playerReceivesStrokes = (playerHandicap === playerAHandicap && playerAReceivesStrokes) ||
-                                 (playerHandicap === playerBHandicap && playerBReceivesStrokes);
+      (playerHandicap === playerBHandicap && playerBReceivesStrokes);
     if (!playerReceivesStrokes) return 0;
     // --- 9-hole stroke allocation fix ---
     // Only allocate strokes to the hardest holes within the 9 being played
@@ -868,7 +868,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       .sort((a, b) => (a.handicap ?? 99) - (b.handicap ?? 99))
       .slice(0, Math.round(handicapDifference))
       .map(h => h.number);
-    
+
     // Debug logging for hole 10 (number 10)
     if (courseHole.number === 10) {
       console.log(`Hole 10 Stroke Allocation:`, {
@@ -883,7 +883,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         strokesGiven: hardestHoles.includes(courseHole.number) ? 1 : 0
       });
     }
-    
+
     if (hardestHoles.includes(courseHole.number)) return 1;
     return 0;
   }
@@ -925,8 +925,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     }
 
     // Check if there was a tie in net scores (both players have matchWin = false but no one wins overall)
-    const wasNetScoreTie = !this.scorecardData.playerAMatchWin && !this.scorecardData.playerBMatchWin && 
-                          (playerAMatchPoints > 0 || playerBMatchPoints > 0);
+    const wasNetScoreTie = !this.scorecardData.playerAMatchWin && !this.scorecardData.playerBMatchWin &&
+      (playerAMatchPoints > 0 || playerBMatchPoints > 0);
 
     if (playerAMatchPoints > playerBMatchPoints) {
       const result = `${this.scorecardData.playerAName} Wins`;
@@ -961,11 +961,11 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   getMatchPlayScore(): string {
     const playerAPoints = this.scorecardData.playerAMatchPoints || 0;
     const playerBPoints = this.scorecardData.playerBMatchPoints || 0;
-    
+
     if (playerAPoints === 0 && playerBPoints === 0) {
       return 'Scores pending calculation';
     }
-    
+
     return `${playerAPoints} - ${playerBPoints}`;
   }
 
@@ -974,7 +974,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     if (this.scorecardData.playerAAbsent || this.scorecardData.playerBAbsent) {
       return true;
     }
-    
+
     // Check if at least some scores are entered
     return this.scorecardData.holes.some(hole => hole.playerAScore || hole.playerBScore);
   }
@@ -999,7 +999,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           this.scorecardData.playerBAbsent = response.playerBAbsent;
           this.scorecardData.playerAAbsentWithNotice = response.playerAAbsentWithNotice;
           this.scorecardData.playerBAbsentWithNotice = response.playerBAbsentWithNotice;
-          
+
           this.save.emit(this.scorecardData);
         } else {
           this.saveError = response.message || 'Failed to save scorecard';
@@ -1026,13 +1026,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   // Public method to trigger scorecard initialization
   public initializeScorecard() {
     console.log('initializeScorecard called manually, isLoadingScorecard:', this.isLoadingScorecard);
-    
+
     // Prevent duplicate loads
     if (this.isLoadingScorecard) {
       console.log('Already loading scorecard, skipping manual initialization');
       return;
     }
-    
+
     this.loadScorecardData();
   }
 
@@ -1093,18 +1093,18 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     if (!this.scorecardData?.holes) {
       this.initializeHoles();
     }
-    
+
     // Ensure the specific hole exists
     if (!this.scorecardData.holes[holeIndex]) {
       this.scorecardData.holes[holeIndex] = this.getHoleData(holeIndex);
     }
-    
+
     if (player === 'A') {
       this.scorecardData.holes[holeIndex].playerAScore = score;
     } else {
       this.scorecardData.holes[holeIndex].playerBScore = score;
     }
-    
+
     // Don't call calculateTotals here - let the calling method handle updates more efficiently
   }
 
@@ -1121,7 +1121,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     // Create cache key from handicaps and week
     const handicapKey = `${this.scorecardData.playerAHandicap || 0}-${this.scorecardData.playerBHandicap || 0}-${this.week?.id || 'no-week'}`;
-    
+
     // Return cached result if handicaps and week haven't changed
     if (this.cachedStrokeHoles && this.cachedHandicapKey === handicapKey) {
       return this.cachedStrokeHoles;
@@ -1136,33 +1136,33 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     // Get the relevant holes based on week's NineHoles setting
     const holes = this.getRelevantHoles();
-    
+
     console.log('Relevant holes for strokes:', holes.map(h => h.number));
-    
+
     // Sort holes by handicap index (1 = hardest)
     const sortedHoles = holes
-      .map((hole, index) => ({ 
-        holeNumber: hole.number, 
+      .map((hole, index) => ({
+        holeNumber: hole.number,
         handicapIndex: hole.handicap || 18,
         arrayIndex: index
       }))
       .sort((a, b) => a.handicapIndex - b.handicapIndex);
-    
+
     // Return the hole numbers that get strokes (based on handicap difference)
     const strokeHoles = sortedHoles.slice(0, handicapDiff).map(h => h.holeNumber);
     console.log('Stroke holes calculated:', strokeHoles);
-    
+
     // Cache the result
     this.cachedStrokeHoles = strokeHoles;
     this.cachedHandicapKey = handicapKey;
-    
+
     return strokeHoles;
   }
 
   getStrokeRecipient(): 'A' | 'B' | null {
     const playerAHandicap = this.scorecardData.playerAHandicap || 0;
     const playerBHandicap = this.scorecardData.playerBHandicap || 0;
-    
+
     if (playerAHandicap > playerBHandicap) return 'A';
     if (playerBHandicap > playerAHandicap) return 'B';
     return null;
@@ -1171,9 +1171,9 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   isStrokeHole(holeNumber: number, player: 'A' | 'B'): boolean {
     const strokeRecipient = this.getStrokeRecipient();
     const strokeHoles = this.getStrokeHoles();
-    
+
     const result = strokeRecipient === player && strokeHoles.includes(holeNumber);
-    
+
     // Debug logging for specific holes
     if (holeNumber <= 3) {
       console.log(`isStrokeHole(${holeNumber}, ${player}):`, {
@@ -1182,30 +1182,30 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         result
       });
     }
-    
+
     return result;
   }
 
   private isPlayingFrontNine(): boolean {
     // Check if there are more scores in front nine vs back nine
-    const frontScores = this.scorecardData.holes.slice(0, 9).filter(hole => 
+    const frontScores = this.scorecardData.holes.slice(0, 9).filter(hole =>
       (hole.playerAScore && hole.playerAScore > 0) || (hole.playerBScore && hole.playerBScore > 0)
     ).length;
-    
-    const backScores = this.scorecardData.holes.slice(9, 18).filter(hole => 
+
+    const backScores = this.scorecardData.holes.slice(9, 18).filter(hole =>
       (hole.playerAScore && hole.playerAScore > 0) || (hole.playerBScore && hole.playerBScore > 0)
     ).length;
-    
+
     // Default to front nine if no scores yet
     return frontScores >= backScores;
   }
 
   getStrokeTooltip(holeNumber: number, player: 'A' | 'B'): string {
     if (!this.isStrokeHole(holeNumber, player)) return '';
-    
+
     const handicapDiff = Math.abs((this.scorecardData.playerAHandicap || 0) - (this.scorecardData.playerBHandicap || 0));
     const playerName = player === 'A' ? this.scorecardData.playerAName : this.scorecardData.playerBName;
-    
+
     return `${playerName} gets a stroke on this hole (handicap difference: ${handicapDiff})`;
   }
 
@@ -1257,7 +1257,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       playerAAbsent: this.scorecardData?.playerAAbsent,
       playerBAbsent: this.scorecardData?.playerBAbsent
     });
-    
+
     if (!this.scorecardData) {
       this.viewModel = this.createEmptyViewModel();
       return;
@@ -1269,7 +1269,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     // Build hole view models
     const relevantHoles = this.getRelevantHoles();
-    this.viewModel.holes = relevantHoles.map((courseHole, index) => 
+    this.viewModel.holes = relevantHoles.map((courseHole, index) =>
       this.buildHoleViewModel(courseHole, index)
     );
 
@@ -1278,7 +1278,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     // Set metadata
     this.viewModel.matchupId = this.scorecardData.matchupId || '';
-    
+
     // Clear loading state if it was set
     this.viewModel.isLoading = false;
   }
@@ -1287,14 +1287,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     const isPlayerA = player === 'A';
     const handicapDiff = Math.abs((this.scorecardData.playerAHandicap || 0) - (this.scorecardData.playerBHandicap || 0));
     const strokeRecipient = this.getStrokeRecipient();
-    
+
     const matchPoints = isPlayerA ? (this.scorecardData.playerAMatchPoints || 0) : (this.scorecardData.playerBMatchPoints || 0);
-    
+
     console.log(`[DEBUG] Building view model for player ${player}:`, {
       matchPoints: matchPoints,
       scorecardDataMatchPoints: isPlayerA ? this.scorecardData.playerAMatchPoints : this.scorecardData.playerBMatchPoints
     });
-    
+
     return {
       name: isPlayerA ? this.scorecardData.playerAName : this.scorecardData.playerBName,
       handicap: isPlayerA ? (this.scorecardData.playerAHandicap || 0) : (this.scorecardData.playerBHandicap || 0),
@@ -1312,16 +1312,16 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   private buildHoleViewModel(courseHole: any, index: number): ScorecardHoleView {
     const holeData = this.getHoleData(index);
     const strokeHoles = this.getStrokeHoles();
-    
+
     // Determine if this is a stroke hole for each player
     const playerAIsStrokeHole = this.isStrokeHole(courseHole.number, 'A');
     const playerBIsStrokeHole = this.isStrokeHole(courseHole.number, 'B');
-    
+
     return {
       holeNumber: courseHole.number,
       par: courseHole.par,
       handicap: courseHole.handicap,
-      
+
       // Player A data
       playerAScore: holeData.playerAScore,
       playerAScoreClass: this.getScoreClass(holeData.playerAScore === null ? undefined : holeData.playerAScore, courseHole.par),
@@ -1329,7 +1329,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       playerAMatchPoints: holeData.playerAMatchPoints || 0,
       playerAIsStrokeHole: playerAIsStrokeHole,
       playerAStrokeTooltip: this.getStrokeTooltip(courseHole.number, 'A'),
-      
+
       // Player B data
       playerBScore: holeData.playerBScore,
       playerBScoreClass: this.getScoreClass(holeData.playerBScore === null ? undefined : holeData.playerBScore, courseHole.par),
@@ -1337,7 +1337,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       playerBMatchPoints: holeData.playerBMatchPoints || 0,
       playerBIsStrokeHole: playerBIsStrokeHole,
       playerBStrokeTooltip: this.getStrokeTooltip(courseHole.number, 'B'),
-      
+
       // Hole result
       holeWinner: this.getHoleWinner(index)
     };
@@ -1359,25 +1359,25 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   onScoreChangeWithAutoAdvance(holeIndex: number, player: 'A' | 'B', score: number | undefined): void {
     // First, do the normal score change logic
     this.onScoreChange(holeIndex, player, score);
-    
+
     // Then handle auto-advance logic
     this.handleAutoAdvance(holeIndex, player, score);
   }
 
   private handleAutoAdvance(holeIndex: number, player: 'A' | 'B', score: number | undefined): void {
     const inputId = `${player}-${holeIndex}`;
-    
+
     // Clear any existing timeout for this input
     if (this.autoAdvanceTimeouts.has(inputId)) {
       clearTimeout(this.autoAdvanceTimeouts.get(inputId));
       this.autoAdvanceTimeouts.delete(inputId);
     }
-    
+
     // Don't auto-advance if the score is empty or undefined
     if (!score || score === 0) {
       return;
     }
-    
+
     // If score is 2-9, advance immediately
     if (score >= 2 && score <= 9) {
       setTimeout(() => this.advanceToNextInput(holeIndex, player), 10);
@@ -1401,18 +1401,18 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   onScoreChange(holeIndex: number, player: 'A' | 'B', score: number | undefined): void {
     // Update the underlying scorecard data
     this.setPlayerScore(holeIndex, player, score);
-    
+
     // Calculate match play points first (affects all holes)
     this.updatePlayerTotals();
-    
+
     // Rebuild all hole view models to ensure match points are updated everywhere
     const relevantHoles = this.getRelevantHoles();
-    this.viewModel.holes = relevantHoles.map((courseHole, index) => 
+    this.viewModel.holes = relevantHoles.map((courseHole, index) =>
       this.buildHoleViewModel(courseHole, index)
     );
-    
+
     console.log(`[DEBUG] onScoreChange - holeIndex: ${holeIndex}, courseHole.number: ${relevantHoles[holeIndex]?.number}, player: ${player}, score: ${score}`);
-    
+
     // Update summary
     this.viewModel.summary = this.buildSummaryViewModel();
   }
@@ -1430,7 +1430,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     // Recalculate match play for live scoring
     this.calculateMatchPlayPoints();
-    
+
     // Update only the player view models
     this.viewModel.playerA = this.buildPlayerViewModel('A');
     this.viewModel.playerB = this.buildPlayerViewModel('B');
@@ -1446,9 +1446,9 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       this.scorecardData.playerBAbsent = this.viewModel.playerB.absent;
       this.scorecardData.playerBAbsentWithNotice = this.viewModel.playerB.absentWithNotice;
     }
-    
+
     this.onPlayerAbsenceChange(player);
-    
+
     // Rebuild the entire view model since absence affects multiple aspects
     this.buildViewModel();
   }
@@ -1458,22 +1458,22 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     const wasNetScoreTie = !this.scorecardData.playerAMatchWin && !this.scorecardData.playerBMatchWin;
     const playerAMatchPoints = this.scorecardData.playerAMatchPoints || 0;
     const playerBMatchPoints = this.scorecardData.playerBMatchPoints || 0;
-    
+
     if (wasNetScoreTie && (playerAMatchPoints > 0 || playerBMatchPoints > 0)) {
       const playerANetTotal = this.calculateNetTotal('A');
       const playerBNetTotal = this.calculateNetTotal('B');
-      
+
       if (playerANetTotal === playerBNetTotal) {
         return `Tied Net Scores (${playerANetTotal})`;
       }
     }
-    
+
     return '';
   }
 
   calculateNetTotal(player: 'A' | 'B'): number {
     if (!this.scorecardData?.holes) return 0;
-    
+
     let netTotal = 0;
     for (let i = 0; i < this.scorecardData.holes.length; i++) {
       const hole = this.scorecardData.holes[i];
@@ -1491,22 +1491,22 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     const input = event.target as HTMLInputElement;
     const value = input.value;
     const inputId = `${player}-${holeIndex}`;
-    
+
     console.log('Score input:', value, 'for player:', player, 'hole:', holeIndex + 1);
-    
+
     // Clear any existing timeout for this input
     if (this.autoAdvanceTimeouts.has(inputId)) {
       clearTimeout(this.autoAdvanceTimeouts.get(inputId));
       this.autoAdvanceTimeouts.delete(inputId);
     }
-    
+
     // Don't auto-advance if the input is empty
     if (!value) {
       return;
     }
-    
+
     const numValue = parseInt(value, 10);
-    
+
     // If value is 2-9, advance immediately
     if (numValue >= 2 && numValue <= 9) {
       setTimeout(() => this.advanceToNextInput(holeIndex, player), 50);
@@ -1532,7 +1532,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   onKeyDown(event: KeyboardEvent, holeIndex: number, player: 'A' | 'B'): void {
     const inputId = `${player}-${holeIndex}`;
-    
+
     // Handle arrow keys for manual navigation
     if (event.key === 'ArrowRight' || event.key === 'Tab' && !event.shiftKey) {
       this.clearAutoAdvanceTimeout(inputId);
@@ -1563,15 +1563,15 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     } else if (event.key === 'Backspace') {
       // Clear timeout when user is editing
       this.clearAutoAdvanceTimeout(inputId);
-      
+
       // Get the current input element
       const input = event.target as HTMLInputElement;
       const currentValue = input.value;
-      
+
       // If the input is already empty, move to previous hole and continue chain if it's also empty
       if (!currentValue || currentValue.trim() === '') {
         event.preventDefault();
-        
+
         // Move to previous hole without clearing anything (already empty)
         this.advanceToPreviousInputWithChain(holeIndex, player);
       } else if (currentValue.length === 1) {
@@ -1609,7 +1609,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Use the relevant holes being displayed, not the full course
     const relevantHoles = this.getRelevantHoles();
     const totalHoles = relevantHoles.length;
-    
+
     if (holeIndex < totalHoles - 1) {
       // Move to next hole for same player
       this.focusInput(holeIndex + 1, player);
@@ -1625,7 +1625,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Use the relevant holes being displayed, not the full course
     const relevantHoles = this.getRelevantHoles();
     const totalHoles = relevantHoles.length;
-    
+
     if (holeIndex > 0) {
       // Move to previous hole for same player
       this.focusInput(holeIndex - 1, player);
@@ -1641,17 +1641,17 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // Use the relevant holes being displayed, not the full course
     const relevantHoles = this.getRelevantHoles();
     const totalHoles = relevantHoles.length;
-    
+
     if (holeIndex > 0) {
       // Move to previous hole for same player
       const previousHoleIndex = holeIndex - 1;
       this.focusInput(previousHoleIndex, player);
-      
+
       // Check if the previous hole is also empty after a brief delay to allow focus
       setTimeout(() => {
         const previousInputId = `player${player}-hole-${previousHoleIndex + 1}`;
         const previousInput = document.getElementById(previousInputId) as HTMLInputElement;
-        
+
         if (previousInput && (!previousInput.value || previousInput.value.trim() === '')) {
           // Previous hole is also empty, continue the chain
           this.advanceToPreviousInputWithChain(previousHoleIndex, player);
@@ -1661,12 +1661,12 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       // First hole for current player, move to other player's last hole
       const otherPlayer = player === 'A' ? 'B' : 'A';
       this.focusInput(totalHoles - 1, otherPlayer);
-      
+
       // Check if the other player's last hole is also empty
       setTimeout(() => {
         const otherInputId = `player${otherPlayer}-hole-${totalHoles}`;
         const otherInput = document.getElementById(otherInputId) as HTMLInputElement;
-        
+
         if (otherInput && (!otherInput.value || otherInput.value.trim() === '')) {
           // Other player's last hole is also empty, continue the chain
           this.advanceToPreviousInputWithChain(totalHoles - 1, otherPlayer);
@@ -1680,7 +1680,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     setTimeout(() => {
       const inputId = `player${player}-hole-${holeIndex + 1}`;
       const input = document.getElementById(inputId) as HTMLInputElement;
-      
+
       if (input && !input.readOnly && !input.disabled) {
         try {
           input.focus();
@@ -1714,21 +1714,21 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     }
 
     const relevantHoles = this.getRelevantHoles();
-    
+
     // First, try to find the first empty hole for Player A
     for (let i = 0; i < relevantHoles.length; i++) {
       const hole = this.scorecardData.holes[i];
-      
+
       if (!hole || hole.playerAScore === null || hole.playerAScore === undefined) {
         this.focusInput(i, 'A');
         return;
       }
     }
-    
+
     // If all Player A holes have scores, check Player B
     for (let i = 0; i < relevantHoles.length; i++) {
       const hole = this.scorecardData.holes[i];
-      
+
       if (!hole || hole.playerBScore === null || hole.playerBScore === undefined) {
         this.focusInput(i, 'B');
         return;

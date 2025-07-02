@@ -39,7 +39,7 @@ try
         CREATE INDEX IF NOT EXISTS ""IX_LeagueSettings_SeasonId"" ON ""LeagueSettings"" (""SeasonId"");
         CREATE UNIQUE INDEX IF NOT EXISTS ""IX_LeagueSettings_SeasonId_Unique"" ON ""LeagueSettings"" (""SeasonId"");
     ";
-    
+
     await context.Database.ExecuteSqlRawAsync(sql);
     Console.WriteLine("LeagueSettings table created successfully!");
 }

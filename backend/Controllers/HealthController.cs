@@ -21,7 +21,7 @@ namespace GolfLeagueManager.Controllers
             {
                 // Check database connectivity
                 await _context.Database.CanConnectAsync();
-                
+
                 var healthStatus = new
                 {
                     status = "healthy",
@@ -55,7 +55,7 @@ namespace GolfLeagueManager.Controllers
                 var canConnect = await _context.Database.CanConnectAsync();
                 var playerCount = await _context.Players.CountAsync();
                 var seasonCount = await _context.Seasons.CountAsync();
-                
+
                 var detailedHealth = new
                 {
                     status = "healthy",

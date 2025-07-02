@@ -6,7 +6,7 @@ namespace GolfLeagueManager
         /// World Handicap System - Best 8 of last 20 scores with differentials
         /// </summary>
         WorldHandicapSystem = 0,
-        
+
         /// <summary>
         /// Simple overall average - (Average Score - Course Par)
         /// Based on analysis from FINAL_HANDICAP_ANALYSIS.md
@@ -20,7 +20,7 @@ namespace GolfLeagueManager
         /// Match play scoring with hole-by-hole competition
         /// </summary>
         MatchPlay = 0,
-        
+
         /// <summary>
         /// Stroke play scoring based on total strokes
         /// </summary>
@@ -33,12 +33,12 @@ namespace GolfLeagueManager
         /// Current system: hole points + 2 point match bonus
         /// </summary>
         HolePointsWithMatchBonus = 0,
-        
+
         /// <summary>
         /// Points based only on final score comparison
         /// </summary>
         ScoreBasedPoints = 1,
-        
+
         /// <summary>
         /// Custom points allocation system
         /// </summary>

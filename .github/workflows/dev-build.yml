@@ -25,6 +25,12 @@ jobs:
       with:
         node-version: '22'
 
+    - name: Clear npm cache
+      run: |
+        echo "🧹 Clearing npm cache to prevent path resolution issues..."
+        npm cache clean --force 2>/dev/null || true
+        echo "✅ npm cache cleared"
+
     - name: Start test database
       run: |
         echo "🗄️ Starting test database for development build..."
@@ -45,6 +51,21 @@ jobs:
         echo "⏳ Waiting for database to be ready..."
         timeout 60 bash -c 'until docker exec dev-test-postgres pg_isready -U golfuser; do sleep 2; done'
 
+    - name: Clear npm cache
+      run: |
+        echo "🧹 Clearing npm cache to prevent path resolution issues..."
+        npm cache clean --force
+        
+    - name: Cache node modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          frontend/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
     - name: Install frontend dependencies
       working-directory: ./frontend
       run: |
@@ -54,10 +75,10 @@ jobs:
         ls -la
         if [ -f "package-lock.json" ]; then
           echo "✅ Found package-lock.json, using npm ci"
-          npm ci --legacy-peer-deps
+          npm ci --legacy-peer-deps --cache ~/.npm
         else
           echo "⚠️  No package-lock.json found, using npm install"
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --cache ~/.npm
         fi
 
     - name: Build frontend (development)

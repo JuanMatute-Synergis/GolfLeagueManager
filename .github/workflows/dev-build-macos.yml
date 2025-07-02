@@ -58,9 +58,26 @@ jobs:
         chmod +x ./setup-chrome-headless.sh
         ./setup-chrome-headless.sh
 
+    - name: Clear npm cache
+      run: |
+        echo "🧹 Clearing npm cache to prevent path resolution issues..."
+        npm cache clean --force
+        
+    - name: Cache node modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.npm
+          frontend/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
     - name: Install frontend dependencies
       working-directory: ./frontend
-      run: npm ci --legacy-peer-deps
+      run: |
+        echo "📦 Installing frontend dependencies..."
+        npm ci --legacy-peer-deps --cache ~/.npm
 
     - name: Build frontend (development)
       working-directory: ./frontend

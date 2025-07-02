@@ -17,19 +17,19 @@ export class SeasonsSettingsComponent implements OnInit {
   // Forms
   seasonForm: FormGroup;
   flightForm: FormGroup;
-  
+
   // Data
   seasons: Season[] = [];
   seasonFlights: Flight[] = [];
   flightAssignments: PlayerFlightAssignment[] = [];
   allSeasonAssignments: PlayerFlightAssignment[] = []; // All assignments for the current season
   players: Player[] = [];
-  
+
   // Selected data
   selectedSeasonId: string | null = null;
   selectedFlightId: string | null = null;
   selectedPlayerId: string | null = null;
-  
+
   // UI state
   showSeasonForm = false;
   showFlightForm = false;
@@ -37,7 +37,7 @@ export class SeasonsSettingsComponent implements OnInit {
   isLoading = false;
   error: string | null = null;
   isEditMode = false;
-  
+
   // Mobile state
   mobileActiveTab: 'seasons' | 'flights' | 'players' | 'league-settings' = 'seasons';
 
@@ -125,11 +125,11 @@ export class SeasonsSettingsComponent implements OnInit {
 
       if (this.editingSeasonId) {
         // Update existing season
-        const seasonToUpdate: Season = { 
-          ...formValue, 
-          id: this.editingSeasonId 
+        const seasonToUpdate: Season = {
+          ...formValue,
+          id: this.editingSeasonId
         };
-        
+
         this.seasonService.updateSeason(seasonToUpdate).subscribe({
           next: () => {
             // Update local array
@@ -149,7 +149,7 @@ export class SeasonsSettingsComponent implements OnInit {
       } else {
         // Create new season
         const newSeason: Omit<Season, 'id'> = formValue;
-        
+
         this.seasonService.addSeason(newSeason as Season).subscribe({
           next: (savedSeason: Season) => {
             this.seasons.push(savedSeason);
@@ -169,7 +169,7 @@ export class SeasonsSettingsComponent implements OnInit {
   deleteSeason(season: Season) {
     if (confirm('Are you sure you want to delete this season?')) {
       this.isLoading = true;
-      
+
       this.seasonService.deleteSeason(season.id).subscribe({
         next: () => {
           this.seasons = this.seasons.filter(s => s.id !== season.id);
@@ -202,10 +202,10 @@ export class SeasonsSettingsComponent implements OnInit {
   // Flight Management
   loadSeasonFlights(seasonId: string) {
     if (!seasonId) return;
-    
+
     this.isLoading = true;
     this.error = null;
-    
+
     // Use the actual API to load flights for the selected season
     this.flightService.getFlightsBySeason(seasonId).subscribe({
       next: (flights: Flight[]) => {
@@ -229,8 +229,8 @@ export class SeasonsSettingsComponent implements OnInit {
     }
     this.showFlightForm = true;
     this.editingFlightId = null;
-    this.flightForm.reset({ 
-      maxPlayers: 16, 
+    this.flightForm.reset({
+      maxPlayers: 16,
       isActive: true
     });
   }
@@ -238,7 +238,7 @@ export class SeasonsSettingsComponent implements OnInit {
   editFlight(flight: Flight) {
     this.showFlightForm = true;
     this.editingFlightId = flight.id!;
-    
+
     this.flightForm.patchValue({
       ...flight
     });
@@ -248,12 +248,12 @@ export class SeasonsSettingsComponent implements OnInit {
     if (this.flightForm.valid && this.selectedSeasonId) {
       const flightData = this.flightForm.value;
       this.isLoading = true;
-      
+
       const flightPayload: Flight = {
         ...flightData,
         seasonId: this.selectedSeasonId
       };
-      
+
       if (this.editingFlightId) {
         // Update existing flight
         flightPayload.id = this.editingFlightId;
@@ -261,9 +261,9 @@ export class SeasonsSettingsComponent implements OnInit {
           next: () => {
             const flightIndex = this.seasonFlights.findIndex(f => f.id === this.editingFlightId);
             if (flightIndex !== -1) {
-              this.seasonFlights[flightIndex] = { 
-                ...flightPayload, 
-                updatedAt: new Date().toISOString() 
+              this.seasonFlights[flightIndex] = {
+                ...flightPayload,
+                updatedAt: new Date().toISOString()
               };
             }
             this.resetFlightForm();
@@ -329,11 +329,11 @@ export class SeasonsSettingsComponent implements OnInit {
   loadFlightAssignments(flightId: string) {
     this.isLoading = true;
     this.error = null;
-    
+
     this.selectedPlayerId = null;
     this.isFlightLeader = false;
     this.playerHandicap = null;
-    
+
     this.playerFlightAssignmentService.getAssignmentsByFlight(flightId).subscribe({
       next: (assignments: PlayerFlightAssignment[]) => {
         this.flightAssignments = assignments;
@@ -353,7 +353,7 @@ export class SeasonsSettingsComponent implements OnInit {
       next: (allAssignments: PlayerFlightAssignment[]) => {
         // Filter assignments to only include those for flights in the current season
         const seasonFlightIds = this.seasonFlights.map(flight => flight.id!);
-        this.allSeasonAssignments = allAssignments.filter(assignment => 
+        this.allSeasonAssignments = allAssignments.filter(assignment =>
           seasonFlightIds.includes(assignment.flightId)
         );
       },
@@ -379,7 +379,7 @@ export class SeasonsSettingsComponent implements OnInit {
 
   getAvailablePlayers(): Player[] {
     if (!this.selectedFlightId) return [];
-    
+
     // Filter out players already assigned to ANY flight in the current season
     const assignedPlayerIds = this.allSeasonAssignments.map(a => a.playerId);
     return this.players.filter(p => !assignedPlayerIds.includes(p.id!));
@@ -392,22 +392,22 @@ export class SeasonsSettingsComponent implements OnInit {
 
   assignPlayerToFlight() {
     if (!this.selectedPlayerId || !this.selectedFlightId) return;
-    
+
     this.isLoading = true;
-    
+
     const assignment: PlayerFlightAssignment = {
       playerId: this.selectedPlayerId,
       flightId: this.selectedFlightId,
       isFlightLeader: this.isFlightLeader,
       handicapAtAssignment: this.playerHandicap || 0
     };
-    
+
     this.playerFlightAssignmentService.addAssignment(assignment).subscribe({
       next: (savedAssignment: PlayerFlightAssignment) => {
         this.flightAssignments.push(savedAssignment);
         // Also add to season-wide assignments
         this.allSeasonAssignments.push(savedAssignment);
-        
+
         this.selectedPlayerId = null;
         this.isFlightLeader = false;
         this.playerHandicap = null;
@@ -423,12 +423,12 @@ export class SeasonsSettingsComponent implements OnInit {
 
   toggleFlightLeader(assignment: PlayerFlightAssignment) {
     this.isLoading = true;
-    
-    const updatedAssignment = { 
-      ...assignment, 
-      isFlightLeader: !assignment.isFlightLeader 
+
+    const updatedAssignment = {
+      ...assignment,
+      isFlightLeader: !assignment.isFlightLeader
     };
-    
+
     this.playerFlightAssignmentService.updateAssignment(updatedAssignment).subscribe({
       next: () => {
         const index = this.flightAssignments.findIndex(a => a.id === assignment.id);
@@ -452,7 +452,7 @@ export class SeasonsSettingsComponent implements OnInit {
 
   removeAssignment(assignmentId: string) {
     this.isLoading = true;
-    
+
     this.playerFlightAssignmentService.removeAssignment(assignmentId).subscribe({
       next: () => {
         this.flightAssignments = this.flightAssignments.filter(a => a.id !== assignmentId);

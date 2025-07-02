@@ -65,12 +65,12 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<ScoreEntryService>();
             builder.Services.AddScoped<MatchupService>();
             builder.Services.AddScoped<CourseService>();
-            builder.Services.AddScoped<DataSeeder>();            builder.Services.AddScoped<ScorecardService>();
+            builder.Services.AddScoped<DataSeeder>(); builder.Services.AddScoped<ScorecardService>();
             builder.Services.AddScoped<MatchPlayService>();
             builder.Services.AddScoped<MatchPlayScoringService>();
             builder.Services.AddScoped<PdfScorecardService>();
             builder.Services.AddScoped<AverageScoreService>();
-            builder.Services.AddScoped<HandicapService>();            builder.Services.AddScoped<LeagueSettingsService>();
+            builder.Services.AddScoped<HandicapService>(); builder.Services.AddScoped<LeagueSettingsService>();
             builder.Services.AddScoped<ScoreImportService>();
             builder.Services.AddScoped<JsonImportService>();
             builder.Services.AddScoped<DatabaseCleanupService>();
@@ -94,10 +94,10 @@ namespace GolfLeagueManager
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull; options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
                 });
-            
+
             // Add CORS - Update to support multiple subdomains
             builder.Services.AddCors(options =>
             {
@@ -168,7 +168,7 @@ namespace GolfLeagueManager
             {
                 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
             }
-            
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -180,13 +180,13 @@ namespace GolfLeagueManager
 
             // Use CORS
             app.UseCors("AllowTenantApps");
-            
+
             app.UseHttpsRedirection();
             app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
 
             // Check if authorization should be disabled for debugging (get value from app config)
             var appDisableAuth = app.Configuration.GetValue<bool>("Debug:DisableAuthorization");
-            
+
             // Only use authentication/authorization if not disabled for debugging
             if (!appDisableAuth || !app.Environment.IsDevelopment())
             {

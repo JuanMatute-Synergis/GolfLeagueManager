@@ -32,17 +32,17 @@ namespace GolfLeagueManager
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber && w.SessionStart)
                 .OrderByDescending(w => w.WeekNumber)
                 .FirstOrDefaultAsync();
-            
+
             // If no session start found, use week 1 as session start
             int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
 
             // Get the session-specific initial handicap or fall back to player's current handicap
             var sessionHandicap = await _context.PlayerSessionHandicaps
-                .Where(psh => psh.PlayerId == playerId && 
-                             psh.SeasonId == seasonId && 
+                .Where(psh => psh.PlayerId == playerId &&
+                             psh.SeasonId == seasonId &&
                              psh.SessionStartWeekNumber == sessionStartWeekNumber)
                 .FirstOrDefaultAsync();
-            
+
             return sessionHandicap?.SessionInitialHandicap ?? player.CurrentHandicap;
         }
 
@@ -58,11 +58,11 @@ namespace GolfLeagueManager
         {
             // Verify the session start week exists
             var sessionStartWeek = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.WeekNumber == sessionStartWeekNumber && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.WeekNumber == sessionStartWeekNumber &&
                            w.SessionStart)
                 .FirstOrDefaultAsync();
-            
+
             if (sessionStartWeek == null)
             {
                 throw new ArgumentException($"Week {sessionStartWeekNumber} is not a valid session start week for season {seasonId}");
@@ -87,8 +87,8 @@ namespace GolfLeagueManager
             {
                 // Check if session handicap already exists
                 var existingSessionHandicap = await _context.PlayerSessionHandicaps
-                    .Where(psh => psh.PlayerId == playerId && 
-                                 psh.SeasonId == seasonId && 
+                    .Where(psh => psh.PlayerId == playerId &&
+                                 psh.SeasonId == seasonId &&
                                  psh.SessionStartWeekNumber == sessionStartWeekNumber)
                     .FirstOrDefaultAsync();
 
@@ -125,11 +125,11 @@ namespace GolfLeagueManager
         {
             // Verify the session start week exists
             var sessionStartWeek = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.WeekNumber == sessionStartWeekNumber && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.WeekNumber == sessionStartWeekNumber &&
                            w.SessionStart)
                 .FirstOrDefaultAsync();
-            
+
             if (sessionStartWeek == null)
             {
                 throw new ArgumentException($"Week {sessionStartWeekNumber} is not a valid session start week for season {seasonId}");
@@ -137,8 +137,8 @@ namespace GolfLeagueManager
 
             // Check if session handicap already exists
             var existingSessionHandicap = await _context.PlayerSessionHandicaps
-                .Where(psh => psh.PlayerId == playerId && 
-                             psh.SeasonId == seasonId && 
+                .Where(psh => psh.PlayerId == playerId &&
+                             psh.SeasonId == seasonId &&
                              psh.SessionStartWeekNumber == sessionStartWeekNumber)
                 .FirstOrDefaultAsync();
 
@@ -197,10 +197,10 @@ namespace GolfLeagueManager
 
             // Get league settings to determine calculation method
             var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
-            
+
             // Get recent scores from matchups
             var recentScores = await GetRecentPlayerScoresAsync(playerId, maxRounds);
-            
+
             if (!recentScores.Any())
             {
                 return player.CurrentHandicap; // No scores available, keep current handicap
@@ -245,7 +245,7 @@ namespace GolfLeagueManager
 
             // Get recent scores from matchups
             var recentScores = await GetRecentPlayerScoresAsync(playerId, maxRounds);
-            
+
             if (!recentScores.Any())
             {
                 return player.CurrentHandicap; // No scores available, keep current handicap
@@ -253,11 +253,11 @@ namespace GolfLeagueManager
 
             // Calculate new handicap using WHS rules
             var newHandicap = CalculateHandicapIndex(recentScores);
-            
+
             // Update player's current handicap
             player.CurrentHandicap = newHandicap;
             await _context.SaveChangesAsync();
-            
+
             return newHandicap;
         }
 
@@ -300,7 +300,7 @@ namespace GolfLeagueManager
 
             // Get number of differentials to use based on WHS rules
             int differentialsToUse = GetDifferentialsCount(differentials.Count);
-            
+
             if (differentialsToUse == 0) return 0;
 
             // Average the lowest differentials and multiply by 0.96
@@ -337,7 +337,7 @@ namespace GolfLeagueManager
         public async Task<Dictionary<Guid, decimal>> GetSuggestedSessionHandicapsAsync(Guid seasonId, int sessionStartWeekNumber)
         {
             var suggestions = new Dictionary<Guid, decimal>();
-            
+
             // Get all players who have played in this season
             var seasonWeeks = await _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
@@ -369,10 +369,10 @@ namespace GolfLeagueManager
         public async Task<Dictionary<Guid, decimal>> BulkCalculateSeasonHandicapsAsync(Guid seasonId, int maxRounds = 20)
         {
             var results = new Dictionary<Guid, decimal>();
-            
+
             // Get league settings for this season
             var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
-            
+
             // Get all players who have played in this season
             var seasonWeeks = await _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
@@ -399,7 +399,7 @@ namespace GolfLeagueManager
                     Console.WriteLine($"Error calculating handicap for player {playerId}: {ex.Message}");
                 }
             }
-            
+
             return results;
         }
 
@@ -414,7 +414,7 @@ namespace GolfLeagueManager
         public async Task<Dictionary<Guid, decimal>> CalculateAllPlayerHandicapsAsync(Guid seasonId, int courseRating = 35, decimal slopeRating = 113)
         {
             var results = new Dictionary<Guid, decimal>();
-            
+
             // Get all players who have played in this season
             var seasonWeeks = await _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
@@ -434,14 +434,14 @@ namespace GolfLeagueManager
                 {
                     // Get player's scores
                     var scores = await GetRecentPlayerScoresAsync(playerId, 20);
-                    
+
                     if (scores.Any())
                     {
                         // Override course parameters if specified
                         var adjustedScores = scores.Select(s => (s.score, courseRating, slopeRating)).ToList();
                         var handicap = CalculateHandicapIndex(adjustedScores);
                         results[playerId] = handicap;
-                        
+
                         // Optionally update the player's current handicap in the database
                         var player = await _context.Players.FindAsync(playerId);
                         if (player != null)
@@ -456,7 +456,7 @@ namespace GolfLeagueManager
                     Console.WriteLine($"Error calculating handicap for player {playerId}: {ex.Message}");
                 }
             }
-            
+
             await _context.SaveChangesAsync();
             return results;
         }
@@ -472,10 +472,10 @@ namespace GolfLeagueManager
         public async Task<decimal> CalculatePlayerHandicapAsync(Guid playerId, int courseRating = 35, decimal slopeRating = 113, int maxRounds = 20)
         {
             var scores = await GetRecentPlayerScoresAsync(playerId, maxRounds);
-            
+
             if (!scores.Any())
                 return 0;
-            
+
             // Override course parameters
             var adjustedScores = scores.Select(s => (s.score, courseRating, slopeRating)).ToList();
             return CalculateHandicapIndex(adjustedScores);

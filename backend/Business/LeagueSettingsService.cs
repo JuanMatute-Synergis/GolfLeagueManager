@@ -63,7 +63,7 @@ namespace GolfLeagueManager
                 existingSettings.AllowHandicapUpdates = settings.AllowHandicapUpdates;
                 existingSettings.CustomRules = settings.CustomRules;
                 existingSettings.ModifiedDate = DateTime.UtcNow;
-                
+
                 settings = existingSettings;
             }
 

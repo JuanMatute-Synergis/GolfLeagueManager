@@ -189,7 +189,7 @@ namespace GolfLeagueManager
 
             // Determine how many differentials to use based on WHS rules
             int differentialsToUse = GetDifferentialsCount(differentials.Count);
-            
+
             if (differentialsToUse == 0) return 0;
 
             // Take the lowest differentials and average them

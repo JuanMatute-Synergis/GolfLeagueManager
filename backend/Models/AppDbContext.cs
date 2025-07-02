@@ -41,11 +41,11 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()");
-                    
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
-                    
+
                 // Configure DateTime properties as UTC
                 entity.Property(e => e.StartDate)
                     .HasConversion(
@@ -63,17 +63,17 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()");
-                    
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
-                    
+
                 // Configure DateTime property as UTC
                 entity.Property(e => e.Date)
                     .HasConversion(
                         v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
                         v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
-                        
+
                 // Configure relationship with Season
                 entity.HasOne(w => w.Season)
                     .WithMany(s => s.Weeks)
@@ -86,19 +86,19 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()");
-                    
+
                 // Configure relationship with Week
                 entity.HasOne(m => m.Week)
                     .WithMany(w => w.Matchups)
                     .HasForeignKey(m => m.WeekId)
                     .OnDelete(DeleteBehavior.Cascade);
-                    
+
                 // Configure relationship with PlayerA
                 entity.HasOne(m => m.PlayerA)
                     .WithMany(p => p.MatchupsAsPlayerA)
                     .HasForeignKey(m => m.PlayerAId)
                     .OnDelete(DeleteBehavior.Restrict);
-                    
+
                 // Configure relationship with PlayerB
                 entity.HasOne(m => m.PlayerB)
                     .WithMany(p => p.MatchupsAsPlayerB)
@@ -116,7 +116,7 @@ namespace GolfLeagueManager
                     .WithMany(s => s.Flights)
                     .HasForeignKey(f => f.SeasonId)
                     .OnDelete(DeleteBehavior.SetNull);
-                    
+
                 entity.Property(e => e.CreatedAt)
                     .HasConversion(
                         v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
@@ -176,7 +176,7 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()");
-                    
+
                 entity.Property(e => e.Name)
                     .IsRequired()
                     .HasMaxLength(100);
@@ -187,7 +187,7 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()");
-                    
+
                 // Configure relationship with Course
                 entity.HasOne(ch => ch.Course)
                     .WithMany(c => c.CourseHoles)
@@ -200,19 +200,19 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()");
-                    
+
                 // Configure relationship with Player
                 entity.HasOne(psa => psa.Player)
                     .WithMany()
                     .HasForeignKey(psa => psa.PlayerId)
                     .OnDelete(DeleteBehavior.Cascade);
-                    
+
                 // Configure relationship with Season
                 entity.HasOne(psa => psa.Season)
                     .WithMany()
                     .HasForeignKey(psa => psa.SeasonId)
                     .OnDelete(DeleteBehavior.Cascade);
-                    
+
                 // Create unique index to prevent duplicate session averages for same player/season/session
                 entity.HasIndex(psa => new { psa.PlayerId, psa.SeasonId, psa.SessionStartWeekNumber })
                     .IsUnique();
@@ -223,19 +223,19 @@ namespace GolfLeagueManager
             {
                 entity.Property(e => e.Id)
                     .HasDefaultValueSql("gen_random_uuid()");
-                    
+
                 // Configure relationship with Player
                 entity.HasOne(psh => psh.Player)
                     .WithMany()
                     .HasForeignKey(psh => psh.PlayerId)
                     .OnDelete(DeleteBehavior.Cascade);
-                    
+
                 // Configure relationship with Season
                 entity.HasOne(psh => psh.Season)
                     .WithMany()
                     .HasForeignKey(psh => psh.SeasonId)
                     .OnDelete(DeleteBehavior.Cascade);
-                    
+
                 // Create unique index to prevent duplicate session handicaps for same player/season/session
                 entity.HasIndex(psh => new { psh.PlayerId, psh.SeasonId, psh.SessionStartWeekNumber })
                     .IsUnique();
