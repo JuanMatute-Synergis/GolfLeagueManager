@@ -15,6 +15,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Fix Docker credentials for macOS
+      run: |
+        echo "🔧 Fixing Docker credentials for GitHub Actions..."
+        mkdir -p ~/.docker
+        cat > ~/.docker/config.json << 'EOF'
+        {
+          "auths": {},
+          "credsStore": ""
+        }
+        EOF
+        echo "✅ Docker credentials configuration updated"
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
