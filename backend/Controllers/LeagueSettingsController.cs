@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 
 namespace GolfLeagueManager
 {
@@ -32,14 +33,47 @@ namespace GolfLeagueManager
         }
 
         [HttpPut("season/{seasonId}")]
-        public async Task<ActionResult<LeagueSettings>> UpdateLeagueSettings(Guid seasonId, [FromBody] LeagueSettings settings)
+        public async Task<ActionResult<LeagueSettings>> UpdateLeagueSettings(Guid seasonId, [FromBody] UpdateLeagueSettingsRequest request)
         {
             try
             {
-                if (settings.SeasonId != seasonId)
+                // Log the received data for debugging
+                System.Console.WriteLine($"Received seasonId: {seasonId}");
+                System.Console.WriteLine($"Received request: {request?.GetType().Name ?? "null"}");
+                
+                if (request == null)
                 {
-                    return BadRequest("Season ID in URL does not match settings.");
+                    return BadRequest("Settings object is required.");
                 }
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value != null && x.Value.Errors.Count > 0)
+                        .Select(x => new { Field = x.Key, Errors = x.Value?.Errors.Select(e => e.ErrorMessage) ?? new List<string>() })
+                        .ToArray();
+                    return BadRequest(new { Message = "Validation failed", ValidationErrors = errors });
+                }
+
+                // Convert DTO to LeagueSettings
+                var settings = new LeagueSettings
+                {
+                    SeasonId = seasonId,
+                    HandicapMethod = request.HandicapMethod,
+                    CoursePar = request.CoursePar,
+                    CourseRating = request.CourseRating,
+                    SlopeRating = request.SlopeRating,
+                    MaxRoundsForHandicap = request.MaxRoundsForHandicap,
+                    ScoringMethod = request.ScoringMethod,
+                    PointsSystem = request.PointsSystem,
+                    HoleWinPoints = request.HoleWinPoints,
+                    HoleHalvePoints = request.HoleHalvePoints,
+                    MatchWinBonus = request.MatchWinBonus,
+                    MatchTiePoints = request.MatchTiePoints,
+                    UseSessionHandicaps = request.UseSessionHandicaps,
+                    AllowHandicapUpdates = request.AllowHandicapUpdates,
+                    CustomRules = request.CustomRules
+                };
 
                 var updatedSettings = await _leagueSettingsService.UpdateLeagueSettingsAsync(settings);
                 return Ok(updatedSettings);

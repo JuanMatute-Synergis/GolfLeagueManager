@@ -744,8 +744,8 @@ export class ScoreEntryComponent implements OnInit {
           playerBHolesWon: 0,
           holesHalved: 0,
           // Include session handicaps
-          playerAHandicap: this.sessionHandicaps[matchup.playerAId] || playerA?.currentHandicap || 0,
-          playerBHandicap: this.sessionHandicaps[matchup.playerBId] || playerB?.currentHandicap || 0
+          playerAHandicap: this.sessionHandicaps[matchup.playerAId] || playerA?.initialHandicap || 0,
+          playerBHandicap: this.sessionHandicaps[matchup.playerBId] || playerB?.initialHandicap || 0
         };
 
         this.showScorecardModal = true;
@@ -965,9 +965,9 @@ export class ScoreEntryComponent implements OnInit {
       return this.sessionHandicaps[playerId];
     }
 
-    // Fallback to current handicap
+    // Fallback to initial handicap
     const player = this.players.find(p => p.id === playerId);
-    return player?.currentHandicap || null;
+    return player?.initialHandicap || null;
   }
 
   getPlayerFirstName(fullName: string | undefined): string {
@@ -1048,10 +1048,10 @@ export class ScoreEntryComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading session handicaps:', error);
-          // Fallback to current handicaps if session handicaps fail
+          // Fallback to initial handicaps if session handicaps fail
           Array.from(playerIds).forEach(playerId => {
             const player = this.players.find(p => p.id === playerId);
-            this.sessionHandicaps[playerId] = player?.currentHandicap || 0;
+            this.sessionHandicaps[playerId] = player?.initialHandicap || 0;
           });
         }
       });

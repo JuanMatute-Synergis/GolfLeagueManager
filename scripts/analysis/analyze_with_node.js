@@ -28,7 +28,7 @@ const kevinHandicap = kevinScores[0] ? scoreEntries.find(e => e.player.firstName
 if (kevinHandicap) {
     console.log(`\nKevin Kelhart JR handicap info:`);
     console.log(`Initial Handicap: ${kevinHandicap.initialHandicap}`);
-    console.log(`Current Handicap: ${kevinHandicap.currentHandicap}`);
+    console.log(`Note: Current handicap is now calculated dynamically from scores`);
     console.log(`Initial Avg Score: ${kevinHandicap.initialAverageScore}`);
     console.log(`Current Avg Score: ${kevinHandicap.currentAverageScore}`);
 }
@@ -85,7 +85,7 @@ otherPlayers.forEach(playerName => {
         console.log(`  Average: ${avg.toFixed(2)}`);
 
         const playerInfo = scoreEntries.find(e => e.player.firstName === firstName && e.player.lastName === lastName).player;
-        console.log(`  Initial Handicap: ${playerInfo.initialHandicap}, Current: ${playerInfo.currentHandicap}`);
+        console.log(`  Initial Handicap: ${playerInfo.initialHandicap}, Note: Current handicap is now calculated dynamically`);
         console.log(`  Initial Avg: ${playerInfo.initialAverageScore}, Current: ${playerInfo.currentAverageScore}`);
     }
 });

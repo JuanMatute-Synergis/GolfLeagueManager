@@ -25,7 +25,6 @@
       </button>
     </div>
   </div>
-
   <!-- Dropdown Row -->
   <div class="flex items-center gap-3 mb-1 px-2">
     <select
@@ -203,10 +202,15 @@
 </div>
 
 <!-- Scorecard Modal -->
+
 <app-scorecard-modal
   #scorecardModal
   *ngIf="showScorecardModal && currentScorecardData && selectedWeek"
   [scorecardData]="currentScorecardData"
+  [matchupId]="mode === 'matchups' ? currentScorecardData.matchupId : undefined"
+  [playerAName]="mode === 'matchups' ? currentScorecardData.playerAName : undefined"
+  [playerBName]="mode === 'matchups' ? currentScorecardData.playerBName : undefined"
+  [flightName]="mode === 'matchups' ? currentScorecardData.flightName : undefined"
   [week]="selectedWeek"
   [isOpen]="showScorecardModal"
   [mode]="mode === 'matchups' ? 'view' : 'edit'"

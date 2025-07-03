@@ -70,7 +70,7 @@ import { Season, PlayerSeasonStats, PlayerWithFlight } from '../../models/week.m
             <div class="text-center">
               <div class="text-4xl mb-3">📈</div>
               <h3 class="text-lg font-semibold text-foreground mb-2">Best Average</h3>
-              <p class="text-2xl font-bold text-foreground mb-1">{{ getBestAverage() | number:'1.1-1' }}</p>
+              <p class="text-2xl font-bold text-foreground mb-1">{{ getBestAverage() | number:'1.2-2' }}</p>
               <p class="text-sm text-muted-foreground">strokes</p>
             </div>
           </div>
@@ -140,7 +140,7 @@ import { Season, PlayerSeasonStats, PlayerWithFlight } from '../../models/week.m
                     </td>
                     <td class="p-4 border-b border-border text-center">
                       <span class="font-bold" [class]="getAverageScoreClass(player.averageScore)">
-                        {{ player.averageScore | number:'1.1-1' }}
+                        {{ player.averageScore | number:'1.2-2' }}
                       </span>
                     </td>
                     <td class="p-4 border-b border-border text-center">
@@ -213,7 +213,7 @@ import { Season, PlayerSeasonStats, PlayerWithFlight } from '../../models/week.m
                 <div class="space-y-3">
                   <div class="flex justify-between items-center">
                     <span class="text-muted-foreground">Season Average:</span>
-                    <span class="font-bold text-foreground">{{ getOverallAverage() | number:'1.1-1' }}</span>
+                    <span class="font-bold text-foreground">{{ getOverallAverage() | number:'1.2-2' }}</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="text-muted-foreground">Best Single Round:</span>

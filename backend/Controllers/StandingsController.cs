@@ -19,6 +19,7 @@ namespace GolfLeagueManager.Controllers
         private readonly ScorecardService _scorecardService;
         private readonly MatchPlayService _matchPlayService;
         private readonly AverageScoreService _averageScoreService;
+        private readonly HandicapService _handicapService;
         private readonly AppDbContext _context;
 
         public StandingsController(
@@ -29,6 +30,7 @@ namespace GolfLeagueManager.Controllers
             ScorecardService scorecardService,
             MatchPlayService matchPlayService,
             AverageScoreService averageScoreService,
+            HandicapService handicapService,
             AppDbContext context)
         {
             _flightAssignmentService = flightAssignmentService;
@@ -38,6 +40,7 @@ namespace GolfLeagueManager.Controllers
             _scorecardService = scorecardService;
             _matchPlayService = matchPlayService;
             _averageScoreService = averageScoreService;
+            _handicapService = handicapService;
             _context = context;
         }
 
@@ -252,11 +255,15 @@ namespace GolfLeagueManager.Controllers
                     var averageScore = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
                         player.Id, seasonId, currentWeekNumber + 1);
 
+                    // Calculate handicap up to and including this week
+                    var handicapUpToWeek = await _handicapService.GetPlayerHandicapUpToWeekAsync(
+                        player.Id, seasonId, currentWeekNumber);
+
                     playerStats.Add(new {
                         id = player.Id,
                         name = $"{player.FirstName} {player.LastName.Substring(0, 1)}.",
                         displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.",
-                        handicap = player.CurrentHandicap,
+                        handicap = handicapUpToWeek,
                         averageScore = averageScore,
                         grossScore = grossScore ?? 0,
                         thisWeekPoints = thisWeekPoints,

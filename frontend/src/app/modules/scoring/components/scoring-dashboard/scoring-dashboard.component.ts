@@ -167,7 +167,7 @@ import { Season, Week, PlayerSeasonStats } from '../../models/week.model';
                       </div>
                       <div class="text-right">
                         <div class="font-bold text-lg text-foreground">{{ player.totalPoints }}</div>
-                        <div class="text-sm text-muted-foreground">{{ player.averageScore | number:'1.1-1' }} avg</div>
+                        <div class="text-sm text-muted-foreground">{{ player.averageScore | number:'1.2-2' }} avg</div>
                       </div>
                     </div>
                   </div>

@@ -14,36 +14,118 @@ namespace GolfLeagueManager
         }
 
         /// <summary>
-        /// Get a player's session-specific handicap for calculations, using session context
-        /// similar to how we handle session averages.
+        /// Get a player's handicap for calculations. This method now calculates the handicap
+        /// based on scores up to and including the specified week.
         /// </summary>
         /// <param name="playerId">The player's ID</param>
         /// <param name="seasonId">The season ID</param>
         /// <param name="weekNumber">The week number to get handicap for</param>
-        /// <returns>The session-specific handicap or current handicap if no session handicap is set</returns>
+        /// <returns>The player's calculated handicap</returns>
         public async Task<decimal> GetPlayerSessionHandicapAsync(Guid playerId, Guid seasonId, int weekNumber)
         {
             var player = await _context.Players.FindAsync(playerId);
             if (player == null)
                 throw new ArgumentException($"Player with ID {playerId} not found");
 
-            // Find the most recent SessionStart week up to and including the current week
-            var sessionStartWeek = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber && w.SessionStart)
-                .OrderByDescending(w => w.WeekNumber)
-                .FirstOrDefaultAsync();
+            // Calculate handicap based on scores up to and including the specified week
+            return await GetPlayerHandicapUpToWeekAsync(playerId, seasonId, weekNumber);
+        }
 
-            // If no session start found, use week 1 as session start
-            int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
+        /// <summary>
+        /// Calculate a player's handicap based on scores up to and including a specific week
+        /// </summary>
+        /// <param name="playerId">The player's ID</param>
+        /// <param name="seasonId">The season ID</param>
+        /// <param name="upToWeekNumber">The week number to calculate handicap up to (inclusive)</param>
+        /// <param name="maxRounds">Maximum number of recent rounds to consider (default 20)</param>
+        /// <returns>The calculated handicap up to the specified week</returns>
+        public async Task<decimal> GetPlayerHandicapUpToWeekAsync(Guid playerId, Guid seasonId, int upToWeekNumber, int maxRounds = 20)
+        {
+            var player = await _context.Players.FindAsync(playerId);
+            if (player == null)
+                throw new ArgumentException($"Player with ID {playerId} not found");
 
-            // Get the session-specific initial handicap or fall back to player's current handicap
-            var sessionHandicap = await _context.PlayerSessionHandicaps
-                .Where(psh => psh.PlayerId == playerId &&
-                             psh.SeasonId == seasonId &&
-                             psh.SessionStartWeekNumber == sessionStartWeekNumber)
-                .FirstOrDefaultAsync();
+            // Get league settings to determine calculation method
+            var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
 
-            return sessionHandicap?.SessionInitialHandicap ?? player.CurrentHandicap;
+            // Get ALL weeks in the season up to and including the specified week (both counting and non-counting)
+            var allSeasonWeeks = await _context.Weeks
+                .Where(w => w.SeasonId == seasonId && 
+                           w.CountsForScoring && 
+                           w.WeekNumber <= upToWeekNumber &&
+                           !w.SpecialPointsAwarded.HasValue) // Exclude weeks with special points
+                .OrderBy(w => w.WeekNumber)
+                .ToListAsync();
+
+            // Build scores array using previous valid handicap for non-counting weeks
+            var scoresForCalculation = new List<(int score, int courseRating, decimal slopeRating)>();
+            var currentValidHandicap = player.InitialHandicap; // This only updates when we have a counting week with actual score
+
+            foreach (var week in allSeasonWeeks)
+            {
+                if (week.CountsForHandicap)
+                {
+                    // Get actual score for this week
+                    var actualScore = await _context.Matchups
+                        .Where(m => m.WeekId == week.Id &&
+                                   (m.PlayerAId == playerId || m.PlayerBId == playerId) &&
+                                   ((m.PlayerAId == playerId && m.PlayerAScore.HasValue && !m.PlayerAAbsent) ||
+                                    (m.PlayerBId == playerId && m.PlayerBScore.HasValue && !m.PlayerBAbsent)))
+                        .Select(m => m.PlayerAId == playerId ? m.PlayerAScore!.Value : m.PlayerBScore!.Value)
+                        .FirstOrDefaultAsync();
+
+                    if (actualScore > 0)
+                    {
+                        scoresForCalculation.Add((actualScore, (int)leagueSettings.CourseRating, leagueSettings.SlopeRating));
+                        
+                        // Update the valid handicap AFTER adding this score for future non-counting weeks
+                        // Calculate handicap based on all scores accumulated so far
+                        if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
+                        {
+                            var avgScore = (decimal)scoresForCalculation.Average(s => s.score);
+                            currentValidHandicap = Math.Round(avgScore - leagueSettings.CoursePar, 0);
+                            currentValidHandicap = Math.Max(0, Math.Min(36, currentValidHandicap));
+                        }
+                        else
+                        {
+                            if (scoresForCalculation.Count >= 3) // Need at least 3 scores for WHS calculation
+                            {
+                                currentValidHandicap = CalculateHandicapIndex(scoresForCalculation);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Week doesn't count for handicap - use the LAST VALID handicap converted to equivalent score
+                    var equivalentScore = (int)(currentValidHandicap + leagueSettings.CoursePar);
+                    scoresForCalculation.Add((equivalentScore, (int)leagueSettings.CourseRating, leagueSettings.SlopeRating));
+                }
+            }
+
+            if (!scoresForCalculation.Any())
+            {
+                return player.InitialHandicap; // No weeks played, return initial handicap
+            }
+
+            // Final handicap calculation with all scores (actual + previous handicap equivalents)
+            decimal calculatedHandicap;
+
+            if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
+            {
+                // Simple Average Method: Handicap = Average Score - Course Par
+                var averageScore = (decimal)scoresForCalculation.Average(s => s.score);
+                calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0); // Round to whole numbers
+                calculatedHandicap = Math.Max(0, Math.Min(36, calculatedHandicap)); // Cap between 0 and 36
+            }
+            else
+            {
+                // World Handicap System Method - limit to maxRounds for WHS calculation
+                var recentScores = scoresForCalculation.TakeLast(maxRounds).ToList();
+                calculatedHandicap = CalculateHandicapIndex(recentScores);
+            }
+
+            return calculatedHandicap;
         }
 
         /// <summary>
@@ -70,7 +152,7 @@ namespace GolfLeagueManager
 
             // Get all players who have played in this season
             var seasonWeeks = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
+                .Where(w => w.SeasonId == seasonId && w.CountsForScoring && w.CountsForHandicap)
                 .Select(w => w.Id)
                 .ToListAsync();
 
@@ -198,12 +280,13 @@ namespace GolfLeagueManager
             // Get league settings to determine calculation method
             var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
 
-            // Get recent scores from matchups
-            var recentScores = await GetRecentPlayerScoresAsync(playerId, maxRounds);
+            // Get recent scores using the same methodology as GetPlayerHandicapUpToWeekAsync
+            // This ensures consistency across all handicap calculations
+            var recentScores = await GetRecentPlayerScoresForSeasonAsync(playerId, seasonId, maxRounds);
 
             if (!recentScores.Any())
             {
-                return player.CurrentHandicap; // No scores available, keep current handicap
+                return player.InitialHandicap; // No scores available, return initial handicap
             }
 
             decimal newHandicap;
@@ -212,7 +295,7 @@ namespace GolfLeagueManager
             {
                 // Simple Average Method: Handicap = Average Score - Course Par
                 var averageScore = (decimal)recentScores.Average(s => s.score);
-                newHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 1);
+                newHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0); // Round to whole numbers
                 newHandicap = Math.Max(0, Math.Min(36, newHandicap)); // Cap between 0 and 36
             }
             else
@@ -223,10 +306,7 @@ namespace GolfLeagueManager
                 newHandicap = CalculateHandicapIndex(adjustedScores);
             }
 
-            // Update player's current handicap
-            player.CurrentHandicap = newHandicap;
-            await _context.SaveChangesAsync();
-
+            // Don't store calculated handicap - always calculate on demand
             return newHandicap;
         }
 
@@ -248,41 +328,110 @@ namespace GolfLeagueManager
 
             if (!recentScores.Any())
             {
-                return player.CurrentHandicap; // No scores available, keep current handicap
+                return player.InitialHandicap; // No scores available, return initial handicap
             }
 
             // Calculate new handicap using WHS rules
             var newHandicap = CalculateHandicapIndex(recentScores);
 
-            // Update player's current handicap
-            player.CurrentHandicap = newHandicap;
-            await _context.SaveChangesAsync();
-
+            // Don't store calculated handicap - always calculate on demand
             return newHandicap;
         }
 
         /// <summary>
-        /// Get recent player scores for handicap calculation
+        /// Get player scores for handicap calculation starting from week 1
         /// </summary>
         private async Task<List<(int score, int courseRating, decimal slopeRating)>> GetRecentPlayerScoresAsync(Guid playerId, int maxRounds)
         {
-            var scores = await _context.Matchups
-                .Where(m => (m.PlayerAId == playerId && m.PlayerAScore.HasValue) ||
-                           (m.PlayerBId == playerId && m.PlayerBScore.HasValue))
-                .Include(m => m.Week)
-                .Where(m => m.Week != null && m.Week.CountsForScoring)
-                .OrderByDescending(m => m.Week!.WeekNumber)
-                .Take(maxRounds)
-                .Select(m => new
-                {
-                    Score = m.PlayerAId == playerId ? m.PlayerAScore!.Value : m.PlayerBScore!.Value,
-                    WeekNumber = m.Week!.WeekNumber,
-                    CourseRating = 35, // 9-hole rating for Allentown Municipal (adjust as needed)
-                    SlopeRating = 113m // Standard slope rating (adjust if you know the actual slope)
-                })
+            // Get all weeks that count for handicap calculations
+            var weekIds = await _context.Weeks
+                .Where(w => w.CountsForScoring && 
+                           w.CountsForHandicap &&
+                           !w.SpecialPointsAwarded.HasValue) // Exclude weeks with special points
+                .Select(w => w.Id)
                 .ToListAsync();
 
-            return scores.Select(s => (s.Score, s.CourseRating, s.SlopeRating)).ToList();
+            // Get all non-absent scores for this player (same pattern as AverageScoreService)
+            var playerScores = await _context.Matchups
+                .Where(m => weekIds.Contains(m.WeekId) &&
+                           (m.PlayerAId == playerId || m.PlayerBId == playerId) &&
+                           ((m.PlayerAId == playerId && m.PlayerAScore.HasValue && !m.PlayerAAbsent) ||
+                            (m.PlayerBId == playerId && m.PlayerBScore.HasValue && !m.PlayerBAbsent)))
+                .Include(m => m.Week)
+                .OrderByDescending(m => m.Week!.WeekNumber)
+                .Take(maxRounds)
+                .Select(m => m.PlayerAId == playerId ? m.PlayerAScore!.Value : m.PlayerBScore!.Value)
+                .ToListAsync();
+
+            return playerScores.Select(score => (score, 35, 113m)).ToList(); // 9-hole rating for Allentown Municipal
+        }
+
+        /// <summary>
+        /// Get player scores for handicap calculation for a specific season using the same methodology
+        /// as GetPlayerHandicapUpToWeekAsync (includes non-counting weeks with previous averages)
+        /// </summary>
+        private async Task<List<(int score, int courseRating, decimal slopeRating)>> GetRecentPlayerScoresForSeasonAsync(Guid playerId, Guid seasonId, int maxRounds)
+        {
+            var player = await _context.Players.FindAsync(playerId);
+            if (player == null) return new List<(int, int, decimal)>();
+
+            var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
+
+            // Get ALL weeks in the season (both counting and non-counting)
+            var allSeasonWeeks = await _context.Weeks
+                .Where(w => w.SeasonId == seasonId && 
+                           w.CountsForScoring && 
+                           !w.SpecialPointsAwarded.HasValue) // Exclude weeks with special points
+                .OrderBy(w => w.WeekNumber)
+                .ToListAsync();
+
+            // Build scores array using previous valid handicap for non-counting weeks
+            var scoresForCalculation = new List<(int score, int courseRating, decimal slopeRating)>();
+            var currentValidHandicap = player.InitialHandicap; // This only updates when we have a counting week with actual score
+
+            foreach (var week in allSeasonWeeks)
+            {
+                if (week.CountsForHandicap)
+                {
+                    // Get actual score for this week
+                    var actualScore = await _context.Matchups
+                        .Where(m => m.WeekId == week.Id &&
+                                   (m.PlayerAId == playerId || m.PlayerBId == playerId) &&
+                                   ((m.PlayerAId == playerId && m.PlayerAScore.HasValue && !m.PlayerAAbsent) ||
+                                    (m.PlayerBId == playerId && m.PlayerBScore.HasValue && !m.PlayerBAbsent)))
+                        .Select(m => m.PlayerAId == playerId ? m.PlayerAScore!.Value : m.PlayerBScore!.Value)
+                        .FirstOrDefaultAsync();
+
+                    if (actualScore > 0)
+                    {
+                        scoresForCalculation.Add((actualScore, (int)leagueSettings.CourseRating, leagueSettings.SlopeRating));
+                        
+                        // Update the valid handicap AFTER adding this score for future non-counting weeks
+                        if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
+                        {
+                            var avgScore = (decimal)scoresForCalculation.Average(s => s.score);
+                            currentValidHandicap = Math.Round(avgScore - leagueSettings.CoursePar, 0);
+                            currentValidHandicap = Math.Max(0, Math.Min(36, currentValidHandicap));
+                        }
+                        else
+                        {
+                            if (scoresForCalculation.Count >= 3) // Need at least 3 scores for calculation
+                            {
+                                currentValidHandicap = CalculateHandicapIndex(scoresForCalculation);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Week doesn't count for handicap - use the LAST VALID handicap converted to equivalent score
+                    var equivalentScore = (int)(currentValidHandicap + leagueSettings.CoursePar);
+                    scoresForCalculation.Add((equivalentScore, (int)leagueSettings.CourseRating, leagueSettings.SlopeRating));
+                }
+            }
+
+            // Return most recent scores up to maxRounds
+            return scoresForCalculation.TakeLast(maxRounds).ToList();
         }
 
         /// <summary>
@@ -308,7 +457,7 @@ namespace GolfLeagueManager
             var averageDifferential = selectedDifferentials.Average();
             var handicapIndex = averageDifferential * 0.96m;
 
-            return Math.Max(0, Math.Min(36, Math.Round(handicapIndex, 1)));
+            return Math.Max(0, Math.Min(36, Math.Round(handicapIndex, 0))); // Round to whole numbers
         }
 
         /// <summary>
@@ -340,7 +489,7 @@ namespace GolfLeagueManager
 
             // Get all players who have played in this season
             var seasonWeeks = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
+                .Where(w => w.SeasonId == seasonId && w.CountsForScoring && w.CountsForHandicap)
                 .Select(w => w.Id)
                 .ToListAsync();
 
@@ -375,7 +524,7 @@ namespace GolfLeagueManager
 
             // Get all players who have played in this season
             var seasonWeeks = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
+                .Where(w => w.SeasonId == seasonId && w.CountsForScoring && w.CountsForHandicap)
                 .Select(w => w.Id)
                 .ToListAsync();
 
@@ -417,7 +566,7 @@ namespace GolfLeagueManager
 
             // Get all players who have played in this season
             var seasonWeeks = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && w.CountsForScoring)
+                .Where(w => w.SeasonId == seasonId && w.CountsForScoring && w.CountsForHandicap)
                 .Select(w => w.Id)
                 .ToListAsync();
 
@@ -442,12 +591,7 @@ namespace GolfLeagueManager
                         var handicap = CalculateHandicapIndex(adjustedScores);
                         results[playerId] = handicap;
 
-                        // Optionally update the player's current handicap in the database
-                        var player = await _context.Players.FindAsync(playerId);
-                        if (player != null)
-                        {
-                            player.CurrentHandicap = handicap;
-                        }
+                        // Don't update CurrentHandicap as it should always be calculated on demand
                     }
                 }
                 catch (Exception ex)
@@ -480,5 +624,10 @@ namespace GolfLeagueManager
             var adjustedScores = scores.Select(s => (s.score, courseRating, slopeRating)).ToList();
             return CalculateHandicapIndex(adjustedScores);
         }
+
     }
 }
+
+        // Note: This service now uses the same efficient pattern as AverageScoreService,
+        // querying Matchups directly to get player scores instead of complex HoleScores aggregation.
+        // Scores are retrieved from the PlayerAScore/PlayerBScore fields in the Matchups table.

@@ -56,8 +56,8 @@ export class LeagueSettingsService {
         return this.http.get<LeagueSettings>(`${this.apiUrl}/season/${seasonId}`);
     }
 
-    updateLeagueSettings(seasonId: string, settings: LeagueSettings): Observable<LeagueSettings> {
-        return this.http.put<LeagueSettings>(`${this.apiUrl}/season/${seasonId}`, settings);
+    updateLeagueSettings(seasonId: string, request: any): Observable<LeagueSettings> {
+        return this.http.put<LeagueSettings>(`${this.apiUrl}/season/${seasonId}`, request);
     }
 
     resetToDefaults(seasonId: string): Observable<LeagueSettings> {

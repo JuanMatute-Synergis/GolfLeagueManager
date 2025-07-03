@@ -327,11 +327,11 @@ export class LeaderboardComponent implements OnInit {
   }
 
   getHandicap(score: any): number | string {
-    if (score.player && typeof score.player.currentHandicap === 'number') {
-      return score.player.currentHandicap;
+    if (score.player && typeof score.player.initialHandicap === 'number') {
+      return score.player.initialHandicap;
     }
-    if (typeof score.currentHandicap === 'number') {
-      return score.currentHandicap;
+    if (typeof score.initialHandicap === 'number') {
+      return score.initialHandicap;
     }
     return '-';
   }

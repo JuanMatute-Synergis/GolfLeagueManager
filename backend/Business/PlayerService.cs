@@ -69,7 +69,7 @@ namespace GolfLeagueManager
                             HandicapAtAssignment = assignment.HandicapAtAssignment,
                             IsFlightLeader = assignment.IsFlightLeader,
                             InitialHandicap = player.InitialHandicap,
-                            CurrentHandicap = player.CurrentHandicap,
+                            // Don't include CurrentHandicap as it should always be calculated on demand
                             InitialAverageScore = player.InitialAverageScore,
                             CurrentAverageScore = player.CurrentAverageScore
                         });

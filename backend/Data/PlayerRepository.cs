@@ -50,6 +50,10 @@ namespace GolfLeagueManager
             existingPlayer.LastName = player.LastName;
             existingPlayer.Email = player.Email;
             existingPlayer.Phone = player.Phone;
+            existingPlayer.InitialHandicap = player.InitialHandicap;
+            // Don't update CurrentHandicap as it should always be calculated on demand
+            existingPlayer.InitialAverageScore = player.InitialAverageScore;
+            existingPlayer.CurrentAverageScore = player.CurrentAverageScore;
             
             _context.SaveChanges();
             return true;

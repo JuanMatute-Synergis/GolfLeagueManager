@@ -138,28 +138,24 @@ export class LeagueSettingsComponent implements OnInit {
         this.error = null;
 
         const formValue = this.settingsForm.value;
-        const settings: LeagueSettings = {
-            id: '', // Will be set by the server
-            seasonId: this.selectedSeasonId,
-            handicapMethod: formValue.handicapMethod,
+        const request = {
+            handicapMethod: parseInt(formValue.handicapMethod),
             coursePar: formValue.coursePar,
             courseRating: formValue.courseRating,
             slopeRating: formValue.slopeRating,
             maxRoundsForHandicap: formValue.maxRoundsForHandicap,
-            scoringMethod: formValue.scoringMethod,
-            pointsSystem: formValue.pointsSystem,
+            scoringMethod: parseInt(formValue.scoringMethod),
+            pointsSystem: parseInt(formValue.pointsSystem),
             holeWinPoints: formValue.holeWinPoints,
             holeHalvePoints: formValue.holeHalvePoints,
             matchWinBonus: formValue.matchWinBonus,
             matchTiePoints: formValue.matchTiePoints,
             useSessionHandicaps: formValue.useSessionHandicaps,
             allowHandicapUpdates: formValue.allowHandicapUpdates,
-            customRules: formValue.customRules,
-            createdDate: new Date().toISOString(),
-            modifiedDate: new Date().toISOString()
+            customRules: formValue.customRules
         };
 
-        this.leagueSettingsService.updateLeagueSettings(this.selectedSeasonId, settings).subscribe({
+        this.leagueSettingsService.updateLeagueSettings(this.selectedSeasonId, request).subscribe({
             next: (savedSettings) => {
                 this.isSaving = false;
                 // Could emit an event or show a success message here

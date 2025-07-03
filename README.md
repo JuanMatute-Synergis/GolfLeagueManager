@@ -179,10 +179,54 @@ GolfLeagueManager/
 │   │   └── core/             # Core services
 │   └── tests-e2e/            # End-to-end tests
 ├── frontend-old/              # Legacy frontend (deprecated)
+├── scripts/                   # Utility scripts organized by category
+│   ├── analysis/             # Data analysis and handicap scripts
+│   ├── database/             # Database management scripts
+│   ├── deployment/           # Deployment and infrastructure scripts
+│   ├── testing/              # Testing and CI/CD scripts
+│   ├── utilities/            # General utility scripts
+│   └── README.md             # Scripts documentation
+├── data/                      # Data files and analysis outputs
+│   └── analysis/             # Analysis data and CSV files
 ├── docker-compose.yml         # Docker configuration
 ├── GolfLeagueManager.sln     # Visual Studio solution
 └── README.md                 # This file
 ```
+
+## 🔧 Scripts & Utilities
+
+The project includes a comprehensive collection of utility scripts organized in the `/scripts` directory:
+
+### Script Categories
+
+- **`/scripts/analysis/`** - Data analysis, handicap calculations, and score pattern analysis
+- **`/scripts/database/`** - Database management, tenant operations, and data updates
+- **`/scripts/deployment/`** - Infrastructure, deployment, and service management scripts
+- **`/scripts/testing/`** - Testing, CI/CD, and validation scripts
+- **`/scripts/utilities/`** - General utility scripts and helpers
+
+### Common Script Usage
+
+```bash
+# Database operations
+./scripts/database/create-tenant.sh
+./scripts/database/migrate-all-tenants.sh
+./scripts/database/cleanup_duplicate_weeks.sh
+
+# Testing and validation
+./scripts/testing/test-multi-tenant.sh
+./scripts/testing/test-ci-setup.sh
+
+# Deployment and monitoring
+./scripts/deployment/health-check.sh
+./scripts/deployment/verify-deployment.sh
+
+# Data analysis
+./scripts/analysis/analyze_handicaps.py
+./scripts/analysis/debug_week_analysis.py
+```
+
+📖 **See `/scripts/README.md` for detailed documentation of all available scripts and their usage.**
 
 ## 🔧 Configuration
 

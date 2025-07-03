@@ -60,11 +60,26 @@ namespace GolfLeagueManager.Business
             // Pre-fetch session handicaps for all players in the matchups
             var allPlayerIds = matchups.SelectMany(m => new[] { m.PlayerAId, m.PlayerBId }).Distinct().ToList();
             var handicapData = new Dictionary<Guid, decimal>();
+            
+            // Get league settings for this season to use proper handicap calculation
+            var leagueSettings = await _context.LeagueSettings
+                .FirstOrDefaultAsync(ls => ls.SeasonId == seasonId);
+            
             foreach (var playerId in allPlayerIds)
             {
                 try 
                 {
-                    var handicap = await _handicapService.CalculatePlayerHandicapAsync(playerId, 35, 113, 20);
+                    decimal handicap;
+                    if (leagueSettings != null)
+                    {
+                        // Use the proper method that respects league settings
+                        handicap = await _handicapService.CalculateAndUpdateCurrentHandicapAsync(playerId, seasonId, leagueSettings.MaxRoundsForHandicap);
+                    }
+                    else
+                    {
+                        // Fallback to hardcoded WHS values if no league settings found
+                        handicap = await _handicapService.CalculatePlayerHandicapAsync(playerId, 35, 113, 20);
+                    }
                     handicapData[playerId] = handicap;
                 }
                 catch
@@ -185,6 +200,22 @@ namespace GolfLeagueManager.Business
 
             var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
 
+            // Pre-calculate handicaps for all players in all matchups (same method as UI)
+            var allPlayerIds = matchups.SelectMany(m => new[] { m.PlayerAId, m.PlayerBId }).Distinct().ToList();
+            var handicapData = new Dictionary<Guid, decimal>();
+            foreach (var playerId in allPlayerIds)
+            {
+                try
+                {
+                    var handicap = await _handicapService.GetPlayerHandicapUpToWeekAsync(playerId, seasonId, week.WeekNumber);
+                    handicapData[playerId] = handicap;
+                }
+                catch
+                {
+                    handicapData[playerId] = 0; // Fallback on error
+                }
+            }
+
             // Calculate session number
             var sessionNumber = _context.Weeks
                 .Where(w => w.SeasonId == week.SeasonId && w.WeekNumber <= week.WeekNumber && w.SessionStart)
@@ -227,7 +258,7 @@ namespace GolfLeagueManager.Business
                                         var firstFlight = firstRowFlights.ElementAtOrDefault(0);
                                         if (firstFlight != null)
                                         {
-                                            CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId);
+                                            CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId, handicapData);
                                         }
                                     });
                                     
@@ -235,7 +266,7 @@ namespace GolfLeagueManager.Business
                                     {
                                         row.RelativeItem().Padding(3).Element(container =>
                                         {
-                                            CreateCompactFlightSummaryTable(container, firstRowFlights[1], week, seasonId);
+                                            CreateCompactFlightSummaryTable(container, firstRowFlights[1], week, seasonId, handicapData);
                                         });
                                     }
                                 });
@@ -252,7 +283,7 @@ namespace GolfLeagueManager.Business
                                         var firstFlight = secondRowFlights.ElementAtOrDefault(0);
                                         if (firstFlight != null)
                                         {
-                                            CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId);
+                                            CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId, handicapData);
                                         }
                                     });
                                     
@@ -260,7 +291,7 @@ namespace GolfLeagueManager.Business
                                     {
                                         row.RelativeItem().Padding(3).Element(container =>
                                         {
-                                            CreateCompactFlightSummaryTable(container, secondRowFlights[1], week, seasonId);
+                                            CreateCompactFlightSummaryTable(container, secondRowFlights[1], week, seasonId, handicapData);
                                         });
                                     }
                                 });
@@ -280,7 +311,7 @@ namespace GolfLeagueManager.Business
 
                                 content.Item().Element(container =>
                                 {
-                                    CreateCompactFlightSummaryTable(container, flightGroup, week, seasonId);
+                                    CreateCompactFlightSummaryTable(container, flightGroup, week, seasonId, handicapData);
                                 });
                             }
                         }
@@ -557,7 +588,7 @@ namespace GolfLeagueManager.Business
                 });
         }
 
-        private void CreateCompactFlightSummaryTable(IContainer container, dynamic flightGroup, Week currentWeek, Guid seasonId)
+        private void CreateCompactFlightSummaryTable(IContainer container, dynamic flightGroup, Week currentWeek, Guid seasonId, Dictionary<Guid, decimal> handicapData)
         {
             if (flightGroup == null) return;
 
@@ -569,14 +600,6 @@ namespace GolfLeagueManager.Business
                 .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
                 .Distinct()
                 .ToList();
-
-            // Fetch session handicaps for all players in this flight
-            var handicapData = new Dictionary<Guid, decimal>();
-            foreach (var playerId in playerIds)
-            {
-                var handicap = _handicapService.CalculatePlayerHandicapAsync(playerId, 35, 113, 20).Result;
-                handicapData[playerId] = handicap;
-            }
 
             container.Column(column =>
             {
@@ -686,7 +709,7 @@ namespace GolfLeagueManager.Business
                     var (player, accumScore) = sortedPlayers[i];
                     var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
 
-                    var hcp = handicapData.ContainsKey(player.Id) ? handicapData[player.Id] : player.CurrentHandicap;
+                    var hcp = handicapData.ContainsKey(player.Id) ? handicapData[player.Id] : player.InitialHandicap;
                     var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
                         player.Id, seasonId, currentWeek.WeekNumber + 1).Result;
 
@@ -721,7 +744,7 @@ namespace GolfLeagueManager.Business
                     table.Cell().Background(rowColor).Padding(3).Text(displayName).FontSize(6).FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(2).Text(phoneDisplay).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(hcp.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.Black);
-                    table.Cell().Background(rowColor).Padding(3).Text(avg.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.Black);
+                    table.Cell().Background(rowColor).Padding(3).Text(avg.ToString("0.00")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-").FontSize(6).AlignCenter().FontColor(Colors.Black);
                     
@@ -777,10 +800,10 @@ namespace GolfLeagueManager.Business
 
                             var playerAHandicap = playerA != null && handicapData.ContainsKey(playerA.Id) 
                                 ? handicapData[playerA.Id] 
-                                : (playerA?.CurrentHandicap ?? 0);
+                                : (playerA?.InitialHandicap ?? 0);
                             var playerBHandicap = playerB != null && handicapData.ContainsKey(playerB.Id) 
                                 ? handicapData[playerB.Id] 
-                                : (playerB?.CurrentHandicap ?? 0);
+                                : (playerB?.InitialHandicap ?? 0);
                             
                             int playerAHandicapInt = (int)Math.Round((double)playerAHandicap);
                             int playerBHandicapInt = (int)Math.Round((double)playerBHandicap);
@@ -1062,7 +1085,7 @@ namespace GolfLeagueManager.Business
                                     var handicap = _handicapService.CalculatePlayerHandicapAsync(
                                         player.Id, 35, 113, 20).Result;
                                     
-                                    var avgText = avg > 0 ? avg.ToString("F1") : "-";
+                                    var avgText = avg > 0 ? avg.ToString("F2") : "-";
                                     var grossText = grossScore?.ToString() ?? "-";
                                     var handicapText = handicap > 0 ? Math.Round(handicap).ToString() : "-";
                                     var pointsText = weekPoints > 0 ? weekPoints.ToString() : "-";

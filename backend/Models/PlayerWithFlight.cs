@@ -14,7 +14,6 @@ namespace GolfLeagueManager
         
         // Current handicap information
         public decimal InitialHandicap { get; set; } = 0;
-        public decimal CurrentHandicap { get; set; } = 0;
         
         // Average score information
         public decimal InitialAverageScore { get; set; } = 0;

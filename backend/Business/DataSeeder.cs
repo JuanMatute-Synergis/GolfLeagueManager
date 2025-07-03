@@ -41,7 +41,6 @@ namespace GolfLeagueManager
                 if (existingPlayer != null)
                 {
                     // Update existing player's handicap
-                    existingPlayer.CurrentHandicap = playerData.Handicap;
                     existingPlayer.InitialHandicap = playerData.Handicap;
                     Console.WriteLine($"Updated handicap for {playerData.FirstName} {playerData.LastName}: {playerData.Handicap}");
                 }
@@ -52,7 +51,6 @@ namespace GolfLeagueManager
                     {
                         FirstName = playerData.FirstName,
                         LastName = playerData.LastName,
-                        CurrentHandicap = playerData.Handicap,
                         InitialHandicap = playerData.Handicap,
                         Email = $"{playerData.FirstName.ToLower()}.{playerData.LastName.ToLower()}@example.com",
                         Phone = ""

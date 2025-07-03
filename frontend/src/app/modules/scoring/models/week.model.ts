@@ -56,7 +56,6 @@ export interface Player {
   email: string;
   phone: string;
   initialHandicap: number;
-  currentHandicap: number;
   initialAverageScore: number;
   currentAverageScore: number;
 }

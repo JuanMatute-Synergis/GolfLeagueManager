@@ -41,7 +41,7 @@ def analyze_week_progression(score_data):
                 'points': points,
                 'player_name': entry.get('player', {}).get('firstName', '') + ' ' + 
                               entry.get('player', {}).get('lastName', ''),
-                'current_handicap': entry.get('player', {}).get('currentHandicap', 0),
+                # Note: current_handicap is now calculated dynamically, not stored
                 'initial_handicap': entry.get('player', {}).get('initialHandicap', 0),
                 'current_avg': entry.get('player', {}).get('currentAverageScore', 0),
                 'initial_avg': entry.get('player', {}).get('initialAverageScore', 0)

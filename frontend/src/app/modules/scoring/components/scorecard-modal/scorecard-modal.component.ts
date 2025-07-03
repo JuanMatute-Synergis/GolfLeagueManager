@@ -201,14 +201,31 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
     // For view mode, initialize data from individual inputs if needed
     if (this.mode === 'view' && (changes['matchupId'] || changes['isOpen']) && this.isOpen) {
-      if (!this.scorecardData || this.scorecardData.matchupId !== this.matchupId) {
-        this.initializeViewModeData();
+      if (!this.scorecardData || (this.scorecardData.matchupId !== this.matchupId && this.matchupId)) {
+        // Only initialize view mode data if we don't have scorecard data yet
+        // Don't modify existing scorecardData to avoid change detection errors
+        if (!this.scorecardData) {
+          this.initializeViewModeData();
+        }
+        // For view mode, we'll use the input matchupId directly in loadScorecardData()
+        // instead of modifying the scorecardData object
       }
     }
 
     // Load scorecard data when modal opens (but only once)
+    // For view mode, ensure we have the matchupId before loading
     if (changes['isOpen'] && changes['isOpen'].currentValue === true && !this.isLoadingScorecard) {
       console.log('Modal opened, loading scorecard data');
+      
+      // For view mode, ensure we have the matchupId available but don't modify scorecardData
+      if (this.mode === 'view' && this.matchupId) {
+        // Ensure scorecardData exists without modifying the original
+        if (!this.scorecardData) {
+          this.initializeViewModeData();
+        }
+        // Don't modify the existing scorecardData.matchupId to avoid change detection errors
+      }
+      
       this.loadScorecardData();
 
       // Auto-focus first hole for Player A after modal opens and data loads
@@ -239,10 +256,18 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   }
 
   loadScorecardData() {
-    const matchupId = this.scorecardData?.matchupId || this.matchupId;
+    // For view mode, prioritize the input matchupId over scorecardData.matchupId
+    let matchupId: string;
+    if (this.mode === 'view' && this.matchupId) {
+      matchupId = this.matchupId;
+    } else {
+      matchupId = this.scorecardData?.matchupId || this.matchupId || '';
+    }
+    
     console.log('loadScorecardData called with matchupId:', matchupId, 'isLoadingScorecard:', this.isLoadingScorecard);
     console.log('Mode:', this.mode);
     console.log('Scorecard data at load:', this.scorecardData);
+    console.log('Input matchupId:', this.matchupId);
 
     // Prevent multiple simultaneous loads
     if (this.isLoadingScorecard) {
@@ -250,9 +275,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       return;
     }
 
-    if (!matchupId) {
-      console.log('No matchupId, initializing holes');
-      this.initializeHoles();
+    if (!matchupId || matchupId === '') {
+      console.log('No matchupId provided, cannot load scorecard data');
+      if (this.mode === 'view') {
+        this.error = 'No matchup ID available to load scorecard data.';
+        this.buildViewModel();
+      } else {
+        this.initializeHoles();
+      }
       return;
     }
 
@@ -267,9 +297,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         this.isLoadingScorecard = false;
 
         if (response.success && response.holeScores && response.holeScores.length > 0) {
-          // Ensure scorecardData exists for view mode
+          // Ensure scorecardData exists for view mode, but don't overwrite if it already exists
           if (this.mode === 'view' && !this.scorecardData) {
             this.initializeViewModeData();
+          }
+          // Always ensure scorecardData exists (edit mode or view mode without existing data)
+          if (!this.scorecardData) {
+            console.error('scorecardData is null when trying to load backend data');
+            return;
           }
           // Use relevant holes based on week setting, map scores by actual hole number
           const relevantHoles = this.getRelevantHoles();
@@ -305,6 +340,17 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           // Calculate total scores and match play points AFTER setting backend values
           this.calculateTotals();
 
+          console.log('[DEBUG] Scorecard data after loading from backend:', {
+            mode: this.mode,
+            holesCount: this.scorecardData.holes.length,
+            firstHoleAScore: this.scorecardData.holes[0]?.playerAScore,
+            firstHoleBScore: this.scorecardData.holes[0]?.playerBScore,
+            playerAMatchPoints: response.playerAMatchPoints,
+            playerBMatchPoints: response.playerBMatchPoints,
+            playerAAbsent: response.playerAAbsent,
+            playerBAbsent: response.playerBAbsent
+          });
+
           console.log('[DEBUG] Backend response match points:', {
             playerAMatchPoints: response.playerAMatchPoints,
             playerBMatchPoints: response.playerBMatchPoints,
@@ -329,6 +375,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           // No existing scorecard, initialize with empty holes
           if (this.mode === 'view') {
             this.error = 'No scorecard data available for this matchup.';
+            // Still build view model for consistent state
+            this.buildViewModel();
           } else {
             this.initializeHoles();
             // Auto-focus first hole after initializing empty scorecard
@@ -345,6 +393,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
         if (this.mode === 'view') {
           this.error = 'Failed to load scorecard data.';
+          // Build view model even for error case to maintain consistent state
+          this.buildViewModel();
         } else {
           console.log('No existing scorecard found, initializing empty scorecard');
           // If no scorecard exists, initialize with empty holes for edit mode
@@ -458,6 +508,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   // Initialize scorecard data for view mode from individual inputs
   private initializeViewModeData() {
+    console.log('Initializing view mode data with matchupId:', this.matchupId);
     this.scorecardData = {
       matchupId: this.matchupId || '',
       playerAId: '', // Not needed for view mode
@@ -1272,6 +1323,14 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     this.viewModel.holes = relevantHoles.map((courseHole, index) =>
       this.buildHoleViewModel(courseHole, index)
     );
+
+    console.log('[DEBUG] Built hole view models:', {
+      relevantHolesCount: relevantHoles.length,
+      viewModelHolesCount: this.viewModel.holes.length,
+      firstHoleViewModel: this.viewModel.holes[0],
+      scorecardDataHoles: this.scorecardData.holes?.length || 0,
+      firstScorecardHole: this.scorecardData.holes?.[0]
+    });
 
     // Build summary view model
     this.viewModel.summary = this.buildSummaryViewModel();
