@@ -94,9 +94,7 @@ jobs:
     - name: Cache node modules
       uses: actions/cache@v4
       with:
-        path: |
-          ~/.npm
-          frontend/node_modules
+        path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
@@ -108,6 +106,10 @@ jobs:
         echo "Current directory: $(pwd)"
         echo "Files in directory:"
         ls -la
+        
+        # Ensure .npm cache directory exists
+        mkdir -p ~/.npm
+        
         if [ -f "package-lock.json" ]; then
           echo "✅ Found package-lock.json, using npm ci"
           npm ci --legacy-peer-deps --cache ~/.npm
@@ -187,6 +189,15 @@ jobs:
     - name: Build and start services
       run: |
         echo "🔨 Building and starting services..."
+        # Ensure Docker credentials are set up correctly
+        mkdir -p ~/.docker
+        cat > ~/.docker/config.json << 'EOF'
+        {
+          "auths": {},
+          "credsStore": ""
+        }
+        EOF
+        
         docker compose up -d --build
         
         echo "⏳ Waiting for services to start..."
@@ -199,6 +210,11 @@ jobs:
           if docker exec golfleague_postgres pg_isready -U ${{ env.POSTGRES_USER }} >/dev/null 2>&1; then
             echo "✅ Database is ready"
             break
+          fi
+          if [ $i -eq 60 ]; then
+            echo "❌ Database failed to start within 120 seconds"
+            docker compose logs postgres
+            exit 1
           fi
           echo "Waiting for database... ($i/60)"
           sleep 2
@@ -219,9 +235,14 @@ jobs:
     - name: Cleanup old images
       run: |
         echo "🧹 Cleaning up old images..."
-        # Keep last 3 versions of each image
-        docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" | grep "golfleaguemanager.*backend" | tail -n +4 | awk '{print $3}' | xargs -r docker rmi -f || true
-        docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" | grep "golfleaguemanager.*frontend" | tail -n +4 | awk '{print $3}' | xargs -r docker rmi -f || true
+        # Keep last 3 versions of each image (macOS compatible)
+        docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" | grep "golfleaguemanager.*backend" | tail -n +4 | awk '{print $3}' | while read image_id; do
+          [ -n "$image_id" ] && docker rmi -f "$image_id" || true
+        done
+        
+        docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}" | grep "golfleaguemanager.*frontend" | tail -n +4 | awk '{print $3}' | while read image_id; do
+          [ -n "$image_id" ] && docker rmi -f "$image_id" || true
+        done
         
         # Clean up dangling images
         docker image prune -f
@@ -239,7 +260,7 @@ jobs:
         echo "🎉 Deployment successful!"
         echo "Frontend: http://localhost:4500"
         echo "Backend: http://localhost:5505"
-        echo "Health Check: http://localhost:5505/api/health"
+        echo "Health Check: http://localhost:5505/health"
         
     - name: Deployment Failed
       if: needs.build-and-deploy.result == 'failure'
