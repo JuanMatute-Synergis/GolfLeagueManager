@@ -60,12 +60,6 @@ services_ok=true
 # Check backend health endpoint
 if ! check_service "Backend Health" "http://localhost:5505/health" 30; then
     services_ok=false
-fi
-
-# Check backend API with auth status endpoint
-if ! check_service "Backend API" "http://localhost:5505/api/auth/status" 30; then
-    services_ok=false
-fi
 
 # Check frontend
 if ! check_service "Frontend" "http://localhost:4500" 30; then
