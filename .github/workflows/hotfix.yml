@@ -75,14 +75,14 @@ jobs:
     - name: Run migrations
       run: |
         echo "🗄️ Running database migrations..."
-        chmod +x ./migrate-all-tenants.sh
-        ./migrate-all-tenants.sh
+        chmod +x ./scripts/database/migrate-all-tenants.sh
+        ./scripts/database/migrate-all-tenants.sh
 
     - name: Verify hotfix deployment
       run: |
         echo "🔍 Verifying hotfix deployment..."
-        chmod +x ./verify-deployment.sh
-        ./verify-deployment.sh
+        chmod +x ./scripts/deployment/verify-deployment.sh
+        ./scripts/deployment/verify-deployment.sh
 
     - name: Hotfix deployment complete
       run: |

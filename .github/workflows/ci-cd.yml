@@ -223,14 +223,14 @@ jobs:
     - name: Run database migrations
       run: |
         echo "🗄️ Running database migrations..."
-        chmod +x ./migrate-all-tenants.sh
-        ./migrate-all-tenants.sh
+        chmod +x ./scripts/database/migrate-all-tenants.sh
+        ./scripts/database/migrate-all-tenants.sh
 
     - name: Verify deployment
       run: |
         echo "🔍 Verifying deployment..."
-        chmod +x ./verify-deployment.sh
-        ./verify-deployment.sh
+        chmod +x ./scripts/deployment/verify-deployment.sh
+        ./scripts/deployment/verify-deployment.sh
 
     - name: Cleanup old images
       run: |
@@ -267,5 +267,5 @@ jobs:
       run: |
         echo "❌ Deployment failed!"
         echo "Check the logs above for details."
-        echo "You can run a rollback using: ./rollback-deployment.sh quick"
+        echo "You can run a rollback using: ./scripts/deployment/rollback-deployment.sh quick"
         exit 1

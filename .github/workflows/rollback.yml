@@ -57,19 +57,19 @@ jobs:
     - name: Create emergency backup
       if: github.event.inputs.rollback_type != 'backup_only'
       run: |
-        chmod +x ./rollback-deployment.sh
-        ./rollback-deployment.sh backup
+        chmod +x ./scripts/deployment/rollback-deployment.sh
+        ./scripts/deployment/rollback-deployment.sh backup
 
     - name: List available backups
       run: |
         echo "📋 Available backup images:"
-        ./rollback-deployment.sh list
+        ./scripts/deployment/rollback-deployment.sh list
 
     - name: Quick rollback
       if: github.event.inputs.rollback_type == 'quick'
       run: |
         echo "🔄 Performing quick rollback..."
-        ./rollback-deployment.sh quick
+        ./scripts/deployment/rollback-deployment.sh quick
 
     - name: Specific rollback
       if: github.event.inputs.rollback_type == 'specific'
@@ -79,20 +79,20 @@ jobs:
           echo "❌ Both backend and frontend backup tags must be provided for specific rollback"
           exit 1
         fi
-        ./rollback-deployment.sh rollback "${{ github.event.inputs.backend_backup }}" "${{ github.event.inputs.frontend_backup }}"
+        ./scripts/deployment/rollback-deployment.sh rollback "${{ github.event.inputs.backend_backup }}" "${{ github.event.inputs.frontend_backup }}"
 
     - name: Backup only
       if: github.event.inputs.rollback_type == 'backup_only'
       run: |
         echo "📦 Creating backup only (no rollback)..."
-        ./rollback-deployment.sh backup
+        ./scripts/deployment/rollback-deployment.sh backup
 
     - name: Verify rollback
       if: github.event.inputs.rollback_type != 'backup_only'
       run: |
         echo "🔍 Verifying rollback deployment..."
-        chmod +x ./verify-deployment.sh
-        ./verify-deployment.sh
+        chmod +x ./scripts/deployment/verify-deployment.sh
+        ./scripts/deployment/verify-deployment.sh
 
     - name: Rollback complete
       run: |
