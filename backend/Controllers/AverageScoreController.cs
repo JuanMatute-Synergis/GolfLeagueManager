@@ -153,6 +153,31 @@ namespace GolfLeagueManager.Controllers
             }
         }
 
+        /// <summary>
+        /// Get a player's average score up to and including a specific week
+        /// </summary>
+        /// <param name="playerId">Player ID</param>
+        /// <param name="seasonId">Season ID</param>
+        /// <param name="weekNumber">Week number (inclusive)</param>
+        /// <returns>Average score up to and including the specified week</returns>
+        [HttpGet("player/{playerId}/season/{seasonId}/uptoweekincluding/{weekNumber}")]
+        public async Task<ActionResult<decimal>> GetPlayerAverageScoreUpToWeekInclusive(Guid playerId, Guid seasonId, int weekNumber)
+        {
+            try
+            {
+                var average = await _averageScoreService.UpdatePlayerAverageScoreAsync(playerId, seasonId, weekNumber);
+                return Ok(average);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving player average score up to week {weekNumber}: {ex.Message}");
+            }
+        }
+
         // ========== SESSION MANAGEMENT ENDPOINTS ==========
         // Session averages are automatically handled by GetPlayerAverageScoreUpToWeek
         // These endpoints are for managing session initial averages

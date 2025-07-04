@@ -11,7 +11,29 @@ namespace GolfLeagueManager
         /// Simple overall average - (Average Score - Course Par)
         /// Based on analysis from FINAL_HANDICAP_ANALYSIS.md
         /// </summary>
-        SimpleAverage = 1
+        SimpleAverage = 1,
+
+        /// <summary>
+        /// Legacy Lookup Table System - Maps average scores to specific handicaps using predefined table
+        /// Based on the other system's handicap calculation method
+        /// </summary>
+        LegacyLookupTable = 2
+    }
+
+    public enum AverageCalculationMethod
+    {
+        /// <summary>
+        /// Current system - Simple arithmetic average with initial baseline
+        /// Formula: (Initial Average + Sum of actual scores) / (1 + Number of actual rounds played)
+        /// </summary>
+        SimpleAverage = 0,
+
+        /// <summary>
+        /// Legacy Weighted Average System - Uses weighted average where initial average counts as multiple rounds
+        /// Formula: (initial_average × initial_weight + sum_of_scores) / (initial_weight + number_of_scores)
+        /// Initial weight typically 4, weeks 1-3 don't count toward handicap
+        /// </summary>
+        LegacyWeightedAverage = 1
     }
 
     public enum ScoringMethod

@@ -7,18 +7,18 @@ namespace GolfLeagueManager
     {
         private readonly AppDbContext _context;
         private readonly PlayerSeasonStatsService _playerSeasonStatsService;
+        private readonly LeagueSettingsService _leagueSettingsService;
 
-        public AverageScoreService(AppDbContext context, PlayerSeasonStatsService playerSeasonStatsService)
+        public AverageScoreService(AppDbContext context, PlayerSeasonStatsService playerSeasonStatsService, LeagueSettingsService leagueSettingsService)
         {
             _context = context;
             _playerSeasonStatsService = playerSeasonStatsService;
+            _leagueSettingsService = leagueSettingsService;
         }
 
         /// <summary>
         /// Calculate and update the current average score for a player after a new score is entered.
-        /// The calculation uses the player's initial average score from Week 1 as a baseline, 
-        /// then incorporates actual scores from all weeks in the season up to and including the specified week.
-        /// Formula: (Initial Average + Sum of actual scores) / (1 + Number of actual rounds played)
+        /// The calculation method depends on the league settings (SimpleAverage or LegacyWeightedAverage).
         /// </summary>
         /// <param name="playerId">The player's ID</param>
         /// <param name="seasonId">The season ID to calculate average for</param>
@@ -32,10 +32,29 @@ namespace GolfLeagueManager
                 throw new ArgumentException($"Player with ID {playerId} not found");
             }
 
+            // Get league settings to determine calculation method
+            var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
+
+            if (leagueSettings.AverageMethod == AverageCalculationMethod.LegacyWeightedAverage)
+            {
+                return await CalculateLegacyWeightedAverageAsync(playerId, seasonId, upToWeekNumber, leagueSettings.LegacyInitialWeight);
+            }
+            else
+            {
+                return await CalculateSimpleAverageAsync(playerId, seasonId, upToWeekNumber);
+            }
+        }
+
+        /// <summary>
+        /// Calculate average using the current simple average method
+        /// Formula: (Initial Average + Sum of actual scores) / (1 + Number of actual rounds played)
+        /// </summary>
+        private async Task<decimal> CalculateSimpleAverageAsync(Guid playerId, Guid seasonId, int upToWeekNumber)
+        {
             // Get the player's initial average score for this season
             decimal initialAverage = await _playerSeasonStatsService.GetInitialAverageScoreAsync(playerId, seasonId);
 
-            // Get ALL weeks in the season up to and including the specified week (both counting and non-counting)
+            // Get ALL weeks in the season up to and including the specified week
             var allSeasonWeeks = await _context.Weeks
                 .Where(w => w.SeasonId == seasonId &&
                            w.CountsForScoring &&
@@ -43,9 +62,8 @@ namespace GolfLeagueManager
                 .OrderBy(w => w.WeekNumber)
                 .ToListAsync();
 
-            // Build scores array using previous valid average for non-counting weeks
-            var scoresForCalculation = new List<decimal>();
-            var currentValidAverage = initialAverage; // This only updates when we have a counting week with actual score
+            // Collect only actual scores from weeks that count for handicap
+            var actualScores = new List<decimal>();
 
             foreach (var week in allSeasonWeeks)
             {
@@ -62,30 +80,88 @@ namespace GolfLeagueManager
 
                     if (actualScore > 0)
                     {
-                        scoresForCalculation.Add(actualScore);
+                        actualScores.Add(actualScore);
+                    }
+                }
+                // Weeks that don't count for handicap are ignored in SimpleAverage method
+            }
 
-                        // Update the valid average AFTER adding this score for future non-counting weeks
-                        currentValidAverage = scoresForCalculation.Average();
+            // Simple average formula: (initial + sum of actual scores) / (1 + count of actual scores)
+            var totalScore = initialAverage + actualScores.Sum();
+            var totalCount = 1 + actualScores.Count;
+            var averageScore = totalScore / totalCount;
+
+            return Math.Round(averageScore, 2);
+        }
+
+        /// <summary>
+        /// Calculate average using the legacy weighted average method
+        /// Formula: (initial_average + sum_of_scores + sum_of_phantom_scores) / total_weeks
+        /// For non-counting weeks, use the current running average as phantom score
+        /// </summary>
+        private async Task<decimal> CalculateLegacyWeightedAverageAsync(Guid playerId, Guid seasonId, int upToWeekNumber, int initialWeight)
+        {
+            // Get the player's initial average score for this season
+            decimal initialAverage = await _playerSeasonStatsService.GetInitialAverageScoreAsync(playerId, seasonId);
+
+            // Get ALL weeks in the season up to and including the specified week
+            var allSeasonWeeks = await _context.Weeks
+                .Where(w => w.SeasonId == seasonId &&
+                           w.CountsForScoring &&
+                           w.WeekNumber <= upToWeekNumber)
+                .OrderBy(w => w.WeekNumber)
+                .ToListAsync();
+
+            // Start with initial average counting as 1 week
+            decimal totalScore = initialAverage;
+            int totalWeeks = 1;
+            decimal currentRunningAverage = initialAverage;
+
+            foreach (var week in allSeasonWeeks)
+            {
+
+
+                if (week.CountsForHandicap)
+                {
+                    // Get actual score for this week
+                    var actualScore = await _context.Matchups
+                        .Where(m => m.WeekId == week.Id &&
+                                   (m.PlayerAId == playerId || m.PlayerBId == playerId) &&
+                                   ((m.PlayerAId == playerId && m.PlayerAScore.HasValue && !m.PlayerAAbsent) ||
+                                    (m.PlayerBId == playerId && m.PlayerBScore.HasValue && !m.PlayerBAbsent)))
+                        .Select(m => m.PlayerAId == playerId ? m.PlayerAScore!.Value : m.PlayerBScore!.Value)
+                        .FirstOrDefaultAsync();
+
+                    if (actualScore > 0)
+                    {
+                        // Add actual score to total
+                        totalScore += actualScore;
+                        //dont count this week as phantom
+                        currentRunningAverage = totalScore / totalWeeks;
+                    }
+                    else
+                    {
+                        //dont count this week as phantom, no operation
+                        continue;
                     }
                 }
                 else
                 {
-                    // Week doesn't count for handicap - use the LAST VALID average
-                    scoresForCalculation.Add(currentValidAverage);
+                    // Week doesn't count for handicap (like weeks 1-3), use current running average
+                    totalScore += currentRunningAverage;
                 }
+                // Increment total weeks for both counting and non-counting weeks
+                totalWeeks++;
+
+                // Update the current running average for the next iteration
+                currentRunningAverage = totalScore / totalWeeks;
             }
 
-            // If no weeks processed, return initial average
-            if (!scoresForCalculation.Any())
-            {
-                return initialAverage;
-            }
+            // Calculate final weighted average
+            if (totalWeeks == 0) return Math.Round(initialAverage, 2);
 
-            // Calculate final average including all weeks (actual scores + previous averages for non-counting weeks)
-            var averageScore = scoresForCalculation.Average();
-
-            // Don't update CurrentAverageScore as it should always be calculated on demand
-            return Math.Round(averageScore, 2);
+            decimal weightedAverage = totalScore / totalWeeks;
+            return Math.Round(weightedAverage, 2);
         }
 
         /// <summary>

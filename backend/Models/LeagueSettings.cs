@@ -16,6 +16,17 @@ namespace GolfLeagueManager
         // Handicap Calculation Settings
         public HandicapCalculationMethod HandicapMethod { get; set; } = HandicapCalculationMethod.WorldHandicapSystem;
 
+        // Average Calculation Settings
+        /// <summary>
+        /// Method used to calculate running average scores
+        /// </summary>
+        public AverageCalculationMethod AverageMethod { get; set; } = AverageCalculationMethod.SimpleAverage;
+
+        /// <summary>
+        /// Weight given to initial average in legacy weighted average calculation (typically 4)
+        /// </summary>
+        public int LegacyInitialWeight { get; set; } = 4;
+
         /// <summary>
         /// Course par for simple average handicap calculation (typically 36 for 9-hole)
         /// </summary>

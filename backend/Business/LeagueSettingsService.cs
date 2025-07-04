@@ -49,6 +49,8 @@ namespace GolfLeagueManager
             {
                 // Update existing settings
                 existingSettings.HandicapMethod = settings.HandicapMethod;
+                existingSettings.AverageMethod = settings.AverageMethod;
+                existingSettings.LegacyInitialWeight = settings.LegacyInitialWeight;
                 existingSettings.CoursePar = settings.CoursePar;
                 existingSettings.CourseRating = settings.CourseRating;
                 existingSettings.SlopeRating = settings.SlopeRating;
@@ -81,6 +83,8 @@ namespace GolfLeagueManager
                 Id = Guid.NewGuid(),
                 SeasonId = seasonId,
                 HandicapMethod = HandicapCalculationMethod.WorldHandicapSystem,
+                AverageMethod = AverageCalculationMethod.SimpleAverage,
+                LegacyInitialWeight = 1,
                 CoursePar = 36,
                 CourseRating = 35.0m,
                 SlopeRating = 113m,

@@ -74,8 +74,8 @@ namespace GolfLeagueManager.Business
                     decimal handicap;
                     if (leagueSettings != null)
                     {
-                        // Use the proper method that respects league settings
-                        handicap = await _handicapService.CalculateAndUpdateCurrentHandicapAsync(playerId, seasonId, leagueSettings.MaxRoundsForHandicap);
+                        // Use the proper method that respects league settings and week number
+                        handicap = await _handicapService.GetPlayerHandicapUpToWeekAsync(playerId, seasonId, week.WeekNumber);
                     }
                     else
                     {
@@ -1092,9 +1092,9 @@ namespace GolfLeagueManager.Business
                                     var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
                                         player.Id, seasonId, week.WeekNumber + 1).Result;
 
-                                    // Get player's calculated handicap based on recent scores
-                                    var handicap = _handicapService.CalculatePlayerHandicapAsync(
-                                        player.Id, 35, 113, 20).Result;
+                                    // Get player's handicap up to this week (same method as league summary)
+                                    var handicap = _handicapService.GetPlayerHandicapUpToWeekAsync(
+                                        player.Id, seasonId, week.WeekNumber).Result;
 
                                     var avgText = avg > 0 ? avg.ToString("F2") : "-";
                                     var grossText = grossScore?.ToString() ?? "-";

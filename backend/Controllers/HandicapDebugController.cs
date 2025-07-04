@@ -62,6 +62,16 @@ namespace GolfLeagueManager
                                            $"Raw Handicap: {averageScore - leagueSettings.CoursePar:F2}, " +
                                            $"Capped Handicap: {calculatedHandicap:F1}";
                     }
+                    else if (leagueSettings.HandicapMethod == HandicapCalculationMethod.LegacyLookupTable)
+                    {
+                        calculationMethod = "Legacy Lookup Table";
+                        var scores = recentScores.Select(s => s.score).ToArray();
+                        var averageScore = (decimal)scores.Average();
+                        calculatedHandicap = HandicapService.CalculateHandicapFromLookupTable(averageScore);
+
+                        calculationDetails = $"Average Score: {averageScore:F2}, " +
+                                           $"Lookup Table Handicap: {calculatedHandicap}";
+                    }
                     else
                     {
                         calculationMethod = "World Handicap System";

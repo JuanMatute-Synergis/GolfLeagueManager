@@ -56,4 +56,11 @@ export class AverageScoreService {
   getAllPlayerStatsForSeason(seasonId: string): Observable<PlayerScoringStats[]> {
     return this.http.get<PlayerScoringStats[]>(`${this.baseUrl}/AverageScore/season/${seasonId}/all-stats`);
   }
+
+  /**
+   * Get a player's average score up to and including a specific week
+   */
+  getPlayerAverageScoreUpToWeek(playerId: string, seasonId: string, weekNumber: number): Observable<number> {
+    return this.http.get<number>(`${this.baseUrl}/AverageScore/player/${playerId}/season/${seasonId}/uptoweekincluding/${weekNumber}`);
+  }
 }

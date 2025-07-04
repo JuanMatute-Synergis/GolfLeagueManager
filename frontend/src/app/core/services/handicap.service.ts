@@ -43,6 +43,13 @@ export class HandicapService {
   }
 
   /**
+   * Get a player's handicap up to a specific week (uses the proper calculation method)
+   */
+  getPlayerHandicapUpToWeek(playerId: string, seasonId: string, weekNumber: number): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/${playerId}/${seasonId}/${weekNumber}`);
+  }
+
+  /**
    * Set session initial handicap for a player
    */
   setPlayerSessionHandicap(request: SetSessionHandicapRequest): Observable<PlayerSessionHandicap> {

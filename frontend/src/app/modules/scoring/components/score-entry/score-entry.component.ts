@@ -9,6 +9,7 @@ import { ScorecardService } from '../../services/scorecard.service';
 import { MatchupService } from '../../../settings/services/matchup.service';
 import { ScoreCalculationService } from '../../services/score-calculation.service';
 import { HandicapService } from '../../../../core/services/handicap.service';
+import { AverageScoreService } from '../../services/average-score.service';
 import { Season, Week, ScoreEntry, Player, PlayerWithFlight } from '../../models/week.model';
 import { Matchup } from '../../../settings/services/matchup.service';
 import { ScorecardModalComponent } from '../scorecard-modal/scorecard-modal.component';
@@ -57,11 +58,13 @@ export class ScoreEntryComponent implements OnInit {
   selectedWeek: Week | null = null;
   isLoading: boolean = false;
 
-  // Cache for per-week averages
+  // Cache for per-week averages and handicaps
   private weekAverageCache: Map<string, number> = new Map();
+  private weekHandicapCache: Map<string, number> = new Map();
 
-  // Pre-loaded averages for display (avoids calling methods in template)
+  // Pre-loaded averages and handicaps for display (avoids calling methods in template)
   playerAverages: Map<string, number> = new Map();
+  playerHandicaps: Map<string, number> = new Map();
 
   // Session handicaps cache
   sessionHandicaps: { [playerId: string]: number } = {};
@@ -93,10 +96,11 @@ export class ScoreEntryComponent implements OnInit {
     private matchupService: MatchupService,
     private scoreCalculationService: ScoreCalculationService,
     private handicapService: HandicapService,
+    private averageScoreService: AverageScoreService,
     private route: ActivatedRoute,
     private router: Router,
     private dateUtil: DateUtilService,
-    private http: HttpClient // <-- add HttpClient
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
@@ -139,7 +143,9 @@ export class ScoreEntryComponent implements OnInit {
       this.matchups = [];
       // Clear caches when season changes
       this.weekAverageCache.clear();
+      this.weekHandicapCache.clear();
       this.playerAverages.clear();
+      this.playerHandicaps.clear();
       this.holeScoresCache.clear();
       // Only load weeks - players will be loaded when week is selected
       this.loadWeeks();
@@ -213,7 +219,9 @@ export class ScoreEntryComponent implements OnInit {
       this.selectedWeek = this.weeks.find(w => w.id === this.selectedWeekId) || null;
       // Clear the caches when week changes
       this.weekAverageCache.clear();
+      this.weekHandicapCache.clear();
       this.playerAverages.clear();
+      this.playerHandicaps.clear();
       this.holeScoresCache.clear();
       // Use the robust loading method to avoid timing issues
       this.loadPlayersAndMatchups();
@@ -879,34 +887,17 @@ export class ScoreEntryComponent implements OnInit {
   getPlayerAverageScore(playerId: string | undefined): string {
     if (!playerId) return '-';
 
-    // Use pre-loaded average from playerAverages map
+    // Use pre-loaded average score from playerAverages map
     const average = this.playerAverages.get(playerId);
     if (average !== undefined) {
-      return average.toFixed(1);
+      return average.toFixed(2);
     }
 
     // Return placeholder if not yet loaded
     return '...';
   }
 
-  private fetchPlayerWeekAverage(playerId: string, seasonId: string, weekNumber: number, cacheKey: string): void {
-    const url = `/api/averagescore/player/${playerId}/season/${seasonId}/uptoweek/${weekNumber}`;
 
-    this.http.get<number>(url).subscribe({
-      next: (average) => {
-        this.weekAverageCache.set(cacheKey, average);
-      },
-      error: (error) => {
-        console.error('Error fetching player week average:', error);
-        // Cache a fallback value to avoid repeated failed requests
-        this.weekAverageCache.set(cacheKey, 0);
-      }
-    });
-  }
-
-  /**
-   * Pre-load player averages for all players in the current matchups to avoid excessive API calls
-   */
   private preLoadPlayerAverages(): void {
     if (!this.selectedWeek || this.matchups.length === 0) return;
 
@@ -917,7 +908,7 @@ export class ScoreEntryComponent implements OnInit {
       if (matchup.playerBId) playerIds.add(matchup.playerBId);
     });
 
-    // Fetch averages for all players at once
+    // Fetch both average scores and handicaps for all players
     const averageRequests = Array.from(playerIds).map(playerId => {
       const cacheKey = `${playerId}-${this.selectedWeek!.id}`;
 
@@ -927,23 +918,48 @@ export class ScoreEntryComponent implements OnInit {
         return Promise.resolve(this.weekAverageCache.get(cacheKey)!);
       }
 
-      // Fetch from API
-      const url = `/api/averagescore/player/${playerId}/season/${this.selectedWeek!.seasonId}/uptoweek/${this.selectedWeek!.weekNumber}`;
-      return this.http.get<number>(url).toPromise().then(average => {
-        this.weekAverageCache.set(cacheKey, average!);
-        this.playerAverages.set(playerId, average!);
-        return average!;
-      }).catch(error => {
-        console.error('Error fetching player week average:', error);
-        this.weekAverageCache.set(cacheKey, 0);
-        this.playerAverages.set(playerId, 0);
-        return 0;
-      });
+      // Fetch from AverageScoreService for average score up to week
+      return this.averageScoreService.getPlayerAverageScoreUpToWeek(playerId, this.selectedWeek!.seasonId, this.selectedWeek!.weekNumber)
+        .toPromise().then((average: number | undefined) => {
+          const avgValue = average || 0;
+          this.weekAverageCache.set(cacheKey, avgValue);
+          this.playerAverages.set(playerId, avgValue);
+          return avgValue;
+        }).catch((error: any) => {
+          console.error('Error fetching player week average:', error);
+          this.weekAverageCache.set(cacheKey, 0);
+          this.playerAverages.set(playerId, 0);
+          return 0;
+        });
+    });
+
+    const handicapRequests = Array.from(playerIds).map(playerId => {
+      const cacheKey = `${playerId}-${this.selectedWeek!.id}`;
+
+      // Check if already cached
+      if (this.weekHandicapCache.has(cacheKey)) {
+        this.playerHandicaps.set(playerId, this.weekHandicapCache.get(cacheKey)!);
+        return Promise.resolve(this.weekHandicapCache.get(cacheKey)!);
+      }
+
+      // Fetch from HandicapService for handicap up to week
+      return this.handicapService.getPlayerHandicapUpToWeek(playerId, this.selectedWeek!.seasonId, this.selectedWeek!.weekNumber)
+        .toPromise().then((handicap: number | undefined) => {
+          const hcpValue = handicap || 0;
+          this.weekHandicapCache.set(cacheKey, hcpValue);
+          this.playerHandicaps.set(playerId, hcpValue);
+          return hcpValue;
+        }).catch((error: any) => {
+          console.error('Error fetching player week handicap:', error);
+          this.weekHandicapCache.set(cacheKey, 0);
+          this.playerHandicaps.set(playerId, 0);
+          return 0;
+        });
     });
 
     // Wait for all requests to complete
-    Promise.all(averageRequests).then(() => {
-      console.log(`Pre-loaded averages for ${playerIds.size} players`);
+    Promise.all([...averageRequests, ...handicapRequests]).then(() => {
+      console.log(`Pre-loaded averages and handicaps for ${playerIds.size} players`);
     });
   }
 
@@ -960,12 +976,13 @@ export class ScoreEntryComponent implements OnInit {
   private getPlayerHandicap(playerId: string | undefined): number | null {
     if (!playerId) return null;
 
-    // First try to get session handicap
-    if (this.sessionHandicaps[playerId] !== undefined) {
-      return this.sessionHandicaps[playerId];
+    // Use the pre-loaded handicap from playerHandicaps map
+    const handicap = this.playerHandicaps.get(playerId);
+    if (handicap !== undefined) {
+      return handicap;
     }
 
-    // Fallback to initial handicap
+    // Fallback to initial handicap if not yet loaded
     const player = this.players.find(p => p.id === playerId);
     return player?.initialHandicap || null;
   }
