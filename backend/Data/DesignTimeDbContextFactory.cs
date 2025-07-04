@@ -16,13 +16,14 @@ namespace GolfLeagueManager.Data
                 .AddEnvironmentVariables()
                 .Build();
 
-            // Get connection string directly from configuration (not through tenant service)
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            // Get connection string - check environment variables first for migration overrides
+            var connectionString = Environment.GetEnvironmentVariable("MIGRATION_CONNECTION_STRING")
+                                 ?? configuration.GetConnectionString("DefaultConnection");
 
             // If no connection string found, throw an error
             if (string.IsNullOrEmpty(connectionString))
             {
-                throw new InvalidOperationException("DefaultConnection string not found in configuration");
+                throw new InvalidOperationException("DefaultConnection string not found in configuration and MIGRATION_CONNECTION_STRING environment variable not set");
             }
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
