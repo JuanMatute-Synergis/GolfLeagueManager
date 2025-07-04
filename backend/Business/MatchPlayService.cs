@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using GolfLeagueManager.Business;
 
 namespace GolfLeagueManager
 {
@@ -8,13 +9,15 @@ namespace GolfLeagueManager
         private readonly MatchPlayScoringService _scoringService;
         private readonly HandicapService _handicapService;
         private readonly LeagueSettingsService _leagueSettingsService;
+        private readonly PlayerSeasonStatsService _playerSeasonStatsService;
 
-        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService, LeagueSettingsService leagueSettingsService)
+        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService, LeagueSettingsService leagueSettingsService, PlayerSeasonStatsService playerSeasonStatsService)
         {
             _context = context;
             _scoringService = scoringService;
             _handicapService = handicapService;
             _leagueSettingsService = leagueSettingsService;
+            _playerSeasonStatsService = playerSeasonStatsService;
         }
 
         /// <summary>
@@ -251,7 +254,13 @@ namespace GolfLeagueManager
                 return lowScorePoints; // Default fallback: low points (no match bonus in absence scenario)
             }
 
-            Console.WriteLine($"[DEBUG] Player found: {player.FirstName} {player.LastName}, CurrentAverageScore: {player.CurrentAverageScore}");
+            // Get seasonId from the matchup's week
+            var week = await _context.Weeks.FindAsync(matchup.WeekId);
+            var seasonId = week?.SeasonId ?? Guid.Empty;
+
+            // Get current average score for this season
+            var averageScore = await _playerSeasonStatsService.GetCurrentAverageScoreAsync(playerId, seasonId);
+            Console.WriteLine($"[DEBUG] Player found: {player.FirstName} {player.LastName}, CurrentAverageScore: {averageScore}");
 
             // Get hole scores for this matchup to calculate total score
             var holeScores = await _context.HoleScores
@@ -295,7 +304,6 @@ namespace GolfLeagueManager
 
             // Check if player beat their average by a whole number
             // Example: If average is 43.99, they need to shoot 42 or better
-            var averageScore = player.CurrentAverageScore;
             var requiredScore = Math.Floor(averageScore); // This gives us the whole number threshold
 
             Console.WriteLine($"[DEBUG] Player average: {averageScore}, Required score to get {highScorePoints} points: {requiredScore}, Actual score: {totalScore}");

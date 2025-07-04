@@ -23,12 +23,12 @@
     <h2 class="text-foreground text-xl font-semibold mb-2">Players</h2>
     <p class="text-muted-foreground text-base">Browse player profiles and stats.</p>
   </div>
-  <div
+  <div *ngIf="isAdmin"
     class="bg-card hover:shadow-lg rounded-2xl shadow-sm p-8 text-center cursor-pointer transition-all duration-200 border border-border"
-    routerLink="/settings">
-    <svg-icon src="/assets/icons/heroicons/outline/cog-6-tooth.svg"
+    routerLink="/settings/score-entry">
+    <svg-icon src="/assets/icons/heroicons/outline/pencil-square.svg"
       [svgClass]="'w-12 h-12 mx-auto mb-4 text-muted-foreground'"></svg-icon>
-    <h2 class="text-foreground text-xl font-semibold mb-2">Settings</h2>
-    <p class="text-muted-foreground text-base">Update your preferences and league settings.</p>
+    <h2 class="text-foreground text-xl font-semibold mb-2">Score Entry</h2>
+    <p class="text-muted-foreground text-base">Enter and manage player scores for rounds.</p>
   </div>
 </div>

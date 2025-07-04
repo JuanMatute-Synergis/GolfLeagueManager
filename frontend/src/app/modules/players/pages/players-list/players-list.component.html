@@ -1,0 +1,80 @@
+<div class="h-full flex flex-col">
+  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-8 flex-shrink-0 gap-4">
+    <h2 class="text-3xl font-semibold text-foreground">Players</h2>
+    <div class="text-sm text-muted-foreground">
+      {{ players.length }} {{ players.length === 1 ? 'player' : 'players' }} total
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div
+    class="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-md mb-8 flex justify-between items-center flex-shrink-0"
+    *ngIf="error">
+    {{ error }}
+    <button class="bg-muted text-muted-foreground px-3 py-1 rounded text-sm hover:bg-muted/80"
+      (click)="dismissError()">Dismiss</button>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div class="text-center p-8 text-muted-foreground text-lg flex-shrink-0" *ngIf="isLoading">
+    <p>Loading players...</p>
+  </div>
+
+  <!-- Players List -->
+  <div class="bg-card border border-border rounded-lg shadow-sm flex-1 flex flex-col min-h-0" *ngIf="!isLoading">
+    <div class="p-4 border-b border-border bg-muted/20 flex-shrink-0">
+      <h3 class="text-lg font-semibold text-foreground">Players Directory</h3>
+    </div>
+
+    <div class="flex-1 overflow-hidden">
+      <div class="h-full overflow-y-auto">
+        <!-- Desktop Table View - Hidden on mobile -->
+        <div class="hidden lg:block">
+          <table class="w-full border-collapse">
+            <thead class="bg-muted/50 text-xs uppercase text-muted-foreground sticky top-0 z-[5]">
+              <tr>
+                <th class="text-left font-semibold text-foreground p-4 border-b border-border">First Name</th>
+                <th class="text-left font-semibold text-foreground p-4 border-b border-border">Last Name</th>
+                <th class="text-left font-semibold text-foreground p-4 border-b border-border">Phone Number</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let player of players" class="hover:bg-muted/20 transition-colors">
+                <td class="p-4 border-b border-border text-foreground">{{ player.firstName }}</td>
+                <td class="p-4 border-b border-border text-foreground">{{ player.lastName }}</td>
+                <td class="p-4 border-b border-border text-foreground">{{ player.phone }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Card View - Visible only on mobile -->
+        <div class="lg:hidden">
+          <div class="p-4 space-y-4">
+            <div *ngFor="let player of players" class="border border-border rounded-lg p-4 bg-background">
+              <div class="flex flex-col space-y-3">
+                <!-- Player Name -->
+                <div class="flex items-center justify-between">
+                  <h4 class="text-lg font-semibold text-foreground">{{ player.firstName }} {{ player.lastName }}</h4>
+                </div>
+
+                <!-- Player Details -->
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center">
+                    <span class="text-muted-foreground font-medium w-16">Phone:</span>
+                    <span class="text-foreground ml-2">{{ player.phone }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="text-center p-12 text-muted-foreground italic" *ngIf="players.length === 0">
+          <p class="text-lg">No players found.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

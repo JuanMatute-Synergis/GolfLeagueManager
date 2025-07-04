@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FlightService, Flight } from '../../services/flight.service';
-import { PlayerService, Player } from '../../services/player.service';
 import { PlayerFlightAssignmentService, PlayerFlightAssignment } from '../../services/player-flight-assignment.service';
+import { PlayerSeasonStatsService, PlayerSeasonRecord } from '../../services/player-season-stats.service';
+import { PlayerService, Player } from '../../services/player.service';
 import { SeasonService, Season } from '../../services/season.service';
 
 @Component({
@@ -47,6 +48,10 @@ export class SeasonsSettingsComponent implements OnInit {
   isFlightLeader: boolean = false;
   playerHandicap: number | null = null;
 
+  // New fields for season-specific player data
+  initialHandicap: number | null = null;
+  initialAverageScore: number | null = null;
+
   get selectedSeason(): Season | undefined {
     return this.seasons.find(season => season.id === this.selectedSeasonId);
   }
@@ -56,7 +61,8 @@ export class SeasonsSettingsComponent implements OnInit {
     private flightService: FlightService,
     private playerService: PlayerService,
     private playerFlightAssignmentService: PlayerFlightAssignmentService,
-    private seasonService: SeasonService
+    private seasonService: SeasonService,
+    private playerSeasonStatsService: PlayerSeasonStatsService
   ) {
     this.seasonForm = this.fb.group({
       name: ['', Validators.required],
@@ -333,6 +339,8 @@ export class SeasonsSettingsComponent implements OnInit {
     this.selectedPlayerId = null;
     this.isFlightLeader = false;
     this.playerHandicap = null;
+    this.initialHandicap = null;
+    this.initialAverageScore = null;
 
     this.playerFlightAssignmentService.getAssignmentsByFlight(flightId).subscribe({
       next: (assignments: PlayerFlightAssignment[]) => {
@@ -367,8 +375,10 @@ export class SeasonsSettingsComponent implements OnInit {
   onPlayerSelected() {
     if (!this.selectedPlayerId) {
       this.playerHandicap = null;
+      this.initialHandicap = null;
+      this.initialAverageScore = null;
     }
-    // Let the user enter the handicap manually
+    // Let the user enter the values manually
   }
 
   getSelectedFlightName(): string {
@@ -391,7 +401,7 @@ export class SeasonsSettingsComponent implements OnInit {
   }
 
   assignPlayerToFlight() {
-    if (!this.selectedPlayerId || !this.selectedFlightId) return;
+    if (!this.selectedPlayerId || !this.selectedFlightId || !this.selectedSeasonId) return;
 
     this.isLoading = true;
 
@@ -402,15 +412,39 @@ export class SeasonsSettingsComponent implements OnInit {
       handicapAtAssignment: this.playerHandicap || 0
     };
 
+    // Create the flight assignment first
     this.playerFlightAssignmentService.addAssignment(assignment).subscribe({
       next: (savedAssignment: PlayerFlightAssignment) => {
         this.flightAssignments.push(savedAssignment);
         // Also add to season-wide assignments
         this.allSeasonAssignments.push(savedAssignment);
 
+        // Create PlayerSeasonRecord if initial handicap or average score provided
+        if (this.initialHandicap !== null || this.initialAverageScore !== null) {
+          const playerSeasonRecord: PlayerSeasonRecord = {
+            playerId: this.selectedPlayerId!,
+            seasonId: this.selectedSeasonId!,
+            initialHandicap: this.initialHandicap || 0,
+            initialAverageScore: this.initialAverageScore || 0
+          };
+
+          this.playerSeasonStatsService.createPlayerSeasonRecord(playerSeasonRecord).subscribe({
+            next: () => {
+              console.log('Player season record created successfully');
+            },
+            error: (error: any) => {
+              console.error('Error creating player season record:', error);
+              // Don't fail the assignment if season record creation fails
+            }
+          });
+        }
+
+        // Reset form
         this.selectedPlayerId = null;
         this.isFlightLeader = false;
         this.playerHandicap = null;
+        this.initialHandicap = null;
+        this.initialAverageScore = null;
         this.isLoading = false;
       },
       error: (error: any) => {

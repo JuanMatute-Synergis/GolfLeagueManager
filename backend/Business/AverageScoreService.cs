@@ -1,14 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using GolfLeagueManager.Business;
 
 namespace GolfLeagueManager
 {
     public class AverageScoreService
     {
         private readonly AppDbContext _context;
+        private readonly PlayerSeasonStatsService _playerSeasonStatsService;
 
-        public AverageScoreService(AppDbContext context)
+        public AverageScoreService(AppDbContext context, PlayerSeasonStatsService playerSeasonStatsService)
         {
             _context = context;
+            _playerSeasonStatsService = playerSeasonStatsService;
         }
 
         /// <summary>
@@ -29,13 +32,13 @@ namespace GolfLeagueManager
                 throw new ArgumentException($"Player with ID {playerId} not found");
             }
 
-            // Always use the player's initial average score from Week 1 
-            decimal initialAverage = player.InitialAverageScore;
+            // Get the player's initial average score for this season
+            decimal initialAverage = await _playerSeasonStatsService.GetInitialAverageScoreAsync(playerId, seasonId);
 
             // Get ALL weeks in the season up to and including the specified week (both counting and non-counting)
             var allSeasonWeeks = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.CountsForScoring && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.CountsForScoring &&
                            w.WeekNumber <= upToWeekNumber)
                 .OrderBy(w => w.WeekNumber)
                 .ToListAsync();
@@ -60,7 +63,7 @@ namespace GolfLeagueManager
                     if (actualScore > 0)
                     {
                         scoresForCalculation.Add(actualScore);
-                        
+
                         // Update the valid average AFTER adding this score for future non-counting weeks
                         currentValidAverage = scoresForCalculation.Average();
                     }
@@ -80,7 +83,7 @@ namespace GolfLeagueManager
 
             // Calculate final average including all weeks (actual scores + previous averages for non-counting weeks)
             var averageScore = scoresForCalculation.Average();
-            
+
             // Don't update CurrentAverageScore as it should always be calculated on demand
             return Math.Round(averageScore, 2);
         }
@@ -182,17 +185,21 @@ namespace GolfLeagueManager
 
             var scores = playerScores.Select(s => s.Score!.Value).ToList();
 
+            // Get initial and current average scores for this season
+            var initialAverageScore = await _playerSeasonStatsService.GetInitialAverageScoreAsync(playerId, seasonId);
+            var currentAverageScore = await _playerSeasonStatsService.GetCurrentAverageScoreAsync(playerId, seasonId);
+
             // Calculate average including initial average score as baseline
-            var averageScoreCalculated = scores.Count > 0 
-                ? Math.Round(((decimal)player.InitialAverageScore + scores.Sum()) / (1 + scores.Count), 2)
-                : player.InitialAverageScore;
+            var averageScoreCalculated = scores.Count > 0
+                ? Math.Round((initialAverageScore + scores.Sum()) / (1 + scores.Count), 2)
+                : initialAverageScore;
 
             return new PlayerScoringStats
             {
                 PlayerId = playerId,
                 PlayerName = $"{player.FirstName} {player.LastName}",
-                InitialAverageScore = player.InitialAverageScore,
-                CurrentAverageScore = player.CurrentAverageScore,
+                InitialAverageScore = initialAverageScore,
+                CurrentAverageScore = currentAverageScore,
                 RoundsPlayed = scores.Count,
                 BestScore = scores.Count > 0 ? scores.Min() : null,
                 WorstScore = scores.Count > 0 ? scores.Max() : null,
@@ -263,11 +270,11 @@ namespace GolfLeagueManager
         {
             // Verify the session start week exists
             var sessionStartWeek = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.WeekNumber == sessionStartWeekNumber && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.WeekNumber == sessionStartWeekNumber &&
                            w.SessionStart)
                 .FirstOrDefaultAsync();
-            
+
             if (sessionStartWeek == null)
             {
                 throw new ArgumentException($"Week {sessionStartWeekNumber} is not a valid session start week for season {seasonId}");
@@ -292,8 +299,8 @@ namespace GolfLeagueManager
             {
                 // Check if session average already exists
                 var existingSessionAverage = await _context.PlayerSessionAverages
-                    .Where(psa => psa.PlayerId == playerId && 
-                                 psa.SeasonId == seasonId && 
+                    .Where(psa => psa.PlayerId == playerId &&
+                                 psa.SeasonId == seasonId &&
                                  psa.SessionStartWeekNumber == sessionStartWeekNumber)
                     .FirstOrDefaultAsync();
 

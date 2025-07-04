@@ -22,6 +22,12 @@ export const layoutRoutes: Routes = [
     loadChildren: () => import('../settings/settings.routes').then((m) => m.settingsRoutes),
   },
   {
+    path: 'players',
+    canActivate: [authGuard],
+    loadComponent: () => import('./layout.component').then(m => m.LayoutComponent),
+    loadChildren: () => import('../players/players.routes').then((m) => m.playersRoutes),
+  },
+  {
     path: 'matchups',
     canActivate: [authGuard],
     loadComponent: () => import('./layout.component').then(m => m.LayoutComponent),

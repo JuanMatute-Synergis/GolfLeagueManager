@@ -28,8 +28,13 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Mobile layout fixes */
@@ -39,17 +44,17 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
   }
-  
+
   .action-button {
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
   }
-  
+
   /* Ensure table header stays below mobile navbar */
   .table-header-mobile {
     z-index: 5 !important;
   }
-  
+
   /* Add proper backdrop for sticky headers */
   .table-header-mobile th {
     backdrop-filter: blur(8px);

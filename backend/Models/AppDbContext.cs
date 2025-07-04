@@ -20,6 +20,7 @@ namespace GolfLeagueManager
         public DbSet<CourseHole> CourseHoles { get; set; }
         public DbSet<PlayerSessionAverage> PlayerSessionAverages { get; set; }
         public DbSet<PlayerSessionHandicap> PlayerSessionHandicaps { get; set; }
+        public DbSet<PlayerSeasonRecord> PlayerSeasonRecords { get; set; }
         public DbSet<LeagueSettings> LeagueSettings { get; set; }
         public DbSet<User> Users { get; set; } // Add DbSet for User entity
 
@@ -238,6 +239,40 @@ namespace GolfLeagueManager
 
                 // Create unique index to prevent duplicate session handicaps for same player/season/session
                 entity.HasIndex(psh => new { psh.PlayerId, psh.SeasonId, psh.SessionStartWeekNumber })
+                    .IsUnique();
+            });
+
+            // Configure PlayerSeasonRecord entity
+            modelBuilder.Entity<PlayerSeasonRecord>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasDefaultValueSql("gen_random_uuid()");
+
+                // Configure relationship with Player
+                entity.HasOne(pss => pss.Player)
+                    .WithMany(p => p.SeasonStats)
+                    .HasForeignKey(pss => pss.PlayerId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Configure relationship with Season
+                entity.HasOne(pss => pss.Season)
+                    .WithMany(s => s.PlayerStats)
+                    .HasForeignKey(pss => pss.SeasonId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Configure DateTime properties as UTC
+                entity.Property(e => e.CreatedAt)
+                    .HasConversion(
+                        v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasConversion(
+                        v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+                // Create unique index to ensure one record per player per season
+                entity.HasIndex(pss => new { pss.PlayerId, pss.SeasonId })
                     .IsUnique();
             });
 

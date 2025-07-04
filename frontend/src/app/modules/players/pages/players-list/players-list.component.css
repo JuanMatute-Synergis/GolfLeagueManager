@@ -1,0 +1,32 @@
+/* Players List Component Styles */
+
+/* Ensure consistent z-index for sticky table headers */
+.lg\:block table thead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--muted);
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 1023px) {
+  .lg\:hidden {
+    display: block;
+  }
+
+  .hidden.lg\:block {
+    display: none;
+  }
+}
+
+/* Hover effects for better UX */
+.hover\:bg-muted\/20:hover {
+  background-color: hsl(var(--muted) / 0.2);
+}
+
+/* Smooth transitions */
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}

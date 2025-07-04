@@ -12,26 +12,30 @@ namespace GolfLeagueManager
 
         // Player avatar or profile picture (URL or path)
         public string? ImageUrl { get; set; }
-        
-        // Handicap system
+
+        // Handicap system - DEPRECATED: Will be moved to PlayerSeasonRecord
         public decimal InitialHandicap { get; set; } = 0; // Starting handicap for the season
-        
-        // Average score system
+
+        // Average score system - DEPRECATED: Will be moved to PlayerSeasonRecord
         public decimal InitialAverageScore { get; set; } = 0; // Starting average score for the season
         public decimal CurrentAverageScore { get; set; } = 0; // Current calculated average score
-        
+
         // Navigation properties for matchups where this player is involved
         [JsonIgnore]
         public List<Matchup> MatchupsAsPlayerA { get; set; } = new List<Matchup>();
         [JsonIgnore]
         public List<Matchup> MatchupsAsPlayerB { get; set; } = new List<Matchup>();
-        
+
         // Navigation properties for flight assignments
         [JsonIgnore]
         public List<PlayerFlightAssignment> FlightAssignments { get; set; } = new List<PlayerFlightAssignment>();
-        
+
         // Navigation properties for score entries
         [JsonIgnore]
         public List<ScoreEntry> ScoreEntries { get; set; } = new List<ScoreEntry>();
+
+        // Navigation property for season-specific stats
+        [JsonIgnore]
+        public List<PlayerSeasonRecord> SeasonStats { get; set; } = new List<PlayerSeasonRecord>();
     }
 }

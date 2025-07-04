@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using GolfLeagueManager.Business;
 
 namespace GolfLeagueManager
 {
@@ -10,12 +11,14 @@ namespace GolfLeagueManager
         private readonly AppDbContext _context;
         private readonly HandicapService _handicapService;
         private readonly LeagueSettingsService _leagueSettingsService;
+        private readonly PlayerSeasonStatsService _playerSeasonStatsService;
 
-        public HandicapDebugController(AppDbContext context, HandicapService handicapService, LeagueSettingsService leagueSettingsService)
+        public HandicapDebugController(AppDbContext context, HandicapService handicapService, LeagueSettingsService leagueSettingsService, PlayerSeasonStatsService playerSeasonStatsService)
         {
             _context = context;
             _handicapService = handicapService;
             _leagueSettingsService = leagueSettingsService;
+            _playerSeasonStatsService = playerSeasonStatsService;
         }
 
         [HttpGet("player/{playerId}/season/{seasonId}")]
@@ -54,7 +57,7 @@ namespace GolfLeagueManager
                         var averageScore = (decimal)scores.Average();
                         calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 1);
                         calculatedHandicap = Math.Max(0, Math.Min(36, calculatedHandicap));
-                        
+
                         calculationDetails = $"Average Score: {averageScore:F2}, Course Par: {leagueSettings.CoursePar}, " +
                                            $"Raw Handicap: {averageScore - leagueSettings.CoursePar:F2}, " +
                                            $"Capped Handicap: {calculatedHandicap:F1}";
@@ -64,7 +67,7 @@ namespace GolfLeagueManager
                         calculationMethod = "World Handicap System";
                         var adjustedScores = recentScores.Select(s => (s.score, (int)leagueSettings.CourseRating, leagueSettings.SlopeRating)).ToList();
                         calculatedHandicap = CalculateHandicapIndex(adjustedScores);
-                        
+
                         calculationDetails = $"Course Rating: {leagueSettings.CourseRating}, Slope: {leagueSettings.SlopeRating}, " +
                                            $"Using {adjustedScores.Count} rounds";
                     }
@@ -72,7 +75,7 @@ namespace GolfLeagueManager
                 else
                 {
                     calculationMethod = "No scores available";
-                    calculatedHandicap = player.InitialHandicap;
+                    calculatedHandicap = await _playerSeasonStatsService.GetInitialHandicapAsync(player.Id, seasonId);
                     calculationDetails = "Using initial handicap as no scores are available";
                 }
 
@@ -82,7 +85,7 @@ namespace GolfLeagueManager
                     {
                         Id = player.Id,
                         Name = $"{player.FirstName} {player.LastName}".Trim(),
-                        InitialHandicap = player.InitialHandicap
+                        InitialHandicap = await _playerSeasonStatsService.GetInitialHandicapAsync(player.Id, seasonId)
                     },
                     Season = new
                     {
@@ -109,8 +112,8 @@ namespace GolfLeagueManager
                         Method = calculationMethod,
                         Details = calculationDetails,
                         CalculatedHandicap = calculatedHandicap,
-                        InitialHandicap = player.InitialHandicap,
-                        Difference = calculatedHandicap - player.InitialHandicap
+                        InitialHandicap = await _playerSeasonStatsService.GetInitialHandicapAsync(player.Id, seasonId),
+                        Difference = calculatedHandicap - await _playerSeasonStatsService.GetInitialHandicapAsync(player.Id, seasonId)
                     }
                 });
             }
@@ -133,13 +136,24 @@ namespace GolfLeagueManager
                     {
                         Id = pfa.Player!.Id,
                         Name = pfa.Player.FirstName + " " + pfa.Player.LastName,
-                        InitialHandicap = pfa.Player.InitialHandicap
+                        SeasonId = seasonId
                     })
                     .Distinct()
                     .OrderBy(p => p.Name)
                     .ToListAsync();
 
-                return Ok(players);
+                var result = new List<object>();
+                foreach (var player in players)
+                {
+                    result.Add(new
+                    {
+                        Id = player.Id,
+                        Name = player.Name,
+                        InitialHandicap = await _playerSeasonStatsService.GetInitialHandicapAsync(player.Id, seasonId)
+                    });
+                }
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using GolfLeagueManager.Business;
 
 namespace GolfLeagueManager
 {
@@ -6,11 +7,13 @@ namespace GolfLeagueManager
     {
         private readonly AppDbContext _context;
         private readonly LeagueSettingsService _leagueSettingsService;
+        private readonly PlayerSeasonStatsService _playerSeasonStatsService;
 
-        public HandicapService(AppDbContext context, LeagueSettingsService leagueSettingsService)
+        public HandicapService(AppDbContext context, LeagueSettingsService leagueSettingsService, PlayerSeasonStatsService playerSeasonStatsService)
         {
             _context = context;
             _leagueSettingsService = leagueSettingsService;
+            _playerSeasonStatsService = playerSeasonStatsService;
         }
 
         /// <summary>
@@ -50,8 +53,8 @@ namespace GolfLeagueManager
 
             // Get ALL weeks in the season up to and including the specified week (both counting and non-counting)
             var allSeasonWeeks = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.CountsForScoring && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.CountsForScoring &&
                            w.WeekNumber <= upToWeekNumber &&
                            !w.SpecialPointsAwarded.HasValue) // Exclude weeks with special points
                 .OrderBy(w => w.WeekNumber)
@@ -59,7 +62,7 @@ namespace GolfLeagueManager
 
             // Build scores array using previous valid handicap for non-counting weeks
             var scoresForCalculation = new List<(int score, int courseRating, decimal slopeRating)>();
-            var currentValidHandicap = player.InitialHandicap; // This only updates when we have a counting week with actual score
+            var currentValidHandicap = await _playerSeasonStatsService.GetInitialHandicapAsync(playerId, seasonId); // This only updates when we have a counting week with actual score
 
             foreach (var week in allSeasonWeeks)
             {
@@ -77,7 +80,7 @@ namespace GolfLeagueManager
                     if (actualScore > 0)
                     {
                         scoresForCalculation.Add((actualScore, (int)leagueSettings.CourseRating, leagueSettings.SlopeRating));
-                        
+
                         // Update the valid handicap AFTER adding this score for future non-counting weeks
                         // Calculate handicap based on all scores accumulated so far
                         if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
@@ -105,7 +108,7 @@ namespace GolfLeagueManager
 
             if (!scoresForCalculation.Any())
             {
-                return player.InitialHandicap; // No weeks played, return initial handicap
+                return await _playerSeasonStatsService.GetInitialHandicapAsync(playerId, seasonId); // No weeks played, return initial handicap
             }
 
             // Final handicap calculation with all scores (actual + previous handicap equivalents)
@@ -286,7 +289,7 @@ namespace GolfLeagueManager
 
             if (!recentScores.Any())
             {
-                return player.InitialHandicap; // No scores available, return initial handicap
+                return await _playerSeasonStatsService.GetInitialHandicapAsync(playerId, seasonId); // No scores available, return initial handicap
             }
 
             decimal newHandicap;
@@ -345,7 +348,7 @@ namespace GolfLeagueManager
         {
             // Get all weeks that count for handicap calculations
             var weekIds = await _context.Weeks
-                .Where(w => w.CountsForScoring && 
+                .Where(w => w.CountsForScoring &&
                            w.CountsForHandicap &&
                            !w.SpecialPointsAwarded.HasValue) // Exclude weeks with special points
                 .Select(w => w.Id)
@@ -379,15 +382,15 @@ namespace GolfLeagueManager
 
             // Get ALL weeks in the season (both counting and non-counting)
             var allSeasonWeeks = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.CountsForScoring && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.CountsForScoring &&
                            !w.SpecialPointsAwarded.HasValue) // Exclude weeks with special points
                 .OrderBy(w => w.WeekNumber)
                 .ToListAsync();
 
             // Build scores array using previous valid handicap for non-counting weeks
             var scoresForCalculation = new List<(int score, int courseRating, decimal slopeRating)>();
-            var currentValidHandicap = player.InitialHandicap; // This only updates when we have a counting week with actual score
+            var currentValidHandicap = await _playerSeasonStatsService.GetInitialHandicapAsync(playerId, seasonId); // This only updates when we have a counting week with actual score
 
             foreach (var week in allSeasonWeeks)
             {
@@ -405,7 +408,7 @@ namespace GolfLeagueManager
                     if (actualScore > 0)
                     {
                         scoresForCalculation.Add((actualScore, (int)leagueSettings.CourseRating, leagueSettings.SlopeRating));
-                        
+
                         // Update the valid handicap AFTER adding this score for future non-counting weeks
                         if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
                         {
@@ -628,6 +631,6 @@ namespace GolfLeagueManager
     }
 }
 
-        // Note: This service now uses the same efficient pattern as AverageScoreService,
-        // querying Matchups directly to get player scores instead of complex HoleScores aggregation.
-        // Scores are retrieved from the PlayerAScore/PlayerBScore fields in the Matchups table.
+// Note: This service now uses the same efficient pattern as AverageScoreService,
+// querying Matchups directly to get player scores instead of complex HoleScores aggregation.
+// Scores are retrieved from the PlayerAScore/PlayerBScore fields in the Matchups table.

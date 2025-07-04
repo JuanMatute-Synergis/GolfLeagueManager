@@ -2,18 +2,18 @@
 
 /* Ensure navbar stays above all content including sticky table headers */
 :host {
-  position: relative;
-  z-index: 20;
+    position: relative;
+    z-index: 20;
 }
 
 /* Mobile navbar overlay positioning */
 @media (max-width: 768px) {
-  .mobile-navbar-overlay {
-    z-index: 30;
-  }
+    .mobile-navbar-overlay {
+        z-index: 30;
+    }
 }
 
 /* Ensure mobile menu has highest priority */
 .mobile-menu {
-  z-index: 50;
+    z-index: 50;
 }
