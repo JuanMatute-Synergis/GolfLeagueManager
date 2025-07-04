@@ -194,9 +194,9 @@ namespace GolfLeagueManager.Controllers
         /// <returns>Success message</returns>
         [HttpPost("player/{playerId}/season/{seasonId}/session/{sessionStartWeekNumber}/initial")]
         public async Task<ActionResult> SetPlayerSessionInitialAverage(
-            Guid playerId, 
-            Guid seasonId, 
-            int sessionStartWeekNumber, 
+            Guid playerId,
+            Guid seasonId,
+            int sessionStartWeekNumber,
             [FromBody] decimal sessionInitialAverage)
         {
             // Verify player exists
@@ -215,11 +215,11 @@ namespace GolfLeagueManager.Controllers
 
             // Verify the session start week exists and is marked as session start
             var sessionStartWeek = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.WeekNumber == sessionStartWeekNumber && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.WeekNumber == sessionStartWeekNumber &&
                            w.SessionStart)
                 .FirstOrDefaultAsync();
-            
+
             if (sessionStartWeek == null)
             {
                 return BadRequest($"Week {sessionStartWeekNumber} is not a valid session start week for season {seasonId}");
@@ -227,8 +227,8 @@ namespace GolfLeagueManager.Controllers
 
             // Find existing session average or create new one
             var existingSessionAverage = await _context.PlayerSessionAverages
-                .Where(psa => psa.PlayerId == playerId && 
-                             psa.SeasonId == seasonId && 
+                .Where(psa => psa.PlayerId == playerId &&
+                             psa.SeasonId == seasonId &&
                              psa.SessionStartWeekNumber == sessionStartWeekNumber)
                 .FirstOrDefaultAsync();
 
@@ -267,8 +267,8 @@ namespace GolfLeagueManager.Controllers
         /// <returns>Number of players updated</returns>
         [HttpPost("season/{seasonId}/session/{sessionStartWeekNumber}/bulk")]
         public async Task<ActionResult<object>> SetSessionAveragesForAllPlayers(
-            Guid seasonId, 
-            int sessionStartWeekNumber, 
+            Guid seasonId,
+            int sessionStartWeekNumber,
             [FromBody] decimal defaultSessionAverage)
         {
             try
@@ -276,7 +276,8 @@ namespace GolfLeagueManager.Controllers
                 var updatedCount = await _averageScoreService.SetSessionAveragesForAllPlayersAsync(
                     seasonId, sessionStartWeekNumber, defaultSessionAverage);
 
-                return Ok(new { 
+                return Ok(new
+                {
                     message = $"Session averages set for {updatedCount} players",
                     playersUpdated = updatedCount,
                     seasonId,
