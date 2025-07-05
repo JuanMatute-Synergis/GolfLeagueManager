@@ -330,8 +330,8 @@ namespace GolfLeagueManager
         public async Task<decimal> GetPlayerAverageScoreUpToWeekAsync(Guid playerId, Guid seasonId, int upToWeekNumber)
         {
             // Use the existing phantom score methodology by calling UpdatePlayerAverageScoreAsync
-            // with upToWeekNumber - 1 to get the average up to (but not including) the given week
-            return await UpdatePlayerAverageScoreAsync(playerId, seasonId, upToWeekNumber - 1);
+            // with upToWeekNumber to get the average up to and including the given week
+            return await UpdatePlayerAverageScoreAsync(playerId, seasonId, upToWeekNumber);
         }
 
         /// <summary>

@@ -937,6 +937,13 @@ export class ScoreEntryComponent implements OnInit {
     return '...';
   }
 
+<<<<<<< Updated upstream
+
+=======
+  /**
+   * Pre-load player averages for all players in the current matchups to avoid excessive API calls
+   */
+>>>>>>> Stashed changes
   private preLoadPlayerAverages(): void {
     if (!this.selectedWeek || this.matchups.length === 0) return;
 
@@ -971,6 +978,7 @@ export class ScoreEntryComponent implements OnInit {
         return Promise.resolve(this.weekAverageCache.get(cacheKey)!);
       }
 
+<<<<<<< Updated upstream
       // Fetch from AverageScoreService for average score up to week
       return this.averageScoreService.getPlayerAverageScoreUpToWeek(playerId, this.selectedWeek!.seasonId, this.selectedWeek!.weekNumber)
         .toPromise().then((average: number | undefined) => {
@@ -1008,6 +1016,19 @@ export class ScoreEntryComponent implements OnInit {
           this.playerHandicaps.set(playerId, 0);
           return 0;
         });
+=======
+      const url = `/api/averagescore/player/${playerId}/season/${this.selectedWeek!.seasonId}/uptoweek/${weekNumber}`;
+      return this.http.get<number>(url).toPromise().then(average => {
+        this.weekAverageCache.set(cacheKey, average!);
+        this.playerAverages.set(playerId, average!);
+        return average!;
+      }).catch(error => {
+        console.error('Error fetching player week average:', error);
+        this.weekAverageCache.set(cacheKey, 0);
+        this.playerAverages.set(playerId, 0);
+        return 0;
+      });
+>>>>>>> Stashed changes
     });
 
     // Wait for all requests to complete
@@ -1029,6 +1050,7 @@ export class ScoreEntryComponent implements OnInit {
   private getPlayerHandicap(playerId: string | undefined): number | null {
     if (!playerId) return null;
 
+<<<<<<< Updated upstream
     // Use the pre-loaded handicap from playerHandicaps map
     const handicap = this.playerHandicaps.get(playerId);
     if (handicap !== undefined) {
@@ -1036,6 +1058,14 @@ export class ScoreEntryComponent implements OnInit {
     }
 
     // Fallback to initial handicap if not yet loaded
+=======
+    // Use the new player handicaps cache
+    if (this.playerHandicapsCache.has(playerId)) {
+      return this.playerHandicapsCache.get(playerId)!;
+    }
+
+    // Fallback to initial handicap if not in cache
+>>>>>>> Stashed changes
     const player = this.players.find(p => p.id === playerId);
     return player?.initialHandicap || null;
   }

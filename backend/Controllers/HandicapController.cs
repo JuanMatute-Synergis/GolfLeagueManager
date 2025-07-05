@@ -16,6 +16,20 @@ namespace GolfLeagueManager.Controllers
             _handicapService = handicapService;
         }
 
+        [HttpGet("get-all-handicaps/up-to-week/{seasonId}/{weekNumber}")]
+        public async Task<ActionResult<Dictionary<Guid, decimal>>> GetAllPlayerUpToWeekHandicaps(string seasonId, int weekNumber)
+        {
+            try
+            {
+                var handicaps = await _handicapService.GetAllPlayerUpToWeekHandicapsAsync(weekNumber, Guid.Parse(seasonId));
+                return Ok(handicaps);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         /// <summary>
         /// Get a player's session-specific handicap for a given season and week
         /// </summary>

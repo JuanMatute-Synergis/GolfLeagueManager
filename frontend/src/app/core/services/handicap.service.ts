@@ -35,6 +35,10 @@ export class HandicapService {
 
   constructor(private http: HttpClient) { }
 
+  getAllPlayerUptoWeekHandicaps(seasonId: string, weekNumber: number): Observable<{[playerId: string]: number}> {
+    return this.http.get<{[playerId: string]: number}>(`${this.apiUrl}/get-all-handicaps/up-to-week/${seasonId}/${weekNumber}`);
+  }
+
   /**
    * Get a player's session-specific handicap for a given season and week
    */

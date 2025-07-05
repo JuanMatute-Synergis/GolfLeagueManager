@@ -15,12 +15,12 @@
     <div class="flex gap-2 mt-2 sm:mt-0">
       <button
         class="bg-blue-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-blue-700 transition-colors"
-        (click)="downloadWeekScorecardPdf()" [disabled]="!selectedWeekId || isLoading">
+        (click)="downloadWeekScorecardPdf()" [disabled]="!selectedWeekId || isLoading || isLoadingData">
         📝 PDF Scorecards
       </button>
       <button
         class="bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-green-700 transition-colors"
-        (click)="downloadWeekSummaryPdf()" [disabled]="!selectedWeekId || isLoading">
+        (click)="downloadWeekSummaryPdf()" [disabled]="!selectedWeekId || isLoading || isLoadingData">
         📊 Summary Report
       </button>
     </div>
@@ -51,8 +51,30 @@
     </div>
   </div>
 
+  <!-- Loading State -->
+  <div *ngIf="isLoadingData" class="flex items-center justify-center p-12 flex-1">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p class="text-muted-foreground">Loading matchup data...</p>
+    </div>
+  </div>
+
+  <!-- No Selection State -->
+  <div 
+    *ngIf="!isLoadingData && (!selectedSeasonId || !selectedWeekId)" 
+    class="flex items-center justify-center p-12 text-center flex-1"
+  >
+    <div>
+      <svg class="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+      </svg>
+      <h3 class="text-base font-medium text-foreground mb-2">Select Season and Week</h3>
+      <p class="text-muted-foreground">Choose a season and week above to start scoring</p>
+    </div>
+  </div>
+
   <!-- Matchups List (main focus) -->
-  <div class="flex-1 flex flex-col min-h-0">
+  <div *ngIf="!isLoadingData && selectedSeasonId && selectedWeekId" class="flex-1 flex flex-col min-h-0">
     <div class="flex flex-col flex-1 min-h-0">
       <div class="px-2 pt-2 pb-1">
         <div class="relative">
@@ -179,7 +201,7 @@
                     📋
                   </button>
                   <button *ngIf="mode !== 'matchups' && matchup.hasChanged" (click)="saveMatchupScore(matchup)"
-                    [disabled]="isLoading"
+                    [disabled]="isLoading || isLoadingData"
                     class="bg-primary text-primary-foreground px-2 py-1 rounded text-xs hover:bg-primary/90 transition-colors disabled:opacity-50">
                     💾
                   </button>

@@ -651,6 +651,22 @@ namespace GolfLeagueManager
             return lookupTable.TryGetValue(roundedAverage, out int handicap) ? handicap : 18;
         }
 
+        internal async Task<Dictionary<Guid, decimal>> GetAllPlayerUpToWeekHandicapsAsync(int weekNumber, Guid seasonId)
+        {
+            Dictionary<Guid, decimal> playerHandicaps = new Dictionary<Guid, decimal>();
+            //get all players in the league
+            var players = await _context.Players.ToListAsync();
+            foreach (var player in players)
+            {
+                //get the player's handicap up to the specified week
+                var handicap = await GetPlayerHandicapUpToWeekAsync(player.Id, seasonId, weekNumber);
+                
+                // Add to the dictionary
+                playerHandicaps[player.Id] = handicap;
+            }
+
+            return playerHandicaps;
+        }
     }
 }
 
