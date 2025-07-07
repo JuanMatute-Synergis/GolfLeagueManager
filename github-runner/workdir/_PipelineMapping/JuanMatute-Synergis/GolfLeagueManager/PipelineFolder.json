@@ -1,0 +1,12 @@
+﻿{
+  "repositoryName": "JuanMatute-Synergis/GolfLeagueManager",
+  "pipelineDirectory": "GolfLeagueManager",
+  "workspaceDirectory": "GolfLeagueManager/GolfLeagueManager",
+  "repositories": {
+    "JuanMatute-Synergis/GolfLeagueManager": {
+      "repositoryPath": "GolfLeagueManager/GolfLeagueManager",
+      "lastRunOn": "07/07/2025 16:32:28 +00:00"
+    }
+  },
+  "lastRunOn": "07/07/2025 16:32:45 +00:00"
+}

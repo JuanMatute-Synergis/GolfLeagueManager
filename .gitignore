@@ -308,4 +308,11 @@ backup/
 # Deprecated frontend (legacy version)
 frontend-old/
 
+# =============================================================================
+# GITHUB RUNNER WORKDIR (Contains cloned repositories)
+# =============================================================================
+
+# Exclude runner workdir content to prevent nested git repositories
+github-runner/workdir/*/
+
 # End of .gitignore

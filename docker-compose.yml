@@ -34,5 +34,36 @@ services:
     ports:
       - "4500:80"
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: golfleague_cloudflared
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./cloudflared-config.yml:/etc/cloudflared/config.yml:ro
+      - ~/.cloudflared/64746180-e8db-4616-abfb-0433703b2645.json:/etc/cloudflared/credentials.json:ro
+    networks:
+      - default
+
+  github-runner:
+    build:
+      context: ./github-runner
+      dockerfile: Dockerfile
+    container_name: golfleague_github_runner
+    restart: unless-stopped
+    environment:
+      - RUNNER_NAME=golf-league-container-runner
+      - RUNNER_TOKEN=${GITHUB_RUNNER_TOKEN}
+      - RUNNER_REPOSITORY_URL=https://github.com/JuanMatute-Synergis/GolfLeagueManager
+      - RUNNER_WORKDIR=/tmp/github-runner-workdir
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./github-runner/workdir:/tmp/github-runner-workdir
+    privileged: true
+    networks:
+      - default
+
 volumes:
   postgres_data:
