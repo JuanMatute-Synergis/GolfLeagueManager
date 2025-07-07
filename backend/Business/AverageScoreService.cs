@@ -126,7 +126,7 @@ namespace GolfLeagueManager
                 .Select(p => p.FirstName)
                 .FirstOrDefaultAsync();
 
-            if (playerName == "Ray")
+            if (playerName == "Bill")
             {
                 Console.WriteLine($"Player Name: {playerName}");
             }

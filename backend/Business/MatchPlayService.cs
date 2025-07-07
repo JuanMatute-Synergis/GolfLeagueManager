@@ -244,8 +244,9 @@ namespace GolfLeagueManager
             Console.WriteLine($"[DEBUG] CalculateNoOpponentScoringAsync called for player {playerId}");
 
             // Calculate scoring thresholds based on league settings
-            var maxHolePoints = leagueSettings.HoleWinPoints * 9; // Maximum points from holes (9 holes)
-            var highScorePoints = maxHolePoints; // Points for beating average (16 with standard 2-point system)
+            // Maximum hole points is HoleWinPoints * 8 holes (no match win bonus in absence scenarios)
+            var maxHolePoints = leagueSettings.HoleWinPoints * 8; // Points for beating average (16 with standard 2-point system)
+            var highScorePoints = maxHolePoints; // 16 points for beating average, no match win bonus
             var lowScorePoints = 8; // Fixed 8 points for not beating average in absence scenarios
 
             // Get the player's current average score
@@ -308,12 +309,12 @@ namespace GolfLeagueManager
             // Example: If average is 43.99, they need to shoot 42 or better
             var requiredScore = Math.Floor(averageScore); // This gives us the whole number threshold
 
-            Console.WriteLine($"[DEBUG] Player average: {averageScore}, Required score to get {highScorePoints} points: {requiredScore}, Actual score: {totalScore}");
+            Console.WriteLine($"[DEBUG] Player average: {averageScore}, Required score to get {highScorePoints} points (16 = max hole points, no match bonus): {requiredScore}, Actual score: {totalScore}");
 
             int totalPoints;
             if (totalScore < requiredScore)
             {
-                Console.WriteLine($"[DEBUG] Player beat their average by a whole number - awarding {highScorePoints} points");
+                Console.WriteLine($"[DEBUG] Player beat their average by a whole number - awarding {highScorePoints} points (16 = max hole points, no match bonus)");
                 totalPoints = highScorePoints;
             }
             else
