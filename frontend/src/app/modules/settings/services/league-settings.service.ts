@@ -6,6 +6,8 @@ export interface LeagueSettings {
     id: string;
     seasonId: string;
     handicapMethod: HandicapCalculationMethod;
+    averageMethod: AverageCalculationMethod;
+    legacyInitialWeight: number;
     coursePar: number;
     courseRating: number;
     slopeRating: number;
@@ -25,7 +27,13 @@ export interface LeagueSettings {
 
 export enum HandicapCalculationMethod {
     WorldHandicapSystem = 0,
-    SimpleAverage = 1
+    SimpleAverage = 1,
+    LegacyLookupTable = 2
+}
+
+export enum AverageCalculationMethod {
+    SimpleAverage = 0,
+    LegacyWeightedAverage = 1
 }
 
 export enum ScoringMethod {
@@ -66,6 +74,10 @@ export class LeagueSettingsService {
 
     getHandicapMethods(): Observable<EnumOption[]> {
         return this.http.get<EnumOption[]>(`${this.apiUrl}/enums/handicap-methods`);
+    }
+
+    getAverageMethods(): Observable<EnumOption[]> {
+        return this.http.get<EnumOption[]>(`${this.apiUrl}/enums/average-methods`);
     }
 
     getScoringMethods(): Observable<EnumOption[]> {

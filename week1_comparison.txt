@@ -1,0 +1,128 @@
+Week 1 Handicap Comparison - System vs Reference Data
+
+From Reference Data (Week 1 expected handicaps):
+- Alex Peck: 5 (was showing 6, should be 5)
+- Kevin Kelhart: 6 (was showing 7, should be 6)
+- George H.: 5
+- Tim S.: 6
+- Joe M.: 6
+- John P.: 6
+- Bill S.: 5
+- Jeff D.: 5
+- Stu S.: 6
+- Steve B.: 6
+- Curt S.: 6
+- Carl H.: 6
+- Frank F.: 6
+- Lou G.: 6
+- Kenny P.: 6
+- Jay S.: 6
+- Bob G.: 8
+- Matt S.: 7
+- Danny W.: 8
+- Steve H.: 8
+- Matt D.: 8
+- Jim E.: 7
+- Kevin K. (2nd): 9
+- Juan M.: 8
+- Andrew K.: 14
+- Tom H.: 17
+- Rich H.: 11
+- Ray B.: 9
+- Jax H.: 16
+- Steve K.: 13
+- Steve F.: 14
+- Mike S.: 12
+
+========================================
+
+CURRENT SYSTEM RESULTS:
+
+Handicap Endpoint (/api/handicap/get-all-handicaps/up-to-week/...):
+"c43faa83-23d6-4d09-9ffb-9548361480bc":9    // Kevin K. (2nd) - ✓ CORRECT
+"354f62e4-a538-4eaa-b7e4-5f9bd60e777f":9    // Ray B. - ✓ CORRECT
+"155adf40-c73d-4c46-b2e2-f6b2471563dd":8    // Steve H. - ✓ CORRECT
+"ac3946ff-48eb-4479-ad63-92136e7c2f7f":6    // Curt S. - ✓ CORRECT
+"52369d98-5f1b-4c9d-9859-3d4a2a183439":6    // Frank F. - ✓ CORRECT
+"1e083524-cc5e-436b-a911-63c4607f5a33":12   // Mike S. - ✓ CORRECT
+"b1046572-8971-425b-9dbd-cdfdc80bbdd7":13   // Steve K. - ✓ CORRECT
+"4ef1e93d-be97-42f6-9721-3c1ddd256c60":6    // Tim S. - ✓ CORRECT
+"9548bbdf-f6ea-447d-988b-fe1e21bd2080":6    // Joe M. - ✓ CORRECT
+"7d6db2a5-480b-4e68-a0f7-bd5d24db8999":6    // Stu S. - ✓ CORRECT
+"459e64fe-a08e-4f1b-8546-91b9cb10ed95":6    // Steve B. - ✓ CORRECT
+"9e7a3048-2254-46ae-a16a-a90cc8dbd962":7    // Matt S. - ✓ CORRECT
+"238b9732-4a0f-4922-8d5c-26e33fd8ac95":8    // Juan M. - ✓ CORRECT
+"dd5a8bd3-0bf1-436e-9484-74b40d6e83fc":5    // Bill S. - ✓ CORRECT
+"a16dd095-e46d-4f47-8767-50b02226dca4":14   // Andrew K. - ✓ CORRECT
+"4d2ab22d-daee-4cbf-98ca-ca5f8034b3fc":7    // Jim E. - ✓ CORRECT
+"9deacc93-f9ed-49e6-ab68-c89b056af0fe":8    // Danny W. - ✓ CORRECT
+"9d4ab9eb-6c6f-4fdd-be6b-2396202eb645":14   // Steve F. - ✓ CORRECT
+"67a0c954-df29-45ec-a183-08ff7cb3678b":17   // Tom H. - ✓ CORRECT
+"3a58bd78-1074-4c5c-b43e-605a8efc3a35":8    // Bob G. - ✓ CORRECT
+"74d4dd50-3a5a-4e14-8e06-a37704cddd71":8    // Matt D. - ✓ CORRECT
+"731fbc13-0f87-497a-9674-1bceaa67b395":6    // Carl H. - ✓ CORRECT
+"878f2662-b5bb-4474-aaa5-d2b4b179e070":6    // Lou G. - ✓ CORRECT
+"ed6799bc-76d6-43fd-9301-f4fa9effaee6":11   // Rich H. - ✓ CORRECT
+"c7de2e43-847d-4b73-bb40-cf268fa7c301":16   // Jax H. - ✓ CORRECT
+"2c8b669d-8b6c-4951-880f-a3d607415f8c":5    // George H. - ✓ CORRECT
+"1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee":6    // Kevin Kelhart - ✓ CORRECT (NOW FIXED!)
+"c80aef4d-db47-493e-b1ae-9d09a734a094":5    // Alex Peck - ✓ CORRECT (ALREADY FIXED)
+"28fca147-da6f-4fbb-a4bd-67e51f17c2a2":6    // Jay S. - ✓ CORRECT
+"a51ea62e-4a3f-4741-b43c-56e3feae7e70":6    // Kenny P. - ✓ CORRECT
+"d971efb9-8e8c-4e91-87e9-f79c74391455":5    // Jeff D. - ✓ CORRECT
+"8c24e1d3-50bf-49b0-956f-3843ab1d9bf7":6    // John P. - ✓ CORRECT
+
+========================================
+
+Session Standings Endpoint (/api/standings/session?...):
+All players showing CORRECT handicaps matching the handicap endpoint:
+
+Flight 1:
+- George H.: handicap 5 ✓
+- Tim S.: handicap 6 ✓
+- Joe M.: handicap 6 ✓
+- John P.: handicap 6 ✓
+- Bill S.: handicap 5 ✓
+- Alex P.: handicap 5 ✓ (FIXED!)
+- Kevin K.: handicap 6 ✓ (FIXED!)
+- Jeff D.: handicap 5 ✓
+
+Flight 2:
+- Stu S.: handicap 6 ✓
+- Steve B.: handicap 6 ✓
+- Curt S.: handicap 6 ✓
+- Carl H.: handicap 6 ✓
+- Frank F.: handicap 6 ✓
+- Lou G.: handicap 6 ✓
+- Kenny P.: handicap 6 ✓
+- Jay S.: handicap 6 ✓
+
+Flight 3:
+- Bob G.: handicap 8 ✓
+- Matt S.: handicap 7 ✓
+- Danny W.: handicap 8 ✓
+- Steve H.: handicap 8 ✓
+- Matt D.: handicap 8 ✓
+- Jim E.: handicap 7 ✓
+- Kevin K. (2nd): handicap 9 ✓
+- Juan M.: handicap 8 ✓
+
+Flight 4:
+- Andrew K.: handicap 14 ✓
+- Tom H.: handicap 17 ✓
+- Rich H.: handicap 11 ✓
+- Ray B.: handicap 9 ✓
+- Jax H.: handicap 16 ✓
+- Steve K.: handicap 13 ✓
+- Steve F.: handicap 14 ✓
+- Mike S.: handicap 12 ✓
+
+========================================
+
+SUMMARY:
+✅ ALL HANDICAPS ARE NOW CORRECT! 
+✅ Kevin Kelhart now shows handicap 6 (was 7)
+✅ Alex Peck continues to show handicap 5 (was 6)
+✅ All other players match reference data exactly
+
+The system is now using the calculated handicap from the average score and lookup table consistently across all endpoints, including the scorecard display (session standings).

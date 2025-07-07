@@ -37,7 +37,7 @@ namespace GolfLeagueManager
             var updated = _playerService.UpdatePlayer(player);
             if (!updated)
                 return NotFound();
-            
+
             return NoContent();
         }
 
@@ -51,9 +51,9 @@ namespace GolfLeagueManager
         }
 
         [HttpGet("season/{seasonId}/flights")]
-        public ActionResult<IEnumerable<PlayerWithFlight>> GetPlayersInFlights(Guid seasonId)
+        public async Task<ActionResult<IEnumerable<PlayerWithFlight>>> GetPlayersInFlights(Guid seasonId)
         {
-            var players = _playerService.GetPlayersInFlights(seasonId);
+            var players = await _playerService.GetPlayersInFlightsAsync(seasonId);
             return Ok(players);
         }
     }

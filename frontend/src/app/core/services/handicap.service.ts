@@ -43,6 +43,13 @@ export class HandicapService {
   }
 
   /**
+   * Get a player's handicap up to a specific week (uses the proper calculation method)
+   */
+  getPlayerHandicapUpToWeek(playerId: string, seasonId: string, weekNumber: number): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/${playerId}/${seasonId}/${weekNumber}`);
+  }
+
+  /**
    * Set session initial handicap for a player
    */
   setPlayerSessionHandicap(request: SetSessionHandicapRequest): Observable<PlayerSessionHandicap> {
@@ -61,5 +68,13 @@ export class HandicapService {
    */
   getPlayerSessionHandicaps(playerId: string, seasonId: string): Observable<PlayerSessionHandicap[]> {
     return this.http.get<PlayerSessionHandicap[]>(`${this.apiUrl}/${playerId}/${seasonId}`);
+  }
+
+  /**
+   * Get handicaps for all players in a season up to and including a specific week
+   * This bulk endpoint replaces multiple individual calls for better performance
+   */
+  getAllPlayerHandicapsUpToWeek(seasonId: string, weekNumber: number): Observable<{[playerId: string]: number}> {
+    return this.http.get<{[playerId: string]: number}>(`${this.apiUrl}/get-all-handicaps/up-to-week/${seasonId}/${weekNumber}`);
   }
 }

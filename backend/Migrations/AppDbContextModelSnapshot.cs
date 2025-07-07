@@ -170,6 +170,9 @@ namespace backend.Migrations
                     b.Property<bool>("AllowHandicapUpdates")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("AverageMethod")
+                        .HasColumnType("integer");
+
                     b.Property<int>("CoursePar")
                         .HasColumnType("integer");
 
@@ -190,6 +193,9 @@ namespace backend.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("HoleWinPoints")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LegacyInitialWeight")
                         .HasColumnType("integer");
 
                     b.Property<int>("MatchTiePoints")
@@ -389,6 +395,47 @@ namespace backend.Migrations
                     b.HasIndex("PlayerId");
 
                     b.ToTable("PlayerFlightAssignments");
+                });
+
+            modelBuilder.Entity("GolfLeagueManager.PlayerSeasonRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("CurrentAverageScore")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("CurrentHandicap")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("InitialAverageScore")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("InitialHandicap")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("PlayerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("SeasonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeasonId");
+
+                    b.HasIndex("PlayerId", "SeasonId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerSeasonRecords");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.PlayerSessionAverage", b =>
@@ -666,6 +713,25 @@ namespace backend.Migrations
                     b.Navigation("Player");
                 });
 
+            modelBuilder.Entity("GolfLeagueManager.PlayerSeasonRecord", b =>
+                {
+                    b.HasOne("GolfLeagueManager.Player", "Player")
+                        .WithMany("SeasonStats")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GolfLeagueManager.Season", "Season")
+                        .WithMany("PlayerStats")
+                        .HasForeignKey("SeasonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Season");
+                });
+
             modelBuilder.Entity("GolfLeagueManager.PlayerSessionAverage", b =>
                 {
                     b.HasOne("GolfLeagueManager.Player", "Player")
@@ -748,11 +814,15 @@ namespace backend.Migrations
                     b.Navigation("MatchupsAsPlayerB");
 
                     b.Navigation("ScoreEntries");
+
+                    b.Navigation("SeasonStats");
                 });
 
             modelBuilder.Entity("GolfLeagueManager.Season", b =>
                 {
                     b.Navigation("Flights");
+
+                    b.Navigation("PlayerStats");
 
                     b.Navigation("Weeks");
                 });

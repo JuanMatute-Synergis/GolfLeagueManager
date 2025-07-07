@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using GolfLeagueManager.Business;
 
 namespace GolfLeagueManager
 {
@@ -8,13 +9,15 @@ namespace GolfLeagueManager
         private readonly MatchPlayScoringService _scoringService;
         private readonly HandicapService _handicapService;
         private readonly LeagueSettingsService _leagueSettingsService;
+        private readonly PlayerSeasonStatsService _playerSeasonStatsService;
 
-        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService, LeagueSettingsService leagueSettingsService)
+        public MatchPlayService(AppDbContext context, MatchPlayScoringService scoringService, HandicapService handicapService, LeagueSettingsService leagueSettingsService, PlayerSeasonStatsService playerSeasonStatsService)
         {
             _context = context;
             _scoringService = scoringService;
             _handicapService = handicapService;
             _leagueSettingsService = leagueSettingsService;
+            _playerSeasonStatsService = playerSeasonStatsService;
         }
 
         /// <summary>
@@ -67,9 +70,9 @@ namespace GolfLeagueManager
                 return false;
             }
 
-            // Get session-specific handicaps for both players
-            var playerAHandicap = await _handicapService.GetPlayerSessionHandicapAsync(matchup.PlayerAId, week.SeasonId, week.WeekNumber);
-            var playerBHandicap = await _handicapService.GetPlayerSessionHandicapAsync(matchup.PlayerBId, week.SeasonId, week.WeekNumber);
+            // Get scoring handicaps for both players (based on previous week's data)
+            var playerAHandicap = await _handicapService.GetPlayerScoringHandicapAsync(matchup.PlayerAId, week.SeasonId, week.WeekNumber);
+            var playerBHandicap = await _handicapService.GetPlayerScoringHandicapAsync(matchup.PlayerBId, week.SeasonId, week.WeekNumber);
 
             // Get league settings for the season
             var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(week.SeasonId);
@@ -195,7 +198,8 @@ namespace GolfLeagueManager
                 matchup.PlayerAPoints = playerAPoints;
                 matchup.PlayerBPoints = playerBPoints;
                 matchup.PlayerAHolePoints = 0;
-                matchup.PlayerBHolePoints = Math.Max(0, playerBPoints - leagueSettings.MatchWinBonus); // Subtract match bonus to get hole points
+                // In absence scenarios, no match win bonus is awarded - the points from CalculateNoOpponentScoringAsync are the total
+                matchup.PlayerBHolePoints = playerBPoints; // All points are hole points in absence scenarios
                 matchup.PlayerAMatchWin = false;
                 matchup.PlayerBMatchWin = playerBPoints > playerAPoints;
 
@@ -214,7 +218,8 @@ namespace GolfLeagueManager
 
                 matchup.PlayerAPoints = playerAPoints;
                 matchup.PlayerBPoints = playerBPoints;
-                matchup.PlayerAHolePoints = Math.Max(0, playerAPoints - leagueSettings.MatchWinBonus); // Subtract match bonus to get hole points
+                // In absence scenarios, no match win bonus is awarded - the points from CalculateNoOpponentScoringAsync are the total
+                matchup.PlayerAHolePoints = playerAPoints; // All points are hole points in absence scenarios
                 matchup.PlayerBHolePoints = 0;
                 matchup.PlayerAMatchWin = playerAPoints > playerBPoints;
                 matchup.PlayerBMatchWin = false;
@@ -239,9 +244,10 @@ namespace GolfLeagueManager
             Console.WriteLine($"[DEBUG] CalculateNoOpponentScoringAsync called for player {playerId}");
 
             // Calculate scoring thresholds based on league settings
-            var maxHolePoints = leagueSettings.HoleWinPoints * 9; // Maximum points from holes (9 holes)
-            var highScorePoints = maxHolePoints; // Points for beating average (16 with standard 2-point system)
-            var lowScorePoints = maxHolePoints / 2; // Points for not beating average (8 with standard 2-point system)
+            // Maximum hole points is HoleWinPoints * 8 holes (no match win bonus in absence scenarios)
+            var maxHolePoints = leagueSettings.HoleWinPoints * 8; // Points for beating average (16 with standard 2-point system)
+            var highScorePoints = maxHolePoints; // 16 points for beating average, no match win bonus
+            var lowScorePoints = 8; // Fixed 8 points for not beating average in absence scenarios
 
             // Get the player's current average score
             var player = await _context.Players.FindAsync(playerId);
@@ -251,7 +257,13 @@ namespace GolfLeagueManager
                 return lowScorePoints; // Default fallback: low points (no match bonus in absence scenario)
             }
 
-            Console.WriteLine($"[DEBUG] Player found: {player.FirstName} {player.LastName}, CurrentAverageScore: {player.CurrentAverageScore}");
+            // Get seasonId from the matchup's week
+            var week = await _context.Weeks.FindAsync(matchup.WeekId);
+            var seasonId = week?.SeasonId ?? Guid.Empty;
+
+            // Get current average score for this season
+            var averageScore = await _playerSeasonStatsService.GetCurrentAverageScoreAsync(playerId, seasonId);
+            Console.WriteLine($"[DEBUG] Player found: {player.FirstName} {player.LastName}, CurrentAverageScore: {averageScore}");
 
             // Get hole scores for this matchup to calculate total score
             var holeScores = await _context.HoleScores
@@ -295,15 +307,14 @@ namespace GolfLeagueManager
 
             // Check if player beat their average by a whole number
             // Example: If average is 43.99, they need to shoot 42 or better
-            var averageScore = player.CurrentAverageScore;
             var requiredScore = Math.Floor(averageScore); // This gives us the whole number threshold
 
-            Console.WriteLine($"[DEBUG] Player average: {averageScore}, Required score to get {highScorePoints} points: {requiredScore}, Actual score: {totalScore}");
+            Console.WriteLine($"[DEBUG] Player average: {averageScore}, Required score to get {highScorePoints} points (16 = max hole points, no match bonus): {requiredScore}, Actual score: {totalScore}");
 
             int totalPoints;
             if (totalScore < requiredScore)
             {
-                Console.WriteLine($"[DEBUG] Player beat their average by a whole number - awarding {highScorePoints} points");
+                Console.WriteLine($"[DEBUG] Player beat their average by a whole number - awarding {highScorePoints} points (16 = max hole points, no match bonus)");
                 totalPoints = highScorePoints;
             }
             else

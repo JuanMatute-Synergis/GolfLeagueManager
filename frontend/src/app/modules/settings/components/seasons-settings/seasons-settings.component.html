@@ -6,43 +6,39 @@
   </div>
 
   <!-- Error Message -->
-  <div class="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-md mb-6 flex justify-between items-center flex-shrink-0" *ngIf="error">
+  <div
+    class="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-md mb-6 flex justify-between items-center flex-shrink-0"
+    *ngIf="error">
     {{ error }}
-    <button class="bg-muted text-muted-foreground px-3 py-1 rounded text-sm hover:bg-muted/80" (click)="error = null">Dismiss</button>
+    <button class="bg-muted text-muted-foreground px-3 py-1 rounded text-sm hover:bg-muted/80"
+      (click)="error = null">Dismiss</button>
   </div>
 
   <!-- Mobile Navigation Tabs (shown only on mobile) -->
   <div class="lg:hidden mb-4 flex-shrink-0">
     <div class="flex bg-muted rounded-lg p-1">
-      <button 
-        class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors"
-        [class.bg-background]="mobileActiveTab === 'seasons'"
-        [class.text-foreground]="mobileActiveTab === 'seasons'"
-        [class.text-muted-foreground]="mobileActiveTab !== 'seasons'"
-        (click)="setMobileActiveTab('seasons')">
+      <button class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors"
+        [class.bg-background]="mobileActiveTab === 'seasons'" [class.text-foreground]="mobileActiveTab === 'seasons'"
+        [class.text-muted-foreground]="mobileActiveTab !== 'seasons'" (click)="setMobileActiveTab('seasons')">
         Seasons
       </button>
-      <button 
-        class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors"
-        [class.bg-background]="mobileActiveTab === 'flights'"
-        [class.text-foreground]="mobileActiveTab === 'flights'"
-        [class.text-muted-foreground]="mobileActiveTab !== 'flights'"
-        [disabled]="!selectedSeasonId"
+      <button class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors"
+        [class.bg-background]="mobileActiveTab === 'flights'" [class.text-foreground]="mobileActiveTab === 'flights'"
+        [class.text-muted-foreground]="mobileActiveTab !== 'flights'" [disabled]="!selectedSeasonId"
         (click)="setMobileActiveTab('flights')">
         Flights
-        <span *ngIf="selectedSeasonId" class="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+        <span *ngIf="selectedSeasonId"
+          class="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
           {{ seasonFlights.length }}
         </span>
       </button>
-      <button 
-        class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors"
-        [class.bg-background]="mobileActiveTab === 'players'"
-        [class.text-foreground]="mobileActiveTab === 'players'"
-        [class.text-muted-foreground]="mobileActiveTab !== 'players'"
-        [disabled]="!selectedFlightId"
+      <button class="flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors"
+        [class.bg-background]="mobileActiveTab === 'players'" [class.text-foreground]="mobileActiveTab === 'players'"
+        [class.text-muted-foreground]="mobileActiveTab !== 'players'" [disabled]="!selectedFlightId"
         (click)="setMobileActiveTab('players')">
         Players
-        <span *ngIf="selectedFlightId" class="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
+        <span *ngIf="selectedFlightId"
+          class="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
           {{ flightAssignments.length }}
         </span>
       </button>
@@ -57,51 +53,63 @@
         <div class="p-4 border-b border-border bg-muted/20 flex-shrink-0">
           <div class="flex justify-between items-center">
             <h3 class="text-lg font-semibold text-foreground">Seasons</h3>
-            <button class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90" (click)="showAddSeasonForm()">
+            <button
+              class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90"
+              (click)="showAddSeasonForm()">
               Add Season
             </button>
           </div>
         </div>
-        
+
         <div class="flex-1 overflow-y-auto">
           <div class="flex flex-col">
             <!-- Season Form -->
             <div class="p-4 border-b border-border bg-background" *ngIf="showSeasonForm">
-              <h4 class="text-md font-medium text-foreground mb-4">{{ editingSeasonId ? 'Edit Season' : 'Add New Season' }}</h4>
+              <h4 class="text-md font-medium text-foreground mb-4">{{ editingSeasonId ? 'Edit Season' : 'Add New Season'
+                }}</h4>
               <form [formGroup]="seasonForm" (ngSubmit)="saveSeason()" class="space-y-3">
                 <div>
                   <label for="seasonName" class="block text-sm font-medium text-foreground mb-1">Season Name</label>
-                  <input type="text" id="seasonName" formControlName="name" class="w-full p-3 border border-border rounded text-base" required>
+                  <input type="text" id="seasonName" formControlName="name"
+                    class="w-full p-3 border border-border rounded text-base" required>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                   <div>
                     <label for="seasonYear" class="block text-sm font-medium text-foreground mb-1">Year</label>
-                    <input type="number" id="seasonYear" formControlName="year" class="w-full p-3 border border-border rounded text-base" min="2000" max="2100" required>
+                    <input type="number" id="seasonYear" formControlName="year"
+                      class="w-full p-3 border border-border rounded text-base" min="2000" max="2100" required>
                   </div>
                   <div>
                     <label for="seasonNumber" class="block text-sm font-medium text-foreground mb-1">Season #</label>
-                    <input type="number" id="seasonNumber" formControlName="seasonNumber" class="w-full p-3 border border-border rounded text-base" min="1" required>
+                    <input type="number" id="seasonNumber" formControlName="seasonNumber"
+                      class="w-full p-3 border border-border rounded text-base" min="1" required>
                   </div>
                 </div>
                 <div class="grid grid-cols-1 gap-2">
                   <div>
                     <label for="startDate" class="block text-sm font-medium text-foreground mb-1">Start Date</label>
                     <div class="date-input-wrapper">
-                      <input type="date" id="startDate" formControlName="startDate" class="w-full p-3 border border-border rounded text-base" required>
+                      <input type="date" id="startDate" formControlName="startDate"
+                        class="w-full p-3 border border-border rounded text-base" required>
                     </div>
                   </div>
                   <div>
                     <label for="endDate" class="block text-sm font-medium text-foreground mb-1">End Date</label>
                     <div class="date-input-wrapper">
-                      <input type="date" id="endDate" formControlName="endDate" class="w-full p-3 border border-border rounded text-base" required>
+                      <input type="date" id="endDate" formControlName="endDate"
+                        class="w-full p-3 border border-border rounded text-base" required>
                     </div>
                   </div>
                 </div>
                 <div class="flex gap-2 pt-2">
-                  <button type="submit" class="flex-1 bg-primary text-primary-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-primary/90 disabled:opacity-50" [disabled]="seasonForm.invalid">
+                  <button type="submit"
+                    class="flex-1 bg-primary text-primary-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-primary/90 disabled:opacity-50"
+                    [disabled]="seasonForm.invalid">
                     {{ editingSeasonId ? 'Update' : 'Add' }}
                   </button>
-                  <button type="button" class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-muted/80" (click)="resetSeasonForm()">
+                  <button type="button"
+                    class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-muted/80"
+                    (click)="resetSeasonForm()">
                     Cancel
                   </button>
                 </div>
@@ -110,26 +118,32 @@
 
             <!-- Seasons List -->
             <div class="divide-y divide-border">
-              <div *ngFor="let season of seasons" 
-                   class="p-4 hover:bg-muted/20 transition-colors cursor-pointer border-l-4"
-                   [class.border-l-primary]="season.id === selectedSeasonId"
-                   [class.border-l-transparent]="season.id !== selectedSeasonId"
-                   [class.bg-primary]="season.id === selectedSeasonId"
-                   [class.bg-opacity-5]="season.id === selectedSeasonId"
-                   (click)="selectSeasonMobile(season)">
+              <div *ngFor="let season of seasons"
+                class="p-4 hover:bg-muted/20 transition-colors cursor-pointer border-l-4"
+                [class.border-l-primary]="season.id === selectedSeasonId"
+                [class.border-l-transparent]="season.id !== selectedSeasonId"
+                [class.bg-primary]="season.id === selectedSeasonId"
+                [class.bg-opacity-5]="season.id === selectedSeasonId" (click)="selectSeasonMobile(season)">
                 <div class="flex justify-between items-start">
                   <div class="flex-1">
                     <h4 class="font-medium text-foreground text-base">{{ season.name }}</h4>
                     <p class="text-sm text-muted-foreground">{{ season.year }} • Season {{ season.seasonNumber }}</p>
-                    <p class="text-sm text-muted-foreground">{{ season.startDate | date:'MMM d' }} - {{ season.endDate | date:'MMM d, y' }}</p>
+                    <p class="text-sm text-muted-foreground">{{ season.startDate | date:'MMM d' }} - {{ season.endDate |
+                      date:'MMM d, y' }}</p>
                   </div>
                   <div class="flex flex-col gap-1 ml-2">
-                    <button class="bg-muted text-muted-foreground px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-muted/80" (click)="editSeason(season); $event.stopPropagation()">Edit</button>
-                    <button class="bg-destructive text-destructive-foreground px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-destructive/90" (click)="deleteSeason(season); $event.stopPropagation()">Delete</button>
+                    <button
+                      class="bg-muted text-muted-foreground px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-muted/80"
+                      (click)="editSeason(season); $event.stopPropagation()">Edit</button>
+                    <button
+                      class="bg-destructive text-destructive-foreground px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-destructive/90"
+                      (click)="deleteSeason(season); $event.stopPropagation()">Delete</button>
                   </div>
                 </div>
                 <div *ngIf="season.id === selectedSeasonId" class="mt-3 pt-3 border-t border-border">
-                  <button class="w-full bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90" (click)="setMobileActiveTab('flights'); $event.stopPropagation()">
+                  <button
+                    class="w-full bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90"
+                    (click)="setMobileActiveTab('flights'); $event.stopPropagation()">
                     View Flights ({{ seasonFlights.length }})
                   </button>
                 </div>
@@ -149,19 +163,19 @@
               <h3 class="text-lg font-semibold text-foreground">Flights</h3>
               <p class="text-sm text-muted-foreground" *ngIf="selectedSeason">{{ selectedSeason.name }}</p>
             </div>
-            <button 
-              class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed" 
-              (click)="showAddFlightForm()"
-              [disabled]="!selectedSeasonId">
+            <button
+              class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              (click)="showAddFlightForm()" [disabled]="!selectedSeasonId">
               Add Flight
             </button>
           </div>
         </div>
-        
+
         <div class="flex-1 overflow-y-auto">
           <div class="flex flex-col">
             <!-- Loading State for Flights -->
-            <div class="flex items-center justify-center p-8" *ngIf="isLoading && selectedSeasonId && !selectedFlightId">
+            <div class="flex items-center justify-center p-8"
+              *ngIf="isLoading && selectedSeasonId && !selectedFlightId">
               <div class="text-center">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
                 <p class="text-sm text-muted-foreground">Loading flights...</p>
@@ -173,7 +187,9 @@
               <div class="text-center text-muted-foreground">
                 <i class="fas fa-calendar-alt text-3xl mb-3"></i>
                 <p class="text-base mb-2">No season selected</p>
-                <button class="bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90" (click)="setMobileActiveTab('seasons')">
+                <button
+                  class="bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90"
+                  (click)="setMobileActiveTab('seasons')">
                   Select Season
                 </button>
               </div>
@@ -181,29 +197,37 @@
 
             <!-- Flight Form -->
             <div class="p-4 border-b border-border bg-background" *ngIf="showFlightForm && selectedSeasonId">
-              <h4 class="text-md font-medium text-foreground mb-4">{{ editingFlightId ? 'Edit Flight' : 'Add New Flight' }}</h4>
+              <h4 class="text-md font-medium text-foreground mb-4">{{ editingFlightId ? 'Edit Flight' : 'Add New Flight'
+                }}</h4>
               <form [formGroup]="flightForm" (ngSubmit)="saveFlight()" class="space-y-3">
                 <div>
                   <label for="flightName" class="block text-sm font-medium text-foreground mb-1">Flight Name</label>
-                  <input type="text" id="flightName" formControlName="name" class="w-full p-3 border border-border rounded text-base" required>
+                  <input type="text" id="flightName" formControlName="name"
+                    class="w-full p-3 border border-border rounded text-base" required>
                 </div>
                 <div>
                   <label for="maxPlayers" class="block text-sm font-medium text-foreground mb-1">Max Players</label>
-                  <input type="number" id="maxPlayers" formControlName="maxPlayers" class="w-full p-3 border border-border rounded text-base" min="1" required>
+                  <input type="number" id="maxPlayers" formControlName="maxPlayers"
+                    class="w-full p-3 border border-border rounded text-base" min="1" required>
                 </div>
                 <div>
                   <label for="description" class="block text-sm font-medium text-foreground mb-1">Description</label>
-                  <textarea id="description" formControlName="description" class="w-full p-3 border border-border rounded text-base h-20 resize-none"></textarea>
+                  <textarea id="description" formControlName="description"
+                    class="w-full p-3 border border-border rounded text-base h-20 resize-none"></textarea>
                 </div>
                 <div class="flex items-center">
                   <input type="checkbox" formControlName="isActive" class="mr-3 h-5 w-5">
                   <span class="text-base font-medium text-foreground">Active Flight</span>
                 </div>
                 <div class="flex gap-2 pt-2">
-                  <button type="submit" class="flex-1 bg-primary text-primary-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-primary/90 disabled:opacity-50" [disabled]="flightForm.invalid || isLoading">
+                  <button type="submit"
+                    class="flex-1 bg-primary text-primary-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-primary/90 disabled:opacity-50"
+                    [disabled]="flightForm.invalid || isLoading">
                     {{ isLoading ? 'Saving...' : (editingFlightId ? 'Update' : 'Add') }}
                   </button>
-                  <button type="button" class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-muted/80" (click)="resetFlightForm()">
+                  <button type="button"
+                    class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-muted/80"
+                    (click)="resetFlightForm()">
                     Cancel
                   </button>
                 </div>
@@ -212,13 +236,12 @@
 
             <!-- Flights List -->
             <div class="divide-y divide-border" *ngIf="selectedSeasonId && !isLoading && seasonFlights.length > 0">
-              <div *ngFor="let flight of seasonFlights" 
-                   class="p-4 hover:bg-muted/20 transition-colors cursor-pointer border-l-4"
-                   [class.border-l-primary]="flight.id === selectedFlightId"
-                   [class.border-l-transparent]="flight.id !== selectedFlightId"
-                   [class.bg-primary]="flight.id === selectedFlightId"
-                   [class.bg-opacity-5]="flight.id === selectedFlightId"
-                   (click)="selectFlightMobile(flight)">
+              <div *ngFor="let flight of seasonFlights"
+                class="p-4 hover:bg-muted/20 transition-colors cursor-pointer border-l-4"
+                [class.border-l-primary]="flight.id === selectedFlightId"
+                [class.border-l-transparent]="flight.id !== selectedFlightId"
+                [class.bg-primary]="flight.id === selectedFlightId"
+                [class.bg-opacity-5]="flight.id === selectedFlightId" (click)="selectFlightMobile(flight)">
                 <div class="flex justify-between items-start">
                   <div class="flex-1">
                     <h4 class="font-medium text-foreground text-base">{{ flight.name }}</h4>
@@ -226,12 +249,18 @@
                     <p class="text-sm text-muted-foreground">{{ flight.description }}</p>
                   </div>
                   <div class="flex flex-col gap-1 ml-2">
-                    <button class="bg-muted text-muted-foreground px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-muted/80" (click)="editFlight(flight); $event.stopPropagation()">Edit</button>
-                    <button class="bg-destructive text-destructive-foreground px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-destructive/90" (click)="deleteFlight(flight.id!); $event.stopPropagation()">Delete</button>
+                    <button
+                      class="bg-muted text-muted-foreground px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-muted/80"
+                      (click)="editFlight(flight); $event.stopPropagation()">Edit</button>
+                    <button
+                      class="bg-destructive text-destructive-foreground px-3 py-2 rounded text-sm font-medium transition-colors hover:bg-destructive/90"
+                      (click)="deleteFlight(flight.id!); $event.stopPropagation()">Delete</button>
                   </div>
                 </div>
                 <div *ngIf="flight.id === selectedFlightId" class="mt-3 pt-3 border-t border-border">
-                  <button class="w-full bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90" (click)="setMobileActiveTab('players'); $event.stopPropagation()">
+                  <button
+                    class="w-full bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90"
+                    (click)="setMobileActiveTab('players'); $event.stopPropagation()">
                     Manage Players ({{ getFlightAssignmentCount(flight.id!) }})
                   </button>
                 </div>
@@ -239,11 +268,14 @@
             </div>
 
             <!-- Empty Flight State -->
-            <div class="flex items-center justify-center p-8" *ngIf="selectedSeasonId && !isLoading && seasonFlights.length === 0">
+            <div class="flex items-center justify-center p-8"
+              *ngIf="selectedSeasonId && !isLoading && seasonFlights.length === 0">
               <div class="text-center text-muted-foreground">
                 <i class="fas fa-plane text-3xl mb-3"></i>
                 <p class="text-base mb-2">No flights for this season</p>
-                <button class="bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90" (click)="showAddFlightForm()">
+                <button
+                  class="bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90"
+                  (click)="showAddFlightForm()">
                   Add First Flight
                 </button>
               </div>
@@ -261,7 +293,7 @@
             <div>
               <h3 class="text-lg font-semibold text-foreground">Player Assignments</h3>
               <p class="text-sm text-muted-foreground" *ngIf="selectedFlightId">
-                {{ getSelectedFlightName() }} 
+                {{ getSelectedFlightName() }}
                 <span class="ml-1 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
                   {{ flightAssignments.length }} players
                 </span>
@@ -269,16 +301,18 @@
             </div>
             <!-- Navigation helpers -->
             <div class="flex gap-2" *ngIf="!selectedFlightId">
-              <button class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-medium" (click)="setMobileActiveTab('seasons')" *ngIf="!selectedSeasonId">
+              <button class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-medium"
+                (click)="setMobileActiveTab('seasons')" *ngIf="!selectedSeasonId">
                 Select Season
               </button>
-              <button class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-medium" (click)="setMobileActiveTab('flights')" *ngIf="selectedSeasonId">
+              <button class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-medium"
+                (click)="setMobileActiveTab('flights')" *ngIf="selectedSeasonId">
                 Select Flight
               </button>
             </div>
           </div>
         </div>
-        
+
         <div class="flex-1 overflow-hidden flex flex-col">
           <!-- Loading State for Assignments -->
           <div class="flex-1 flex items-center justify-center" *ngIf="isLoading && selectedFlightId">
@@ -295,15 +329,20 @@
               <div *ngIf="!selectedSeasonId; else flightSelectionNeeded">
                 <p class="text-base mb-2">No season selected</p>
                 <p class="text-sm mb-3">Select a season first to view player assignments</p>
-                <button class="bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90" (click)="setMobileActiveTab('seasons')">
+                <button
+                  class="bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90"
+                  (click)="setMobileActiveTab('seasons')">
                   Select Season
                 </button>
               </div>
               <ng-template #flightSelectionNeeded>
                 <p class="text-base mb-2">No flight selected</p>
-                <p class="text-sm mb-3" *ngIf="seasonFlights.length > 0">Choose a flight to view and manage player assignments</p>
+                <p class="text-sm mb-3" *ngIf="seasonFlights.length > 0">Choose a flight to view and manage player
+                  assignments</p>
                 <p class="text-sm mb-3" *ngIf="seasonFlights.length === 0">Create a flight first to assign players</p>
-                <button class="bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90" (click)="setMobileActiveTab('flights')">
+                <button
+                  class="bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium transition-colors hover:bg-primary/90"
+                  (click)="setMobileActiveTab('flights')">
                   {{ seasonFlights.length > 0 ? 'Select Flight' : 'Create Flight' }}
                 </button>
               </ng-template>
@@ -316,24 +355,40 @@
             <div class="space-y-3">
               <div>
                 <label class="block text-sm font-medium text-foreground mb-1">Player</label>
-                <select class="w-full p-3 border border-border rounded text-base" [(ngModel)]="selectedPlayerId" (ngModelChange)="onPlayerSelected()">
+                <select class="w-full p-3 border border-border rounded text-base" [(ngModel)]="selectedPlayerId"
+                  (ngModelChange)="onPlayerSelected()">
                   <option [ngValue]="null">-- Select Player --</option>
                   <option *ngFor="let player of getAvailablePlayers()" [ngValue]="player.id">
                     {{ player.firstName }} {{ player.lastName }}
                   </option>
                 </select>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-foreground mb-1">Handicap</label>
-                <input type="number" [(ngModel)]="playerHandicap" class="w-full p-3 border border-border rounded text-base" min="0" max="54" placeholder="Handicap">
+              <div class="grid grid-cols-1 gap-3">
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Flight Assignment Handicap</label>
+                  <input type="number" [(ngModel)]="playerHandicap"
+                    class="w-full p-3 border border-border rounded text-base" min="0" max="54"
+                    placeholder="Current handicap for flight assignment">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Initial Season Handicap</label>
+                  <input type="number" [(ngModel)]="initialHandicap"
+                    class="w-full p-3 border border-border rounded text-base" min="0" max="54" step="0.1"
+                    placeholder="Starting handicap for this season">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-foreground mb-1">Initial Average Score</label>
+                  <input type="number" [(ngModel)]="initialAverageScore"
+                    class="w-full p-3 border border-border rounded text-base" min="60" max="150" step="0.1"
+                    placeholder="Starting average score for this season">
+                </div>
               </div>
               <div class="flex items-center">
                 <input type="checkbox" [(ngModel)]="isFlightLeader" class="mr-3 h-5 w-5">
                 <span class="text-base text-foreground">Flight Leader</span>
               </div>
-              <button 
-                (click)="assignPlayerToFlight()" 
-                class="w-full bg-primary text-primary-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed" 
+              <button (click)="assignPlayerToFlight()"
+                class="w-full bg-primary text-primary-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 [disabled]="!selectedPlayerId || isLoading">
                 Assign to Flight
               </button>
@@ -354,20 +409,22 @@
                   <div>
                     <h4 class="font-medium text-foreground text-base">{{ getPlayerNameById(assignment.playerId) }}</h4>
                     <div class="flex items-center gap-2 mt-1">
-                      <span class="text-sm text-muted-foreground">Handicap: {{ assignment.handicapAtAssignment || 'N/A' }}</span>
-                      <span *ngIf="assignment.isFlightLeader" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
+                      <span class="text-sm text-muted-foreground">Handicap: {{ assignment.handicapAtAssignment || 'N/A'
+                        }}</span>
+                      <span *ngIf="assignment.isFlightLeader"
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
                         Leader
                       </span>
                     </div>
                   </div>
                   <div class="flex gap-3">
-                    <button 
-                      class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-muted/80" 
+                    <button
+                      class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-muted/80"
                       (click)="toggleFlightLeader(assignment)">
                       {{ assignment.isFlightLeader ? 'Remove Leader' : 'Make Leader' }}
                     </button>
-                    <button 
-                      class="flex-1 bg-destructive text-destructive-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-destructive/90" 
+                    <button
+                      class="flex-1 bg-destructive text-destructive-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-destructive/90"
                       (click)="removeAssignment(assignment.id!)">
                       Remove Player
                     </button>
@@ -378,7 +435,8 @@
           </div>
 
           <!-- Empty Assignment State -->
-          <div class="flex-1 flex items-center justify-center" *ngIf="selectedFlightId && !isLoading && flightAssignments.length === 0">
+          <div class="flex-1 flex items-center justify-center"
+            *ngIf="selectedFlightId && !isLoading && flightAssignments.length === 0">
             <div class="text-center text-muted-foreground">
               <i class="fas fa-user-plus text-3xl mb-3"></i>
               <p class="text-base mb-2">No players assigned yet</p>
@@ -392,311 +450,358 @@
 
   <!-- Desktop Three Column Layout -->
   <div class="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
-  
-  <!-- Column 1: Seasons -->
-  <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
-    <div class="p-4 border-b border-border bg-muted/20">
-      <div class="flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-foreground">Seasons</h3>
-        <button class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90" (click)="showAddSeasonForm()">
-          Add Season
-        </button>
-      </div>
-    </div>
-    
-    <div class="flex-1 overflow-hidden flex flex-col">
-      <!-- Season Form -->
-      <div class="p-4 border-b border-border bg-background" *ngIf="showSeasonForm">
-        <h4 class="text-md font-medium text-foreground mb-4">{{ editingSeasonId ? 'Edit Season' : 'Add New Season' }}</h4>
-        <form [formGroup]="seasonForm" (ngSubmit)="saveSeason()" class="space-y-3">
-          <div>
-            <label for="seasonName" class="block text-sm font-medium text-foreground mb-1">Season Name</label>
-            <input type="text" id="seasonName" formControlName="name" class="w-full p-2 border border-border rounded text-sm" required>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label for="seasonYear" class="block text-sm font-medium text-foreground mb-1">Year</label>
-              <input type="number" id="seasonYear" formControlName="year" class="w-full p-2 border border-border rounded text-sm" min="2000" max="2100" required>
-            </div>
-            <div>
-              <label for="seasonNumber" class="block text-sm font-medium text-foreground mb-1">Season #</label>
-              <input type="number" id="seasonNumber" formControlName="seasonNumber" class="w-full p-2 border border-border rounded text-sm" min="1" required>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label for="startDate" class="block text-sm font-medium text-foreground mb-1">Start Date</label>
-              <div class="date-input-wrapper">
-                <input type="date" id="startDate" formControlName="startDate" class="w-full p-2 border border-border rounded text-sm" required>
-              </div>
-            </div>
-            <div>
-              <label for="endDate" class="block text-sm font-medium text-foreground mb-1">End Date</label>
-              <div class="date-input-wrapper">
-                <input type="date" id="endDate" formControlName="endDate" class="w-full p-2 border border-border rounded text-sm" required>
-              </div>
-            </div>
-          </div>
-          <div class="flex gap-2 pt-2">
-            <button type="submit" class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50" [disabled]="seasonForm.invalid">
-              {{ editingSeasonId ? 'Update' : 'Add' }}
-            </button>
-            <button type="button" class="bg-muted text-muted-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-muted/80" (click)="resetSeasonForm()">
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
 
-      <!-- Seasons List -->
-      <div class="flex-1 overflow-y-auto">
-        <div class="divide-y divide-border">
-          <div *ngFor="let season of seasons" 
-               class="p-3 hover:bg-muted/20 transition-colors cursor-pointer border-l-4"
-               [class.border-l-primary]="season.id === selectedSeasonId"
-               [class.border-l-transparent]="season.id !== selectedSeasonId"
-               [class.bg-primary]="season.id === selectedSeasonId"
-               [class.bg-opacity-5]="season.id === selectedSeasonId"
-               (click)="selectSeason(season)">
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <h4 class="font-medium text-foreground text-sm">{{ season.name }}</h4>
-                <p class="text-xs text-muted-foreground">{{ season.year }} • Season {{ season.seasonNumber }}</p>
-                <p class="text-xs text-muted-foreground">{{ season.startDate | date:'MMM d' }} - {{ season.endDate | date:'MMM d, y' }}</p>
-              </div>
-              <div class="flex gap-1 ml-2">
-                <button class="bg-muted text-muted-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-muted/80" (click)="editSeason(season); $event.stopPropagation()">Edit</button>
-                <button class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-destructive/90" (click)="deleteSeason(season); $event.stopPropagation()">Delete</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Column 2: Flights -->
-  <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
-    <div class="p-4 border-b border-border bg-muted/20">
-      <div class="flex justify-between items-center">
-        <h3 class="text-lg font-semibold text-foreground">Flights</h3>
-        <button 
-          class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed" 
-          (click)="showAddFlightForm()"
-          [disabled]="!selectedSeasonId">
-          Add Flight
-        </button>
-      </div>
-      <p class="text-xs text-muted-foreground mt-1" *ngIf="selectedSeason">{{ selectedSeason.name }}</p>
-    </div>
-    
-    <div class="flex-1 overflow-y-auto">
-      <!-- Loading State for Flights -->
-      <div class="flex items-center justify-center p-8" *ngIf="isLoading && selectedSeasonId && !selectedFlightId">
-        <div class="text-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p class="text-sm text-muted-foreground">Loading flights...</p>
-        </div>
-      </div>
-
-      <!-- No Season Selected -->
-      <div class="flex items-center justify-center p-8" *ngIf="!selectedSeasonId">
-        <div class="text-center text-muted-foreground">
-          <i class="fas fa-calendar-alt text-2xl mb-2"></i>
-          <p class="text-sm">Select a season to view flights</p>
-        </div>
-      </div>
-
-      <!-- Flight Form -->
-      <div class="p-4 border-b border-border bg-background" *ngIf="showFlightForm && selectedSeasonId">
-        <h4 class="text-md font-medium text-foreground mb-4">{{ editingFlightId ? 'Edit Flight' : 'Add New Flight' }}</h4>
-        <form [formGroup]="flightForm" (ngSubmit)="saveFlight()" class="space-y-3">
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label for="flightName" class="block text-sm font-medium text-foreground mb-1">Flight Name</label>
-              <input type="text" id="flightName" formControlName="name" class="w-full p-2 border border-border rounded text-sm" required>
-            </div>
-            <div>
-              <label for="maxPlayers" class="block text-sm font-medium text-foreground mb-1">Max Players</label>
-              <input type="number" id="maxPlayers" formControlName="maxPlayers" class="w-full p-2 border border-border rounded text-sm" min="1" required>
-            </div>
-          </div>
-          <div>
-            <label for="description" class="block text-sm font-medium text-foreground mb-1">Description</label>
-            <textarea id="description" formControlName="description" class="w-full p-2 border border-border rounded text-sm h-16 resize-none"></textarea>
-          </div>
-          <div class="flex items-center">
-            <input type="checkbox" formControlName="isActive" class="mr-2 h-4 w-4">
-            <span class="text-sm font-medium text-foreground">Active Flight</span>
-          </div>
-          <div class="flex gap-2 pt-2">
-            <button type="submit" class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50" [disabled]="flightForm.invalid || isLoading">
-              {{ isLoading ? 'Saving...' : (editingFlightId ? 'Update' : 'Add') }}
-            </button>
-            <button type="button" class="bg-muted text-muted-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-muted/80" (click)="resetFlightForm()">
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Flights List -->
-      <div class="divide-y divide-border" *ngIf="selectedSeasonId && !isLoading && seasonFlights.length > 0">
-        <div *ngFor="let flight of seasonFlights" 
-             class="p-3 hover:bg-muted/20 transition-colors cursor-pointer border-l-4"
-             [class.border-l-primary]="flight.id === selectedFlightId"
-             [class.border-l-transparent]="flight.id !== selectedFlightId"
-             [class.bg-primary]="flight.id === selectedFlightId"
-             [class.bg-opacity-5]="flight.id === selectedFlightId"
-             (click)="selectFlight(flight)">
-          <div class="flex justify-between items-start">
-            <div class="flex-1">
-              <h4 class="font-medium text-foreground text-sm">{{ flight.name }}</h4>
-              <p class="text-xs text-muted-foreground">Max {{ flight.maxPlayers }} players</p>
-            </div>
-            <div class="flex gap-1 ml-2">
-              <button class="bg-muted text-muted-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-muted/80" (click)="editFlight(flight); $event.stopPropagation()">Edit</button>
-              <button class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-destructive/90" (click)="deleteFlight(flight.id!); $event.stopPropagation()">Delete</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty Flight State -->
-      <div class="flex items-center justify-center p-8" *ngIf="selectedSeasonId && !isLoading && seasonFlights.length === 0">
-        <div class="text-center text-muted-foreground">
-          <i class="fas fa-plane text-2xl mb-2"></i>
-          <p class="text-sm">No flights for this season</p>
-          <p class="text-xs">Add your first flight to get started</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Column 3: Player Assignments -->
-  <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
-    <div class="p-4 border-b border-border bg-muted/20">
-      <h3 class="text-lg font-semibold text-foreground">Player Assignments</h3>
-      <p class="text-xs text-muted-foreground mt-1" *ngIf="selectedFlightId">{{ getSelectedFlightName() }}</p>
-    </div>
-    
-    <div class="flex-1 overflow-y-auto">
-      <!-- Loading State for Assignments -->
-      <div class="flex items-center justify-center p-8" *ngIf="isLoading && selectedFlightId">
-        <div class="text-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-          <p class="text-sm text-muted-foreground">Loading assignments...</p>
-        </div>
-      </div>
-
-      <!-- No Flight Selected -->
-      <div class="flex items-center justify-center p-8" *ngIf="!selectedFlightId">
-        <div class="text-center text-muted-foreground">
-          <i class="fas fa-users text-2xl mb-2"></i>
-          <p class="text-sm">Select a flight to manage players</p>
-        </div>
-      </div>
-
-      <!-- Assignment Form -->
-      <div class="p-4 border-b border-border bg-background" *ngIf="selectedFlightId && !isLoading">
-        <h4 class="text-md font-medium text-foreground mb-4">Assign Player</h4>
-        <div class="space-y-3">
-          <div>
-            <label class="block text-sm font-medium text-foreground mb-1">Player</label>
-            <select class="w-full p-3 lg:p-2 border border-border rounded text-base lg:text-sm focus:border-primary focus:ring-2 focus:ring-primary/20" [(ngModel)]="selectedPlayerId" (ngModelChange)="onPlayerSelected()">
-              <option [ngValue]="null">-- Select Player --</option>
-              <option *ngFor="let player of getAvailablePlayers()" [ngValue]="player.id">
-                {{ player.firstName }} {{ player.lastName }}
-              </option>
-            </select>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-2">
-            <div>
-              <label class="block text-sm font-medium text-foreground mb-1">Handicap</label>
-              <input type="number" [(ngModel)]="playerHandicap" class="w-full p-3 lg:p-2 border border-border rounded text-base lg:text-sm focus:border-primary focus:ring-2 focus:ring-primary/20" min="0" max="54" placeholder="Handicap">
-            </div>
-            <div class="flex items-end lg:items-center">
-              <label class="flex items-center">
-                <input type="checkbox" [(ngModel)]="isFlightLeader" class="mr-3 lg:mr-2 h-5 w-5 lg:h-4 lg:w-4">
-                <span class="text-base lg:text-sm text-foreground">Flight Leader</span>
-              </label>
-            </div>
-          </div>
-          <button 
-            (click)="assignPlayerToFlight()" 
-            class="w-full bg-primary text-primary-foreground px-4 py-3 lg:px-3 lg:py-2 rounded-md text-base lg:text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed" 
-            [disabled]="!selectedPlayerId || isLoading">
-            Assign to Flight
+    <!-- Column 1: Seasons -->
+    <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
+      <div class="p-4 border-b border-border bg-muted/20">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-foreground">Seasons</h3>
+          <button
+            class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90"
+            (click)="showAddSeasonForm()">
+            Add Season
           </button>
         </div>
       </div>
 
-      <!-- Assignments List -->
-      <div class="divide-y divide-border" *ngIf="selectedFlightId && !isLoading && flightAssignments.length > 0">
-        <div *ngFor="let assignment of flightAssignments" class="p-3 hover:bg-muted/20 transition-colors">
-          <!-- Desktop Layout - Hidden on mobile -->
-          <div class="hidden lg:flex justify-between items-start">
-            <div class="flex-1">
-              <h4 class="font-medium text-foreground text-sm">{{ getPlayerNameById(assignment.playerId) }}</h4>
-              <div class="flex items-center gap-2 mt-1">
-                <span class="text-xs text-muted-foreground">Handicap: {{ assignment.handicapAtAssignment || 'N/A' }}</span>
-                <span *ngIf="assignment.isFlightLeader" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/20 text-primary">
-                  Leader
-                </span>
+      <div class="flex-1 overflow-hidden flex flex-col">
+        <!-- Season Form -->
+        <div class="p-4 border-b border-border bg-background" *ngIf="showSeasonForm">
+          <h4 class="text-md font-medium text-foreground mb-4">{{ editingSeasonId ? 'Edit Season' : 'Add New Season' }}
+          </h4>
+          <form [formGroup]="seasonForm" (ngSubmit)="saveSeason()" class="space-y-3">
+            <div>
+              <label for="seasonName" class="block text-sm font-medium text-foreground mb-1">Season Name</label>
+              <input type="text" id="seasonName" formControlName="name"
+                class="w-full p-2 border border-border rounded text-sm" required>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label for="seasonYear" class="block text-sm font-medium text-foreground mb-1">Year</label>
+                <input type="number" id="seasonYear" formControlName="year"
+                  class="w-full p-2 border border-border rounded text-sm" min="2000" max="2100" required>
+              </div>
+              <div>
+                <label for="seasonNumber" class="block text-sm font-medium text-foreground mb-1">Season #</label>
+                <input type="number" id="seasonNumber" formControlName="seasonNumber"
+                  class="w-full p-2 border border-border rounded text-sm" min="1" required>
               </div>
             </div>
-            <div class="flex gap-1 ml-2">
-              <button 
-                class="bg-muted text-muted-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-muted/80" 
-                (click)="toggleFlightLeader(assignment)">
-                {{ assignment.isFlightLeader ? 'Remove Leader' : 'Make Leader' }}
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label for="startDate" class="block text-sm font-medium text-foreground mb-1">Start Date</label>
+                <div class="date-input-wrapper">
+                  <input type="date" id="startDate" formControlName="startDate"
+                    class="w-full p-2 border border-border rounded text-sm" required>
+                </div>
+              </div>
+              <div>
+                <label for="endDate" class="block text-sm font-medium text-foreground mb-1">End Date</label>
+                <div class="date-input-wrapper">
+                  <input type="date" id="endDate" formControlName="endDate"
+                    class="w-full p-2 border border-border rounded text-sm" required>
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+              <button type="submit"
+                class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50"
+                [disabled]="seasonForm.invalid">
+                {{ editingSeasonId ? 'Update' : 'Add' }}
               </button>
-              <button 
-                class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-destructive/90" 
-                (click)="removeAssignment(assignment.id!)">
-                Remove
+              <button type="button"
+                class="bg-muted text-muted-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-muted/80"
+                (click)="resetSeasonForm()">
+                Cancel
               </button>
             </div>
-          </div>
+          </form>
+        </div>
 
-          <!-- Mobile Layout - Visible only on mobile -->
-          <div class="lg:hidden">
-            <div class="flex flex-col space-y-3">
+        <!-- Seasons List -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="divide-y divide-border">
+            <div *ngFor="let season of seasons"
+              class="p-3 hover:bg-muted/20 transition-colors cursor-pointer border-l-4"
+              [class.border-l-primary]="season.id === selectedSeasonId"
+              [class.border-l-transparent]="season.id !== selectedSeasonId"
+              [class.bg-primary]="season.id === selectedSeasonId" [class.bg-opacity-5]="season.id === selectedSeasonId"
+              (click)="selectSeason(season)">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <h4 class="font-medium text-foreground text-sm">{{ season.name }}</h4>
+                  <p class="text-xs text-muted-foreground">{{ season.year }} • Season {{ season.seasonNumber }}</p>
+                  <p class="text-xs text-muted-foreground">{{ season.startDate | date:'MMM d' }} - {{ season.endDate |
+                    date:'MMM d, y' }}</p>
+                </div>
+                <div class="flex gap-1 ml-2">
+                  <button
+                    class="bg-muted text-muted-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-muted/80"
+                    (click)="editSeason(season); $event.stopPropagation()">Edit</button>
+                  <button
+                    class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-destructive/90"
+                    (click)="deleteSeason(season); $event.stopPropagation()">Delete</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 2: Flights -->
+    <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
+      <div class="p-4 border-b border-border bg-muted/20">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-foreground">Flights</h3>
+          <button
+            class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            (click)="showAddFlightForm()" [disabled]="!selectedSeasonId">
+            Add Flight
+          </button>
+        </div>
+        <p class="text-xs text-muted-foreground mt-1" *ngIf="selectedSeason">{{ selectedSeason.name }}</p>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <!-- Loading State for Flights -->
+        <div class="flex items-center justify-center p-8" *ngIf="isLoading && selectedSeasonId && !selectedFlightId">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p class="text-sm text-muted-foreground">Loading flights...</p>
+          </div>
+        </div>
+
+        <!-- No Season Selected -->
+        <div class="flex items-center justify-center p-8" *ngIf="!selectedSeasonId">
+          <div class="text-center text-muted-foreground">
+            <i class="fas fa-calendar-alt text-2xl mb-2"></i>
+            <p class="text-sm">Select a season to view flights</p>
+          </div>
+        </div>
+
+        <!-- Flight Form -->
+        <div class="p-4 border-b border-border bg-background" *ngIf="showFlightForm && selectedSeasonId">
+          <h4 class="text-md font-medium text-foreground mb-4">{{ editingFlightId ? 'Edit Flight' : 'Add New Flight' }}
+          </h4>
+          <form [formGroup]="flightForm" (ngSubmit)="saveFlight()" class="space-y-3">
+            <div class="grid grid-cols-2 gap-2">
               <div>
-                <h4 class="font-medium text-foreground text-base">{{ getPlayerNameById(assignment.playerId) }}</h4>
+                <label for="flightName" class="block text-sm font-medium text-foreground mb-1">Flight Name</label>
+                <input type="text" id="flightName" formControlName="name"
+                  class="w-full p-2 border border-border rounded text-sm" required>
+              </div>
+              <div>
+                <label for="maxPlayers" class="block text-sm font-medium text-foreground mb-1">Max Players</label>
+                <input type="number" id="maxPlayers" formControlName="maxPlayers"
+                  class="w-full p-2 border border-border rounded text-sm" min="1" required>
+              </div>
+            </div>
+            <div>
+              <label for="description" class="block text-sm font-medium text-foreground mb-1">Description</label>
+              <textarea id="description" formControlName="description"
+                class="w-full p-2 border border-border rounded text-sm h-16 resize-none"></textarea>
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" formControlName="isActive" class="mr-2 h-4 w-4">
+              <span class="text-sm font-medium text-foreground">Active Flight</span>
+            </div>
+            <div class="flex gap-2 pt-2">
+              <button type="submit"
+                class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50"
+                [disabled]="flightForm.invalid || isLoading">
+                {{ isLoading ? 'Saving...' : (editingFlightId ? 'Update' : 'Add') }}
+              </button>
+              <button type="button"
+                class="bg-muted text-muted-foreground px-3 py-1.5 rounded text-sm font-medium transition-colors hover:bg-muted/80"
+                (click)="resetFlightForm()">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Flights List -->
+        <div class="divide-y divide-border" *ngIf="selectedSeasonId && !isLoading && seasonFlights.length > 0">
+          <div *ngFor="let flight of seasonFlights"
+            class="p-3 hover:bg-muted/20 transition-colors cursor-pointer border-l-4"
+            [class.border-l-primary]="flight.id === selectedFlightId"
+            [class.border-l-transparent]="flight.id !== selectedFlightId"
+            [class.bg-primary]="flight.id === selectedFlightId" [class.bg-opacity-5]="flight.id === selectedFlightId"
+            (click)="selectFlight(flight)">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h4 class="font-medium text-foreground text-sm">{{ flight.name }}</h4>
+                <p class="text-xs text-muted-foreground">Max {{ flight.maxPlayers }} players</p>
+              </div>
+              <div class="flex gap-1 ml-2">
+                <button
+                  class="bg-muted text-muted-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-muted/80"
+                  (click)="editFlight(flight); $event.stopPropagation()">Edit</button>
+                <button
+                  class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-destructive/90"
+                  (click)="deleteFlight(flight.id!); $event.stopPropagation()">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty Flight State -->
+        <div class="flex items-center justify-center p-8"
+          *ngIf="selectedSeasonId && !isLoading && seasonFlights.length === 0">
+          <div class="text-center text-muted-foreground">
+            <i class="fas fa-plane text-2xl mb-2"></i>
+            <p class="text-sm">No flights for this season</p>
+            <p class="text-xs">Add your first flight to get started</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column 3: Player Assignments -->
+    <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
+      <div class="p-4 border-b border-border bg-muted/20">
+        <h3 class="text-lg font-semibold text-foreground">Player Assignments</h3>
+        <p class="text-xs text-muted-foreground mt-1" *ngIf="selectedFlightId">{{ getSelectedFlightName() }}</p>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <!-- Loading State for Assignments -->
+        <div class="flex items-center justify-center p-8" *ngIf="isLoading && selectedFlightId">
+          <div class="text-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+            <p class="text-sm text-muted-foreground">Loading assignments...</p>
+          </div>
+        </div>
+
+        <!-- No Flight Selected -->
+        <div class="flex items-center justify-center p-8" *ngIf="!selectedFlightId">
+          <div class="text-center text-muted-foreground">
+            <i class="fas fa-users text-2xl mb-2"></i>
+            <p class="text-sm">Select a flight to manage players</p>
+          </div>
+        </div>
+
+        <!-- Assignment Form -->
+        <div class="p-4 border-b border-border bg-background" *ngIf="selectedFlightId && !isLoading">
+          <h4 class="text-md font-medium text-foreground mb-4">Assign Player</h4>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-foreground mb-1">Player</label>
+              <select
+                class="w-full p-3 lg:p-2 border border-border rounded text-base lg:text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                [(ngModel)]="selectedPlayerId" (ngModelChange)="onPlayerSelected()">
+                <option [ngValue]="null">-- Select Player --</option>
+                <option *ngFor="let player of getAvailablePlayers()" [ngValue]="player.id">
+                  {{ player.firstName }} {{ player.lastName }}
+                </option>
+              </select>
+            </div>
+            <div class="grid grid-cols-1 gap-3 lg:gap-2">
+              <div>
+                <label class="block text-sm font-medium text-foreground mb-1">Flight Assignment Handicap</label>
+                <input type="number" [(ngModel)]="playerHandicap"
+                  class="w-full p-3 lg:p-2 border border-border rounded text-base lg:text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  min="0" max="54" placeholder="Current handicap for flight assignment">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-foreground mb-1">Initial Season Handicap</label>
+                <input type="number" [(ngModel)]="initialHandicap"
+                  class="w-full p-3 lg:p-2 border border-border rounded text-base lg:text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  min="0" max="54" step="0.1" placeholder="Starting handicap for this season">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-foreground mb-1">Initial Average Score</label>
+                <input type="number" [(ngModel)]="initialAverageScore"
+                  class="w-full p-3 lg:p-2 border border-border rounded text-base lg:text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  min="60" max="150" step="0.1" placeholder="Starting average score for this season">
+              </div>
+              <div class="flex items-center">
+                <label class="flex items-center">
+                  <input type="checkbox" [(ngModel)]="isFlightLeader" class="mr-3 lg:mr-2 h-5 w-5 lg:h-4 lg:w-4">
+                  <span class="text-base lg:text-sm text-foreground">Flight Leader</span>
+                </label>
+              </div>
+            </div>
+            <button (click)="assignPlayerToFlight()"
+              class="w-full bg-primary text-primary-foreground px-4 py-3 lg:px-3 lg:py-2 rounded-md text-base lg:text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="!selectedPlayerId || isLoading">
+              Assign to Flight
+            </button>
+          </div>
+        </div>
+
+        <!-- Assignments List -->
+        <div class="divide-y divide-border" *ngIf="selectedFlightId && !isLoading && flightAssignments.length > 0">
+          <div *ngFor="let assignment of flightAssignments" class="p-3 hover:bg-muted/20 transition-colors">
+            <!-- Desktop Layout - Hidden on mobile -->
+            <div class="hidden lg:flex justify-between items-start">
+              <div class="flex-1">
+                <h4 class="font-medium text-foreground text-sm">{{ getPlayerNameById(assignment.playerId) }}</h4>
                 <div class="flex items-center gap-2 mt-1">
-                  <span class="text-sm text-muted-foreground">Handicap: {{ assignment.handicapAtAssignment || 'N/A' }}</span>
-                  <span *ngIf="assignment.isFlightLeader" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
+                  <span class="text-xs text-muted-foreground">Handicap: {{ assignment.handicapAtAssignment || 'N/A'
+                    }}</span>
+                  <span *ngIf="assignment.isFlightLeader"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/20 text-primary">
                     Leader
                   </span>
                 </div>
               </div>
-              <div class="flex gap-3">
-                <button 
-                  class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-muted/80" 
+              <div class="flex gap-1 ml-2">
+                <button
+                  class="bg-muted text-muted-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-muted/80"
                   (click)="toggleFlightLeader(assignment)">
                   {{ assignment.isFlightLeader ? 'Remove Leader' : 'Make Leader' }}
                 </button>
-                <button 
-                  class="flex-1 bg-destructive text-destructive-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-destructive/90" 
+                <button
+                  class="bg-destructive text-destructive-foreground px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-destructive/90"
                   (click)="removeAssignment(assignment.id!)">
-                  Remove Player
+                  Remove
                 </button>
+              </div>
+            </div>
+
+            <!-- Mobile Layout - Visible only on mobile -->
+            <div class="lg:hidden">
+              <div class="flex flex-col space-y-3">
+                <div>
+                  <h4 class="font-medium text-foreground text-base">{{ getPlayerNameById(assignment.playerId) }}</h4>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-sm text-muted-foreground">Handicap: {{ assignment.handicapAtAssignment || 'N/A'
+                      }}</span>
+                    <span *ngIf="assignment.isFlightLeader"
+                      class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
+                      Leader
+                    </span>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <button
+                    class="flex-1 bg-muted text-muted-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-muted/80"
+                    (click)="toggleFlightLeader(assignment)">
+                    {{ assignment.isFlightLeader ? 'Remove Leader' : 'Make Leader' }}
+                  </button>
+                  <button
+                    class="flex-1 bg-destructive text-destructive-foreground px-4 py-3 rounded-md text-sm font-medium transition-colors hover:bg-destructive/90"
+                    (click)="removeAssignment(assignment.id!)">
+                    Remove Player
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Empty Assignment State -->
-      <div class="flex items-center justify-center p-8" *ngIf="selectedFlightId && !isLoading && flightAssignments.length === 0">
-        <div class="text-center text-muted-foreground">
-          <i class="fas fa-user-plus text-2xl mb-2"></i>
-          <p class="text-sm">No players assigned yet</p>
-          <p class="text-xs">Use the form above to add players</p>
+        <!-- Empty Assignment State -->
+        <div class="flex items-center justify-center p-8"
+          *ngIf="selectedFlightId && !isLoading && flightAssignments.length === 0">
+          <div class="text-center text-muted-foreground">
+            <i class="fas fa-user-plus text-2xl mb-2"></i>
+            <p class="text-sm">No players assigned yet</p>
+            <p class="text-xs">Use the form above to add players</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 </div>

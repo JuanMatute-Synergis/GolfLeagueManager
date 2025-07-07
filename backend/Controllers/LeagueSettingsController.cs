@@ -40,7 +40,7 @@ namespace GolfLeagueManager
                 // Log the received data for debugging
                 System.Console.WriteLine($"Received seasonId: {seasonId}");
                 System.Console.WriteLine($"Received request: {request?.GetType().Name ?? "null"}");
-                
+
                 if (request == null)
                 {
                     return BadRequest("Settings object is required.");
@@ -60,6 +60,8 @@ namespace GolfLeagueManager
                 {
                     SeasonId = seasonId,
                     HandicapMethod = request.HandicapMethod,
+                    AverageMethod = request.AverageMethod,
+                    LegacyInitialWeight = request.LegacyInitialWeight,
                     CoursePar = request.CoursePar,
                     CourseRating = request.CourseRating,
                     SlopeRating = request.SlopeRating,
@@ -110,6 +112,15 @@ namespace GolfLeagueManager
         public ActionResult<object> GetHandicapMethods()
         {
             var methods = Enum.GetValues<HandicapCalculationMethod>()
+                .Select(e => new { value = (int)e, name = e.ToString() })
+                .ToArray();
+            return Ok(methods);
+        }
+
+        [HttpGet("enums/average-methods")]
+        public ActionResult<object> GetAverageMethods()
+        {
+            var methods = Enum.GetValues<AverageCalculationMethod>()
                 .Select(e => new { value = (int)e, name = e.ToString() })
                 .ToArray();
             return Ok(methods);

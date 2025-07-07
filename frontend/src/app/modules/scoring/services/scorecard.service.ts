@@ -93,6 +93,14 @@ export class ScorecardService {
     return this.http.delete<void>(`${this.apiUrl}/${matchupId}`);
   }
 
+  /**
+   * Get scorecards for multiple matchups in bulk
+   * This replaces multiple individual getScorecard calls for better performance
+   */
+  getBulkScorecards(matchupIds: string[]): Observable<{[matchupId: string]: HoleScoreBackend[]}> {
+    return this.http.post<{[matchupId: string]: HoleScoreBackend[]}>(`${this.apiUrl}/bulk`, matchupIds);
+  }
+
   // Convert backend hole scores to frontend scorecard format
   convertToScorecardData(
     holeScores: HoleScoreBackend[],

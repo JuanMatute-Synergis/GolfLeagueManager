@@ -16,11 +16,11 @@ export class Menu {
         //   label: 'Standings',
         //   route: '/standings',
         // },
-        // {
-        //   icon: 'assets/icons/heroicons/outline/users.svg',
-        //   label: 'Players',
-        //   route: '/players',
-        // },
+        {
+          icon: 'assets/icons/heroicons/outline/users.svg',
+          label: 'Players',
+          route: '/players',
+        },
         {
           icon: 'assets/icons/tablericons/arrows-shuffle-2.svg',
           label: 'Matchups',

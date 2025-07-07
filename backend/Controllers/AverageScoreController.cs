@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using GolfLeagueManager.Business;
+using GolfLeagueManager.Models;
 
 namespace GolfLeagueManager.Controllers
 {
@@ -153,6 +155,31 @@ namespace GolfLeagueManager.Controllers
             }
         }
 
+        /// <summary>
+        /// Get a player's average score up to and including a specific week
+        /// </summary>
+        /// <param name="playerId">Player ID</param>
+        /// <param name="seasonId">Season ID</param>
+        /// <param name="weekNumber">Week number (inclusive)</param>
+        /// <returns>Average score up to and including the specified week</returns>
+        [HttpGet("player/{playerId}/season/{seasonId}/uptoweekincluding/{weekNumber}")]
+        public async Task<ActionResult<decimal>> GetPlayerAverageScoreUpToWeekInclusive(Guid playerId, Guid seasonId, int weekNumber)
+        {
+            try
+            {
+                var average = await _averageScoreService.UpdatePlayerAverageScoreAsync(playerId, seasonId, weekNumber);
+                return Ok(average);
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving player average score up to week {weekNumber}: {ex.Message}");
+            }
+        }
+
         // ========== SESSION MANAGEMENT ENDPOINTS ==========
         // Session averages are automatically handled by GetPlayerAverageScoreUpToWeek
         // These endpoints are for managing session initial averages
@@ -169,9 +196,9 @@ namespace GolfLeagueManager.Controllers
         /// <returns>Success message</returns>
         [HttpPost("player/{playerId}/season/{seasonId}/session/{sessionStartWeekNumber}/initial")]
         public async Task<ActionResult> SetPlayerSessionInitialAverage(
-            Guid playerId, 
-            Guid seasonId, 
-            int sessionStartWeekNumber, 
+            Guid playerId,
+            Guid seasonId,
+            int sessionStartWeekNumber,
             [FromBody] decimal sessionInitialAverage)
         {
             // Verify player exists
@@ -190,11 +217,11 @@ namespace GolfLeagueManager.Controllers
 
             // Verify the session start week exists and is marked as session start
             var sessionStartWeek = await _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.WeekNumber == sessionStartWeekNumber && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.WeekNumber == sessionStartWeekNumber &&
                            w.SessionStart)
                 .FirstOrDefaultAsync();
-            
+
             if (sessionStartWeek == null)
             {
                 return BadRequest($"Week {sessionStartWeekNumber} is not a valid session start week for season {seasonId}");
@@ -202,8 +229,8 @@ namespace GolfLeagueManager.Controllers
 
             // Find existing session average or create new one
             var existingSessionAverage = await _context.PlayerSessionAverages
-                .Where(psa => psa.PlayerId == playerId && 
-                             psa.SeasonId == seasonId && 
+                .Where(psa => psa.PlayerId == playerId &&
+                             psa.SeasonId == seasonId &&
                              psa.SessionStartWeekNumber == sessionStartWeekNumber)
                 .FirstOrDefaultAsync();
 
@@ -242,8 +269,8 @@ namespace GolfLeagueManager.Controllers
         /// <returns>Number of players updated</returns>
         [HttpPost("season/{seasonId}/session/{sessionStartWeekNumber}/bulk")]
         public async Task<ActionResult<object>> SetSessionAveragesForAllPlayers(
-            Guid seasonId, 
-            int sessionStartWeekNumber, 
+            Guid seasonId,
+            int sessionStartWeekNumber,
             [FromBody] decimal defaultSessionAverage)
         {
             try
@@ -251,7 +278,8 @@ namespace GolfLeagueManager.Controllers
                 var updatedCount = await _averageScoreService.SetSessionAveragesForAllPlayersAsync(
                     seasonId, sessionStartWeekNumber, defaultSessionAverage);
 
-                return Ok(new { 
+                return Ok(new
+                {
                     message = $"Session averages set for {updatedCount} players",
                     playersUpdated = updatedCount,
                     seasonId,
@@ -262,6 +290,64 @@ namespace GolfLeagueManager.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Get average scores for all players up to and including a specific week
+        /// This is a bulk endpoint to replace multiple individual calls
+        /// </summary>
+        /// <param name="seasonId">Season ID</param>
+        /// <param name="weekNumber">Week number (inclusive)</param>
+        /// <returns>Dictionary of player IDs to their average scores</returns>
+        [HttpGet("bulk/season/{seasonId}/week/{weekNumber}")]
+        public async Task<ActionResult<Dictionary<string, decimal>>> GetAllPlayerAverageScoresUpToWeek(Guid seasonId, int weekNumber)
+        {
+            try
+            {
+                var results = new Dictionary<string, decimal>();
+                
+                // Get all players who have played in this season
+                var seasonWeeks = await _context.Weeks
+                    .Where(w => w.SeasonId == seasonId && w.CountsForScoring && w.CountsForHandicap)
+                    .Select(w => w.Id)
+                    .ToListAsync();
+
+                var playerAIds = await _context.Matchups
+                    .Where(m => seasonWeeks.Contains(m.WeekId) &&
+                               (m.PlayerAScore.HasValue || m.PlayerBScore.HasValue))
+                    .Select(m => m.PlayerAId)
+                    .ToListAsync();
+
+                var playerBIds = await _context.Matchups
+                    .Where(m => seasonWeeks.Contains(m.WeekId) &&
+                               (m.PlayerAScore.HasValue || m.PlayerBScore.HasValue))
+                    .Select(m => m.PlayerBId)
+                    .ToListAsync();
+
+                var playersInSeason = playerAIds.Concat(playerBIds).Distinct().ToList();
+
+                // Get average scores for all players
+                foreach (var playerId in playersInSeason)
+                {
+                    try
+                    {
+                        var averageScore = await _averageScoreService.UpdatePlayerAverageScoreAsync(playerId, seasonId, weekNumber);
+                        results[playerId.ToString()] = averageScore;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but continue with other players
+                        Console.WriteLine($"Error calculating average for player {playerId}: {ex.Message}");
+                        results[playerId.ToString()] = 0;
+                    }
+                }
+
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving bulk average scores: {ex.Message}");
             }
         }
     }

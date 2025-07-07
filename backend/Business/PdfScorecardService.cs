@@ -20,8 +20,9 @@ namespace GolfLeagueManager.Business
         private readonly MatchPlayService _matchPlayService;
         private readonly AverageScoreService _averageScoreService;
         private readonly HandicapService _handicapService;
+        private readonly PlayerSeasonStatsService _playerSeasonStatsService;
 
-        public PdfScorecardService(AppDbContext context, MatchupService matchupService, PlayerFlightAssignmentService flightAssignmentService, MatchPlayService matchPlayService, AverageScoreService averageScoreService, HandicapService handicapService)
+        public PdfScorecardService(AppDbContext context, MatchupService matchupService, PlayerFlightAssignmentService flightAssignmentService, MatchPlayService matchPlayService, AverageScoreService averageScoreService, HandicapService handicapService, PlayerSeasonStatsService playerSeasonStatsService)
         {
             _context = context;
             _matchupService = matchupService;
@@ -29,6 +30,7 @@ namespace GolfLeagueManager.Business
             _matchPlayService = matchPlayService;
             _averageScoreService = averageScoreService;
             _handicapService = handicapService;
+            _playerSeasonStatsService = playerSeasonStatsService;
         }
 
         /// <summary>
@@ -45,35 +47,35 @@ namespace GolfLeagueManager.Business
             var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == weekId);
             if (week == null) throw new ArgumentException("Week not found.");
             var seasonId = week.SeasonId;
-            
+
             // Calculate session number
             var sessionNumber = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber <= week.WeekNumber && w.SessionStart)
                 .Count();
             if (sessionNumber == 0) sessionNumber = 1;
-            
+
             var assignments = _flightAssignmentService.GetAllAssignments().ToList();
             var flights = await _context.Flights.ToListAsync();
             var course = await _context.Courses.Include(c => c.CourseHoles).FirstOrDefaultAsync();
             if (course == null) throw new ArgumentException("No course found.");
-            
+
             // Pre-fetch session handicaps for all players in the matchups
             var allPlayerIds = matchups.SelectMany(m => new[] { m.PlayerAId, m.PlayerBId }).Distinct().ToList();
             var handicapData = new Dictionary<Guid, decimal>();
-            
+
             // Get league settings for this season to use proper handicap calculation
             var leagueSettings = await _context.LeagueSettings
                 .FirstOrDefaultAsync(ls => ls.SeasonId == seasonId);
-            
+
             foreach (var playerId in allPlayerIds)
             {
-                try 
+                try
                 {
                     decimal handicap;
                     if (leagueSettings != null)
                     {
-                        // Use the proper method that respects league settings
-                        handicap = await _handicapService.CalculateAndUpdateCurrentHandicapAsync(playerId, seasonId, leagueSettings.MaxRoundsForHandicap);
+                        // Use the proper method that respects league settings and week number
+                        handicap = await _handicapService.GetPlayerHandicapUpToWeekAsync(playerId, seasonId, week.WeekNumber);
                     }
                     else
                     {
@@ -88,10 +90,10 @@ namespace GolfLeagueManager.Business
                     handicapData[playerId] = 0;
                 }
             }
-            
+
             // Filter holes based on the week's NineHoles setting
             var allHoles = course.CourseHoles.OrderBy(h => h.HoleNumber).ToList();
-            var holes = week.NineHoles == NineHoles.Front 
+            var holes = week.NineHoles == NineHoles.Front
                 ? allHoles.Where(h => h.HoleNumber >= 1 && h.HoleNumber <= 9).ToList()
                 : allHoles.Where(h => h.HoleNumber >= 10 && h.HoleNumber <= 18).ToList();
 
@@ -99,9 +101,11 @@ namespace GolfLeagueManager.Business
             var orderedFlights = flights.OrderBy(f => f.Name).ToList();
             // Group matchups by flight (using PlayerA's assignment for the season)
             var matchupsByFlight = orderedFlights
-                .Select(flight => new {
+                .Select(flight => new
+                {
                     Flight = flight,
-                    Matchups = matchups.Where(m => {
+                    Matchups = matchups.Where(m =>
+                    {
                         var assignment = assignments.FirstOrDefault(a => a.PlayerId == m.PlayerAId && a.Flight != null && a.Flight.SeasonId == seasonId);
                         return assignment?.Flight?.Id == flight.Id;
                     }).ToList()
@@ -122,7 +126,7 @@ namespace GolfLeagueManager.Business
                     page.Content().Column(content =>
                     {
                         bool isFirstPage = true;
-                        
+
                         foreach (var flightGroup in matchupsByFlight)
                         {
                             var flight = flightGroup.Flight;
@@ -137,7 +141,7 @@ namespace GolfLeagueManager.Business
                             isFirstPage = false;
 
                             var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
-                            
+
                             // Header
                             content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League - Session {sessionNumber}")
                                 .FontSize(10).FontColor(Colors.Black).Bold().AlignCenter();
@@ -146,7 +150,7 @@ namespace GolfLeagueManager.Business
                             for (int i = 0; i < matchupsInFlight.Count; i++)
                             {
                                 var matchup = matchupsInFlight[i];
-                                content.Item().PaddingVertical(5).Element(container => 
+                                content.Item().PaddingVertical(5).Element(container =>
                                 {
                                     CreateCompactScorecardTable(container, matchup, holes, handicapData);
                                 });
@@ -188,9 +192,11 @@ namespace GolfLeagueManager.Business
             var orderedFlights = flights.OrderBy(f => f.Name).ToList();
             // Group matchups by flight (using PlayerA's assignment for the season)
             var matchupsByFlight = orderedFlights
-                .Select(flight => new {
+                .Select(flight => new
+                {
                     Flight = flight,
-                    Matchups = matchups.Where(m => {
+                    Matchups = matchups.Where(m =>
+                    {
                         var assignment = assignments.FirstOrDefault(a => a.PlayerId == m.PlayerAId && a.Flight != null && a.Flight.SeasonId == seasonId);
                         return assignment?.Flight?.Id == flight.Id;
                     }).ToList()
@@ -225,10 +231,11 @@ namespace GolfLeagueManager.Business
             var document = Document.Create(container =>
             {
                 container.Page(page =>
-                {                page.Size(PageSizes.A4);
-                page.Margin(15);
-                page.PageColor(Colors.White);
-                page.DefaultTextStyle(x => x.FontColor(Colors.Black));
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(15);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontColor(Colors.Black));
                     page.DefaultTextStyle(x => x.FontSize(8));
 
                     page.Content().Column(content =>
@@ -261,7 +268,7 @@ namespace GolfLeagueManager.Business
                                             CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId, handicapData);
                                         }
                                     });
-                                    
+
                                     if (firstRowFlights.Count >= 2)
                                     {
                                         row.RelativeItem().Padding(3).Element(container =>
@@ -286,7 +293,7 @@ namespace GolfLeagueManager.Business
                                             CreateCompactFlightSummaryTable(container, firstFlight, week, seasonId, handicapData);
                                         }
                                     });
-                                    
+
                                     if (secondRowFlights.Count >= 2)
                                     {
                                         row.RelativeItem().Padding(3).Element(container =>
@@ -318,7 +325,7 @@ namespace GolfLeagueManager.Business
 
                         // Page 2: Detailed Match Play Points Breakdown by Week
                         content.Item().PageBreak();
-                        
+
                         // Header for page 2
                         content.Item().Table(table =>
                         {
@@ -333,7 +340,7 @@ namespace GolfLeagueManager.Business
                         // Create detailed weekly breakdown for each flight
                         foreach (var flightGroup in matchupsByFlight)
                         {
-                            content.Item().Element(container => 
+                            content.Item().Element(container =>
                             {
                                 CreateWeeklyPointsBreakdownTable(container, flightGroup, week, seasonId);
                             });
@@ -342,7 +349,7 @@ namespace GolfLeagueManager.Business
 
                         // Page 3: Remaining Schedule
                         content.Item().PageBreak();
-                        
+
                         // Header for page 3
                         content.Item().Table(table =>
                         {
@@ -355,7 +362,7 @@ namespace GolfLeagueManager.Business
                         content.Item().PaddingTop(10);
 
                         // Create remaining schedule table
-                        content.Item().Element(container => 
+                        content.Item().Element(container =>
                         {
                             CreateRemainingScheduleTable(container, week, seasonId, orderedFlights, assignments);
                         });
@@ -373,13 +380,13 @@ namespace GolfLeagueManager.Business
             var playerB = matchup.PlayerB;
             string playerAName = playerA != null ? $"{playerA.FirstName} {playerA.LastName}" : "Player A";
             string playerBName = playerB != null ? $"{playerB.FirstName} {playerB.LastName}" : "Player B";
-            
+
             // Get session-specific handicaps from pre-fetched data
-            var playerAHandicap = playerA != null && handicapData.ContainsKey(playerA.Id) 
-                ? handicapData[playerA.Id] 
+            var playerAHandicap = playerA != null && handicapData.ContainsKey(playerA.Id)
+                ? handicapData[playerA.Id]
                 : 0;
-            var playerBHandicap = playerB != null && handicapData.ContainsKey(playerB.Id) 
-                ? handicapData[playerB.Id] 
+            var playerBHandicap = playerB != null && handicapData.ContainsKey(playerB.Id)
+                ? handicapData[playerB.Id]
                 : 0;
 
             // Get hole scores - use the data that's already calculated and stored
@@ -399,7 +406,7 @@ namespace GolfLeagueManager.Business
             string winner = "Tie";
             if (matchup.PlayerAMatchWin) winner = playerAName;
             else if (matchup.PlayerBMatchWin) winner = playerBName;
-            
+
             string winnerText = winner == "Tie" ? "Tie" : $"Winner: {winner}";
 
             // Modern card-like container with border, background - Dark mode
@@ -465,17 +472,17 @@ namespace GolfLeagueManager.Business
                                 var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
                                 int playerAGross = hs?.PlayerAScore ?? 0;
                                 if (playerAGross > 0) playerATotal += playerAGross;
-                                
+
                                 // Determine if player A gets a stroke on this hole (for yellow background)
                                 bool playerAReceivesStrokeOnHole = playerAReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
                                 var backgroundColor = playerAReceivesStrokeOnHole ? Colors.Yellow.Lighten3 : Colors.White;
-                                
+
                                 // Use stored match play points to determine hole winner (no recalculation needed)
                                 int playerAHolePoints = hs?.PlayerAMatchPoints ?? 0;
                                 int playerBHolePoints = hs?.PlayerBMatchPoints ?? 0;
                                 bool aWins = playerAHolePoints > playerBHolePoints;
                                 bool isTie = playerAHolePoints == playerBHolePoints && playerAHolePoints > 0;
-                                
+
                                 table.Cell().Background(backgroundColor).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
                                     .Layers(layers =>
                                     {
@@ -510,17 +517,17 @@ namespace GolfLeagueManager.Business
                                 var hs = holeScoresOrdered.FirstOrDefault(x => x.HoleNumber == hole.HoleNumber);
                                 int playerBGross = hs?.PlayerBScore ?? 0;
                                 if (playerBGross > 0) playerBTotal += playerBGross;
-                                
+
                                 // Determine if player B gets a stroke on this hole (for yellow background)
                                 bool playerBReceivesStrokeOnHole = playerBReceivesStrokes && hs != null && hardestHoles.Contains(hole.HoleNumber);
                                 var backgroundColor = playerBReceivesStrokeOnHole ? Colors.Yellow.Lighten3 : Colors.White;
-                                
+
                                 // Use stored match play points to determine hole winner (no recalculation needed)
                                 int playerAHolePoints = hs?.PlayerAMatchPoints ?? 0;
                                 int playerBHolePoints = hs?.PlayerBMatchPoints ?? 0;
                                 bool bWins = playerBHolePoints > playerAHolePoints;
                                 bool isTie = playerAHolePoints == playerBHolePoints && playerBHolePoints > 0;
-                                
+
                                 table.Cell().Background(backgroundColor).Padding(0).Height(28).Border(0.7f).BorderColor(Colors.Grey.Darken1)
                                     .Layers(layers =>
                                     {
@@ -549,7 +556,7 @@ namespace GolfLeagueManager.Business
                             // Matchplay Points row - Use stored calculated values instead of recalculating
                             table.Cell().Background(Colors.Grey.Lighten2).Padding(6)
                                 .Element(cell => cell.AlignCenter().AlignMiddle().Text("POINTS").FontSize(6).Bold().FontColor(Colors.Black));
-                            
+
                             // Display individual hole match play points using stored values
                             foreach (var hole in holes)
                             {
@@ -567,17 +574,17 @@ namespace GolfLeagueManager.Business
                                 table.Cell().Background(Colors.White).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
                                     .Element(cell => cell.AlignCenter().AlignMiddle().Text(holeResult).FontSize(8).Bold().FontColor(Colors.Black));
                             }
-                            
+
                             // Use stored total matchplay points from the matchup (already calculated by MatchPlayService)
                             int playerATotalPoints = matchup.PlayerAPoints ?? 0;
                             int playerBTotalPoints = matchup.PlayerBPoints ?? 0;
-                            
+
                             // Total points cell (showing final match play points out of 20)
                             table.Cell().Background(Colors.Grey.Lighten3).Padding(0).Border(0.7f).BorderColor(Colors.Grey.Darken1)
                                 .Element(cell => cell.AlignCenter().AlignMiddle().Text($"{playerATotalPoints}-{playerBTotalPoints}").FontSize(10).Bold().FontColor(Colors.Black));
                         });
                     });
-                    
+
                     // Match result explanation at the bottom
                     cardCol.Item().PaddingTop(0).Element(explanationContainer =>
                     {
@@ -613,13 +620,13 @@ namespace GolfLeagueManager.Business
                 });
 
                 // Summary table
-                column.Item().Element(container => 
+                column.Item().Element(container =>
                 {
                     CreateFlightSummaryTable(container, flight, matchupsInFlight, currentWeek, seasonId, handicapData);
                 });
 
                 // Next week matchups
-                column.Item().PaddingTop(4).Element(container => 
+                column.Item().PaddingTop(4).Element(container =>
                 {
                     CreateNextWeekMatchupsTable(container, flight, currentWeek, seasonId, handicapData);
                 });
@@ -640,13 +647,13 @@ namespace GolfLeagueManager.Business
                 .Where(m => (playerIds.Contains(m.PlayerAId) || playerIds.Contains(m.PlayerBId)))
                 .ToList();
             var weekNumber = currentWeek.WeekNumber;
-            
+
             var sessionStartWeek = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber && w.SessionStart)
                 .OrderByDescending(w => w.WeekNumber)
                 .FirstOrDefault();
             int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
-            
+
             var weekIdsInSession = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber >= sessionStartWeekNumber && w.WeekNumber <= weekNumber)
                 .OrderBy(w => w.WeekNumber)
@@ -655,12 +662,13 @@ namespace GolfLeagueManager.Business
 
             // Calculate scores for sorting
             var playersWithScores = new List<(Player player, int accumScore)>();
-            
+
             foreach (var player in players)
             {
                 var matchPoints = allMatchups
                     .Where(m => weekIdsInSession.Contains(m.WeekId) && (m.PlayerAId == player.Id || m.PlayerBId == player.Id))
-                    .Select(m => {
+                    .Select(m =>
+                    {
                         var week = _context.Weeks.FirstOrDefault(x => x.Id == m.WeekId);
                         bool absent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
                         if (week != null && week.SpecialPointsAwarded.HasValue)
@@ -709,7 +717,9 @@ namespace GolfLeagueManager.Business
                     var (player, accumScore) = sortedPlayers[i];
                     var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
 
-                    var hcp = handicapData.ContainsKey(player.Id) ? handicapData[player.Id] : player.InitialHandicap;
+                    // Get handicap from calculated data or fallback to season record
+                    var hcp = handicapData.ContainsKey(player.Id) ? handicapData[player.Id] :
+                        _playerSeasonStatsService.GetInitialHandicapAsync(player.Id, seasonId).Result;
                     var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
                         player.Id, seasonId, currentWeek.WeekNumber + 1).Result;
 
@@ -740,14 +750,14 @@ namespace GolfLeagueManager.Business
 
                     var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
                     var phoneDisplay = FormatPhoneNumber(player.Phone);
-                    
+
                     table.Cell().Background(rowColor).Padding(3).Text(displayName).FontSize(6).FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(2).Text(phoneDisplay).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(hcp.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(avg.ToString("0.00")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-").FontSize(6).AlignCenter().FontColor(Colors.Black);
-                    
+
                     var sessionTotalColor = accumScore > 0 ? Colors.Grey.Lighten2 : rowColor;
                     table.Cell().Background(sessionTotalColor).Padding(3).Text(accumScore > 0 ? accumScore.ToString() : "-").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
                 }
@@ -759,7 +769,7 @@ namespace GolfLeagueManager.Business
             var nextWeek = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber == currentWeek.WeekNumber + 1)
                 .FirstOrDefault();
-            
+
             if (nextWeek == null) return;
 
             // Get ALL matchups for next week, then filter by flight
@@ -771,7 +781,8 @@ namespace GolfLeagueManager.Business
 
             // Filter matchups to only include those for this flight
             var assignments = _flightAssignmentService.GetAllAssignments().ToList();
-            var nextWeekMatchupsForFlight = allNextWeekMatchups.Where(m => {
+            var nextWeekMatchupsForFlight = allNextWeekMatchups.Where(m =>
+            {
                 var playerAAssignment = assignments.FirstOrDefault(a => a.PlayerId == m.PlayerAId && a.Flight != null && a.Flight.SeasonId == seasonId);
                 return playerAAssignment?.Flight?.Id == flight.Id;
             }).ToList();
@@ -781,7 +792,7 @@ namespace GolfLeagueManager.Business
             container.Table(table =>
             {
                 table.ColumnsDefinition(columns => columns.RelativeColumn());
-                
+
                 // Header
                 table.Cell().Padding(3).Background(Colors.White)
                     .Text($"Next Matchups - {nextWeek.Date:dddd, MMMM d}")
@@ -798,17 +809,17 @@ namespace GolfLeagueManager.Business
 
                             if (playerA == null || playerB == null) continue;
 
-                            var playerAHandicap = playerA != null && handicapData.ContainsKey(playerA.Id) 
-                                ? handicapData[playerA.Id] 
-                                : (playerA?.InitialHandicap ?? 0);
-                            var playerBHandicap = playerB != null && handicapData.ContainsKey(playerB.Id) 
-                                ? handicapData[playerB.Id] 
-                                : (playerB?.InitialHandicap ?? 0);
-                            
+                            var playerAHandicap = playerA != null && handicapData.ContainsKey(playerA.Id)
+                                ? handicapData[playerA.Id]
+                                : (playerA != null ? _playerSeasonStatsService.GetInitialHandicapAsync(playerA.Id, seasonId).Result : 0m);
+                            var playerBHandicap = playerB != null && handicapData.ContainsKey(playerB.Id)
+                                ? handicapData[playerB.Id]
+                                : (playerB != null ? _playerSeasonStatsService.GetInitialHandicapAsync(playerB.Id, seasonId).Result : 0m);
+
                             int playerAHandicapInt = (int)Math.Round((double)playerAHandicap);
                             int playerBHandicapInt = (int)Math.Round((double)playerBHandicap);
                             int handicapDiff = Math.Abs(playerAHandicapInt - playerBHandicapInt);
-                            
+
                             string strokeInfo = "";
                             if (handicapDiff > 0)
                             {
@@ -820,7 +831,7 @@ namespace GolfLeagueManager.Business
 
                             var line = $"{playerA!.FirstName} {playerA.LastName.Substring(0, 1)}. ({playerAHandicap:0.#}) vs " +
                                       $"{playerB!.FirstName} {playerB.LastName.Substring(0, 1)}. ({playerBHandicap:0.#}){strokeInfo}";
-                            
+
                             column.Item().Text(line).FontSize(8).LineHeight(1.0f).FontColor(Colors.Black);
                         }
                     });
@@ -834,7 +845,7 @@ namespace GolfLeagueManager.Business
         {
             string playerAFirstName = playerAName.Split(' ')[0];
             string playerBFirstName = playerBName.Split(' ')[0];
-            
+
             // Handle absence scenarios first
             if (matchup.PlayerAAbsent && matchup.PlayerBAbsent)
             {
@@ -867,11 +878,11 @@ namespace GolfLeagueManager.Business
                 int playerAPoints = matchup.PlayerAPoints ?? 0;
                 return $"{playerBFirstName} absent {noticeText} - {playerAFirstName} played and earned {playerAPoints} pts";
             }
-            
+
             // Normal match scenarios - use stored match results
             int playerATotalPoints = matchup.PlayerAPoints ?? 0;
             int playerBTotalPoints = matchup.PlayerBPoints ?? 0;
-            
+
             if (playerATotalPoints > playerBTotalPoints)
             {
                 if (matchup.PlayerAMatchWin)
@@ -920,7 +931,7 @@ namespace GolfLeagueManager.Business
                 .OrderByDescending(w => w.WeekNumber)
                 .FirstOrDefault();
             int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
-            
+
             var weeksInSession = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber >= sessionStartWeekNumber && w.WeekNumber <= currentWeek.WeekNumber)
                 .OrderBy(w => w.WeekNumber)
@@ -929,7 +940,7 @@ namespace GolfLeagueManager.Business
             // Get all matchups for these players in the session
             var allMatchups = _context.Matchups
                 .Include(m => m.Week)
-                .Where(m => (playerIds.Contains(m.PlayerAId) || playerIds.Contains(m.PlayerBId)) 
+                .Where(m => (playerIds.Contains(m.PlayerAId) || playerIds.Contains(m.PlayerBId))
                            && weeksInSession.Select(w => w.Id).Contains(m.WeekId))
                 .ToList();
 
@@ -945,7 +956,7 @@ namespace GolfLeagueManager.Business
                 });
 
                 // Create table with players as rows and weeks as columns
-                column.Item().Element(container => 
+                column.Item().Element(container =>
                 {
                     container.Table(table =>
                     {
@@ -985,16 +996,16 @@ namespace GolfLeagueManager.Business
 
                         // Player rows
                         var playersWithTotals = new List<(Player player, int totalPoints)>();
-                        
+
                         // Calculate total points for each player
                         foreach (var player in players)
                         {
                             int totalPoints = 0;
                             foreach (var week in weeksInSession)
                             {
-                                var matchup = allMatchups.FirstOrDefault(m => m.WeekId == week.Id && 
+                                var matchup = allMatchups.FirstOrDefault(m => m.WeekId == week.Id &&
                                     (m.PlayerAId == player.Id || m.PlayerBId == player.Id));
-                                
+
                                 int weekPoints = 0;
                                 bool isAbsent = false;
                                 if (matchup != null)
@@ -1021,31 +1032,31 @@ namespace GolfLeagueManager.Business
                             }
                             playersWithTotals.Add((player, totalPoints));
                         }
-                        
+
                         // Sort by total points (descending), then by last name
                         var sortedPlayers = playersWithTotals
                             .OrderByDescending(p => p.totalPoints)
                             .ThenBy(p => p.player.LastName)
                             .ToList();
-                        
+
                         for (int i = 0; i < sortedPlayers.Count; i++)
                         {
                             var (player, playerTotalPoints) = sortedPlayers[i];
                             var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
                             var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
-                            
+
                             table.Cell().Background(rowColor).Padding(2)
                                 .Text(displayName).FontSize(7).FontColor(Colors.Black);
 
                             foreach (var week in weeksInSession)
                             {
-                                var matchup = allMatchups.FirstOrDefault(m => m.WeekId == week.Id && 
+                                var matchup = allMatchups.FirstOrDefault(m => m.WeekId == week.Id &&
                                     (m.PlayerAId == player.Id || m.PlayerBId == player.Id));
-                                
+
                                 int weekPoints = 0;
                                 int? grossScore = null;
                                 bool isAbsent = false;
-                                
+
                                 if (matchup != null)
                                 {
                                     if (matchup.PlayerAId == player.Id)
@@ -1068,7 +1079,7 @@ namespace GolfLeagueManager.Business
                                         weekPoints = isAbsent ? (special / 2) : special;
                                     }
                                 }
-                                
+
                                 if (isAbsent)
                                 {
                                     var cellText = "-  |  -  |  -  |  ABS";
@@ -1080,19 +1091,19 @@ namespace GolfLeagueManager.Business
                                     // Calculate average score up to this week (including this week)
                                     var avg = _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
                                         player.Id, seasonId, week.WeekNumber + 1).Result;
-                                    
-                                    // Get player's calculated handicap based on recent scores
-                                    var handicap = _handicapService.CalculatePlayerHandicapAsync(
-                                        player.Id, 35, 113, 20).Result;
-                                    
+
+                                    // Get player's handicap up to this week (same method as league summary)
+                                    var handicap = _handicapService.GetPlayerHandicapUpToWeekAsync(
+                                        player.Id, seasonId, week.WeekNumber).Result;
+
                                     var avgText = avg > 0 ? avg.ToString("F2") : "-";
                                     var grossText = grossScore?.ToString() ?? "-";
                                     var handicapText = handicap > 0 ? Math.Round(handicap).ToString() : "-";
                                     var pointsText = weekPoints > 0 ? weekPoints.ToString() : "-";
-                                    
+
                                     // Format horizontally with better separation for readability
                                     var cellText = $"{avgText}  |  {grossText}  |  {handicapText}  |  {pointsText}";
-                                    
+
                                     table.Cell().Background(rowColor).Padding(2)
                                         .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
                                 }
@@ -1116,13 +1127,13 @@ namespace GolfLeagueManager.Business
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber > currentWeek.WeekNumber && w.SessionStart)
                 .OrderBy(w => w.WeekNumber)
                 .FirstOrDefault();
-            
+
             int sessionEndWeekNumber = nextSessionStartWeek?.WeekNumber - 1 ?? int.MaxValue;
-            
+
             // Get remaining weeks in the current session only
             var remainingWeeks = _context.Weeks
-                .Where(w => w.SeasonId == seasonId && 
-                           w.WeekNumber > currentWeek.WeekNumber && 
+                .Where(w => w.SeasonId == seasonId &&
+                           w.WeekNumber > currentWeek.WeekNumber &&
                            w.WeekNumber <= sessionEndWeekNumber)
                 .OrderBy(w => w.WeekNumber)
                 .ToList();
@@ -1181,11 +1192,11 @@ namespace GolfLeagueManager.Business
                     foreach (var matchup in flightMatchups)
                     {
                         if (matchup.Week == null || matchup.PlayerA == null || matchup.PlayerB == null) continue;
-                        
+
                         var weekNum = matchup.Week.WeekNumber;
                         var playerAName = $"{matchup.PlayerA.FirstName} {matchup.PlayerA.LastName.Substring(0, 1)}.";
                         var playerBName = $"{matchup.PlayerB.FirstName} {matchup.PlayerB.LastName.Substring(0, 1)}.";
-                        
+
                         scheduleMatrix[matchup.PlayerAId][weekNum] = playerBName;
                         scheduleMatrix[matchup.PlayerBId][weekNum] = playerAName;
                     }
@@ -1233,7 +1244,7 @@ namespace GolfLeagueManager.Business
                                 var player = flightPlayers[i];
                                 var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
                                 var playerDisplayName = $"{player.FirstName} {player.LastName}";
-                                
+
                                 // Player name cell
                                 table.Cell().Background(rowColor).Padding(3)
                                     .Text(playerDisplayName).FontSize(7).FontColor(Colors.Black);
@@ -1241,10 +1252,10 @@ namespace GolfLeagueManager.Business
                                 // Opponent cells for each week
                                 foreach (var week in remainingWeeks)
                                 {
-                                    var opponent = scheduleMatrix[player.Id].ContainsKey(week.WeekNumber) 
-                                        ? scheduleMatrix[player.Id][week.WeekNumber] 
+                                    var opponent = scheduleMatrix[player.Id].ContainsKey(week.WeekNumber)
+                                        ? scheduleMatrix[player.Id][week.WeekNumber]
                                         : "-";
-                                    
+
                                     table.Cell().Background(rowColor).Padding(3)
                                         .Text(opponent).FontSize(6).AlignCenter().FontColor(Colors.Black);
                                 }
@@ -1261,16 +1272,16 @@ namespace GolfLeagueManager.Business
         private string FormatPhoneNumber(string phone)
         {
             if (string.IsNullOrWhiteSpace(phone)) return "-";
-            
+
             // Remove all non-numeric characters
             var digits = new string(phone.Where(char.IsDigit).ToArray());
-            
+
             // Format as (XXX) XXX-XXXX for 10-digit numbers
             if (digits.Length == 10)
             {
                 return $"({digits.Substring(0, 3)}) {digits.Substring(3, 3)}-{digits.Substring(6, 4)}";
             }
-            
+
             // For other lengths, just return the original phone number without extra spaces
             return phone.Replace(" ", " ").Trim(); // Replace multiple spaces with single space
         }

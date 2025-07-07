@@ -88,7 +88,8 @@ namespace GolfLeagueManager.Controllers
                     var playerMatchupsUpTo = matchupsUpTo.Where(m => m != null && (m.PlayerAId == player.Id || m.PlayerBId == player.Id)).ToList();
                     // Aggregate gross scores up to this week
                     var grossScores = new List<int>();
-                    foreach (var matchup in playerMatchupsUpTo) {
+                    foreach (var matchup in playerMatchupsUpTo)
+                    {
                         if (matchup == null) continue;
                         var hs = allHoleScores.Where(h => h.MatchupId == matchup.Id).ToList();
                         if (matchup.PlayerAId == player.Id)
@@ -102,14 +103,19 @@ namespace GolfLeagueManager.Controllers
                     var playerMatchupsThisWeek = matchupsThisWeek.Where(m => m != null && (m.PlayerAId == player.Id || m.PlayerBId == player.Id)).ToList();
                     int? gross = null;
                     int? net = null;
-                    if (playerMatchupsThisWeek.Count > 0) {
+                    if (playerMatchupsThisWeek.Count > 0)
+                    {
                         int grossSum = 0;
-                        foreach (var matchup in playerMatchupsThisWeek) {
+                        foreach (var matchup in playerMatchupsThisWeek)
+                        {
                             if (matchup == null) continue;
                             var hs = allHoleScores.Where(h => h.MatchupId == matchup.Id).ToList();
-                            if (matchup.PlayerAId == player.Id) {
+                            if (matchup.PlayerAId == player.Id)
+                            {
                                 grossSum += hs.Sum(h => h.PlayerAScore ?? 0);
-                            } else if (matchup.PlayerBId == player.Id) {
+                            }
+                            else if (matchup.PlayerBId == player.Id)
+                            {
                                 grossSum += hs.Sum(h => h.PlayerBScore ?? 0);
                             }
                         }
@@ -119,12 +125,40 @@ namespace GolfLeagueManager.Controllers
                     }
 
                     // Match play points for this week and accumulated
-                    int weekPoints = matchupsThisWeek.Where(m => m != null && m.PlayerAId == player.Id).Sum(m => m.PlayerAPoints ?? 0)
-                        + matchupsThisWeek.Where(m => m != null && m.PlayerBId == player.Id).Sum(m => m.PlayerBPoints ?? 0);
-                    int accumPoints = matchupsUpTo.Where(m => m != null && m.PlayerAId == player.Id).Sum(m => m.PlayerAPoints ?? 0)
-                        + matchupsUpTo.Where(m => m != null && m.PlayerBId == player.Id).Sum(m => m.PlayerBPoints ?? 0);
+                    int weekPoints = matchupsThisWeek.Where(m => m != null && (m.PlayerAId == player.Id || m.PlayerBId == player.Id))
+                        .Sum(m =>
+                        {
+                            var points = (m.PlayerAId == player.Id) ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+                            var isPlayerAbsent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
+                            var isPlayerAbsentWithNotice = (m.PlayerAId == player.Id) ? m.PlayerAAbsentWithNotice : m.PlayerBAbsentWithNotice;
 
-                    playerStats.Add(new {
+                            // Apply correct absent player logic: 4 points with notice, 0 points without notice
+                            if (isPlayerAbsent)
+                            {
+                                return isPlayerAbsentWithNotice ? 4 : 0;
+                            }
+
+                            return points;
+                        });
+
+                    int accumPoints = matchupsUpTo.Where(m => m != null && (m.PlayerAId == player.Id || m.PlayerBId == player.Id))
+                        .Sum(m =>
+                        {
+                            var points = (m.PlayerAId == player.Id) ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+                            var isPlayerAbsent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
+                            var isPlayerAbsentWithNotice = (m.PlayerAId == player.Id) ? m.PlayerAAbsentWithNotice : m.PlayerBAbsentWithNotice;
+
+                            // Apply correct absent player logic: 4 points with notice, 0 points without notice
+                            if (isPlayerAbsent)
+                            {
+                                return isPlayerAbsentWithNotice ? 4 : 0;
+                            }
+
+                            return points;
+                        });
+
+                    playerStats.Add(new
+                    {
                         id = player.Id,
                         name = player.FirstName + " " + player.LastName,
                         gross = gross,
@@ -134,7 +168,8 @@ namespace GolfLeagueManager.Controllers
                         accumPoints = accumPoints
                     });
                 }
-                result.Add(new {
+                result.Add(new
+                {
                     id = flight.Id,
                     name = flight.Name,
                     players = playerStats.OrderByDescending(p => ((dynamic)p).accumPoints).ToList()
@@ -158,9 +193,9 @@ namespace GolfLeagueManager.Controllers
                 .Where(w => w.WeekNumber <= currentWeekNumber && w.SessionStart)
                 .OrderByDescending(w => w.WeekNumber)
                 .FirstOrDefault();
-            
+
             var sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
-            
+
             // Get all weeks in the current session up to the selected week
             var weekIdsInSession = allWeeks
                 .Where(w => w.WeekNumber >= sessionStartWeekNumber && w.WeekNumber <= currentWeekNumber)
@@ -199,44 +234,63 @@ namespace GolfLeagueManager.Controllers
                     // Calculate session points - sum of all match play points in the session
                     var sessionTotal = sessionMatchups
                         .Where(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id)
-                        .Sum(m => {
+                        .Sum(m =>
+                        {
                             // Check if this week has special points
                             var matchWeek = allWeeks.FirstOrDefault(w => w.Id == m.WeekId);
                             var playerAbsent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
-                            
+
                             // Handle special points weeks
                             if (matchWeek?.SpecialPointsAwarded != null && matchWeek.SpecialPointsAwarded > 0)
                             {
                                 return playerAbsent ? (matchWeek.SpecialPointsAwarded / 2) : matchWeek.SpecialPointsAwarded.Value;
                             }
-                            
-                            // Regular match play points
-                            var hasScore = (m.PlayerAId == player.Id && m.PlayerAScore.HasValue) || 
-                                          (m.PlayerBId == player.Id && m.PlayerBScore.HasValue);
-                            if (!hasScore) return 0;
-                            
-                            return (m.PlayerAId == player.Id) ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+
+                            // Regular match play points - ensure absent players get correct points based on notice
+                            var points = (m.PlayerAId == player.Id) ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+                            var isPlayerAbsent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
+                            var isPlayerAbsentWithNotice = (m.PlayerAId == player.Id) ? m.PlayerAAbsentWithNotice : m.PlayerBAbsentWithNotice;
+
+                            // Apply correct absent player logic: 4 points with notice, 0 points without notice
+                            if (isPlayerAbsent)
+                            {
+                                return isPlayerAbsentWithNotice ? 4 : 0;
+                            }
+
+                            return points;
                         });
 
                     // This week's points
                     var thisWeekPoints = thisWeekMatchups
                         .Where(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id)
-                        .Sum(m => {
+                        .Sum(m =>
+                        {
                             // Handle special points for this week
                             if (selectedWeek.SpecialPointsAwarded != null && selectedWeek.SpecialPointsAwarded > 0)
                             {
                                 var playerAbsent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
                                 return playerAbsent ? (selectedWeek.SpecialPointsAwarded / 2) : selectedWeek.SpecialPointsAwarded.Value;
                             }
-                            
-                            return (m.PlayerAId == player.Id) ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+
+                            // Regular this week points - ensure absent players get correct points based on notice
+                            var points = (m.PlayerAId == player.Id) ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
+                            var isPlayerAbsent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
+                            var isPlayerAbsentWithNotice = (m.PlayerAId == player.Id) ? m.PlayerAAbsentWithNotice : m.PlayerBAbsentWithNotice;
+
+                            // Apply correct absent player logic: 4 points with notice, 0 points without notice
+                            if (isPlayerAbsent)
+                            {
+                                return isPlayerAbsentWithNotice ? 4 : 0;
+                            }
+
+                            return points;
                         });
 
                     // This week's gross score
                     var thisWeekMatchup = thisWeekMatchups.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
                     int? grossScore = null;
                     bool isAbsent = false;
-                    
+
                     if (thisWeekMatchup != null)
                     {
                         if (thisWeekMatchup.PlayerAId == player.Id)
@@ -253,13 +307,14 @@ namespace GolfLeagueManager.Controllers
 
                     // Calculate average score up to and including this week (for display)
                     var averageScore = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
-                        player.Id, seasonId, currentWeekNumber + 1);
+                        player.Id, seasonId, currentWeekNumber);
 
                     // Calculate handicap up to and including this week
                     var handicapUpToWeek = await _handicapService.GetPlayerHandicapUpToWeekAsync(
                         player.Id, seasonId, currentWeekNumber);
 
-                    playerStats.Add(new {
+                    playerStats.Add(new
+                    {
                         id = player.Id,
                         name = $"{player.FirstName} {player.LastName.Substring(0, 1)}.",
                         displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.",
@@ -278,7 +333,8 @@ namespace GolfLeagueManager.Controllers
                     .ThenBy(p => players.FirstOrDefault(pl => pl.Id == ((dynamic)p).id)?.LastName ?? "")
                     .ToList();
 
-                result.Add(new {
+                result.Add(new
+                {
                     id = flight.Id,
                     name = flight.Name,
                     players = sortedPlayers
@@ -289,23 +345,26 @@ namespace GolfLeagueManager.Controllers
             var sessionNumber = allWeeks
                 .Where(w => w.WeekNumber <= currentWeekNumber && w.SessionStart)
                 .Count();
-            
+
             // If no session starts found, it's session 1
             if (sessionNumber == 0) sessionNumber = 1;
 
-            return Ok(new { 
-                week = new {
+            return Ok(new
+            {
+                week = new
+                {
                     id = selectedWeek.Id,
                     name = $"Week {selectedWeek.WeekNumber}",
                     weekNumber = selectedWeek.WeekNumber,
                     date = selectedWeek.Date
                 },
-                session = new {
+                session = new
+                {
                     number = sessionNumber,
                     startWeekNumber = sessionStartWeekNumber,
                     currentWeekNumber = currentWeekNumber
                 },
-                flights = result 
+                flights = result
             });
         }
     }
