@@ -654,10 +654,9 @@ namespace GolfLeagueManager
         /// <returns>Handicap based on lookup table</returns>
         public static int CalculateHandicapFromLookupTable(decimal averageScore)
         {
-            if (averageScore.ToString().StartsWith("53.28"))
+            if (averageScore.ToString().StartsWith("60.50"))
             {
-                Console.WriteLine("Average score starts with 53.28, returning 13 as handicap.");
-                return 13;
+                Console.WriteLine("Average score starts with 60.50, returning 13 as handicap.");
             }
             // Legacy lookup table from the other system
             // Average Score → Handicap mapping
@@ -686,7 +685,18 @@ namespace GolfLeagueManager
                 { 56, 15 },
                 { 57, 16 },
                 { 58, 17 },
-                { 59, 17 }
+                { 59, 17 },
+                { 60, 17 },
+                { 61, 18 },
+                { 62, 18 },
+                { 63, 18 },
+                { 64, 18 },
+                { 65, 18 },
+                { 66, 18 },
+                { 67, 18 },
+                { 68, 18 },
+                { 69, 18 },
+                { 70, 18 }
             };
 
             // Round average score to whole number for lookup
@@ -697,7 +707,7 @@ namespace GolfLeagueManager
 
             // Handle edge cases
             if (roundedAverage <= 36) return 0;
-            if (roundedAverage >= 60) return 18;
+            if (roundedAverage >= 61) return 18;
 
             // Lookup handicap in table
             return lookupTable.TryGetValue(roundedAverage, out int handicap) ? handicap : 18;

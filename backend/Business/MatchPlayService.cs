@@ -198,7 +198,8 @@ namespace GolfLeagueManager
                 matchup.PlayerAPoints = playerAPoints;
                 matchup.PlayerBPoints = playerBPoints;
                 matchup.PlayerAHolePoints = 0;
-                matchup.PlayerBHolePoints = Math.Max(0, playerBPoints - leagueSettings.MatchWinBonus); // Subtract match bonus to get hole points
+                // In absence scenarios, no match win bonus is awarded - the points from CalculateNoOpponentScoringAsync are the total
+                matchup.PlayerBHolePoints = playerBPoints; // All points are hole points in absence scenarios
                 matchup.PlayerAMatchWin = false;
                 matchup.PlayerBMatchWin = playerBPoints > playerAPoints;
 
@@ -217,7 +218,8 @@ namespace GolfLeagueManager
 
                 matchup.PlayerAPoints = playerAPoints;
                 matchup.PlayerBPoints = playerBPoints;
-                matchup.PlayerAHolePoints = Math.Max(0, playerAPoints - leagueSettings.MatchWinBonus); // Subtract match bonus to get hole points
+                // In absence scenarios, no match win bonus is awarded - the points from CalculateNoOpponentScoringAsync are the total
+                matchup.PlayerAHolePoints = playerAPoints; // All points are hole points in absence scenarios
                 matchup.PlayerBHolePoints = 0;
                 matchup.PlayerAMatchWin = playerAPoints > playerBPoints;
                 matchup.PlayerBMatchWin = false;
@@ -244,7 +246,7 @@ namespace GolfLeagueManager
             // Calculate scoring thresholds based on league settings
             var maxHolePoints = leagueSettings.HoleWinPoints * 9; // Maximum points from holes (9 holes)
             var highScorePoints = maxHolePoints; // Points for beating average (16 with standard 2-point system)
-            var lowScorePoints = maxHolePoints / 2; // Points for not beating average (8 with standard 2-point system)
+            var lowScorePoints = 8; // Fixed 8 points for not beating average in absence scenarios
 
             // Get the player's current average score
             var player = await _context.Players.FindAsync(playerId);
