@@ -557,13 +557,13 @@ export class ScoreEntryComponent implements OnInit {
         matchup.originalPlayerAScore = matchup.playerAScore;
         matchup.originalPlayerBScore = matchup.playerBScore;
         matchup.hasChanged = false;
-        
+
         const playerIds = [matchup.playerAId, matchup.playerBId].filter(id => id) as string[];
-        
+
         // Refresh both player averages and handicaps since scores have changed
         this.refreshPlayerAverages(playerIds);
         await this.refreshPlayerHandicaps(playerIds);
-        
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -637,12 +637,12 @@ export class ScoreEntryComponent implements OnInit {
         matchup.playerAScore = undefined;
         matchup.playerBScore = undefined;
         this.onScoreChange(matchup);
-        
+
         // Refresh averages and handicaps since scores were cleared
         const playerIds = [matchup.playerAId, matchup.playerBId].filter(id => id) as string[];
         this.refreshPlayerAverages(playerIds);
         await this.refreshPlayerHandicaps(playerIds);
-        
+
         this.isLoading = false;
         console.log('Scorecard cleared successfully');
       },
@@ -654,12 +654,12 @@ export class ScoreEntryComponent implements OnInit {
         matchup.playerAScore = undefined;
         matchup.playerBScore = undefined;
         this.onScoreChange(matchup);
-        
+
         // Refresh averages and handicaps even on error
         const playerIds = [matchup.playerAId, matchup.playerBId].filter(id => id) as string[];
         this.refreshPlayerAverages(playerIds);
         await this.refreshPlayerHandicaps(playerIds);
-        
+
         this.isLoading = false;
       }
     });
@@ -880,6 +880,14 @@ export class ScoreEntryComponent implements OnInit {
   }
 
   getPlayerNetScore(matchup: MatchupWithDetails, player: 'A' | 'B'): string {
+    // Check if the specific player is absent first
+    if (player === 'A' && matchup.playerAAbsent) {
+      return 'Absent';
+    }
+    if (player === 'B' && matchup.playerBAbsent) {
+      return 'Absent';
+    }
+
     // If no scores available, return dash
     if (!matchup.playerAScore || !matchup.playerBScore) {
       return '-';
@@ -950,10 +958,10 @@ export class ScoreEntryComponent implements OnInit {
     // Fetch both average scores and handicaps for all players
     const averageRequests = Array.from(playerIds).map(playerId => {
       // Determine if this player has completed scores for the current week
-      const playerMatchups = this.matchups.filter(m => 
+      const playerMatchups = this.matchups.filter(m =>
         m.playerAId === playerId || m.playerBId === playerId
       );
-      
+
       const hasCompletedScores = playerMatchups.some(matchup => {
         const playerAComplete = matchup.playerAId === playerId && matchup.playerAScore;
         const playerBComplete = matchup.playerBId === playerId && matchup.playerBScore;
@@ -1113,10 +1121,10 @@ export class ScoreEntryComponent implements OnInit {
 
       // Check if any players have completed scores for the current week
       const hasAnyCompletedScores = Array.from(playerIds).some(playerId => {
-        const playerMatchups = this.matchups.filter(m => 
+        const playerMatchups = this.matchups.filter(m =>
           m.playerAId === playerId || m.playerBId === playerId
         );
-        
+
         return playerMatchups.some(matchup => {
           const playerAComplete = matchup.playerAId === playerId && matchup.playerAScore;
           const playerBComplete = matchup.playerBId === playerId && matchup.playerBScore;
@@ -1127,18 +1135,18 @@ export class ScoreEntryComponent implements OnInit {
       // If any player has completed scores, include current week
       // If not, exclude current week (use previous week)
       const weekNumber = hasAnyCompletedScores ? this.selectedWeek.weekNumber : this.selectedWeek.weekNumber - 1;
-      
+
       // Use bulk API to get all handicaps at once
       const handicapsDict = await firstValueFrom(this.handicapService.getAllPlayerUptoWeekHandicaps(this.selectedSeasonId, weekNumber));
-      
+
       // Clear and populate the handicaps cache
       this.playerHandicapsCache.clear();
-      
+
       // Convert dictionary to cache
       Object.entries(handicapsDict).forEach(([playerId, handicap]) => {
         this.playerHandicapsCache.set(playerId, handicap);
       });
-      
+
       console.log(`Loaded handicaps for ${this.playerHandicapsCache.size} players using bulk API`);
     } catch (error) {
       console.error('Error loading player handicaps:', error);
@@ -1163,10 +1171,10 @@ export class ScoreEntryComponent implements OnInit {
     // Fetch fresh averages for these players
     const averageRequests = playerIds.map(playerId => {
       // Determine if this player has completed scores for the current week
-      const playerMatchups = this.matchups.filter(m => 
+      const playerMatchups = this.matchups.filter(m =>
         m.playerAId === playerId || m.playerBId === playerId
       );
-      
+
       const hasCompletedScores = playerMatchups.some(matchup => {
         const playerAComplete = matchup.playerAId === playerId && matchup.playerAScore;
         const playerBComplete = matchup.playerBId === playerId && matchup.playerBScore;
@@ -1178,7 +1186,7 @@ export class ScoreEntryComponent implements OnInit {
       const weekNumber = hasCompletedScores ? this.selectedWeek!.weekNumber : this.selectedWeek!.weekNumber - 1;
       const cacheKey = `${playerId}-${this.selectedWeek!.id}-${hasCompletedScores}`;
       const url = `/api/averagescore/player/${playerId}/season/${this.selectedWeek!.seasonId}/uptoweek/${weekNumber}`;
-      
+
       return this.http.get<number>(url).toPromise().then(average => {
         this.weekAverageCache.set(cacheKey, average!);
         this.playerAverages.set(playerId, average!);
@@ -1209,10 +1217,10 @@ export class ScoreEntryComponent implements OnInit {
         // Use individual calls for small updates
         const handicapRequests = playerIds.map(async (playerId) => {
           // Determine if this player has completed scores for the current week
-          const playerMatchups = this.matchups.filter(m => 
+          const playerMatchups = this.matchups.filter(m =>
             m.playerAId === playerId || m.playerBId === playerId
           );
-          
+
           const hasCompletedScores = playerMatchups.some(matchup => {
             const playerAComplete = matchup.playerAId === playerId && matchup.playerAScore;
             const playerBComplete = matchup.playerBId === playerId && matchup.playerBScore;
@@ -1222,7 +1230,7 @@ export class ScoreEntryComponent implements OnInit {
           // If player has completed scores, include current week
           // If not, exclude current week (use previous week)
           const weekNumber = hasCompletedScores ? this.selectedWeek!.weekNumber : this.selectedWeek!.weekNumber - 1;
-          
+
           try {
             const handicap = await firstValueFrom(this.handicapService.getPlayerSessionHandicap(playerId, this.selectedSeasonId, weekNumber));
             return { playerId, handicap: handicap as number };
@@ -1234,7 +1242,7 @@ export class ScoreEntryComponent implements OnInit {
 
         // Wait for all handicap requests to complete
         const results = await Promise.all(handicapRequests);
-        
+
         // Update the handicaps cache
         results.forEach(({ playerId, handicap }) => {
           this.playerHandicapsCache.set(playerId, handicap);
@@ -1243,10 +1251,10 @@ export class ScoreEntryComponent implements OnInit {
         // Use bulk API for larger updates
         // Check if any of the affected players have completed scores for the current week
         const hasAnyCompletedScores = playerIds.some(playerId => {
-          const playerMatchups = this.matchups.filter(m => 
+          const playerMatchups = this.matchups.filter(m =>
             m.playerAId === playerId || m.playerBId === playerId
           );
-          
+
           return playerMatchups.some(matchup => {
             const playerAComplete = matchup.playerAId === playerId && matchup.playerAScore;
             const playerBComplete = matchup.playerBId === playerId && matchup.playerBScore;
@@ -1255,10 +1263,10 @@ export class ScoreEntryComponent implements OnInit {
         });
 
         const weekNumber = hasAnyCompletedScores ? this.selectedWeek.weekNumber : this.selectedWeek.weekNumber - 1;
-        
+
         // Use bulk API to get all handicaps at once
         const handicapsDict = await firstValueFrom(this.handicapService.getAllPlayerUptoWeekHandicaps(this.selectedSeasonId, weekNumber));
-        
+
         // Update only the requested players in the cache
         playerIds.forEach(playerId => {
           if (handicapsDict[playerId] !== undefined) {

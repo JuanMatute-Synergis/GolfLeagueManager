@@ -55,7 +55,7 @@ namespace GolfLeagueManager
                         calculationMethod = "Simple Average";
                         var scores = recentScores.Select(s => s.score).ToArray();
                         var averageScore = (decimal)scores.Average();
-                        calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 1);
+                        calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 1, MidpointRounding.AwayFromZero);
                         calculatedHandicap = Math.Max(0, Math.Min(36, calculatedHandicap));
 
                         calculationDetails = $"Average Score: {averageScore:F2}, Course Par: {leagueSettings.CoursePar}, " +
@@ -171,6 +171,68 @@ namespace GolfLeagueManager
             }
         }
 
+        [HttpGet("player/{playerId}/season/{seasonId}/week/{weekNumber}/scoring-handicap")]
+        public async Task<ActionResult<object>> DebugPlayerScoringHandicap(Guid playerId, Guid seasonId, int weekNumber)
+        {
+            try
+            {
+                var player = await _context.Players.FindAsync(playerId);
+                if (player == null)
+                {
+                    return NotFound($"Player with ID {playerId} not found");
+                }
+
+                var season = await _context.Seasons.FindAsync(seasonId);
+                if (season == null)
+                {
+                    return NotFound($"Season with ID {seasonId} not found");
+                }
+
+                // Get the scoring handicap using the exact same method used by standings
+                var scoringHandicap = await _handicapService.GetPlayerScoringHandicapAsync(playerId, seasonId, weekNumber);
+
+                // Get session handicap for comparison
+                var sessionHandicap = await _context.PlayerSessionHandicaps
+                    .Where(psh => psh.PlayerId == playerId &&
+                                 psh.SeasonId == seasonId &&
+                                 psh.SessionStartWeekNumber == weekNumber)
+                    .FirstOrDefaultAsync();
+
+                // Get player season record for comparison
+                var playerSeasonRecord = await _context.PlayerSeasonRecords
+                    .Where(psr => psr.PlayerId == playerId && psr.SeasonId == seasonId)
+                    .FirstOrDefaultAsync();
+
+                return Ok(new
+                {
+                    Player = new
+                    {
+                        Id = player.Id,
+                        Name = $"{player.FirstName} {player.LastName}".Trim()
+                    },
+                    Season = new
+                    {
+                        Id = season.Id,
+                        Name = season.Name,
+                        Year = season.Year
+                    },
+                    WeekNumber = weekNumber,
+                    ScoringHandicap = scoringHandicap,
+                    Debug = new
+                    {
+                        SessionHandicap = sessionHandicap?.SessionInitialHandicap,
+                        PlayerSeasonRecordInitialHandicap = playerSeasonRecord?.InitialHandicap,
+                        PlayerInitialHandicap = player.InitialHandicap,
+                        MethodUsed = weekNumber <= 1 ? "Initial/Session Handicap" : "Calculated from Previous Weeks"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error debugging scoring handicap: {ex.Message}");
+            }
+        }
+
         private async Task<List<(int score, DateTime date, int weekNumber)>> GetRecentPlayerScoresAsync(Guid playerId, int maxRounds)
         {
             var matchups = await _context.Matchups
@@ -210,7 +272,7 @@ namespace GolfLeagueManager
             var differentials = scores.Select(s =>
             {
                 decimal differential = (s.score - s.courseRating) * 113m / s.slopeRating;
-                return Math.Round(differential, 1);
+                return Math.Round(differential, 1, MidpointRounding.AwayFromZero);
             }).ToList();
 
             differentials.Sort();
@@ -233,7 +295,7 @@ namespace GolfLeagueManager
 
             var bestDifferentials = differentials.Take(numToUse);
             var average = bestDifferentials.Average();
-            var handicapIndex = Math.Round(average, 1);
+            var handicapIndex = Math.Round(average, 1, MidpointRounding.AwayFromZero);
 
             return Math.Max(0, Math.Min(36, handicapIndex));
         }

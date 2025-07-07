@@ -26,14 +26,14 @@ namespace GolfLeagueManager
         public async Task<ScorecardResponse> SaveScorecardAsync(ScorecardSaveRequest request)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
-            
+
             try
             {
                 // Validate the matchup exists
                 var matchup = await _context.Matchups
                     .Include(m => m.Week)
                     .FirstOrDefaultAsync(m => m.Id == request.MatchupId);
-                
+
                 if (matchup == null)
                 {
                     return new ScorecardResponse
@@ -48,15 +48,15 @@ namespace GolfLeagueManager
                 var existingHoleScores = await _context.HoleScores
                     .Where(hs => hs.MatchupId == request.MatchupId)
                     .ToListAsync();
-                
+
                 _context.HoleScores.RemoveRange(existingHoleScores);
-                
+
                 // Save the deletion to ensure clean state
                 await _context.SaveChangesAsync();
 
                 // Create new hole scores directly from the request
                 var holeScores = new List<HoleScore>();
-                
+
                 foreach (var holeScoreDto in request.HoleScores)
                 {
                     var holeScore = new HoleScore
@@ -71,7 +71,7 @@ namespace GolfLeagueManager
                         PlayerAMatchPoints = 0, // Will be calculated by match play service
                         PlayerBMatchPoints = 0  // Will be calculated by match play service
                     };
-                    
+
                     holeScores.Add(holeScore);
                 }
 
@@ -94,22 +94,19 @@ namespace GolfLeagueManager
                 matchup.PlayerAAbsentWithNotice = request.PlayerAAbsentWithNotice;
                 matchup.PlayerBAbsentWithNotice = request.PlayerBAbsentWithNotice;
 
-                // If a player is absent, set their score to their average up to this week
-                if (matchup.PlayerAAbsent && matchup.Week != null)
+                // For absent players, set their score to null (they didn't play)
+                if (matchup.PlayerAAbsent)
                 {
-                    var avgA = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
-                        matchup.PlayerAId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
-                    matchup.PlayerAScore = (int)Math.Round(avgA);
+                    matchup.PlayerAScore = null;
                 }
                 else
                 {
                     matchup.PlayerAScore = request.PlayerATotalScore > 0 ? request.PlayerATotalScore : null;
                 }
-                if (matchup.PlayerBAbsent && matchup.Week != null)
+
+                if (matchup.PlayerBAbsent)
                 {
-                    var avgB = await _averageScoreService.GetPlayerAverageScoreUpToWeekAsync(
-                        matchup.PlayerBId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
-                    matchup.PlayerBScore = (int)Math.Round(avgB);
+                    matchup.PlayerBScore = null;
                 }
                 else
                 {
@@ -163,7 +160,7 @@ namespace GolfLeagueManager
                 }
 
                 await _context.SaveChangesAsync();
-                
+
                 // Update average scores for both players after scores are saved
                 if (matchup.Week != null && matchup.Week.CountsForScoring)
                 {
@@ -176,7 +173,7 @@ namespace GolfLeagueManager
                         await _averageScoreService.UpdatePlayerAverageScoreAsync(matchup.PlayerBId, matchup.Week.SeasonId, matchup.Week.WeekNumber);
                     }
                 }
-                
+
                 await transaction.CommitAsync();
 
                 // Reload the matchup to get the calculated match play results
@@ -242,7 +239,7 @@ namespace GolfLeagueManager
                 .Include(m => m.PlayerB)
                 .Include(m => m.Week)
                 .FirstOrDefaultAsync(m => m.Id == matchupId);
-                
+
             if (matchup == null)
             {
                 return new ScorecardResponse
@@ -267,16 +264,16 @@ namespace GolfLeagueManager
             // Get session handicaps for both players
             decimal playerAHandicap = 0;
             decimal playerBHandicap = 0;
-            
+
             if (matchup.PlayerA != null && matchup.Week != null)
             {
-                playerAHandicap = await _handicapService.GetPlayerSessionHandicapAsync(
+                playerAHandicap = await _handicapService.GetPlayerScoringHandicapAsync(
                     matchup.PlayerA.Id, matchup.Week.SeasonId, matchup.Week.WeekNumber);
             }
-            
+
             if (matchup.PlayerB != null && matchup.Week != null)
             {
-                playerBHandicap = await _handicapService.GetPlayerSessionHandicapAsync(
+                playerBHandicap = await _handicapService.GetPlayerScoringHandicapAsync(
                     matchup.PlayerB.Id, matchup.Week.SeasonId, matchup.Week.WeekNumber);
             }
 
@@ -314,7 +311,7 @@ namespace GolfLeagueManager
                 return false;
 
             _context.HoleScores.RemoveRange(holeScores);
-            
+
             // Reset matchup scores
             var matchup = await _context.Matchups.FindAsync(matchupId);
             if (matchup != null)
@@ -339,7 +336,7 @@ namespace GolfLeagueManager
             var matchup = await _context.Matchups
                 .Include(m => m.Week)
                 .FirstOrDefaultAsync(m => m.Id == matchupId);
-                
+
             if (matchup?.Week == null)
             {
                 throw new ArgumentException("Matchup or Week not found");
@@ -363,7 +360,7 @@ namespace GolfLeagueManager
             {
                 // Get the correct handicap for this hole from the database
                 var holeHandicap = await _matchPlayScoringService.GetHoleHandicapAsync(holeNumber);
-                
+
                 var holeScore = new HoleScore
                 {
                     Id = Guid.NewGuid(),

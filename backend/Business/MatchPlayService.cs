@@ -70,9 +70,9 @@ namespace GolfLeagueManager
                 return false;
             }
 
-            // Get session-specific handicaps for both players
-            var playerAHandicap = await _handicapService.GetPlayerSessionHandicapAsync(matchup.PlayerAId, week.SeasonId, week.WeekNumber);
-            var playerBHandicap = await _handicapService.GetPlayerSessionHandicapAsync(matchup.PlayerBId, week.SeasonId, week.WeekNumber);
+            // Get scoring handicaps for both players (based on previous week's data)
+            var playerAHandicap = await _handicapService.GetPlayerScoringHandicapAsync(matchup.PlayerAId, week.SeasonId, week.WeekNumber);
+            var playerBHandicap = await _handicapService.GetPlayerScoringHandicapAsync(matchup.PlayerBId, week.SeasonId, week.WeekNumber);
 
             // Get league settings for the season
             var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(week.SeasonId);

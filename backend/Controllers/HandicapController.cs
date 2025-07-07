@@ -128,6 +128,27 @@ namespace GolfLeagueManager.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Get a player's scoring handicap for a specific week (previous week's handicap)
+        /// </summary>
+        [HttpGet("{playerId}/{seasonId}/{weekNumber}/scoring")]
+        public async Task<ActionResult<decimal>> GetPlayerScoringHandicap(Guid playerId, Guid seasonId, int weekNumber)
+        {
+            try
+            {
+                var handicap = await _handicapService.GetPlayerScoringHandicapAsync(playerId, seasonId, weekNumber);
+                return Ok(handicap);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 
     // Request DTOs

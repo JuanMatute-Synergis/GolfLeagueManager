@@ -136,13 +136,13 @@ namespace GolfLeagueManager.Controllers
 
                 if (matchup.PlayerA != null && matchup.Week != null)
                 {
-                    playerAHandicap = await _handicapService.GetPlayerSessionHandicapAsync(
+                    playerAHandicap = await _handicapService.GetPlayerScoringHandicapAsync(
                         matchup.PlayerA.Id, matchup.Week.SeasonId, matchup.Week.WeekNumber);
                 }
 
                 if (matchup.PlayerB != null && matchup.Week != null)
                 {
-                    playerBHandicap = await _handicapService.GetPlayerSessionHandicapAsync(
+                    playerBHandicap = await _handicapService.GetPlayerScoringHandicapAsync(
                         matchup.PlayerB.Id, matchup.Week.SeasonId, matchup.Week.WeekNumber);
                 }
 

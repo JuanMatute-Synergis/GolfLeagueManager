@@ -37,6 +37,32 @@ namespace GolfLeagueManager
         }
 
         /// <summary>
+        /// Get a player's handicap for scoring calculations. This method calculates the handicap
+        /// based on scores up to but NOT including the specified week (i.e., previous week's handicap).
+        /// This is the correct handicap to use for match play scoring, as strokes are given based on
+        /// the handicap as of the start of the week, not after the week is completed.
+        /// </summary>
+        /// <param name="playerId">The player's ID</param>
+        /// <param name="seasonId">The season ID</param>
+        /// <param name="weekNumber">The week number being played</param>
+        /// <returns>The player's handicap as of the previous week</returns>
+        public async Task<decimal> GetPlayerScoringHandicapAsync(Guid playerId, Guid seasonId, int weekNumber)
+        {
+            var player = await _context.Players.FindAsync(playerId);
+            if (player == null)
+                throw new ArgumentException($"Player with ID {playerId} not found");
+
+            // For week 1, use the calculated handicap from average score (same as GetPlayerHandicapUpToWeekAsync)
+            if (weekNumber <= 1)
+            {
+                return await GetPlayerHandicapUpToWeekAsync(playerId, seasonId, 1);
+            }
+
+            // For week 2 and later, calculate handicap based on scores up to the previous week
+            return await GetPlayerHandicapUpToWeekAsync(playerId, seasonId, weekNumber - 1);
+        }
+
+        /// <summary>
         /// Calculate a player's handicap based on scores up to and including a specific week
         /// </summary>
         /// <param name="playerId">The player's ID</param>
@@ -46,9 +72,11 @@ namespace GolfLeagueManager
         /// <returns>The calculated handicap up to the specified week</returns>
         public async Task<decimal> GetPlayerHandicapUpToWeekAsync(Guid playerId, Guid seasonId, int upToWeekNumber, int maxRounds = 20)
         {
-            if (playerId.ToString() == "9deacc93-f9ed-49e6-ab68-c89b056af0fe")
+            var isKevinKelhart = playerId.ToString() == "1cbaa69a-f72e-4ccd-9e6b-2ea1a501f5ee";
+            var isAlexPeck = playerId.ToString() == "c80aef4d-db47-493e-b1ae-9d09a734a094";
+            if (isAlexPeck || isKevinKelhart)
             {
-                Console.WriteLine("Debugging GetPlayerHandicapUpToWeekAsync for player 9deacc93-f9ed-49e6-ab68-c89b056af0fe");
+                Console.WriteLine($"Debugging GetPlayerHandicapUpToWeekAsync for {(isAlexPeck ? "Alex Peck" : "Kevin Kelhart")}, week {upToWeekNumber}");
             }
             var player = await _context.Players.FindAsync(playerId);
             if (player == null)
@@ -56,10 +84,18 @@ namespace GolfLeagueManager
 
             // Get league settings to determine calculation method
             var leagueSettings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
+            if (isAlexPeck || isKevinKelhart)
+            {
+                Console.WriteLine($"League settings - HandicapMethod: {leagueSettings.HandicapMethod}, CoursePar: {leagueSettings.CoursePar}");
+            }
 
             // For handicap calculation, we need to convert the average score to handicap
             // The AverageScoreService already handles both legacy and simple calculations based on league settings
             decimal averageScore = await _averageScoreService.UpdatePlayerAverageScoreAsync(playerId, seasonId, upToWeekNumber);
+            if (isAlexPeck || isKevinKelhart)
+            {
+                Console.WriteLine($"Average score from AverageScoreService: {averageScore}");
+            }
 
             // Convert average score to handicap based on handicap method
             decimal calculatedHandicap;
@@ -67,22 +103,38 @@ namespace GolfLeagueManager
             if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
             {
                 // Simple Average Method: Handicap = Average Score - Course Par
-                calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0); // Round to whole numbers
+                calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0, MidpointRounding.AwayFromZero); // Round to whole numbers
                 calculatedHandicap = Math.Max(0, Math.Min(36, calculatedHandicap)); // Cap between 0 and 36
+                if (isAlexPeck || isKevinKelhart)
+                {
+                    Console.WriteLine($"Simple Average Method: {averageScore} - {leagueSettings.CoursePar} = {averageScore - leagueSettings.CoursePar}, rounded/capped: {calculatedHandicap}");
+                }
             }
             else if (leagueSettings.HandicapMethod == HandicapCalculationMethod.LegacyLookupTable)
             {
                 // Legacy Lookup Table Method: Map average score to handicap using predefined table
                 calculatedHandicap = CalculateHandicapFromLookupTable(averageScore);
+                if (isAlexPeck || isKevinKelhart)
+                {
+                    Console.WriteLine($"Legacy Lookup Table Method: Average {averageScore} -> Handicap {calculatedHandicap}");
+                }
             }
             else
             {
                 // World Handicap System Method - fall back to simple average method since WHS needs actual scores
                 // but AverageScoreService already handles the complex logic for legacy/simple calculations
-                calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0);
+                calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0, MidpointRounding.AwayFromZero);
                 calculatedHandicap = Math.Max(0, Math.Min(36, calculatedHandicap));
+                if (isAlexPeck || isKevinKelhart)
+                {
+                    Console.WriteLine($"WHS Method (fallback): {averageScore} - {leagueSettings.CoursePar} = {averageScore - leagueSettings.CoursePar}, rounded/capped: {calculatedHandicap}");
+                }
             }
 
+            if (isAlexPeck || isKevinKelhart)
+            {
+                Console.WriteLine($"Final calculated handicap for {(isAlexPeck ? "Alex Peck" : "Kevin Kelhart")}: {calculatedHandicap}");
+            }
             return calculatedHandicap;
         }
 
@@ -253,7 +305,7 @@ namespace GolfLeagueManager
             {
                 // Simple Average Method: Handicap = Average Score - Course Par
                 var averageScore = (decimal)recentScores.Average(s => s.score);
-                newHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0); // Round to whole numbers
+                newHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0, MidpointRounding.AwayFromZero); // Round to whole numbers
                 newHandicap = Math.Max(0, Math.Min(36, newHandicap)); // Cap between 0 and 36
             }
             else if (leagueSettings.HandicapMethod == HandicapCalculationMethod.LegacyLookupTable)
@@ -374,7 +426,7 @@ namespace GolfLeagueManager
                         if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
                         {
                             var avgScore = (decimal)scoresForCalculation.Average(s => s.score);
-                            currentValidHandicap = Math.Round(avgScore - leagueSettings.CoursePar, 0);
+                            currentValidHandicap = Math.Round(avgScore - leagueSettings.CoursePar, 0, MidpointRounding.AwayFromZero);
                             currentValidHandicap = Math.Max(0, Math.Min(36, currentValidHandicap));
                         }
                         else if (leagueSettings.HandicapMethod == HandicapCalculationMethod.LegacyLookupTable)
@@ -426,7 +478,7 @@ namespace GolfLeagueManager
             var averageDifferential = selectedDifferentials.Average();
             var handicapIndex = averageDifferential * 0.96m;
 
-            return Math.Max(0, Math.Min(36, Math.Round(handicapIndex, 0))); // Round to whole numbers
+            return Math.Max(0, Math.Min(36, Math.Round(handicapIndex, 0, MidpointRounding.AwayFromZero))); // Round to whole numbers
         }
 
         /// <summary>
@@ -617,7 +669,7 @@ namespace GolfLeagueManager
                 { 39, 3 },
                 { 40, 4 },
                 { 41, 5 },
-                { 42, 6 },
+                { 42, 5 },
                 { 43, 6 },
                 { 44, 6 },
                 { 45, 7 },
@@ -626,7 +678,7 @@ namespace GolfLeagueManager
                 { 48, 9 },
                 { 49, 10 },
                 { 50, 11 },
-                { 51, 12 },
+                { 51, 11 },
                 { 52, 13 },
                 { 53, 13 },
                 { 54, 14 },
@@ -660,7 +712,7 @@ namespace GolfLeagueManager
             {
                 //get the player's handicap up to the specified week
                 var handicap = await GetPlayerHandicapUpToWeekAsync(player.Id, seasonId, weekNumber);
-                
+
                 // Add to the dictionary
                 playerHandicaps[player.Id] = handicap;
             }

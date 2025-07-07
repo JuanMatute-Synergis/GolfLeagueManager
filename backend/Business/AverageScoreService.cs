@@ -69,14 +69,17 @@ namespace GolfLeagueManager
             {
                 if (week.CountsForHandicap)
                 {
-                    // Get actual score for this week
-                    var actualScore = await _context.Matchups
-                        .Where(m => m.WeekId == week.Id &&
-                                   (m.PlayerAId == playerId || m.PlayerBId == playerId) &&
-                                   ((m.PlayerAId == playerId && m.PlayerAScore.HasValue && !m.PlayerAAbsent) ||
-                                    (m.PlayerBId == playerId && m.PlayerBScore.HasValue && !m.PlayerBAbsent)))
-                        .Select(m => m.PlayerAId == playerId ? m.PlayerAScore!.Value : m.PlayerBScore!.Value)
-                        .FirstOrDefaultAsync();
+                    // Get actual score for this week from HoleScores table via Matchup
+                    var actualScore = await _context.HoleScores
+                        .Join(_context.Matchups,
+                            hs => hs.MatchupId,
+                            m => m.Id,
+                            (hs, m) => new { HoleScore = hs, Matchup = m })
+                        .Where(x => x.Matchup.WeekId == week.Id &&
+                                   (x.Matchup.PlayerAId == playerId || x.Matchup.PlayerBId == playerId))
+                        .SumAsync(x => x.Matchup.PlayerAId == playerId ?
+                                      (x.HoleScore.PlayerAScore ?? 0) :
+                                      (x.HoleScore.PlayerBScore ?? 0));
 
                     if (actualScore > 0)
                     {
@@ -91,7 +94,7 @@ namespace GolfLeagueManager
             var totalCount = 1 + actualScores.Count;
             var averageScore = totalScore / totalCount;
 
-            return Math.Round(averageScore, 2);
+            return Math.Round(averageScore, 2, MidpointRounding.AwayFromZero);
         }
 
         /// <summary>
@@ -115,32 +118,48 @@ namespace GolfLeagueManager
             // Start with initial average counting as 1 week
             decimal totalScore = initialAverage;
             int totalWeeks = 1;
-            decimal currentRunningAverage = initialAverage;
+            decimal currentRunningAverage = Math.Round(initialAverage, 2, MidpointRounding.AwayFromZero);
+
+            //get the player's name
+            var playerName = await _context.Players
+                .Where(p => p.Id == playerId)
+                .Select(p => p.FirstName)
+                .FirstOrDefaultAsync();
+
+            if (playerName == "Ray")
+            {
+                Console.WriteLine($"Player Name: {playerName}");
+            }
 
             foreach (var week in allSeasonWeeks)
             {
-
+                // Increment total weeks for both counting and non-counting weeks
+                totalWeeks++;
 
                 if (week.CountsForHandicap)
                 {
-                    // Get actual score for this week
-                    var actualScore = await _context.Matchups
-                        .Where(m => m.WeekId == week.Id &&
-                                   (m.PlayerAId == playerId || m.PlayerBId == playerId) &&
-                                   ((m.PlayerAId == playerId && m.PlayerAScore.HasValue && !m.PlayerAAbsent) ||
-                                    (m.PlayerBId == playerId && m.PlayerBScore.HasValue && !m.PlayerBAbsent)))
-                        .Select(m => m.PlayerAId == playerId ? m.PlayerAScore!.Value : m.PlayerBScore!.Value)
-                        .FirstOrDefaultAsync();
+                    // Get actual score for this week from HoleScores table via Matchup
+                    var actualScore = await _context.HoleScores
+                        .Join(_context.Matchups,
+                            hs => hs.MatchupId,
+                            m => m.Id,
+                            (hs, m) => new { HoleScore = hs, Matchup = m })
+                        .Where(x => x.Matchup.WeekId == week.Id &&
+                                   (x.Matchup.PlayerAId == playerId || x.Matchup.PlayerBId == playerId))
+                        .SumAsync(x => x.Matchup.PlayerAId == playerId ?
+                                      (x.HoleScore.PlayerAScore ?? 0) :
+                                      (x.HoleScore.PlayerBScore ?? 0));
 
                     if (actualScore > 0)
                     {
                         // Add actual score to total
                         totalScore += actualScore;
                         //dont count this week as phantom
-                        currentRunningAverage = totalScore / totalWeeks;
+                        currentRunningAverage = Math.Round(totalScore / totalWeeks, 2, MidpointRounding.AwayFromZero);
                     }
                     else
                     {
+                        totalWeeks--;
                         //dont count this week as phantom, no operation
                         continue;
                     }
@@ -148,20 +167,18 @@ namespace GolfLeagueManager
                 else
                 {
                     // Week doesn't count for handicap (like weeks 1-3), use current running average
-                    totalScore += currentRunningAverage;
+                    totalScore += Math.Round(currentRunningAverage, 2, MidpointRounding.AwayFromZero);
+                    totalScore = Math.Round(totalScore, 2, MidpointRounding.AwayFromZero);
                 }
-                // Increment total weeks for both counting and non-counting weeks
-                totalWeeks++;
 
                 // Update the current running average for the next iteration
-                currentRunningAverage = totalScore / totalWeeks;
+                currentRunningAverage = Math.Round(totalScore / totalWeeks, 2, MidpointRounding.AwayFromZero);
             }
 
             // Calculate final weighted average
-            if (totalWeeks == 0) return Math.Round(initialAverage, 2);
-
-            decimal weightedAverage = totalScore / totalWeeks;
-            return Math.Round(weightedAverage, 2);
+            if (totalWeeks == 0) return Math.Round(initialAverage, 2, MidpointRounding.AwayFromZero);
+            decimal weightedAverage = Math.Round(totalScore / totalWeeks, 2, MidpointRounding.AwayFromZero);
+            return weightedAverage;
         }
 
         /// <summary>
@@ -245,21 +262,28 @@ namespace GolfLeagueManager
 
             var weekIds = seasonWeeks.Select(w => w.Id).ToList();
 
-            // Get all non-absent scores for this player in these weeks
-            var playerScores = await _context.Matchups
-                .Where(m => weekIds.Contains(m.WeekId) &&
-                           (m.PlayerAId == playerId || m.PlayerBId == playerId) &&
-                           ((m.PlayerAId == playerId && m.PlayerAScore.HasValue && !m.PlayerAAbsent) ||
-                            (m.PlayerBId == playerId && m.PlayerBScore.HasValue && !m.PlayerBAbsent)))
-                .Select(m => new
+            // Get all non-absent scores for this player in these weeks from HoleScores
+            var playerScores = await _context.HoleScores
+                .Join(_context.Matchups,
+                    hs => hs.MatchupId,
+                    m => m.Id,
+                    (hs, m) => new { HoleScore = hs, Matchup = m })
+                .Where(x => weekIds.Contains(x.Matchup.WeekId) &&
+                           (x.Matchup.PlayerAId == playerId || x.Matchup.PlayerBId == playerId) &&
+                           ((x.Matchup.PlayerAId == playerId && !x.Matchup.PlayerAAbsent) ||
+                            (x.Matchup.PlayerBId == playerId && !x.Matchup.PlayerBAbsent)))
+                .GroupBy(x => x.Matchup.WeekId)
+                .Select(g => new
                 {
-                    WeekId = m.WeekId,
-                    Score = m.PlayerAId == playerId ? m.PlayerAScore : m.PlayerBScore
+                    WeekId = g.Key,
+                    Score = g.Sum(x => x.Matchup.PlayerAId == playerId ?
+                                      (x.HoleScore.PlayerAScore ?? 0) :
+                                      (x.HoleScore.PlayerBScore ?? 0))
                 })
-                .Where(s => s.Score.HasValue)
+                .Where(s => s.Score > 0)
                 .ToListAsync();
 
-            var scores = playerScores.Select(s => s.Score!.Value).ToList();
+            var scores = playerScores.Select(s => s.Score).ToList();
 
             // Get initial and current average scores for this season
             var initialAverageScore = await _playerSeasonStatsService.GetInitialAverageScoreAsync(playerId, seasonId);
@@ -267,7 +291,7 @@ namespace GolfLeagueManager
 
             // Calculate average including initial average score as baseline
             var averageScoreCalculated = scores.Count > 0
-                ? Math.Round((initialAverageScore + scores.Sum()) / (1 + scores.Count), 2)
+                ? Math.Round((initialAverageScore + scores.Sum()) / (1 + scores.Count), 2, MidpointRounding.AwayFromZero)
                 : initialAverageScore;
 
             return new PlayerScoringStats
