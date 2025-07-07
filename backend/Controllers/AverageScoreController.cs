@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using GolfLeagueManager.Business;
+using GolfLeagueManager.Models;
 
 namespace GolfLeagueManager.Controllers
 {
@@ -288,6 +290,64 @@ namespace GolfLeagueManager.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Get average scores for all players up to and including a specific week
+        /// This is a bulk endpoint to replace multiple individual calls
+        /// </summary>
+        /// <param name="seasonId">Season ID</param>
+        /// <param name="weekNumber">Week number (inclusive)</param>
+        /// <returns>Dictionary of player IDs to their average scores</returns>
+        [HttpGet("bulk/season/{seasonId}/week/{weekNumber}")]
+        public async Task<ActionResult<Dictionary<string, decimal>>> GetAllPlayerAverageScoresUpToWeek(Guid seasonId, int weekNumber)
+        {
+            try
+            {
+                var results = new Dictionary<string, decimal>();
+                
+                // Get all players who have played in this season
+                var seasonWeeks = await _context.Weeks
+                    .Where(w => w.SeasonId == seasonId && w.CountsForScoring && w.CountsForHandicap)
+                    .Select(w => w.Id)
+                    .ToListAsync();
+
+                var playerAIds = await _context.Matchups
+                    .Where(m => seasonWeeks.Contains(m.WeekId) &&
+                               (m.PlayerAScore.HasValue || m.PlayerBScore.HasValue))
+                    .Select(m => m.PlayerAId)
+                    .ToListAsync();
+
+                var playerBIds = await _context.Matchups
+                    .Where(m => seasonWeeks.Contains(m.WeekId) &&
+                               (m.PlayerAScore.HasValue || m.PlayerBScore.HasValue))
+                    .Select(m => m.PlayerBId)
+                    .ToListAsync();
+
+                var playersInSeason = playerAIds.Concat(playerBIds).Distinct().ToList();
+
+                // Get average scores for all players
+                foreach (var playerId in playersInSeason)
+                {
+                    try
+                    {
+                        var averageScore = await _averageScoreService.UpdatePlayerAverageScoreAsync(playerId, seasonId, weekNumber);
+                        results[playerId.ToString()] = averageScore;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log error but continue with other players
+                        Console.WriteLine($"Error calculating average for player {playerId}: {ex.Message}");
+                        results[playerId.ToString()] = 0;
+                    }
+                }
+
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error retrieving bulk average scores: {ex.Message}");
             }
         }
     }

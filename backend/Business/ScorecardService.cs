@@ -232,6 +232,40 @@ namespace GolfLeagueManager
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Get scorecards for multiple matchups in bulk
+        /// </summary>
+        /// <param name="matchupIds">List of matchup IDs</param>
+        /// <returns>Dictionary of matchup IDs to their hole scores</returns>
+        public async Task<Dictionary<string, List<HoleScore>>> GetBulkScorecardsAsync(List<Guid> matchupIds)
+        {
+            if (matchupIds == null || !matchupIds.Any())
+            {
+                return new Dictionary<string, List<HoleScore>>();
+            }
+
+            // Get all hole scores for the specified matchups
+            var allHoleScores = await _context.HoleScores
+                .Where(hs => matchupIds.Contains(hs.MatchupId))
+                .OrderBy(hs => hs.MatchupId)
+                .ThenBy(hs => hs.HoleNumber)
+                .ToListAsync();
+
+            // Group by matchup ID and return as dictionary
+            var result = new Dictionary<string, List<HoleScore>>();
+            
+            foreach (var matchupId in matchupIds)
+            {
+                var holeScores = allHoleScores
+                    .Where(hs => hs.MatchupId == matchupId)
+                    .ToList();
+                
+                result[matchupId.ToString()] = holeScores;
+            }
+
+            return result;
+        }
+
         public async Task<ScorecardResponse> GetCompleteScorecardAsync(Guid matchupId)
         {
             var matchup = await _context.Matchups

@@ -286,12 +286,11 @@ export class ScoreEntryComponent implements OnInit {
         // Then enrich matchups with player details
         this.matchups = this.sortMatchupsByFlight(matchups.map(matchup => this.enrichMatchupWithDetails(matchup)));
 
-        // Pre-load player averages for all players in matchups
+        // Pre-load player averages and handicaps for all players in matchups
         this.preLoadPlayerAverages();
 
         // Load hole scores
         this.loadHoleScoresForMatchups();
-        await this.loadPlayerHandicaps();
         this.isLoadingData = false;
       },
       error: (error) => {
@@ -347,7 +346,49 @@ export class ScoreEntryComponent implements OnInit {
       return;
     }
 
-    console.log(`Loading hole scores for ${matchupsToLoad.length} matchups`);
+    console.log(`Loading hole scores for ${matchupsToLoad.length} matchups using bulk endpoint`);
+    this.isLoadingHoleScores = true;
+
+    // Use bulk endpoint to get all hole scores at once
+    const matchupIds = matchupsToLoad.map(m => m.id!);
+    
+    this.scorecardService.getBulkScorecards(matchupIds).subscribe({
+      next: (bulkResults) => {
+        console.log(`Loaded hole scores for ${Object.keys(bulkResults).length} matchups via bulk endpoint`);
+        
+        // Update cache and matchup objects with bulk results
+        Object.entries(bulkResults).forEach(([matchupId, holeScores]) => {
+          this.holeScoresCache.set(matchupId, holeScores || []);
+          
+          const matchup = this.matchups.find(m => m.id === matchupId);
+          if (matchup) {
+            matchup.holeScores = holeScores || [];
+          }
+        });
+
+        // For any matchups that weren't returned in bulk results, cache empty arrays
+        matchupsToLoad.forEach(matchup => {
+          if (!bulkResults[matchup.id!]) {
+            this.holeScoresCache.set(matchup.id!, []);
+            matchup.holeScores = [];
+          }
+        });
+
+        this.isLoadingHoleScores = false;
+      },
+      error: (error) => {
+        console.error('Error loading bulk hole scores, falling back to individual calls:', error);
+        this.isLoadingHoleScores = false;
+        
+        // Fallback to individual calls if bulk fails
+        this.loadHoleScoresIndividual(matchupsToLoad);
+      }
+    });
+  }
+
+  // Fallback method using individual calls
+  private loadHoleScoresIndividual(matchupsToLoad: any[]) {
+    console.log(`Falling back to individual hole score calls for ${matchupsToLoad.length} matchups`);
     this.isLoadingHoleScores = true;
 
     // Load hole scores for matchups that need them
@@ -367,7 +408,7 @@ export class ScoreEntryComponent implements OnInit {
     );
 
     Promise.all(requests).then(results => {
-      console.log(`Loaded hole scores for ${results.length} matchups`);
+      console.log(`Loaded hole scores for ${results.length} matchups using individual calls`);
       this.isLoadingHoleScores = false;
     }).catch(error => {
       console.error('Error loading hole scores:', error);
@@ -948,6 +989,51 @@ export class ScoreEntryComponent implements OnInit {
   private preLoadPlayerAverages(): void {
     if (!this.selectedWeek || this.matchups.length === 0) return;
 
+    console.log('Pre-loading player averages and handicaps using bulk endpoints');
+
+    // Use bulk endpoints to fetch all data at once
+    forkJoin({
+      averages: this.averageScoreService.getAllPlayerAverageScoresUpToWeek(
+        this.selectedWeek.seasonId, 
+        this.selectedWeek.weekNumber
+      ),
+      handicaps: this.handicapService.getAllPlayerHandicapsUpToWeek(
+        this.selectedWeek.seasonId, 
+        this.selectedWeek.weekNumber
+      )
+    }).subscribe({
+      next: ({ averages, handicaps }) => {
+        console.log(`Loaded averages for ${Object.keys(averages).length} players and handicaps for ${Object.keys(handicaps).length} players`);
+
+        // Update the maps with bulk data
+        Object.entries(averages).forEach(([playerId, average]) => {
+          this.playerAverages.set(playerId, average);
+          const cacheKey = `${playerId}-${this.selectedWeek!.id}`;
+          this.weekAverageCache.set(cacheKey, average);
+        });
+
+        Object.entries(handicaps).forEach(([playerId, handicap]) => {
+          this.playerHandicaps.set(playerId, handicap);
+          const cacheKey = `${playerId}-${this.selectedWeek!.id}`;
+          this.weekHandicapCache.set(cacheKey, handicap);
+        });
+
+        console.log('Bulk data loading completed successfully');
+      },
+      error: (error) => {
+        console.error('Error loading bulk player data:', error);
+        // Fallback to individual calls if bulk fails
+        this.preLoadPlayerAveragesIndividual();
+      }
+    });
+  }
+
+  // Fallback method using individual calls (keep the original logic)
+  private preLoadPlayerAveragesIndividual(): void {
+    if (!this.selectedWeek || this.matchups.length === 0) return;
+
+    console.log('Falling back to individual API calls for player data');
+
     // Get unique player IDs from all matchups
     const playerIds = new Set<string>();
     this.matchups.forEach(matchup => {
@@ -1137,7 +1223,7 @@ export class ScoreEntryComponent implements OnInit {
       const weekNumber = hasAnyCompletedScores ? this.selectedWeek.weekNumber : this.selectedWeek.weekNumber - 1;
 
       // Use bulk API to get all handicaps at once
-      const handicapsDict = await firstValueFrom(this.handicapService.getAllPlayerUptoWeekHandicaps(this.selectedSeasonId, weekNumber));
+      const handicapsDict = await firstValueFrom(this.handicapService.getAllPlayerHandicapsUpToWeek(this.selectedSeasonId, weekNumber));
 
       // Clear and populate the handicaps cache
       this.playerHandicapsCache.clear();
@@ -1265,7 +1351,7 @@ export class ScoreEntryComponent implements OnInit {
         const weekNumber = hasAnyCompletedScores ? this.selectedWeek.weekNumber : this.selectedWeek.weekNumber - 1;
 
         // Use bulk API to get all handicaps at once
-        const handicapsDict = await firstValueFrom(this.handicapService.getAllPlayerUptoWeekHandicaps(this.selectedSeasonId, weekNumber));
+        const handicapsDict = await firstValueFrom(this.handicapService.getAllPlayerHandicapsUpToWeek(this.selectedSeasonId, weekNumber));
 
         // Update only the requested players in the cache
         playerIds.forEach(playerId => {
