@@ -7,6 +7,12 @@ namespace GolfLeagueManager
     /// </summary>
     public class UpdateLeagueSettingsRequest
     {
+        /// <summary>
+        /// Name of the league to display in UI and reports
+        /// </summary>
+        [StringLength(100)]
+        public string LeagueName { get; set; } = "Golf League";
+
         // Handicap Calculation Settings
         public HandicapCalculationMethod HandicapMethod { get; set; } = HandicapCalculationMethod.WorldHandicapSystem;
 

@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { LeagueSettingsService } from '../../services/league-settings.service';
 import { SeasonService, Season } from '../../services/season.service';
+import { LeagueNameService } from '../../../../core/services/league-name.service';
 import {
     LeagueSettings,
     HandicapCalculationMethod,
@@ -36,7 +37,9 @@ export class LeagueSettingsComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private leagueSettingsService: LeagueSettingsService,
-        private seasonService: SeasonService
+        private seasonService: SeasonService,
+        private leagueNameService: LeagueNameService,
+        private cdr: ChangeDetectorRef
     ) {
         this.settingsForm = this.createForm();
     }
@@ -66,11 +69,12 @@ export class LeagueSettingsComponent implements OnInit {
 
     private createForm(): FormGroup {
         return this.fb.group({
+            leagueName: ['Golf League', [Validators.required, Validators.maxLength(100)]],
             handicapMethod: [0, Validators.required],
             averageMethod: [0, Validators.required],
             legacyInitialWeight: [1, [Validators.required, Validators.min(1), Validators.max(10)]],
-            coursePar: [36, [Validators.required, Validators.min(30), Validators.max(45)]],
-            courseRating: [35.0, [Validators.required, Validators.min(25), Validators.max(45)]],
+            coursePar: [36, [Validators.required, Validators.min(30), Validators.max(80)]],
+            courseRating: [35.0, [Validators.required, Validators.min(25), Validators.max(80)]],
             slopeRating: [113, [Validators.required, Validators.min(55), Validators.max(155)]],
             maxRoundsForHandicap: [20, [Validators.required, Validators.min(5), Validators.max(30)]],
             scoringMethod: [0, Validators.required],
@@ -117,6 +121,7 @@ export class LeagueSettingsComponent implements OnInit {
             next: (settings) => {
                 console.log('Loaded settings:', settings);
                 this.settingsForm.patchValue({
+                    leagueName: settings.leagueName,
                     handicapMethod: settings.handicapMethod,
                     averageMethod: settings.averageMethod,
                     legacyInitialWeight: settings.legacyInitialWeight,
@@ -134,10 +139,19 @@ export class LeagueSettingsComponent implements OnInit {
                     allowHandicapUpdates: settings.allowHandicapUpdates,
                     customRules: settings.customRules || ''
                 });
-                console.log('Form after patch:', this.settingsForm.value);
-                console.log('Form valid after patch:', this.settingsForm.valid);
-                console.log('Form errors after patch:', this.getFormValidationErrors());
+
+                // Update the league name service with the loaded name
+                this.leagueNameService.setLeagueName(settings.leagueName);
+
                 this.isLoading = false;
+                
+                // Use Promise.resolve to defer the validation check and avoid change detection issues
+                Promise.resolve().then(() => {
+                    console.log('Form after patch:', this.settingsForm.value);
+                    console.log('Form valid after patch:', this.settingsForm.valid);
+                    console.log('Form errors after patch:', this.getFormValidationErrors());
+                    this.cdr.detectChanges();
+                });
             },
             error: (error) => {
                 this.error = 'Failed to load league settings. Please try again.';
@@ -148,11 +162,31 @@ export class LeagueSettingsComponent implements OnInit {
     }
 
     onSubmit(): void {
+        console.log('=== FORM SUBMISSION DEBUG ===');
         console.log('Form valid:', this.settingsForm.valid);
+        console.log('Form value:', this.settingsForm.value);
         console.log('Form errors:', this.getFormValidationErrors());
         console.log('Selected season:', this.selectedSeasonId);
+        console.log('isSaving:', this.isSaving);
+        console.log('Save button enabled:', this.isSaveButtonEnabled());
+        
+        // Log each control's status
+        Object.keys(this.settingsForm.controls).forEach(key => {
+            const control = this.settingsForm.get(key);
+            if (control && control.invalid) {
+                console.log(`Invalid control ${key}:`, control.errors);
+            }
+        });
 
-        if (!this.settingsForm.valid || !this.selectedSeasonId) return;
+        if (!this.settingsForm.valid) {
+            console.log('Form is INVALID - cannot submit');
+            return;
+        }
+        
+        if (!this.selectedSeasonId) {
+            console.log('No season selected - cannot submit');
+            return;
+        }
 
         this.isSaving = true;
         this.error = null;
@@ -160,6 +194,7 @@ export class LeagueSettingsComponent implements OnInit {
 
         const formValue = this.settingsForm.value;
         const request = {
+            leagueName: formValue.leagueName,
             handicapMethod: parseInt(formValue.handicapMethod),
             averageMethod: parseInt(formValue.averageMethod),
             legacyInitialWeight: formValue.legacyInitialWeight,
@@ -178,21 +213,28 @@ export class LeagueSettingsComponent implements OnInit {
             customRules: formValue.customRules
         };
 
+        console.log('Sending request:', request);
+
         this.leagueSettingsService.updateLeagueSettings(this.selectedSeasonId, request).subscribe({
             next: (savedSettings) => {
                 this.isSaving = false;
                 this.successMessage = 'League settings saved successfully!';
-                console.log('League settings saved successfully');
+                console.log('League settings saved successfully:', savedSettings);
+
+                // Update the league name service with the new name
+                this.leagueNameService.setLeagueName(savedSettings.leagueName);
 
                 // Clear success message after 5 seconds
                 setTimeout(() => {
                     this.successMessage = null;
+                    this.cdr.detectChanges();
                 }, 5000);
             },
             error: (error) => {
                 this.error = 'Failed to save league settings. Please try again.';
                 this.isSaving = false;
                 console.error('Error saving league settings:', error);
+                console.error('Error details:', error.error);
             }
         });
     }
@@ -208,6 +250,7 @@ export class LeagueSettingsComponent implements OnInit {
             this.leagueSettingsService.resetToDefaults(this.selectedSeasonId).subscribe({
                 next: (defaultSettings) => {
                     this.settingsForm.patchValue({
+                        leagueName: defaultSettings.leagueName,
                         handicapMethod: defaultSettings.handicapMethod,
                         averageMethod: defaultSettings.averageMethod,
                         legacyInitialWeight: defaultSettings.legacyInitialWeight,
@@ -229,9 +272,13 @@ export class LeagueSettingsComponent implements OnInit {
                     this.successMessage = 'League settings reset to defaults successfully!';
                     console.log('League settings reset to defaults');
 
+                    // Update the league name service with the default name
+                    this.leagueNameService.setLeagueName(defaultSettings.leagueName);
+
                     // Clear success message after 5 seconds
                     setTimeout(() => {
                         this.successMessage = null;
+                        this.cdr.detectChanges();
                     }, 5000);
                 },
                 error: (error) => {
@@ -278,11 +325,13 @@ export class LeagueSettingsComponent implements OnInit {
     }
 
     getFormValidationErrors() {
+        if (!this.settingsForm) return {};
+        
         const result: any = {};
         Object.keys(this.settingsForm.controls).forEach(key => {
-            const controlErrors = this.settingsForm.get(key)?.errors;
-            if (controlErrors) {
-                result[key] = controlErrors;
+            const control = this.settingsForm.get(key);
+            if (control && control.errors) {
+                result[key] = control.errors;
             }
         });
         return result;

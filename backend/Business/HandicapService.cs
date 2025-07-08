@@ -100,14 +100,19 @@ namespace GolfLeagueManager
             // Convert average score to handicap based on handicap method
             decimal calculatedHandicap;
 
+            // For 9-hole leagues, if an 18-hole course par is entered (> 45), divide by 2 for handicap calculations
+            // This allows users to enter either 9-hole par (e.g., 36) or 18-hole par (e.g., 72) 
+            // and the system will automatically use the correct value for 9-hole play
+            decimal effectiveCoursePar = leagueSettings.CoursePar > 45 ? leagueSettings.CoursePar / 2.0m : leagueSettings.CoursePar;
+
             if (leagueSettings.HandicapMethod == HandicapCalculationMethod.SimpleAverage)
             {
                 // Simple Average Method: Handicap = Average Score - Course Par
-                calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0, MidpointRounding.AwayFromZero); // Round to whole numbers
+                calculatedHandicap = Math.Round(averageScore - effectiveCoursePar, 0, MidpointRounding.AwayFromZero); // Round to whole numbers
                 calculatedHandicap = Math.Max(0, Math.Min(36, calculatedHandicap)); // Cap between 0 and 36
                 if (isAlexPeck || isKevinKelhart)
                 {
-                    Console.WriteLine($"Simple Average Method: {averageScore} - {leagueSettings.CoursePar} = {averageScore - leagueSettings.CoursePar}, rounded/capped: {calculatedHandicap}");
+                    Console.WriteLine($"Simple Average Method: {averageScore} - {effectiveCoursePar} (from {leagueSettings.CoursePar}) = {averageScore - effectiveCoursePar}, rounded/capped: {calculatedHandicap}");
                 }
             }
             else if (leagueSettings.HandicapMethod == HandicapCalculationMethod.LegacyLookupTable)
@@ -123,11 +128,11 @@ namespace GolfLeagueManager
             {
                 // World Handicap System Method - fall back to simple average method since WHS needs actual scores
                 // but AverageScoreService already handles the complex logic for legacy/simple calculations
-                calculatedHandicap = Math.Round(averageScore - leagueSettings.CoursePar, 0, MidpointRounding.AwayFromZero);
+                calculatedHandicap = Math.Round(averageScore - effectiveCoursePar, 0, MidpointRounding.AwayFromZero);
                 calculatedHandicap = Math.Max(0, Math.Min(36, calculatedHandicap));
                 if (isAlexPeck || isKevinKelhart)
                 {
-                    Console.WriteLine($"WHS Method (fallback): {averageScore} - {leagueSettings.CoursePar} = {averageScore - leagueSettings.CoursePar}, rounded/capped: {calculatedHandicap}");
+                    Console.WriteLine($"WHS Method (fallback): {averageScore} - {effectiveCoursePar} (from {leagueSettings.CoursePar}) = {averageScore - effectiveCoursePar}, rounded/capped: {calculatedHandicap}");
                 }
             }
 

@@ -21,8 +21,9 @@ namespace GolfLeagueManager.Business
         private readonly AverageScoreService _averageScoreService;
         private readonly HandicapService _handicapService;
         private readonly PlayerSeasonStatsService _playerSeasonStatsService;
+        private readonly LeagueSettingsService _leagueSettingsService;
 
-        public PdfScorecardService(AppDbContext context, MatchupService matchupService, PlayerFlightAssignmentService flightAssignmentService, MatchPlayService matchPlayService, AverageScoreService averageScoreService, HandicapService handicapService, PlayerSeasonStatsService playerSeasonStatsService)
+        public PdfScorecardService(AppDbContext context, MatchupService matchupService, PlayerFlightAssignmentService flightAssignmentService, MatchPlayService matchPlayService, AverageScoreService averageScoreService, HandicapService handicapService, PlayerSeasonStatsService playerSeasonStatsService, LeagueSettingsService leagueSettingsService)
         {
             _context = context;
             _matchupService = matchupService;
@@ -31,6 +32,23 @@ namespace GolfLeagueManager.Business
             _averageScoreService = averageScoreService;
             _handicapService = handicapService;
             _playerSeasonStatsService = playerSeasonStatsService;
+            _leagueSettingsService = leagueSettingsService;
+        }
+
+        /// <summary>
+        /// Gets the league name from settings, with fallback to default
+        /// </summary>
+        private async Task<string> GetLeagueNameAsync(Guid seasonId)
+        {
+            try
+            {
+                var settings = await _leagueSettingsService.GetLeagueSettingsAsync(seasonId);
+                return !string.IsNullOrWhiteSpace(settings.LeagueName) ? settings.LeagueName : "Golf League";
+            }
+            catch
+            {
+                return "Golf League"; // Fallback if settings not found
+            }
         }
 
         /// <summary>
@@ -47,6 +65,9 @@ namespace GolfLeagueManager.Business
             var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == weekId);
             if (week == null) throw new ArgumentException("Week not found.");
             var seasonId = week.SeasonId;
+
+            // Get league name from settings
+            var leagueName = await GetLeagueNameAsync(seasonId);
 
             // Calculate session number
             var sessionNumber = _context.Weeks
@@ -143,7 +164,7 @@ namespace GolfLeagueManager.Business
                             var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
 
                             // Header
-                            content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League - Session {sessionNumber}")
+                            content.Item().Text($"{weekTitle} - {flightName} - {leagueName} - Session {sessionNumber}")
                                 .FontSize(10).FontColor(Colors.Black).Bold().AlignCenter();
 
                             // 4 cards per page, each on its own row
@@ -159,7 +180,7 @@ namespace GolfLeagueManager.Business
                                 if ((i + 1) % 4 == 0 && (i + 1) < matchupsInFlight.Count)
                                 {
                                     content.Item().PageBreak();
-                                    content.Item().Text($"{weekTitle} - {flightName} - H.T. Lyons Golf League - Session {sessionNumber}")
+                                    content.Item().Text($"{weekTitle} - {flightName} - {leagueName} - Session {sessionNumber}")
                                         .FontSize(10).Bold().AlignCenter();
                                 }
                             }
@@ -185,6 +206,10 @@ namespace GolfLeagueManager.Business
             var week = await _context.Weeks.FirstOrDefaultAsync(w => w.Id == weekId);
             if (week == null) throw new ArgumentException("Week not found.");
             var seasonId = week.SeasonId;
+
+            // Get league name from settings
+            var leagueName = await GetLeagueNameAsync(seasonId);
+
             var assignments = _flightAssignmentService.GetAllAssignments().ToList();
             var flights = await _context.Flights.ToListAsync();
 
@@ -245,7 +270,7 @@ namespace GolfLeagueManager.Business
                         {
                             table.ColumnsDefinition(columns => columns.RelativeColumn());
                             table.Cell().Padding(15).Background(Colors.White)
-                                .Text($"{weekTitle}\nH.T. Lyons Golf League - Session {sessionNumber} Weekly Summary")
+                                .Text($"{weekTitle}\n{leagueName} - Session {sessionNumber} Weekly Summary")
                                 .FontSize(16).Bold().FontColor(Colors.Black).AlignCenter();
                         });
 

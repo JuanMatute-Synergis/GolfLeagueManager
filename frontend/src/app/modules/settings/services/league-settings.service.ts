@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 export interface LeagueSettings {
     id: string;
     seasonId: string;
+    leagueName: string;
     handicapMethod: HandicapCalculationMethod;
     averageMethod: AverageCalculationMethod;
     legacyInitialWeight: number;

@@ -67,28 +67,28 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   get saveError(): string | null { return this.viewModel.saveError; }
   set saveError(value: string | null) { this.viewModel.saveError = value; }
 
-  // Default course - updated to match current database values
+  // Default course - will be replaced by database data when available
   course: Course = {
-    name: "Allentown Municipal Golf Course",
+    name: "Loading...",
     holes: [
       { number: 1, par: 4, yardage: 380, handicap: 3 },
-      { number: 2, par: 4, yardage: 165, handicap: 11 },
-      { number: 3, par: 5, yardage: 520, handicap: 1 },
-      { number: 4, par: 4, yardage: 420, handicap: 5 },
-      { number: 5, par: 3, yardage: 180, handicap: 17 },
-      { number: 6, par: 5, yardage: 400, handicap: 7 },
-      { number: 7, par: 4, yardage: 540, handicap: 13 },
-      { number: 8, par: 4, yardage: 360, handicap: 9 },
-      { number: 9, par: 3, yardage: 390, handicap: 15 },
-      { number: 10, par: 4, yardage: 410, handicap: 2 },
-      { number: 11, par: 3, yardage: 170, handicap: 12 },
-      { number: 12, par: 4, yardage: 560, handicap: 4 },
-      { number: 13, par: 5, yardage: 440, handicap: 16 },
-      { number: 14, par: 4, yardage: 190, handicap: 6 },
-      { number: 15, par: 4, yardage: 380, handicap: 14 },
-      { number: 16, par: 3, yardage: 530, handicap: 10 },
-      { number: 17, par: 4, yardage: 370, handicap: 8 },
-      { number: 18, par: 5, yardage: 415, handicap: 18 }
+      { number: 2, par: 4, yardage: 354, handicap: 5 },
+      { number: 3, par: 3, yardage: 104, handicap: 17 },
+      { number: 4, par: 5, yardage: 452, handicap: 7 },
+      { number: 5, par: 3, yardage: 154, handicap: 13 },
+      { number: 6, par: 5, yardage: 469, handicap: 1 },
+      { number: 7, par: 4, yardage: 320, handicap: 15 },
+      { number: 8, par: 4, yardage: 352, handicap: 9 },
+      { number: 9, par: 4, yardage: 364, handicap: 11 },
+      { number: 10, par: 4, yardage: 373, handicap: 4 },
+      { number: 11, par: 4, yardage: 274, handicap: 14 },
+      { number: 12, par: 3, yardage: 135, handicap: 18 },
+      { number: 13, par: 4, yardage: 264, handicap: 16 },
+      { number: 14, par: 5, yardage: 478, handicap: 6 },
+      { number: 15, par: 4, yardage: 413, handicap: 2 },
+      { number: 16, par: 3, yardage: 173, handicap: 12 },
+      { number: 17, par: 4, yardage: 335, handicap: 10 },
+      { number: 18, par: 4, yardage: 351, handicap: 8 }
     ]
   };
 
@@ -98,7 +98,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   ngOnInit() {
     console.log('ngOnInit called, initializing scorecard modal, mode:', this.mode);
 
-    // Load course data first
+    // Load course data first - this is critical for proper par/handicap display
     this.loadCourseData();
 
     // Load league settings if week is available
@@ -112,7 +112,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     }
 
     // Always ensure holes array is initialized to prevent template errors
-    if (!this.scorecardData?.holes) {
+    // But only if no holes exist or they are empty
+    if (!this.scorecardData?.holes || this.scorecardData.holes.length === 0) {
       this.initializeHoles();
     }
 
@@ -128,10 +129,19 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
 
   private loadCourseData(): void {
     this.courseService.getAllCourses().subscribe({
-      next: (courses) => {
+      next: (courses: CourseModel[]) => {
+        console.log('Raw course data from API:', courses);
         if (courses.length > 0) {
-          // Use the first course (Allentown Municipal)
+          // Use the first course from the database
           const dbCourse = courses[0];
+          console.log('Selected course from database:', dbCourse);
+          
+          // Check if we have existing scorecard data with scores before updating
+          const hasExistingScores = this.scorecardData?.holes?.some(hole => 
+            hole.playerAScore !== undefined || hole.playerBScore !== undefined
+          );
+          console.log('Has existing scores before course update:', hasExistingScores);
+          
           this.course = {
             name: dbCourse.name,
             holes: dbCourse.courseHoles.map(hole => ({
@@ -141,11 +151,25 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
               handicap: hole.handicapIndex
             }))
           };
+          
+          console.log('Course data loaded from database:', this.course);
+          console.log('Course holes mapped:', this.course.holes);
+          
+          // Clear the relevant holes cache since course data changed
+          this.clearRelevantHolesCache();
+          
+          // If scorecard data exists, update hole pars/handicaps without overwriting scores
+          if (this.scorecardData && this.scorecardData.holes) {
+            console.log('Updating hole data with new course data without overwriting scores');
+            this.updateHolesWithCourseData();
+            this.buildViewModel();
+          }
         }
       },
       error: (error) => {
         console.error('Error loading course data:', error);
         // Keep default course configuration as fallback
+        console.warn('Using fallback course data due to API error');
       }
     });
   }
@@ -308,17 +332,25 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           }
           // Use relevant holes based on week setting, map scores by actual hole number
           const relevantHoles = this.getRelevantHoles();
+          console.log('[DEBUG] Backend holeScores:', response.holeScores);
+          console.log('[DEBUG] Relevant holes for mapping:', relevantHoles.map(h => h.number));
+          
           const holesArray = relevantHoles.map((hole) => {
             // Map scores by actual hole number (1-9, 10-18)
             const hs = (response.holeScores ?? []).find(h => h.holeNumber === hole.number);
+            console.log(`[DEBUG] Mapping hole ${hole.number}:`, {
+              foundHoleScore: hs,
+              playerAScore: hs?.playerAScore,
+              playerBScore: hs?.playerBScore
+            });
             return {
               hole: hole.number // Display the actual hole number (1-9 for front, 10-18 for back)
               , par: hole.par
-              , playerAScore: hs ? hs.playerAScore : undefined
-              , playerBScore: hs ? hs.playerBScore : undefined
-              , holeHandicap: hs ? hs.holeHandicap : hole.handicap
-              , playerAMatchPoints: hs ? hs.playerAMatchPoints : 0
-              , playerBMatchPoints: hs ? hs.playerBMatchPoints : 0
+              , playerAScore: hs?.playerAScore ?? undefined
+              , playerBScore: hs?.playerBScore ?? undefined
+              , holeHandicap: hs?.holeHandicap ?? hole.handicap
+              , playerAMatchPoints: hs?.playerAMatchPoints ?? 0
+              , playerBMatchPoints: hs?.playerBMatchPoints ?? 0
             };
           });
           this.scorecardData.holes = holesArray;
@@ -414,6 +446,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       return;
     }
 
+    console.log('initializeHoles() called - this will create empty holes');
+
     // Filter holes based on week setting
     const relevantHoles = this.getRelevantHoles();
 
@@ -430,6 +464,8 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
       winner: undefined,
       strokesGiven: 0
     }));
+
+    console.log('Initialized holes with empty scores:', this.scorecardData.holes.length, 'holes');
 
     // Initialize match play data
     this.scorecardData.playerAMatchPoints = 0;
@@ -1163,6 +1199,33 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   getMatchPoints(holeIndex: number, player: 'A' | 'B'): number {
     const hole = this.getHoleData(holeIndex);
     return player === 'A' ? (hole.playerAMatchPoints || 0) : (hole.playerBMatchPoints || 0);
+  }
+
+  /**
+   * Update existing holes with new course data (par/handicap) without overwriting scores
+   */
+  private updateHolesWithCourseData(): void {
+    if (!this.scorecardData?.holes) {
+      return;
+    }
+
+    const relevantHoles = this.getRelevantHoles();
+    
+    // Update existing holes with new course data while preserving scores
+    for (let i = 0; i < this.scorecardData.holes.length; i++) {
+      const hole = this.scorecardData.holes[i];
+      const courseHole = relevantHoles[i];
+      
+      if (hole && courseHole) {
+        // Update par and handicap from course data
+        hole.par = courseHole.par;
+        hole.holeHandicap = courseHole.handicap;
+        // Keep existing scores and match points intact
+        console.log(`Updated hole ${hole.hole}: par=${hole.par}, handicap=${hole.holeHandicap}, preserving scores A=${hole.playerAScore}, B=${hole.playerBScore}`);
+      }
+    }
+    
+    console.log('Finished updating holes with course data while preserving scores');
   }
 
   // Stroke allocation methods

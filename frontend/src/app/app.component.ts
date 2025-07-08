@@ -12,7 +12,7 @@ import { ResponsiveHelperComponent } from './shared/components/responsive-helper
   imports: [RouterOutlet, ResponsiveHelperComponent, NgxSonnerToaster],
 })
 export class AppComponent {
-  title = 'Golf League Manager';
+  title = 'Golf League Management System';
 
   constructor(public themeService: ThemeService) {}
 }
