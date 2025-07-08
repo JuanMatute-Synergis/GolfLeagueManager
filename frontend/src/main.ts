@@ -11,6 +11,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { SvgHttpLoader, SvgLoader } from 'angular-svg-icon';
 import { SVG_ICON_REGISTRY_PROVIDER } from 'angular-svg-icon';
 import { jwtInterceptorProvider } from './app/core/services/jwt-interceptor.provider';
+import { QuillModule } from 'ngx-quill';
 
 if (environment.production) {
   enableProdMode();
@@ -22,7 +23,7 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    importProvidersFrom(BrowserModule), 
+    importProvidersFrom(BrowserModule, QuillModule.forRoot()), 
     provideRouter(routes),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),

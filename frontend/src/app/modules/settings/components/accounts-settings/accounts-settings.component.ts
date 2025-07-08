@@ -93,13 +93,13 @@ export class AccountsSettingsComponent implements OnInit {
     
     this.playerService.getPlayers().subscribe({
       next: (players) => {
-        // Convert Player[] to PlayerAccountStatus[] for unified handling
         this.players = players.map(p => ({
           playerId: p.id!,
           firstName: p.firstName,
           lastName: p.lastName,
           imageUrl: undefined, // Player interface doesn't have imageUrl
           email: p.email,
+          phone: p.phone, // Add phone field from Player
           hasUserAccount: false,
           username: undefined,
           userId: undefined
@@ -129,7 +129,7 @@ export class AccountsSettingsComponent implements OnInit {
       firstName: player.firstName,
       lastName: player.lastName,
       email: player.email,
-      phone: '' // Will need to add phone to PlayerAccountStatus or fetch separately
+      phone: player.phone // Use actual phone value from player
     });
   }
 

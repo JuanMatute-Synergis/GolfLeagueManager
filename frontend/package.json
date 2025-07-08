@@ -48,8 +48,12 @@
     "angular-svg-icon": "^13.0.0",
     "apexcharts": "^3.35.3",
     "heroicons": "^2.2.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "ng-apexcharts": "^1.7.1",
+    "ngx-quill": "^27.0.0",
     "ngx-sonner": "^2.0.2",
+    "quill": "^2.0.3",
     "rxjs": "~7.4.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

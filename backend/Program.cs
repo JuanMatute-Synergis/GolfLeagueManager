@@ -70,6 +70,7 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<MatchPlayScoringService>();
             builder.Services.AddScoped<PdfScorecardService>(); builder.Services.AddScoped<AverageScoreService>();
             builder.Services.AddScoped<HandicapService>(); builder.Services.AddScoped<LeagueSettingsService>();
+            builder.Services.AddScoped<ILeagueRulesService, LeagueRulesService>();
             builder.Services.AddScoped<PlayerSeasonStatsService>();
             builder.Services.AddScoped<ScoreImportService>();
             builder.Services.AddScoped<JsonImportService>();

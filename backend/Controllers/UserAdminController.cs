@@ -59,6 +59,7 @@ namespace GolfLeagueManager.Controllers
                     LastName = p.LastName,
                     ImageUrl = p.ImageUrl,
                     Email = p.Email,
+                    Phone = p.Phone, // Add Phone field
                     HasUserAccount = user != null,
                     Username = user?.Username,
                     UserId = user?.Id,
