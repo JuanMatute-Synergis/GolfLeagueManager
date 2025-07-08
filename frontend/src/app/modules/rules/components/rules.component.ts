@@ -167,156 +167,169 @@ export class RulesComponent implements OnInit {
     this.error.set(null);
 
     try {
-      // Create a completely isolated iframe for rendering
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'absolute';
-      iframe.style.left = '-9999px';
-      iframe.style.top = '0';
-      iframe.style.width = '800px';
-      iframe.style.height = '600px';
-      document.body.appendChild(iframe);
-
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) {
-        throw new Error('Unable to create iframe document');
-      }
-
-      // Write clean HTML with only safe CSS to the iframe
-      iframeDoc.open();
-      iframeDoc.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>League Rules</title>
-          <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-              color: #000000 !important;
-              background-color: transparent !important;
-              border-color: #cccccc !important;
-            }
-            body {
-              font-family: Arial, sans-serif;
-              line-height: 1.6;
-              color: #000000;
-              background-color: #ffffff;
-              padding: 20px;
-              max-width: 800px;
-              margin: 0 auto;
-            }
-            h1 { 
-              font-size: 24px; 
-              font-weight: bold; 
-              margin: 20px 0 10px 0;
-              color: #000000;
-            }
-            h2 { 
-              font-size: 20px; 
-              font-weight: bold; 
-              margin: 18px 0 8px 0;
-              color: #000000;
-            }
-            h3 { 
-              font-size: 16px; 
-              font-weight: bold; 
-              margin: 16px 0 6px 0;
-              color: #000000;
-            }
-            p { 
-              margin: 10px 0;
-              color: #000000;
-            }
-            ul, ol { 
-              margin: 10px 0;
-              padding-left: 20px;
-            }
-            li { 
-              margin: 4px 0;
-              color: #000000;
-            }
-            strong, b { 
-              font-weight: bold;
-              color: #000000;
-            }
-            hr {
-              border: none;
-              border-top: 1px solid #cccccc;
-              margin: 20px 0;
-            }
-            blockquote {
-              border-left: 4px solid #cccccc;
-              margin: 15px 0;
-              padding-left: 15px;
-              font-style: italic;
-              color: #000000;
-            }
-            code {
-              background-color: #f5f5f5;
-              padding: 2px 4px;
-              border-radius: 3px;
-              font-family: monospace;
-              color: #000000;
-            }
-          </style>
-        </head>
-        <body>
-          <div id="content">
-            ${this.rules()?.content || ''}
-          </div>
-        </body>
-        </html>
-      `);
-      iframeDoc.close();
-
-      // Wait for iframe to load
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Get the content element from iframe
-      const contentElement = iframeDoc.getElementById('content');
-      if (!contentElement) {
-        throw new Error('Content element not found in iframe');
-      }
-
-      // Use html2canvas on the iframe content
-      const canvas = await html2canvas(contentElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: 800,
-        height: contentElement.scrollHeight,
-        windowWidth: 800,
-        windowHeight: contentElement.scrollHeight
-      });
-
-      // Remove iframe
-      document.body.removeChild(iframe);
-
-      // Generate PDF
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
+      // Use a simple approach: create PDF directly from text without html2canvas
       const pdf = new jsPDF('p', 'mm', 'a4');
-      let position = 0;
-
-      // Add first page
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      // Add additional pages if needed
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
+      const lineHeight = 7;
+      const maxLinesPerPage = Math.floor((pageHeight - (margin * 2)) / lineHeight) - 3;
+      
+      // Clean the HTML content to extract structured text
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = this.rules()?.content || '';
+      
+      // Extract structured content with formatting
+      const structuredContent = this.extractStructuredContent(tempDiv);
+      
+      let y = margin;
+      let lineCount = 0;
+      let pageNumber = 1;
+      
+      // Add title
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('League Rules', margin, y);
+      y += lineHeight * 2;
+      lineCount += 2;
+      
+      // Process each content item
+      for (const item of structuredContent) {
+        // Check if we need a new page
+        const linesNeeded = item.type.startsWith('h') ? 3 : item.lines.length + 1;
+        if (lineCount + linesNeeded > maxLinesPerPage) {
+          // Add page number to current page
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(`Page ${pageNumber}`, pageWidth - margin - 15, pageHeight - 10);
+          
+          pdf.addPage();
+          y = margin;
+          lineCount = 0;
+          pageNumber++;
+        }
+        
+        // Set font based on item type
+        switch (item.type) {
+          case 'h1':
+            pdf.setFontSize(18);
+            pdf.setFont('helvetica', 'bold');
+            y += lineHeight; // Extra space before h1
+            lineCount++;
+            break;
+          case 'h2':
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            y += lineHeight * 0.5; // Space before h2
+            lineCount += 0.5;
+            break;
+          case 'h3':
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            break;
+          case 'list':
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'normal');
+            break;
+          default:
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'normal');
+        }
+        
+        // Add the content lines
+        for (const line of item.lines) {
+          if (lineCount >= maxLinesPerPage) {
+            // Add page number to current page
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`Page ${pageNumber}`, pageWidth - margin - 15, pageHeight - 10);
+            
+            pdf.addPage();
+            y = margin;
+            lineCount = 0;
+            pageNumber++;
+            
+            // Reset font for content continuation
+            switch (item.type) {
+              case 'h1':
+                pdf.setFontSize(18);
+                pdf.setFont('helvetica', 'bold');
+                break;
+              case 'h2':
+                pdf.setFontSize(16);
+                pdf.setFont('helvetica', 'bold');
+                break;
+              case 'h3':
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'bold');
+                break;
+              case 'list':
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'normal');
+                break;
+              default:
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'normal');
+            }
+          }
+          
+          // Split long lines that might exceed page width
+          const wrappedLines = pdf.splitTextToSize(line, contentWidth);
+          for (const wrappedLine of wrappedLines) {
+            if (lineCount >= maxLinesPerPage) {
+              // Add page number to current page
+              pdf.setFontSize(10);
+              pdf.setFont('helvetica', 'normal');
+              pdf.text(`Page ${pageNumber}`, pageWidth - margin - 15, pageHeight - 10);
+              
+              pdf.addPage();
+              y = margin;
+              lineCount = 0;
+              pageNumber++;
+              
+              // Reset font for content continuation
+              switch (item.type) {
+                case 'h1':
+                  pdf.setFontSize(18);
+                  pdf.setFont('helvetica', 'bold');
+                  break;
+                case 'h2':
+                  pdf.setFontSize(16);
+                  pdf.setFont('helvetica', 'bold');
+                  break;
+                case 'h3':
+                  pdf.setFontSize(14);
+                  pdf.setFont('helvetica', 'bold');
+                  break;
+                case 'list':
+                  pdf.setFontSize(12);
+                  pdf.setFont('helvetica', 'normal');
+                  break;
+                default:
+                  pdf.setFontSize(12);
+                  pdf.setFont('helvetica', 'normal');
+              }
+            }
+            
+            pdf.text(wrappedLine, margin, y);
+            y += lineHeight;
+            lineCount++;
+          }
+        }
+        
+        // Add extra spacing after headers
+        if (item.type.startsWith('h')) {
+          y += lineHeight * 0.5;
+          lineCount += 0.5;
+        }
       }
-
+      
+      // Add page number to final page
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Page ${pageNumber}`, pageWidth - margin - 15, pageHeight - 10);
+      
       // Download the PDF
       const fileName = `league-rules-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(fileName);
@@ -449,33 +462,100 @@ export class RulesComponent implements OnInit {
     this.error.set(null);
 
     try {
-      // Create PDF with just text content (no images/styling)
+      // Create PDF with proper margins and page breaks
       const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 20; // 20mm margins
+      const contentWidth = pageWidth - (margin * 2); // 170mm content width
+      const lineHeight = 6;
+      const maxLinesPerPage = Math.floor((pageHeight - (margin * 2)) / lineHeight) - 2; // Leave space at bottom
       
-      // Clean the HTML content to extract just text
+      // Clean the HTML content to extract structured text
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = this.rules()?.content || '';
       
-      // Extract text content and format it
-      const textContent = this.extractTextContent(tempDiv);
+      // Extract structured content with formatting
+      const structuredContent = this.extractStructuredContent(tempDiv);
+      
+      let currentPage = 1;
+      let y = margin;
+      let lineCount = 0;
       
       // Add title
-      pdf.setFontSize(20);
-      pdf.text('League Rules', 20, 20);
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('League Rules', margin, y);
+      y += lineHeight * 2;
+      lineCount += 2;
       
-      // Add content
-      pdf.setFontSize(12);
-      const lines = pdf.splitTextToSize(textContent, 170);
-      let y = 40;
-      
-      lines.forEach((line: string) => {
-        if (y > 280) { // Near bottom of page
+      // Process each content item
+      structuredContent.forEach((item: StructuredContentItem) => {
+        // Check if we need a new page
+        const linesNeeded = item.type.startsWith('h') ? 3 : Math.ceil(item.lines.length);
+        if (lineCount + linesNeeded > maxLinesPerPage) {
           pdf.addPage();
-          y = 20;
+          y = margin;
+          lineCount = 0;
+          currentPage++;
         }
-        pdf.text(line, 20, y);
-        y += 6;
+        
+        // Set font based on item type
+        switch (item.type) {
+          case 'h1':
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            y += lineHeight; // Extra space before h1
+            lineCount++;
+            break;
+          case 'h2':
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            y += lineHeight * 0.5; // Space before h2
+            lineCount += 0.5;
+            break;
+          case 'h3':
+            pdf.setFontSize(12);
+            pdf.setFont('helvetica', 'bold');
+            break;
+          case 'list':
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'normal');
+            break;
+          default:
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'normal');
+        }
+        
+        // Add the content
+        item.lines.forEach((line: string, index: number) => {
+          if (lineCount >= maxLinesPerPage) {
+            pdf.addPage();
+            y = margin;
+            lineCount = 0;
+            currentPage++;
+          }
+          
+          pdf.text(line, margin, y);
+          y += lineHeight;
+          lineCount++;
+        });
+        
+        // Add extra spacing after headers
+        if (item.type.startsWith('h')) {
+          y += lineHeight * 0.5;
+          lineCount += 0.5;
+        }
       });
+      
+      // Add page numbers using getNumberOfPages method
+      const totalPages = (pdf as any).internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin - 20, pageHeight - 10);
+      }
       
       // Download the PDF
       const fileName = `league-rules-simple-${new Date().toISOString().split('T')[0]}.pdf`;
@@ -495,21 +575,21 @@ export class RulesComponent implements OnInit {
     const childNodes = Array.from(element.childNodes);
     for (const child of childNodes) {
       if (child.nodeType === Node.TEXT_NODE) {
-        text += child.textContent?.trim() + ' ';
+        text += this.cleanTextForPdf(child.textContent?.trim()) + ' ';
       } else if (child.nodeType === Node.ELEMENT_NODE) {
         const el = child as HTMLElement;
         
         // Add spacing for headers
         if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(el.tagName)) {
-          text += '\n\n' + el.textContent?.trim() + '\n';
+          text += '\n\n' + this.cleanTextForPdf(el.textContent?.trim()) + '\n';
         }
         // Add spacing for paragraphs
         else if (el.tagName === 'P') {
-          text += '\n' + el.textContent?.trim() + '\n';
+          text += '\n' + this.cleanTextForPdf(el.textContent?.trim()) + '\n';
         }
         // Add bullet points for list items
         else if (el.tagName === 'LI') {
-          text += '\n• ' + el.textContent?.trim();
+          text += '\n• ' + this.cleanTextForPdf(el.textContent?.trim());
         }
         // Add line breaks for HR
         else if (el.tagName === 'HR') {
@@ -524,4 +604,135 @@ export class RulesComponent implements OnInit {
     
     return text.replace(/\n\s*\n\s*\n/g, '\n\n'); // Clean up extra newlines
   }
+
+  private extractStructuredContent(element: HTMLElement): StructuredContentItem[] {
+    const items: StructuredContentItem[] = [];
+    
+    const processElement = (el: HTMLElement) => {
+      const childNodes = Array.from(el.childNodes);
+      
+      for (const child of childNodes) {
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          const childEl = child as HTMLElement;
+          const tagName = childEl.tagName.toLowerCase();
+          
+          switch (tagName) {
+            case 'h1':
+              const h1Text = this.cleanTextForPdf(childEl.textContent?.trim());
+              if (h1Text) {
+                items.push({
+                  type: 'h1',
+                  lines: [h1Text]
+                });
+              }
+              break;
+            case 'h2':
+              const h2Text = this.cleanTextForPdf(childEl.textContent?.trim());
+              if (h2Text) {
+                items.push({
+                  type: 'h2',
+                  lines: [h2Text]
+                });
+              }
+              break;
+            case 'h3':
+              const h3Text = this.cleanTextForPdf(childEl.textContent?.trim());
+              if (h3Text) {
+                items.push({
+                  type: 'h3',
+                  lines: [h3Text]
+                });
+              }
+              break;
+            case 'p':
+              const pText = this.cleanTextForPdf(childEl.textContent?.trim());
+              if (pText) {
+                items.push({
+                  type: 'p',
+                  lines: [pText]
+                });
+              }
+              break;
+            case 'ul':
+            case 'ol':
+              const listItems = Array.from(childEl.querySelectorAll('li'));
+              const listLines = listItems
+                .map(li => this.cleanTextForPdf(li.textContent?.trim()))
+                .filter(text => text)
+                .map(text => '• ' + text);
+              if (listLines.length > 0) {
+                items.push({
+                  type: 'list',
+                  lines: listLines
+                });
+              }
+              break;
+            case 'hr':
+              items.push({
+                type: 'hr',
+                lines: ['─'.repeat(60)]
+              });
+              break;
+            default:
+              // Recursively process nested elements
+              processElement(childEl);
+          }
+        }
+      }
+    };
+    
+    processElement(element);
+    return items;
+  }
+
+  private cleanTextForPdf(text: string | undefined): string {
+    if (!text) return '';
+    
+    // Replace common emojis with text equivalents
+    const emojiReplacements: { [key: string]: string } = {
+      '🏌️': '[Golf]',
+      '🏌️‍♂️': '[Golfer]',
+      '⚡': '[Lightning]',
+      '📋': '[Overview]',
+      '📊': '[Example]',
+      '🚫': '[Absence]',
+      '📈': '[Season]',
+      '⚖️': '[Fair Play]',
+      '📅': '[Administrative]',
+      '🏆': '[Season/Trophy]',
+      '💵': '[Weekly Prizes]',
+      '💰': '[Prize Pool]',
+      '🎯': '',
+      '✅': '[Check]',
+      '❌': '[X]',
+      '📄': '[Document]',
+      '📑': '[Pages]',
+      '🖨️': '[Print]',
+      '📖': '[Book]',
+      '📝': '[Notes]',
+      '🎉': '[Celebration]',
+      '💪': '[Strong]',
+      '&amp;': '&'
+    };
+    
+    let cleanedText = text;
+    
+    // Replace emojis with text equivalents
+    for (const [emoji, replacement] of Object.entries(emojiReplacements)) {
+      cleanedText = cleanedText.replace(new RegExp(emoji, 'g'), replacement);
+    }
+    
+    // Remove any remaining emoji characters (anything in Unicode emoji ranges)
+    cleanedText = cleanedText.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
+    
+    // Clean up extra spaces
+    cleanedText = cleanedText.replace(/\s+/g, ' ').trim();
+    
+    return cleanedText;
+  }
+}
+
+interface StructuredContentItem {
+  type: 'h1' | 'h2' | 'h3' | 'p' | 'list' | 'hr';
+  lines: string[];
 }
