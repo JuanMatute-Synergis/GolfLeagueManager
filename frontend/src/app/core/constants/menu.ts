@@ -31,6 +31,11 @@ export class Menu {
           label: 'League Summary',
           route: '/league-summary',
         },
+        {
+          icon: 'assets/icons/heroicons/outline/flag.svg',
+          label: 'Rules',
+          route: '/rules',
+        },
       ],
     },
     // {

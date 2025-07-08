@@ -45,6 +45,12 @@ export const layoutRoutes: Routes = [
     loadComponent: () => import('./layout.component').then(m => m.LayoutComponent),
     loadChildren: () => import('../league-summary/league-summary.routes').then((m) => m.leagueSummaryRoutes),
   },
+  {
+    path: 'rules',
+    canActivate: [authGuard],
+    loadComponent: () => import('./layout.component').then(m => m.LayoutComponent),
+    loadChildren: () => import('../rules/rules.routes').then((m) => m.rulesRoutes),
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'errors/404' },
 ];
