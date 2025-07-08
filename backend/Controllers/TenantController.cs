@@ -73,5 +73,38 @@ namespace GolfLeagueManager.Controllers
                 return StatusCode(500, $"Error checking tenant: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Switch to a different tenant for the current session (Development only)
+        /// </summary>
+        [HttpPost("switch/{tenantId}")]
+        public async Task<IActionResult> SwitchTenant(string tenantId)
+        {
+            try
+            {
+                // Only allow in development environment for safety
+                var environment = HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>();
+                if (!environment.IsDevelopment())
+                {
+                    return BadRequest(new { error = "Tenant switching only allowed in development environment" });
+                }
+
+                var exists = await _tenantService.TenantExistsAsync(tenantId);
+                if (!exists)
+                {
+                    return BadRequest(new { error = $"Tenant '{tenantId}' does not exist" });
+                }
+
+                _tenantService.SetCurrentTenant(tenantId);
+                _logger.LogInformation("Switched to tenant: {TenantId}", tenantId);
+
+                return Ok(new { tenantId, message = "Switched to tenant successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error switching to tenant {TenantId}", tenantId);
+                return StatusCode(500, new { error = "Error switching tenant" });
+            }
+        }
     }
 }

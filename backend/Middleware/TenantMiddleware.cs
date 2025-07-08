@@ -37,9 +37,10 @@ namespace GolfLeagueManager.Middleware
             }
             else
             {
-                // Default to 'soufhmoore' tenant if no subdomain is detected
-                tenantService.SetCurrentTenant("soufhmoore");
-                _logger.LogInformation("No tenant detected, using default: soufhmoore");
+                // Use the configured default tenant if no subdomain is detected
+                var defaultTenant = tenantService.GetCurrentTenant();
+                tenantService.SetCurrentTenant(defaultTenant);
+                _logger.LogInformation("No tenant detected, using default: {DefaultTenant}", defaultTenant);
             }
 
             await _next(context);
@@ -74,8 +75,8 @@ namespace GolfLeagueManager.Middleware
                     return context.Request.Query["tenant"].ToString();
                 }
 
-                // Default to htlyons for local development
-                return "southmoore";
+                // Return null to use the configured default tenant
+                return null;
             }
 
             return null;
