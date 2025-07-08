@@ -70,7 +70,14 @@ jobs:
     - name: Wait for database
       run: |
         echo "⏳ Waiting for PostgreSQL to be ready..."
-        timeout 120s bash -c 'until docker exec golfleague_postgres pg_isready -U golfuser; do sleep 2; done'
+        for i in {1..60}; do
+          if docker exec golfleague_postgres pg_isready -U golfuser; then
+            echo "✅ PostgreSQL is ready!"
+            break
+          fi
+          echo "⏳ Attempt $i/60: PostgreSQL not ready, waiting 2 seconds..."
+          sleep 2
+        done
 
     - name: Run migrations
       run: |
