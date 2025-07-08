@@ -59,6 +59,7 @@ namespace GolfLeagueManager
                 var settings = new LeagueSettings
                 {
                     SeasonId = seasonId,
+                    LeagueName = request.LeagueName,
                     HandicapMethod = request.HandicapMethod,
                     AverageMethod = request.AverageMethod,
                     LegacyInitialWeight = request.LegacyInitialWeight,

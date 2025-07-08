@@ -48,6 +48,7 @@ namespace GolfLeagueManager
             else
             {
                 // Update existing settings
+                existingSettings.LeagueName = settings.LeagueName;
                 existingSettings.HandicapMethod = settings.HandicapMethod;
                 existingSettings.AverageMethod = settings.AverageMethod;
                 existingSettings.LegacyInitialWeight = settings.LegacyInitialWeight;

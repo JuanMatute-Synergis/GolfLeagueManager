@@ -11,7 +11,7 @@
         </a>
         <a routerLink="/dashboard"
           class="text-foreground ps-2 ml-1 grow text-sm font-bold hover:text-primary transition-colors cursor-pointer">
-          Golf League Manager
+          {{ leagueName$ | async }}
         </a>
       </div>
       <button (click)="toggleSidebar()"
