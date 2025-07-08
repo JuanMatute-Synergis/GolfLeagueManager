@@ -893,46 +893,65 @@ namespace GolfLeagueManager.Business
             }
             else if (matchup.PlayerAAbsent)
             {
-                string noticeText = matchup.PlayerAAbsentWithNotice ? "with notice (4 pts)" : "without notice (0 pts)";
                 int playerBPoints = matchup.PlayerBPoints ?? 0;
-                return $"{playerAFirstName} absent {noticeText} - {playerBFirstName} played and earned {playerBPoints} pts";
+                string noticeText = matchup.PlayerAAbsentWithNotice ? "with notice (4 pts)" : "without notice (0 pts)";
+                string playerBPerformance = playerBPoints == 16 ? "beat average (16 pts)" : playerBPoints == 8 ? "didn't beat average (8 pts)" : $"earned {playerBPoints} pts";
+                return $"{playerAFirstName} absent {noticeText} - {playerBFirstName} played and {playerBPerformance}";
             }
             else if (matchup.PlayerBAbsent)
             {
-                string noticeText = matchup.PlayerBAbsentWithNotice ? "with notice (4 pts)" : "without notice (0 pts)";
                 int playerAPoints = matchup.PlayerAPoints ?? 0;
-                return $"{playerBFirstName} absent {noticeText} - {playerAFirstName} played and earned {playerAPoints} pts";
+                string noticeText = matchup.PlayerBAbsentWithNotice ? "with notice (4 pts)" : "without notice (0 pts)";
+                string playerAPerformance = playerAPoints == 16 ? "beat average (16 pts)" : playerAPoints == 8 ? "didn't beat average (8 pts)" : $"earned {playerAPoints} pts";
+                return $"{playerBFirstName} absent {noticeText} - {playerAFirstName} played and {playerAPerformance}";
             }
 
-            // Normal match scenarios - use stored match results
+            // Normal match play scenarios
             int playerATotalPoints = matchup.PlayerAPoints ?? 0;
             int playerBTotalPoints = matchup.PlayerBPoints ?? 0;
+            int playerAHolePoints = matchup.PlayerAHolePoints;
+            int playerBHolePoints = matchup.PlayerBHolePoints;
 
             if (playerATotalPoints > playerBTotalPoints)
             {
+                // Player A wins
                 if (matchup.PlayerAMatchWin)
                 {
-                    return $"{playerAFirstName} wins with lower net score + 2 bonus points ({playerATotalPoints}-{playerBTotalPoints})";
+                    // Player A won both match play holes AND net score
+                    return $"{playerAFirstName} wins match play ({playerAHolePoints}-{playerBHolePoints} holes) + net score bonus = {playerATotalPoints} pts";
                 }
                 else
                 {
-                    return $"{playerAFirstName} wins on holes + 1 bonus point (tied net scores) ({playerATotalPoints}-{playerBTotalPoints})";
+                    // Player A won match play holes but net scores were tied
+                    return $"{playerAFirstName} wins match play ({playerAHolePoints}-{playerBHolePoints} holes), tied net scores = {playerATotalPoints} pts";
                 }
             }
             else if (playerBTotalPoints > playerATotalPoints)
             {
+                // Player B wins
                 if (matchup.PlayerBMatchWin)
                 {
-                    return $"{playerBFirstName} wins with lower net score + 2 bonus points ({playerBTotalPoints}-{playerATotalPoints})";
+                    // Player B won both match play holes AND net score
+                    return $"{playerBFirstName} wins match play ({playerBHolePoints}-{playerAHolePoints} holes) + net score bonus = {playerBTotalPoints} pts";
                 }
                 else
                 {
-                    return $"{playerBFirstName} wins on holes + 1 bonus point (tied net scores) ({playerBTotalPoints}-{playerATotalPoints})";
+                    // Player B won match play holes but net scores were tied
+                    return $"{playerBFirstName} wins match play ({playerBHolePoints}-{playerAHolePoints} holes), tied net scores = {playerBTotalPoints} pts";
                 }
             }
             else
             {
-                return $"Complete tie - equal points and net scores ({playerATotalPoints}-{playerBTotalPoints})";
+                // Complete tie in total points
+                if (playerAHolePoints == playerBHolePoints)
+                {
+                    return $"Complete tie - equal hole wins ({playerAHolePoints}-{playerBHolePoints}) and net scores = {playerATotalPoints} pts each";
+                }
+                else
+                {
+                    // This shouldn't happen in normal match play, but handle edge case
+                    return $"Tied total points despite different hole wins ({playerAHolePoints}-{playerBHolePoints}) = {playerATotalPoints} pts each";
+                }
             }
         }
 
