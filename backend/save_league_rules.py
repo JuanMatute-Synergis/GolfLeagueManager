@@ -194,6 +194,33 @@ LEAGUE_RULES_CONTENT = """
 
 <hr>
 
+<h2>🏌️‍♂️ 2025 Golf League Prizes &amp; Payout Structure</h2>
+
+<p>Each player contributes <strong>$5 per week for 9 weeks</strong>, creating a total prize pool of <strong>$450</strong>. Prizes will be awarded weekly for standout performances, as well as to the top 3 finishers at the end of the season based on total matchplay points.</p>
+
+<h3>💵 Weekly Prizes – $20/week (Total: $180)</h3>
+<p>Each week, <strong>$20</strong> will be awarded based on one of the following:</p>
+<ul>
+<li><strong>Best Net Score</strong></li>
+<li><strong>Best Matchplay Performance</strong> (most points won)</li>
+<li><strong>Closest to the Pin</strong> or <strong>Longest Putt</strong> (on designated weeks)</li>
+</ul>
+<p>Prize categories may rotate weekly. <strong>Ties will result in a split prize.</strong></p>
+
+<h3>🏆 End-of-Season Prizes – $270 Total</h3>
+<p>Final standings will be determined by <strong>total matchplay points earned over the 9-week season</strong> (max 180 points possible).</p>
+
+<h4>Payouts:</h4>
+<ul>
+<li><strong>1st Place: $140</strong></li>
+<li><strong>2nd Place: $80</strong></li>
+<li><strong>3rd Place: $50</strong></li>
+</ul>
+
+<p><strong>🎯 Play your best each week — every point matters!</strong></p>
+
+<hr>
+
 <p><strong>This scoring system ensures competitive balance while rewarding both individual hole performance and overall round management. The simple average handicap system promotes improvement and maintains fair competition across all skill levels.</strong></p>
 """
 
