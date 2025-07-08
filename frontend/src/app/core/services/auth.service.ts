@@ -19,6 +19,7 @@ export interface PlayerAccountStatus {
   lastName: string;
   imageUrl?: string;
   email: string;
+  phone: string; // Add phone field
   hasUserAccount: boolean;
   username?: string;
   userId?: string;

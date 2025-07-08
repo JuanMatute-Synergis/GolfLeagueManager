@@ -9,6 +9,7 @@ namespace GolfLeagueManager.Models
         public string LastName { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
         public string Email { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty; // Add Phone field
         public bool HasUserAccount { get; set; }
         public string? Username { get; set; }
         public Guid? UserId { get; set; } // Add UserId for password reset functionality
