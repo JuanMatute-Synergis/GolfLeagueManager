@@ -332,7 +332,7 @@ export class SeasonStandingsComponent implements OnInit {
   constructor(
     private scoringService: ScoringService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadSeasons();
@@ -342,13 +342,45 @@ export class SeasonStandingsComponent implements OnInit {
     this.scoringService.getSeasons().subscribe({
       next: (seasons) => {
         this.seasons = seasons;
-        if (seasons.length > 0) {
-          this.selectedSeasonId = seasons[0].id;
-          this.onSeasonChange();
-        }
+        this.selectActiveOrMostRecentSeason(seasons);
       },
       error: (error) => console.error('Error loading seasons:', error)
     });
+  }
+
+  private selectActiveOrMostRecentSeason(seasons: Season[]): void {
+    if (seasons.length === 0) return;
+
+    // First, try to get active seasons (currently running)
+    this.scoringService.getActiveSeasons().subscribe({
+      next: (activeSeasons) => {
+        if (activeSeasons.length > 0) {
+          // Use the first active season
+          this.selectedSeasonId = activeSeasons[0].id;
+          this.onSeasonChange();
+        } else {
+          // No active seasons, find the most recent one
+          this.selectMostRecentSeason(seasons);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading active seasons:', error);
+        // Fallback to most recent season
+        this.selectMostRecentSeason(seasons);
+      }
+    });
+  }
+
+  private selectMostRecentSeason(seasons: Season[]): void {
+    if (seasons.length === 0) return;
+
+    // Sort seasons by start date (most recent first)
+    const sortedSeasons = seasons.sort((a, b) =>
+      new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+    );
+
+    this.selectedSeasonId = sortedSeasons[0].id;
+    this.onSeasonChange();
   }
 
   onSeasonChange() {
@@ -405,9 +437,9 @@ export class SeasonStandingsComponent implements OnInit {
     // Join standings with playersWithFlight to get flightId
     let filtered = this.selectedFlightId
       ? this.standings.filter(s => {
-          const player = this.playersWithFlight.find(p => p.id === s.playerId);
-          return player && player.flightId === this.selectedFlightId;
-        })
+        const player = this.playersWithFlight.find(p => p.id === s.playerId);
+        return player && player.flightId === this.selectedFlightId;
+      })
       : [...this.standings];
 
     let sorted = [...filtered];

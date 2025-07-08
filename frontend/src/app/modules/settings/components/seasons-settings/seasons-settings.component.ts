@@ -100,12 +100,48 @@ export class SeasonsSettingsComponent implements OnInit {
     this.seasonService.getSeasons().subscribe({
       next: (seasons: Season[]) => {
         this.seasons = seasons;
+        this.selectActiveOrMostRecentSeason(seasons);
       },
       error: (error: any) => {
         console.error('Error loading seasons:', error);
         this.error = 'Failed to load seasons. Please try again.';
       }
     });
+  }
+
+  private selectActiveOrMostRecentSeason(seasons: Season[]): void {
+    if (seasons.length === 0) return;
+
+    // First, try to get active seasons (currently running)
+    this.seasonService.getActiveSeasons().subscribe({
+      next: (activeSeasons: Season[]) => {
+        if (activeSeasons.length > 0) {
+          // Use the first active season
+          this.selectedSeasonId = activeSeasons[0].id;
+          this.loadSeasonFlights(activeSeasons[0].id);
+        } else {
+          // No active seasons, find the most recent one
+          this.selectMostRecentSeason(seasons);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error loading active seasons:', error);
+        // Fallback to most recent season
+        this.selectMostRecentSeason(seasons);
+      }
+    });
+  }
+
+  private selectMostRecentSeason(seasons: Season[]): void {
+    if (seasons.length === 0) return;
+
+    // Sort seasons by start date (most recent first)
+    const sortedSeasons = seasons.sort((a, b) =>
+      new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+    );
+
+    this.selectedSeasonId = sortedSeasons[0].id;
+    this.loadSeasonFlights(this.selectedSeasonId);
   }
 
   // Season Management
@@ -182,6 +218,8 @@ export class SeasonsSettingsComponent implements OnInit {
           if (this.selectedSeasonId === season.id) {
             this.selectedSeasonId = null;
             this.seasonFlights = [];
+            // Auto-select the next available season
+            this.selectActiveOrMostRecentSeason(this.seasons);
           }
           this.isLoading = false;
         },

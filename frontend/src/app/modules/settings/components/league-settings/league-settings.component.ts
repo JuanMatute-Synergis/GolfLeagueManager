@@ -53,6 +53,7 @@ export class LeagueSettingsComponent implements OnInit {
         this.seasonService.getSeasons().subscribe({
             next: (seasons) => {
                 this.seasons = seasons;
+                this.selectActiveOrMostRecentSeason(seasons);
             },
             error: (error) => {
                 console.error('Error loading seasons:', error);
@@ -61,9 +62,47 @@ export class LeagueSettingsComponent implements OnInit {
         });
     }
 
+    private selectActiveOrMostRecentSeason(seasons: Season[]): void {
+        if (seasons.length === 0) return;
+
+        // First, try to get active seasons (currently running)
+        this.seasonService.getActiveSeasons().subscribe({
+            next: (activeSeasons) => {
+                if (activeSeasons.length > 0) {
+                    // Use the first active season
+                    this.selectedSeasonId = activeSeasons[0].id;
+                    this.loadLeagueSettings();
+                } else {
+                    // No active seasons, find the most recent one
+                    this.selectMostRecentSeason(seasons);
+                }
+            },
+            error: (error) => {
+                console.error('Error loading active seasons:', error);
+                // Fallback to most recent season
+                this.selectMostRecentSeason(seasons);
+            }
+        });
+    }
+
+    private selectMostRecentSeason(seasons: Season[]): void {
+        if (seasons.length === 0) return;
+
+        // Sort seasons by start date (most recent first)
+        const sortedSeasons = seasons.sort((a, b) =>
+            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        );
+
+        this.selectedSeasonId = sortedSeasons[0].id;
+        this.loadLeagueSettings();
+    }
+
     onSeasonChange(): void {
         if (this.selectedSeasonId) {
             this.loadLeagueSettings();
+        } else {
+            // Reset league name to default when no season is selected
+            this.leagueNameService.setLeagueName('Golf League');
         }
     }
 
@@ -144,7 +183,7 @@ export class LeagueSettingsComponent implements OnInit {
                 this.leagueNameService.setLeagueName(settings.leagueName);
 
                 this.isLoading = false;
-                
+
                 // Use Promise.resolve to defer the validation check and avoid change detection issues
                 Promise.resolve().then(() => {
                     console.log('Form after patch:', this.settingsForm.value);
@@ -169,7 +208,7 @@ export class LeagueSettingsComponent implements OnInit {
         console.log('Selected season:', this.selectedSeasonId);
         console.log('isSaving:', this.isSaving);
         console.log('Save button enabled:', this.isSaveButtonEnabled());
-        
+
         // Log each control's status
         Object.keys(this.settingsForm.controls).forEach(key => {
             const control = this.settingsForm.get(key);
@@ -182,7 +221,7 @@ export class LeagueSettingsComponent implements OnInit {
             console.log('Form is INVALID - cannot submit');
             return;
         }
-        
+
         if (!this.selectedSeasonId) {
             console.log('No season selected - cannot submit');
             return;
@@ -326,7 +365,7 @@ export class LeagueSettingsComponent implements OnInit {
 
     getFormValidationErrors() {
         if (!this.settingsForm) return {};
-        
+
         const result: any = {};
         Object.keys(this.settingsForm.controls).forEach(key => {
             const control = this.settingsForm.get(key);
