@@ -104,6 +104,14 @@ namespace GolfLeagueManager
         /// </summary>
         private async Task<decimal> CalculateLegacyWeightedAverageAsync(Guid playerId, Guid seasonId, int upToWeekNumber, int initialWeight)
         {
+            //get the player from the database
+            var player = await _context.Players.FindAsync(playerId);
+            //if the player's first name is Bill, print it to the console
+            if (player?.FirstName == "Frank")
+            {
+                Console.WriteLine($"Player Name: {player.FirstName}");
+            }
+
             // Get the player's initial average score for this season
             decimal initialAverage = await _playerSeasonStatsService.GetInitialAverageScoreAsync(playerId, seasonId);
 

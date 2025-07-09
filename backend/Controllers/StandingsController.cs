@@ -44,6 +44,21 @@ namespace GolfLeagueManager.Controllers
             _context = context;
         }
 
+        [HttpGet("debug-test")]
+        public IActionResult DebugTest()
+        {
+            // Set a breakpoint on the next line
+            var message = "Debug test endpoint hit!";
+            Console.WriteLine($"Debug Test: {DateTime.Now}");
+
+            return Ok(new
+            {
+                message = message,
+                timestamp = DateTime.Now,
+                status = "Breakpoint should hit here"
+            });
+        }
+
         [HttpGet("weekly")]
         public async Task<IActionResult> GetWeeklyStandings(Guid seasonId, Guid weekId)
         {

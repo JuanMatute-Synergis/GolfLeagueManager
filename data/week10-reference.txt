@@ -1,0 +1,359 @@
+Flight 1
+PLAYER 
+PHONE 
+SCORE LAST WEEK 
+AVG 
+HCP
+POINTS LST WK 
+TOTAL PTS.
+1 
+George Hutson 
+
+
+610-428-4032 
+41 
+41.21 
+5
+6 
+19
+2 
+Jeff Dilcher 
+
+
+215-804-7664 
+44 
+42.21 
+5
+8 
+31
+3 
+Bill Stein 
+
+
+484-695-9692 
+37 
+41.65 
+5
+14 
+32
+4 
+Alex Peck 
+* 
+908-442-2036 
+39 
+42.38 
+5
+14 
+33
+5 
+Tim Seyler 
+
+
+(484) 343-4123 
+43 
+43.86 
+6
+6 
+18
+6 
+Kevin Kelhart 
+
+
+610-597-3315 
+44 
+43.39 
+6
+8 
+28
+7 
+Joe Mahachanh 
+
+
+267-382-8223 
+43 
+43.53 
+6
+12 
+29
+8 
+John Perry 
+
+
+610-530-9092 
+42 
+42.55 
+5
+12 
+26
+
+Flight 2
+PLAYER 
+PHONE 
+SCORE LAST WEEK 
+AVG 
+HCP
+POINTS LST WK 
+TOTAL PTS.
+1 
+Carl Hardner 
+
+
+484-664-9193 
+42 
+43.48 
+6
+15 
+31
+2 
+Jay Sullivan 
+
+
+610-476-4418 
+
+
+44.10 
+6
+4 
+8
+3 
+Stu Silfies 
+
+
+484-547-9553 
+49 
+45.36 
+7
+5 
+26
+4 
+Steve Bedek 
+
+
+484-274-1325 
+48 
+45.84 
+7
+6 
+20
+5 
+Curt Saeger 
+
+
+610-392-8228 
+43 
+43.77 
+6
+14 
+33
+6 
+Lou Gabrielle 
+
+
+484-951-0821 
+50 
+46.42 
+7
+7 
+20
+7 
+Frank Frankenfield 
+* 
+484-375-9035 
+42 
+45.11 
+7
+16 
+38
+8 
+Kenny Palladino 
+
+
+(610) 657-9977 
+46 
+44.57 
+6
+13 
+28
+
+Flight 3
+PLAYER 
+PHONE 
+SCORE LAST WEEK 
+AVG 
+HCP
+POINTS LST WK 
+TOTAL PTS.
+1 
+Matt Speth 
+
+
+484-788-3417 
+
+
+45.85 
+7
+0 
+14
+2 
+Jim Eck 
+
+
+610-858-6264
+ 
+46.80 
+7
+0 
+22
+3 
+Kevin Kelhart JR 
+
+
+484-821-8295 
+
+
+48.22 
+9
+4 
+22
+4 
+Steve Hampton 
+
+
+610-442-2483 
+48 
+47.67 
+8
+7 
+28
+5 
+Bob Gross 
+* 
+484-866-5195 
+43 
+46.63 
+7
+13 
+35
+6 
+Juan Matute 
+
+
+610-417-7659 
+44 
+47.23 
+8
+7 
+21
+7 
+Matt Donahue 
+
+
+570-851-7148 
+47 
+48.73 
+9
+16 
+31
+8 
+Danny Washburn 
+
+
+484-357-8773 
+41 
+47.73 
+8
+13 
+27
+
+Flight 4
+PLAYER 
+PHONE 
+SCORE LAST WEEK 
+AVG 
+HCP
+POINTS LST WK 
+TOTAL PTS.
+1 
+Ray Ballinger 
+
+
+484-554-9044 
+47 
+46.96 
+7
+7 
+28
+2 
+Rich Hart 
+
+
+610-533-7423 
+
+
+50.83 
+11
+4 
+19
+3 
+Mike Schaefer 
+
+
+484-553-0734 
+47 
+50.09 
+11
+13 
+37
+4 
+Steve Kerns 
+
+
+484-256-4012 
+53 
+53.16 
+13
+8 
+32
+5 
+Steve Filipovits 
+
+
+610-823-2206 
+
+
+55.40 
+14
+4 
+14
+6 
+Andrew Kerns 
+* 
+484-401-1000 
+47 
+53.31 
+13
+16 
+42
+7 
+Tom Haeusler 
+
+
+610-217-7491 
+55 
+58.00 
+16
+16 
+28
+8 
+Jax Haeusler 
+
+
+484-635-9062 
+
+
+57.17 
+15
+4 
+16
+
+

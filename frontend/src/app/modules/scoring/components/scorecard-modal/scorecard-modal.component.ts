@@ -93,9 +93,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
   };
 
   // ViewChildren to access all score input elements - simplified approach
-  @ViewChildren('scoreInput') scoreInputs!: QueryList<ElementRef<HTMLInputElement>>;
-
-  ngOnInit() {
+  @ViewChildren('scoreInput') scoreInputs!: QueryList<ElementRef<HTMLInputElement>>; ngOnInit() {
     console.log('ngOnInit called, initializing scorecard modal, mode:', this.mode);
 
     // Load course data first - this is critical for proper par/handicap display
@@ -135,13 +133,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           // Use the first course from the database
           const dbCourse = courses[0];
           console.log('Selected course from database:', dbCourse);
-          
+
           // Check if we have existing scorecard data with scores before updating
-          const hasExistingScores = this.scorecardData?.holes?.some(hole => 
+          const hasExistingScores = this.scorecardData?.holes?.some(hole =>
             hole.playerAScore !== undefined || hole.playerBScore !== undefined
           );
           console.log('Has existing scores before course update:', hasExistingScores);
-          
+
           this.course = {
             name: dbCourse.name,
             holes: dbCourse.courseHoles.map(hole => ({
@@ -151,13 +149,13 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
               handicap: hole.handicapIndex
             }))
           };
-          
+
           console.log('Course data loaded from database:', this.course);
           console.log('Course holes mapped:', this.course.holes);
-          
+
           // Clear the relevant holes cache since course data changed
           this.clearRelevantHolesCache();
-          
+
           // If scorecard data exists, update hole pars/handicaps without overwriting scores
           if (this.scorecardData && this.scorecardData.holes) {
             console.log('Updating hole data with new course data without overwriting scores');
@@ -240,7 +238,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     // For view mode, ensure we have the matchupId before loading
     if (changes['isOpen'] && changes['isOpen'].currentValue === true && !this.isLoadingScorecard) {
       console.log('Modal opened, loading scorecard data');
-      
+
       // For view mode, ensure we have the matchupId available but don't modify scorecardData
       if (this.mode === 'view' && this.matchupId) {
         // Ensure scorecardData exists without modifying the original
@@ -249,7 +247,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         }
         // Don't modify the existing scorecardData.matchupId to avoid change detection errors
       }
-      
+
       this.loadScorecardData();
 
       // Auto-focus first hole for Player A after modal opens and data loads
@@ -287,7 +285,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     } else {
       matchupId = this.scorecardData?.matchupId || this.matchupId || '';
     }
-    
+
     console.log('loadScorecardData called with matchupId:', matchupId, 'isLoadingScorecard:', this.isLoadingScorecard);
     console.log('Mode:', this.mode);
     console.log('Scorecard data at load:', this.scorecardData);
@@ -334,7 +332,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
           const relevantHoles = this.getRelevantHoles();
           console.log('[DEBUG] Backend holeScores:', response.holeScores);
           console.log('[DEBUG] Relevant holes for mapping:', relevantHoles.map(h => h.number));
-          
+
           const holesArray = relevantHoles.map((hole) => {
             // Map scores by actual hole number (1-9, 10-18)
             const hs = (response.holeScores ?? []).find(h => h.holeNumber === hole.number);
@@ -1210,12 +1208,12 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
     }
 
     const relevantHoles = this.getRelevantHoles();
-    
+
     // Update existing holes with new course data while preserving scores
     for (let i = 0; i < this.scorecardData.holes.length; i++) {
       const hole = this.scorecardData.holes[i];
       const courseHole = relevantHoles[i];
-      
+
       if (hole && courseHole) {
         // Update par and handicap from course data
         hole.par = courseHole.par;
@@ -1224,7 +1222,7 @@ export class ScorecardModalComponent implements OnInit, OnChanges, OnDestroy, Af
         console.log(`Updated hole ${hole.hole}: par=${hole.par}, handicap=${hole.holeHandicap}, preserving scores A=${hole.playerAScore}, B=${hole.playerBScore}`);
       }
     }
-    
+
     console.log('Finished updating holes with course data while preserving scores');
   }
 
