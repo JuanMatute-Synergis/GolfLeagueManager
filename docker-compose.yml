@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:16
     container_name: golfleague_postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: golfuser
       POSTGRES_PASSWORD: golfpassword
@@ -16,6 +16,7 @@ services:
     build:
       context: ./backend
     container_name: golfleague_backend
+    restart: unless-stopped
     depends_on:
       - postgres
     environment:
@@ -29,6 +30,7 @@ services:
     build:
       context: ./frontend
     container_name: golfleague_frontend
+    restart: unless-stopped
     depends_on:
       - backend
     ports:
