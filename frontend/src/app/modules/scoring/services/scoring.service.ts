@@ -119,6 +119,10 @@ export class ScoringService {
     return this.http.get<Season[]>(`${this.baseUrl}/seasons`);
   }
 
+  getActiveSeasons(): Observable<Season[]> {
+    return this.http.get<Season[]>(`${this.baseUrl}/seasons/active`);
+  }
+
   getPlayers(): Observable<Player[]> {
     return this.http.get<Player[]>(`${this.baseUrl}/players`);
   }

@@ -9,17 +9,22 @@ namespace GolfLeagueManager.Services
         private readonly ILogger<TenantService> _logger;
         private readonly IServiceProvider _serviceProvider;
         private string? _currentTenant;
+        private readonly string _defaultTenant;
 
         public TenantService(IConfiguration configuration, ILogger<TenantService> logger, IServiceProvider serviceProvider)
         {
             _configuration = configuration;
             _logger = logger;
             _serviceProvider = serviceProvider;
+
+            // Get default tenant from configuration (command line, environment, or appsettings)
+            _defaultTenant = _configuration["DefaultTenant"] ?? "htlyons";
+            _logger.LogInformation("TenantService initialized with default tenant: {DefaultTenant}", _defaultTenant);
         }
 
         public string GetCurrentTenant()
         {
-            return _currentTenant ?? "default";
+            return _currentTenant ?? _defaultTenant;
         }
 
         public void SetCurrentTenant(string tenantId)

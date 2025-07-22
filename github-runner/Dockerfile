@@ -45,19 +45,19 @@ RUN chmod +x /usr/local/bin/docker-compose
 RUN ARCH=$(dpkg --print-architecture) && \
     echo "Detected architecture: $ARCH" && \
     if [ "$ARCH" = "arm64" ] || [ "$ARCH" = "aarch64" ]; then \
-        echo "Installing .NET SDK for ARM64..." && \
-        mkdir -p /opt/dotnet && \
-        curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 8.0.306 --install-dir /opt/dotnet && \
-        ln -sf /opt/dotnet/dotnet /usr/local/bin/dotnet && \
-        chmod +x /usr/local/bin/dotnet && \
-        echo "export PATH=\$PATH:/opt/dotnet" >> /etc/bash.bashrc; \
+    echo "Installing .NET SDK for ARM64..." && \
+    mkdir -p /opt/dotnet && \
+    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version 8.0.306 --install-dir /opt/dotnet && \
+    ln -sf /opt/dotnet/dotnet /usr/local/bin/dotnet && \
+    chmod +x /usr/local/bin/dotnet && \
+    echo "export PATH=\$PATH:/opt/dotnet" >> /etc/bash.bashrc; \
     else \
-        echo "Installing .NET SDK for x64..." && \
-        wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
-        dpkg -i packages-microsoft-prod.deb && \
-        apt-get update && apt-get install -y dotnet-sdk-8.0 && \
-        rm -f packages-microsoft-prod.deb && \
-        rm -rf /var/lib/apt/lists/*; \
+    echo "Installing .NET SDK for x64..." && \
+    wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    apt-get update && apt-get install -y dotnet-sdk-8.0 && \
+    rm -f packages-microsoft-prod.deb && \
+    rm -rf /var/lib/apt/lists/*; \
     fi
 
 # Create runner user and docker group
@@ -72,15 +72,15 @@ WORKDIR /home/runner
 RUN ARCH=$(dpkg --print-architecture) && \
     echo "Detected architecture: $ARCH" && \
     if [ "$ARCH" = "arm64" ]; then \
-        echo "Downloading ARM64 runner..." && \
-        curl -o actions-runner-linux-arm64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-arm64-2.325.0.tar.gz && \
-        tar xzf ./actions-runner-linux-arm64-2.325.0.tar.gz && \
-        rm actions-runner-linux-arm64-2.325.0.tar.gz; \
+    echo "Downloading ARM64 runner..." && \
+    curl -o actions-runner-linux-arm64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-arm64-2.325.0.tar.gz && \
+    tar xzf ./actions-runner-linux-arm64-2.325.0.tar.gz && \
+    rm actions-runner-linux-arm64-2.325.0.tar.gz; \
     else \
-        echo "Downloading x64 runner..." && \
-        curl -o actions-runner-linux-x64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-x64-2.325.0.tar.gz && \
-        tar xzf ./actions-runner-linux-x64-2.325.0.tar.gz && \
-        rm actions-runner-linux-x64-2.325.0.tar.gz; \
+    echo "Downloading x64 runner..." && \
+    curl -o actions-runner-linux-x64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-x64-2.325.0.tar.gz && \
+    tar xzf ./actions-runner-linux-x64-2.325.0.tar.gz && \
+    rm actions-runner-linux-x64-2.325.0.tar.gz; \
     fi
 
 # Install runner dependencies (switch back to root temporarily)

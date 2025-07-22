@@ -58,13 +58,17 @@ remove_dns_route() {
     
     echo -e "${BLUE}Removing DNS route for: $tenant_name.golfleaguemanager.app${NC}"
     
-    # Remove DNS route using cloudflared
-    cloudflared tunnel route dns golf-league-manager "$tenant_name.golfleaguemanager.app" --overwrite-dns=false || {
-        echo -e "${YELLOW}⚠ Could not remove DNS route automatically${NC}"
-        echo -e "${YELLOW}You may need to remove it manually from Cloudflare dashboard${NC}"
-    }
-    
-    echo -e "${GREEN}✓ DNS route removal attempted${NC}"
+    # Remove DNS route using cloudflared container
+    if docker ps | grep -q cloudflared; then
+        docker exec cloudflared cloudflared tunnel route dns golf-league-manager "$tenant_name.golfleaguemanager.app" --overwrite-dns=false || {
+            echo -e "${YELLOW}⚠ Could not remove DNS route automatically${NC}"
+            echo -e "${YELLOW}You may need to remove it manually from Cloudflare dashboard${NC}"
+        }
+        echo -e "${GREEN}✓ DNS route removal attempted${NC}"
+    else
+        echo -e "${YELLOW}⚠ Cloudflared container not running. DNS route not removed.${NC}"
+        echo -e "${YELLOW}Please remove DNS route manually from Cloudflare dashboard.${NC}"
+    fi
 }
 
 main() {
@@ -111,7 +115,6 @@ main() {
 
 # Check if required tools are installed
 command -v docker >/dev/null 2>&1 || { echo -e "${RED}Error: docker is required but not installed${NC}" >&2; exit 1; }
-command -v cloudflared >/dev/null 2>&1 || { echo -e "${RED}Error: cloudflared is required but not installed${NC}" >&2; exit 1; }
 
 # Run main function
 main "$@"

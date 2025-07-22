@@ -84,7 +84,7 @@ run_migrations() {
     echo -e "${BLUE}Running migrations for tenant: $tenant_name${NC}"
     
     # Navigate to backend directory and run migrations
-    cd "$(dirname "$0")/backend"
+    cd "$(dirname "$0")/../../backend"
     
     # Set connection string for the tenant database (using Docker host)
     export ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=$db_name;Username=$PGUSER;Password=$PGPASSWORD"
@@ -104,7 +104,7 @@ create_admin_user() {
     echo -e "${BLUE}Creating admin user for tenant: $tenant_name${NC}"
     
     # Use the external Python script to create admin user
-    if python3 create-admin-user.py "$tenant_name"; then
+    if python3 "$(dirname "$0")/create-admin-user.py" "$tenant_name"; then
         echo -e "${GREEN}✓ Admin user created successfully${NC}"
     else
         echo -e "${RED}✗ Failed to create admin user${NC}"
@@ -118,10 +118,40 @@ setup_dns_route() {
     
     echo -e "${BLUE}Setting up DNS route for: $tenant_name.golfleaguemanager.app${NC}"
     
-    # Add DNS route using cloudflared
-    cloudflared tunnel route dns golf-league-manager "$tenant_name.golfleaguemanager.app"
+    # Add DNS route using cloudflared container
+    if docker ps | grep -q cloudflared; then
+        docker exec cloudflared cloudflared tunnel route dns golf-league-manager "$tenant_name.golfleaguemanager.app"
+        echo -e "${GREEN}✓ DNS route configured${NC}"
+    else
+        echo -e "${YELLOW}⚠ Cloudflared container not running. DNS route not configured.${NC}"
+        echo -e "${YELLOW}Please configure DNS manually or start cloudflared container.${NC}"
+    fi
+}
+
+setup_default_course() {
+    local tenant_name="$1"
     
-    echo -e "${GREEN}✓ DNS route configured${NC}"
+    echo -e "${BLUE}Setting up default course for tenant: $tenant_name${NC}"
+    
+    # Check if Southmoore course import script exists and import it
+    if [[ -f "$(dirname "$0")/import_southmoore_course.py" ]]; then
+        echo -e "${BLUE}Importing Southmoore Golf Course...${NC}"
+        if python3 "$(dirname "$0")/import_southmoore_course.py" "$tenant_name"; then
+            echo -e "${GREEN}✓ Southmoore Golf Course imported successfully${NC}"
+            
+            # Set it as default course
+            echo -e "${BLUE}Setting Southmoore as default course...${NC}"
+            if python3 "$(dirname "$0")/set_default_course.py" "$tenant_name"; then
+                echo -e "${GREEN}✓ Southmoore Golf Course set as default${NC}"
+            else
+                echo -e "${YELLOW}⚠ Could not set Southmoore as default course${NC}"
+            fi
+        else
+            echo -e "${YELLOW}⚠ Could not import Southmoore Golf Course${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠ Southmoore course import script not found${NC}"
+    fi
 }
 
 main() {
@@ -161,6 +191,9 @@ main() {
     # Create admin user
     create_admin_user "$tenant_name"
     
+    # Setup default course
+    setup_default_course "$tenant_name"
+    
     # Setup DNS route
     setup_dns_route "$tenant_name"
     
@@ -183,7 +216,6 @@ main() {
 command -v docker >/dev/null 2>&1 || { echo -e "${RED}Error: docker is required but not installed${NC}" >&2; exit 1; }
 command -v dotnet >/dev/null 2>&1 || { echo -e "${RED}Error: dotnet is required but not installed${NC}" >&2; exit 1; }
 command -v python3 >/dev/null 2>&1 || { echo -e "${RED}Error: python3 is required but not installed${NC}" >&2; exit 1; }
-command -v cloudflared >/dev/null 2>&1 || { echo -e "${RED}Error: cloudflared is required but not installed${NC}" >&2; exit 1; }
 
 # Check if PostgreSQL container is running
 if ! docker ps | grep -q golfleague_postgres; then

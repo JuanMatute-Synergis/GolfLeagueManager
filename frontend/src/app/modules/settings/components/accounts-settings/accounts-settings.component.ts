@@ -90,7 +90,7 @@ export class AccountsSettingsComponent implements OnInit {
   loadPlayers() {
     this.isLoading = true;
     this.errorMessage = '';
-    
+
     this.playerService.getPlayers().subscribe({
       next: (players) => {
         this.players = players.map(p => ({
@@ -104,7 +104,7 @@ export class AccountsSettingsComponent implements OnInit {
           username: undefined,
           userId: undefined
         }));
-        
+
         this.isLoading = false;
       },
       error: (error) => {
@@ -138,7 +138,7 @@ export class AccountsSettingsComponent implements OnInit {
       const playerData = this.playerForm.value;
       this.isLoading = true;
       this.errorMessage = '';
-      
+
       if (this.editingPlayerId) {
         // Update existing player
         const playerToUpdate = { ...playerData, id: this.editingPlayerId };
@@ -178,7 +178,7 @@ export class AccountsSettingsComponent implements OnInit {
     if (confirm('Are you sure you want to delete this player?')) {
       this.isLoading = true;
       this.errorMessage = '';
-      
+
       this.playerService.deletePlayer(id).subscribe({
         next: () => {
           this.loadPlayers();
@@ -201,6 +201,46 @@ export class AccountsSettingsComponent implements OnInit {
     this.playerForm.reset();
   }
 
+  emailLeague() {
+    // Get all player emails, filtering out any empty ones
+    const emails = this.players
+      .map(player => player.email)
+      .filter(email => email && email.trim().length > 0);
+
+    if (emails.length === 0) {
+      alert('No player emails found to include in the email.');
+      return;
+    }
+
+    // Show confirmation with email count
+    const confirmed = confirm(
+      `This will open Gmail with ${emails.length} player email${emails.length === 1 ? '' : 's'} in the BCC field. Continue?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    // Create Gmail compose URL with all emails in BCC
+    const subject = encodeURIComponent('Golf League Communication');
+    const body = encodeURIComponent('Hello everyone,\n\n\n\nBest regards,\nLeague Management');
+    const bccEmails = emails.join(',');
+
+    // Use BCC to protect player privacy
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&bcc=${encodeURIComponent(bccEmails)}&su=${subject}&body=${body}`;
+
+    // Open Gmail in a new window/tab
+    window.open(gmailUrl, '_blank');
+  }
+
+  getEmailButtonTooltip(): string {
+    const emailCount = this.players.filter(player => player.email && player.email.trim().length > 0).length;
+    if (emailCount === 0) {
+      return 'No player emails available';
+    }
+    return `Open Gmail with ${emailCount} player email${emailCount === 1 ? '' : 's'}`;
+  }
+
   clearMessages() {
     this.errorMessage = '';
     this.successMessage = '';
@@ -209,7 +249,7 @@ export class AccountsSettingsComponent implements OnInit {
   // Debug method - can be called from browser console
   debugUserPlayerLinks() {
     console.log('=== DEBUG: Checking user-player links ===');
-    
+
     this.authService.getDebugUsers().subscribe({
       next: (users) => {
         console.log('All users:', users);
@@ -227,11 +267,11 @@ export class AccountsSettingsComponent implements OnInit {
     this.authService.getPlayersWithAccountStatus().subscribe({
       next: (playersWithStatus) => {
         console.log('Players with account status:', playersWithStatus);
-        
+
         // Find any discrepancies
         const playersWithAccounts = playersWithStatus.filter(p => p.hasUserAccount);
         const playersWithoutAccounts = playersWithStatus.filter(p => !p.hasUserAccount);
-        
+
         console.log('Players WITH accounts:', playersWithAccounts);
         console.log('Players WITHOUT accounts:', playersWithoutAccounts);
       },
@@ -259,7 +299,7 @@ export class AccountsSettingsComponent implements OnInit {
     this.showAccountForm = true;
     this.isAccountEditMode = false;
     this.editingAccountPlayerId = player.playerId;
-    
+
     // For creating, password is required
     this.accountForm = this.fb.group({
       username: ['', Validators.required],
@@ -273,7 +313,7 @@ export class AccountsSettingsComponent implements OnInit {
       this.showAccountForm = true;
       this.isAccountEditMode = true;
       this.editingAccountPlayerId = player.playerId;
-      
+
       // For editing, we don't require password
       this.accountForm = this.fb.group({
         username: [player.username || '', Validators.required],
@@ -289,7 +329,7 @@ export class AccountsSettingsComponent implements OnInit {
       this.isAccountEditMode = false;
       this.isPasswordResetMode = true;
       this.editingAccountPlayerId = player.playerId;
-      
+
       // For password reset, only password is required
       this.accountForm = this.fb.group({
         username: [{ value: player.username || '', disabled: true }], // Disabled since we're not updating it
@@ -323,9 +363,9 @@ export class AccountsSettingsComponent implements OnInit {
         // Reset password
         const player = this.players.find(p => p.playerId === this.editingAccountPlayerId);
         if (player && player.userId) {
-          this.authService.resetUserPassword({ 
-            userId: player.userId, 
-            newPassword: formData.password 
+          this.authService.resetUserPassword({
+            userId: player.userId,
+            newPassword: formData.password
           }).subscribe({
             next: () => {
               this.successMessage = 'Password reset successfully!';
@@ -350,7 +390,7 @@ export class AccountsSettingsComponent implements OnInit {
             username: formData.username,
             isAdmin: formData.isAdmin
           };
-          
+
           this.authService.updateUserAccount(request).subscribe({
             next: () => {
               this.successMessage = 'Account updated successfully!';
@@ -375,7 +415,7 @@ export class AccountsSettingsComponent implements OnInit {
           password: formData.password,
           isAdmin: formData.isAdmin
         };
-        
+
         this.authService.createUserForPlayer(req).subscribe({
           next: () => {
             this.successMessage = 'Account created successfully!';
