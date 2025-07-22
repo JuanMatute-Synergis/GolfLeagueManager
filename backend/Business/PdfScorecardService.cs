@@ -696,13 +696,21 @@ namespace GolfLeagueManager.Business
                     {
                         var week = _context.Weeks.FirstOrDefault(x => x.Id == m.WeekId);
                         bool absent = (m.PlayerAId == player.Id) ? m.PlayerAAbsent : m.PlayerBAbsent;
+                        bool absentWithNotice = (m.PlayerAId == player.Id) ? m.PlayerAAbsentWithNotice : m.PlayerBAbsentWithNotice;
+                        
                         if (week != null && week.SpecialPointsAwarded.HasValue)
                         {
                             int special = week.SpecialPointsAwarded.Value;
                             return absent ? (special / 2) : special;
                         }
-                        bool hasScore = (m.PlayerAId == player.Id && m.PlayerAScore.HasValue) || (m.PlayerBId == player.Id && m.PlayerBScore.HasValue);
-                        if (!hasScore) return 0;
+                        
+                        // Handle absent players with/without notice
+                        if (absent)
+                        {
+                            return absentWithNotice ? 4 : 0;
+                        }
+                        
+                        // Regular match points for players who played
                         return m.PlayerAId == player.Id ? (m.PlayerAPoints ?? 0) : (m.PlayerBPoints ?? 0);
                     })
                     .Sum();
@@ -751,18 +759,21 @@ namespace GolfLeagueManager.Business
                     var matchup = matchupsInFlight.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
                     int gross = 0, thisWeekMpPoints = 0;
                     bool isAbsent = false;
+                    bool isAbsentWithNotice = false;
                     if (matchup != null)
                     {
                         if (matchup.PlayerAId == player.Id)
                         {
                             gross = matchup.PlayerAScore ?? 0;
                             isAbsent = matchup.PlayerAAbsent;
+                            isAbsentWithNotice = matchup.PlayerAAbsentWithNotice;
                             thisWeekMpPoints = matchup.PlayerAPoints ?? 0;
                         }
                         else if (matchup.PlayerBId == player.Id)
                         {
                             gross = matchup.PlayerBScore ?? 0;
                             isAbsent = matchup.PlayerBAbsent;
+                            isAbsentWithNotice = matchup.PlayerBAbsentWithNotice;
                             thisWeekMpPoints = matchup.PlayerBPoints ?? 0;
                         }
                     }
@@ -771,6 +782,11 @@ namespace GolfLeagueManager.Business
                     {
                         int special = currentWeek.SpecialPointsAwarded.Value;
                         thisWeekMpPoints = isAbsent ? (special / 2) : special;
+                    }
+                    else if (isAbsent)
+                    {
+                        // Handle absent players with/without notice for regular weeks
+                        thisWeekMpPoints = isAbsentWithNotice ? 4 : 0;
                     }
 
                     var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
@@ -1052,17 +1068,20 @@ namespace GolfLeagueManager.Business
 
                                 int weekPoints = 0;
                                 bool isAbsent = false;
+                                bool isAbsentWithNotice = false;
                                 if (matchup != null)
                                 {
                                     if (matchup.PlayerAId == player.Id)
                                     {
                                         weekPoints = matchup.PlayerAPoints ?? 0;
                                         isAbsent = matchup.PlayerAAbsent;
+                                        isAbsentWithNotice = matchup.PlayerAAbsentWithNotice;
                                     }
                                     else if (matchup.PlayerBId == player.Id)
                                     {
                                         weekPoints = matchup.PlayerBPoints ?? 0;
                                         isAbsent = matchup.PlayerBAbsent;
+                                        isAbsentWithNotice = matchup.PlayerBAbsentWithNotice;
                                     }
 
                                     // Handle special points weeks
@@ -1070,6 +1089,11 @@ namespace GolfLeagueManager.Business
                                     {
                                         int special = week.SpecialPointsAwarded.Value;
                                         weekPoints = isAbsent ? (special / 2) : special;
+                                    }
+                                    else if (isAbsent)
+                                    {
+                                        // Handle absent players with/without notice for regular weeks
+                                        weekPoints = isAbsentWithNotice ? 4 : 0;
                                     }
                                 }
                                 totalPoints += weekPoints;
@@ -1100,6 +1124,7 @@ namespace GolfLeagueManager.Business
                                 int weekPoints = 0;
                                 int? grossScore = null;
                                 bool isAbsent = false;
+                                bool isAbsentWithNotice = false;
 
                                 if (matchup != null)
                                 {
@@ -1108,12 +1133,14 @@ namespace GolfLeagueManager.Business
                                         weekPoints = matchup.PlayerAPoints ?? 0;
                                         grossScore = matchup.PlayerAScore;
                                         isAbsent = matchup.PlayerAAbsent;
+                                        isAbsentWithNotice = matchup.PlayerAAbsentWithNotice;
                                     }
                                     else if (matchup.PlayerBId == player.Id)
                                     {
                                         weekPoints = matchup.PlayerBPoints ?? 0;
                                         grossScore = matchup.PlayerBScore;
                                         isAbsent = matchup.PlayerBAbsent;
+                                        isAbsentWithNotice = matchup.PlayerBAbsentWithNotice;
                                     }
 
                                     // Handle special points weeks
@@ -1122,11 +1149,16 @@ namespace GolfLeagueManager.Business
                                         int special = week.SpecialPointsAwarded.Value;
                                         weekPoints = isAbsent ? (special / 2) : special;
                                     }
+                                    else if (isAbsent)
+                                    {
+                                        // Handle absent players with/without notice for regular weeks
+                                        weekPoints = isAbsentWithNotice ? 4 : 0;
+                                    }
                                 }
 
                                 if (isAbsent)
                                 {
-                                    var cellText = "-  |  -  |  -  |  ABS";
+                                    var cellText = isAbsentWithNotice ? "-  |  -  |  -  |  4" : "-  |  -  |  -  |  0";
                                     table.Cell().Background(rowColor).Padding(2)
                                         .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
                                 }
