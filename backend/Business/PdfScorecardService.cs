@@ -95,8 +95,9 @@ namespace GolfLeagueManager.Business
                     decimal handicap;
                     if (leagueSettings != null)
                     {
-                        // Use the proper method that respects league settings and week number
-                        handicap = await _handicapService.GetPlayerHandicapUpToWeekAsync(playerId, seasonId, week.WeekNumber);
+                        // Use the proper scoring handicap method - this uses handicap as it was at START of week
+                        // (before current week's scores are included) which is correct for match play scoring
+                        handicap = await _handicapService.GetPlayerScoringHandicapAsync(playerId, seasonId, week.WeekNumber);
                     }
                     else
                     {
@@ -231,14 +232,15 @@ namespace GolfLeagueManager.Business
 
             var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
 
-            // Pre-calculate handicaps for all players in all matchups (same method as UI)
+            // Pre-calculate handicaps for all players in all matchups (using scoring handicap method)
             var allPlayerIds = matchups.SelectMany(m => new[] { m.PlayerAId, m.PlayerBId }).Distinct().ToList();
             var handicapData = new Dictionary<Guid, decimal>();
             foreach (var playerId in allPlayerIds)
             {
                 try
                 {
-                    var handicap = await _handicapService.GetPlayerHandicapUpToWeekAsync(playerId, seasonId, week.WeekNumber);
+                    // Use scoring handicap - the handicap as it was at the start of the week
+                    var handicap = await _handicapService.GetPlayerScoringHandicapAsync(playerId, seasonId, week.WeekNumber);
                     handicapData[playerId] = handicap;
                 }
                 catch
