@@ -10,6 +10,9 @@ env:
   POSTGRES_USER: golfuser
   POSTGRES_PASSWORD: golfpassword
   POSTGRES_DB: golfdb
+  DOCKER_CONFIG: ~/.docker
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
 
 jobs:
   test:
@@ -146,17 +149,26 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Fix Docker credentials for macOS
+    - name: Completely bypass Docker credentials
       run: |
-        echo "🔧 Fixing Docker credentials for GitHub Actions..."
-        mkdir -p ~/.docker
-        cat > ~/.docker/config.json << 'EOF'
-        {
-          "auths": {},
-          "credsStore": ""
-        }
-        EOF
-        echo "✅ Docker credentials configuration updated"
+        echo "� Completely bypassing Docker credential helpers for CI..."
+        chmod +x ./scripts/ci/docker-bypass-credentials.sh
+        ./scripts/ci/docker-bypass-credentials.sh
+
+    - name: Verify Docker bypass
+      run: |
+        echo "� Verifying Docker credential bypass..."
+        echo "PATH: $PATH"
+        echo "Docker config:"
+        cat ~/.docker/config.json
+        echo "Available credential helpers in PATH:"
+        which docker-credential-osxkeychain || echo "osxkeychain helper bypassed ✅"
+        which docker-credential-desktop || echo "desktop helper bypassed ✅"
+        
+        # Set additional environment variables for Docker
+        echo "DOCKER_CONFIG=$HOME/.docker" >> $GITHUB_ENV
+        echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+        echo "COMPOSE_DOCKER_CLI_BUILD=1" >> $GITHUB_ENV
 
     - name: Create backup before deployment
       run: |
@@ -189,16 +201,26 @@ jobs:
     - name: Build and start services
       run: |
         echo "🔨 Building and starting services..."
-        # Ensure Docker credentials are set up correctly
-        mkdir -p ~/.docker
-        cat > ~/.docker/config.json << 'EOF'
-        {
-          "auths": {},
-          "credsStore": ""
-        }
-        EOF
         
-        docker compose up -d --build
+        # Verify Docker credentials are bypassed
+        echo "🔍 Final verification before build..."
+        echo "PATH: $PATH"
+        echo "DOCKER_CONFIG: $DOCKER_CONFIG"
+        echo "Credential helper test:"
+        docker-credential-osxkeychain get 2>&1 || echo "Credential helper properly bypassed ✅"
+        echo "Docker config:"
+        cat ~/.docker/config.json
+        
+        # Build with explicit configuration
+        echo "🏗️ Building containers..."
+        docker compose build --pull || {
+          echo "❌ Build failed, clearing cache and retrying..."
+          docker builder prune -f
+          docker compose build --no-cache --pull
+        }
+        
+        echo "🚀 Starting services..."
+        docker compose up -d
         
         echo "⏳ Waiting for services to start..."
         sleep 30
@@ -246,6 +268,21 @@ jobs:
         
         # Clean up dangling images
         docker image prune -f
+
+    - name: Cleanup Docker credential bypass
+      if: always()
+      run: |
+        echo "🧹 Cleaning up Docker credential bypass..."
+        
+        # Remove temporary credential helper bypass directory
+        rm -rf /tmp/docker-ci-bypass || true
+        
+        # Restore original credential helpers (if manage script exists)
+        if [ -f ./scripts/ci/manage-credential-helpers.sh ]; then
+          ./scripts/ci/manage-credential-helpers.sh restore || true
+        fi
+        
+        echo "✅ Docker credential bypass cleaned up"
 
   notify:
     name: Notify Deployment Status
