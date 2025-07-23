@@ -1022,39 +1022,52 @@ namespace GolfLeagueManager.Business
                 {
                     container.Table(table =>
                     {
-                        // Dynamic column definition: Player name + one column per week + total
-                        var columnCount = weeksInSession.Count + 2;
+                        // Dynamic column definition: Player name + 4 columns per week + separators + total
                         table.ColumnsDefinition(columns =>
                         {
-                            columns.RelativeColumn(2f); // Player name
+                            columns.RelativeColumn(1.8f); // Player name (reduced)
                             foreach (var week in weeksInSession)
                             {
-                                columns.RelativeColumn(1f); // Week column
+                                columns.RelativeColumn(0.5f); // Avg
+                                columns.RelativeColumn(0.5f); // Score
+                                columns.RelativeColumn(0.4f); // HC
+                                columns.RelativeColumn(0.5f); // Pts
+                                columns.RelativeColumn(0.03f); // Week separator (made thinner)
                             }
-                            columns.RelativeColumn(1.2f); // Total column
+                            columns.RelativeColumn(0.8f); // Total column
                         });
 
-                        // Header row 1 - Week numbers
-                        table.Cell().Background(Colors.Grey.Lighten2).Padding(2)
-                            .Text("Player").FontSize(7).Bold().FontColor(Colors.Black);
+                        // Header row 1 - Week numbers (spans 4 columns each)
+                        table.Cell().Background(Colors.Grey.Lighten2).Padding(1)
+                            .Text("Player").FontSize(6).Bold().FontColor(Colors.Black);
                         foreach (var week in weeksInSession)
                         {
-                            table.Cell().Background(Colors.Grey.Lighten2).Padding(2)
-                                .Text($"W{week.WeekNumber}").FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
+                            table.Cell().ColumnSpan(4).Background(Colors.Grey.Lighten2).Padding(1)
+                                .Text($"Week {week.WeekNumber}").FontSize(5).Bold().AlignCenter().FontColor(Colors.Black);
+                            // Week separator
+                            table.Cell().Background(Colors.Grey.Darken1).Padding(0);
                         }
-                        table.Cell().Background(Colors.Grey.Lighten2).Padding(2)
-                            .Text("Total").FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
+                        table.Cell().Background(Colors.Grey.Lighten2).Padding(1)
+                            .Text("Total").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
 
-                        // Header row 2 - Data labels
-                        table.Cell().Background(Colors.Grey.Lighten3).Padding(2)
-                            .Text("Name").FontSize(6).FontColor(Colors.Black);
+                        // Header row 2 - Individual column labels
+                        table.Cell().Background(Colors.Grey.Lighten3).Padding(1)
+                            .Text("Name").FontSize(5).FontColor(Colors.Black);
                         foreach (var week in weeksInSession)
                         {
-                            table.Cell().Background(Colors.Grey.Lighten3).Padding(2)
-                                .Text("Avg  |  Score  |  HC  |  Pts").FontSize(6).AlignCenter().FontColor(Colors.Black);
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(0.5f)
+                                .Text("Avg").FontSize(4).AlignCenter().FontColor(Colors.Black);
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(0.5f)
+                                .Text("Score").FontSize(4).AlignCenter().FontColor(Colors.Black);
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(0.5f)
+                                .Text("HC").FontSize(4).AlignCenter().FontColor(Colors.Black);
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(0.5f)
+                                .Text("Pts").FontSize(4).AlignCenter().FontColor(Colors.Black);
+                            // Week separator
+                            table.Cell().Background(Colors.Grey.Darken1).Padding(0);
                         }
-                        table.Cell().Background(Colors.Grey.Lighten3).Padding(2)
-                            .Text("Points").FontSize(6).AlignCenter().FontColor(Colors.Black);
+                        table.Cell().Background(Colors.Grey.Lighten3).Padding(1)
+                            .Text("Points").FontSize(5).AlignCenter().FontColor(Colors.Black);
 
                         // Player rows
                         var playersWithTotals = new List<(Player player, int totalPoints)>();
@@ -1115,8 +1128,8 @@ namespace GolfLeagueManager.Business
                             var rowColor = i % 2 == 0 ? Colors.White : Colors.Grey.Lighten2;
                             var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
 
-                            table.Cell().Background(rowColor).Padding(2)
-                                .Text(displayName).FontSize(7).FontColor(Colors.Black);
+                            table.Cell().Background(rowColor).Padding(1)
+                                .Text(displayName).FontSize(6).FontColor(Colors.Black);
 
                             foreach (var week in weeksInSession)
                             {
@@ -1160,9 +1173,17 @@ namespace GolfLeagueManager.Business
 
                                 if (isAbsent)
                                 {
-                                    var cellText = isAbsentWithNotice ? "-  |  -  |  -  |  4" : "-  |  -  |  -  |  0";
-                                    table.Cell().Background(rowColor).Padding(2)
-                                        .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
+                                    // Create separate cells for each data type when absent
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text("-").FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text("-").FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text("-").FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text(isAbsentWithNotice ? "4" : "0").FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    // Week separator
+                                    table.Cell().Background(Colors.Grey.Darken1).Padding(0);
                                 }
                                 else
                                 {
@@ -1174,24 +1195,30 @@ namespace GolfLeagueManager.Business
                                     var handicap = _handicapService.GetPlayerHandicapUpToWeekAsync(
                                         player.Id, seasonId, week.WeekNumber).Result;
 
-                                    var avgText = avg > 0 ? avg.ToString("F2") : "-";
+                                    var avgText = avg > 0 ? avg.ToString("F1") : "-";
                                     var grossText = grossScore?.ToString() ?? "-";
                                     var handicapText = handicap > 0 ? Math.Round(handicap).ToString() : "-";
                                     var pointsText = weekPoints > 0 ? weekPoints.ToString() : "-";
 
-                                    // Format horizontally with better separation for readability
-                                    var cellText = $"{avgText}  |  {grossText}  |  {handicapText}  |  {pointsText}";
-
-                                    table.Cell().Background(rowColor).Padding(2)
-                                        .Text(cellText).FontSize(7).AlignCenter().FontColor(Colors.Black);
+                                    // Create separate cells for each data type
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text(avgText).FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text(grossText).FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text(handicapText).FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text(pointsText).FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    // Week separator
+                                    table.Cell().Background(Colors.Grey.Darken1).Padding(0);
                                 }
                             }
 
                             // Total column
                             var totalColor = playerTotalPoints > 0 ? Colors.Grey.Lighten3 : rowColor;
-                            table.Cell().Background(totalColor).Padding(2)
+                            table.Cell().Background(totalColor).Padding(1)
                                 .Text(playerTotalPoints > 0 ? playerTotalPoints.ToString() : "-")
-                                .FontSize(7).Bold().AlignCenter().FontColor(Colors.Black);
+                                .FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
                         }
                     });
                 });

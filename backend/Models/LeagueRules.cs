@@ -13,7 +13,7 @@ namespace GolfLeagueManager.Models
         public Guid SeasonId { get; set; }
         
         [ForeignKey("SeasonId")]
-        public Season Season { get; set; }
+        public Season? Season { get; set; }
         
         [Required]
         public string Content { get; set; } = string.Empty;
