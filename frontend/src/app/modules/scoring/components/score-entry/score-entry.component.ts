@@ -351,15 +351,15 @@ export class ScoreEntryComponent implements OnInit {
 
     // Use bulk endpoint to get all hole scores at once
     const matchupIds = matchupsToLoad.map(m => m.id!);
-    
+
     this.scorecardService.getBulkScorecards(matchupIds).subscribe({
       next: (bulkResults) => {
         console.log(`Loaded hole scores for ${Object.keys(bulkResults).length} matchups via bulk endpoint`);
-        
+
         // Update cache and matchup objects with bulk results
         Object.entries(bulkResults).forEach(([matchupId, holeScores]) => {
           this.holeScoresCache.set(matchupId, holeScores || []);
-          
+
           const matchup = this.matchups.find(m => m.id === matchupId);
           if (matchup) {
             matchup.holeScores = holeScores || [];
@@ -379,7 +379,7 @@ export class ScoreEntryComponent implements OnInit {
       error: (error) => {
         console.error('Error loading bulk hole scores, falling back to individual calls:', error);
         this.isLoadingHoleScores = false;
-        
+
         // Fallback to individual calls if bulk fails
         this.loadHoleScoresIndividual(matchupsToLoad);
       }
@@ -460,6 +460,7 @@ export class ScoreEntryComponent implements OnInit {
       matchup.playerBScore !== matchup.originalPlayerBScore
     );
   }
+
   getMatchupWinner(matchup: MatchupWithDetails): string {
     // Handle absence scenarios first
     if (matchup.playerAAbsent && matchup.playerBAbsent) {
@@ -994,11 +995,11 @@ export class ScoreEntryComponent implements OnInit {
     // Use bulk endpoints to fetch all data at once
     forkJoin({
       averages: this.averageScoreService.getAllPlayerAverageScoresUpToWeek(
-        this.selectedWeek.seasonId, 
+        this.selectedWeek.seasonId,
         this.selectedWeek.weekNumber
       ),
       handicaps: this.handicapService.getAllPlayerHandicapsUpToWeek(
-        this.selectedWeek.seasonId, 
+        this.selectedWeek.seasonId,
         this.selectedWeek.weekNumber
       )
     }).subscribe({

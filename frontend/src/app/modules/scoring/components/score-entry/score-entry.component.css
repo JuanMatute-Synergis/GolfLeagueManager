@@ -61,4 +61,41 @@
     background: hsl(var(--muted) / 0.95) !important;
     border-bottom: 1px solid hsl(var(--border));
   }
+
+  /* Mobile card animations */
+  .mobile-matchup-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .mobile-matchup-card:active {
+    transform: scale(0.98);
+  }
+
+  /* Improved mobile input styling */
+  .mobile-score-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+  }
+
+  .mobile-score-input::-webkit-outer-spin-button,
+  .mobile-score-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Better touch targets for checkboxes */
+  .mobile-checkbox-label {
+    min-height: 44px;
+    padding: 0.75rem;
+  }
+
+  /* Card shadow enhancement for depth */
+  .mobile-card-shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .mobile-card-shadow:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
 }
