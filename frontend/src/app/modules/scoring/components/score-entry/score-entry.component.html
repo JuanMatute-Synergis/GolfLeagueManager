@@ -263,26 +263,8 @@
                 </div>
               </div>
 
-              <!-- Score Entry for Player A (Edit Mode Only) -->
-              <div *ngIf="mode !== 'matchups'" class="flex items-center space-x-2">
-                <div class="flex-1">
-                  <label class="text-xs text-muted-foreground block mb-1">Gross Score</label>
-                  <input type="number" [(ngModel)]="matchup.playerAScore" (ngModelChange)="onScoreChange(matchup)"
-                    [disabled]="!!matchup.playerAAbsent" placeholder="Score"
-                    class="w-full h-12 px-3 border border-border rounded-md bg-background text-foreground text-lg font-medium text-center focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-muted disabled:cursor-not-allowed mobile-score-input">
-                </div>
-                <div class="flex flex-col space-y-1">
-                  <label class="flex items-center space-x-1 text-xs cursor-pointer">
-                    <input type="checkbox" [(ngModel)]="matchup.playerAAbsent"
-                      (change)="matchup.playerAAbsent && (matchup.playerAScore = undefined); onScoreChange(matchup)"
-                      class="w-4 h-4 text-primary bg-background border-border rounded">
-                    <span class="text-muted-foreground">Absent</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Score Display (View Mode) -->
-              <div *ngIf="mode === 'matchups'" class="flex items-center space-x-2">
+              <!-- Score Display -->
+              <div class="flex items-center space-x-2">
                 <span
                   class="px-3 py-2 text-lg font-semibold text-foreground bg-muted rounded-md min-w-[4rem] text-center">
                   <span *ngIf="!matchup.playerAAbsent">{{ matchup.playerAScore || '-' }}</span>
@@ -318,26 +300,8 @@
                 </div>
               </div>
 
-              <!-- Score Entry for Player B (Edit Mode Only) -->
-              <div *ngIf="mode !== 'matchups'" class="flex items-center space-x-2">
-                <div class="flex-1">
-                  <label class="text-xs text-muted-foreground block mb-1">Gross Score</label>
-                  <input type="number" [(ngModel)]="matchup.playerBScore" (ngModelChange)="onScoreChange(matchup)"
-                    [disabled]="!!matchup.playerBAbsent" placeholder="Score"
-                    class="w-full h-12 px-3 border border-border rounded-md bg-background text-foreground text-lg font-medium text-center focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-muted disabled:cursor-not-allowed mobile-score-input">
-                </div>
-                <div class="flex flex-col space-y-1">
-                  <label class="flex items-center space-x-1 text-xs cursor-pointer">
-                    <input type="checkbox" [(ngModel)]="matchup.playerBAbsent"
-                      (change)="matchup.playerBAbsent && (matchup.playerBScore = undefined); onScoreChange(matchup)"
-                      class="w-4 h-4 text-primary bg-background border-border rounded">
-                    <span class="text-muted-foreground">Absent</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Score Display (View Mode) -->
-              <div *ngIf="mode === 'matchups'" class="flex items-center space-x-2">
+              <!-- Score Display -->
+              <div class="flex items-center space-x-2">
                 <span
                   class="px-3 py-2 text-lg font-semibold text-foreground bg-muted rounded-md min-w-[4rem] text-center">
                   <span *ngIf="!matchup.playerBAbsent">{{ matchup.playerBScore || '-' }}</span>
@@ -355,23 +319,16 @@
           <div class="bg-muted/20 px-4 py-3 border-t border-border">
             <div class="flex space-x-2">
               <button (click)="openScorecardModal(matchup)"
-                class="flex-1 bg-green-600 text-white py-3 px-4 rounded-md text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center space-x-2"
-                [title]="mode === 'matchups' ? 'View scorecard' : 'Edit scorecard'">
+                class="flex-1 bg-primary text-primary-foreground py-3 px-4 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors flex items-center justify-center space-x-2"
+                [title]="mode === 'matchups' ? 'View scorecard' : 'Enter scores hole by hole'">
                 <span>📋</span>
-                <span>{{ mode === 'matchups' ? 'View Card' : 'Full Card' }}</span>
-              </button>
-
-              <button *ngIf="mode !== 'matchups' && matchup.hasChanged" (click)="saveMatchupScore(matchup)"
-                [disabled]="isLoading || isLoadingData"
-                class="flex-1 bg-primary text-primary-foreground py-3 px-4 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center space-x-2">
-                <span>💾</span>
-                <span>Save</span>
+                <span>{{ mode === 'matchups' ? 'View Scorecard' : 'Enter Scores' }}</span>
               </button>
 
               <button *ngIf="mode !== 'matchups' && (matchup.playerAScore || matchup.playerBScore)"
                 (click)="clearMatchupScores(matchup)"
                 class="bg-destructive text-destructive-foreground py-3 px-3 rounded-md text-sm font-medium hover:bg-destructive/90 transition-colors flex items-center justify-center"
-                title="Clear scores">
+                title="Clear all scores">
                 🗑️
               </button>
             </div>
