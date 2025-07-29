@@ -289,8 +289,8 @@
     <div *ngIf="mobileActiveTab === 'players'" class="h-full">
       <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col h-full">
         <div class="p-4 border-b border-border bg-muted/20 flex-shrink-0">
-          <div class="flex justify-between items-center">
-            <div>
+          <div class="flex justify-between items-start">
+            <div class="flex-1 min-w-0">
               <h3 class="text-lg font-semibold text-foreground">Player Assignments</h3>
               <p class="text-sm text-muted-foreground" *ngIf="selectedFlightId">
                 {{ getSelectedFlightName() }}
@@ -298,9 +298,20 @@
                   {{ flightAssignments.length }} players
                 </span>
               </p>
+              <!-- Session selector for mobile -->
+              <div class="mt-2" *ngIf="selectedSeasonId && availableSessions.length > 1">
+                <label class="block text-xs font-medium text-foreground mb-1">Session:</label>
+                <select
+                  class="text-sm border border-border rounded px-2 py-1 bg-background focus:border-primary focus:ring-1 focus:ring-primary/20"
+                  [(ngModel)]="selectedSessionInfo" (ngModelChange)="selectSession($event)">
+                  <option *ngFor="let session of availableSessions" [ngValue]="session">
+                    {{ getSessionDisplayName(session) }}
+                  </option>
+                </select>
+              </div>
             </div>
             <!-- Navigation helpers -->
-            <div class="flex gap-2" *ngIf="!selectedFlightId">
+            <div class="flex gap-2 flex-shrink-0 ml-2" *ngIf="!selectedFlightId">
               <button class="bg-primary text-primary-foreground px-3 py-1.5 rounded text-xs font-medium"
                 (click)="setMobileActiveTab('seasons')" *ngIf="!selectedSeasonId">
                 Select Season
@@ -354,14 +365,40 @@
             <h4 class="text-md font-medium text-foreground mb-4">Assign Player</h4>
             <div class="space-y-3">
               <div>
-                <label class="block text-sm font-medium text-foreground mb-1">Player</label>
-                <select class="w-full p-3 border border-border rounded text-base" [(ngModel)]="selectedPlayerId"
-                  (ngModelChange)="onPlayerSelected()">
-                  <option [ngValue]="null">-- Select Player --</option>
-                  <option *ngFor="let player of getAvailablePlayers()" [ngValue]="player.id">
-                    {{ player.firstName }} {{ player.lastName }}
+                <label class="block text-sm font-medium text-foreground mb-1">Session</label>
+                <select class="w-full p-3 border border-border rounded text-base" [(ngModel)]="selectedSessionInfo">
+                  <option *ngFor="let session of availableSessions" [ngValue]="session">
+                    {{ getSessionDisplayName(session) }}
                   </option>
                 </select>
+                <p class="text-xs text-muted-foreground mt-1" *ngIf="selectedSessionInfo">
+                  Players will be assigned to {{ getSessionDisplayName(selectedSessionInfo) }}
+                </p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-foreground mb-1">Player</label>
+                <div class="relative">
+                  <input type="text" [(ngModel)]="playerSearchTerm" (input)="onPlayerSearchChange()"
+                    (focus)="onPlayerSearchFocus()" (blur)="onPlayerSearchBlur()"
+                    class="w-full p-3 border border-border rounded text-base pr-10" placeholder="Search for a player..."
+                    autocomplete="off">
+                  <button type="button" *ngIf="selectedPlayerId" (click)="clearPlayerSearch()"
+                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    <i class="fas fa-times"></i>
+                  </button>
+                  <!-- Dropdown -->
+                  <div *ngIf="showPlayerDropdown && filteredPlayers.length > 0"
+                    class="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    <div *ngFor="let player of filteredPlayers" (click)="selectPlayerFromSearch(player)"
+                      class="px-3 py-2 hover:bg-muted cursor-pointer text-base">
+                      {{ player.firstName }} {{ player.lastName }}
+                    </div>
+                    <div *ngIf="filteredPlayers.length === 0 && playerSearchTerm.trim() !== ''"
+                      class="px-3 py-2 text-muted-foreground text-base">
+                      No players found
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="grid grid-cols-1 gap-3">
                 <div>
@@ -390,7 +427,11 @@
               <button (click)="assignPlayerToFlight()"
                 class="w-full bg-primary text-primary-foreground px-4 py-3 rounded text-base font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 [disabled]="!selectedPlayerId || isLoading">
-                Assign to Flight
+                <span *ngIf="!isLoading">Assign to Flight</span>
+                <span *ngIf="isLoading" class="flex items-center justify-center">
+                  <i class="fas fa-spinner fa-spin mr-2"></i>
+                  Assigning...
+                </span>
               </button>
             </div>
           </div>
@@ -661,8 +702,22 @@
     <!-- Column 3: Player Assignments -->
     <div class="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
       <div class="p-4 border-b border-border bg-muted/20">
-        <h3 class="text-lg font-semibold text-foreground">Player Assignments</h3>
-        <p class="text-xs text-muted-foreground mt-1" *ngIf="selectedFlightId">{{ getSelectedFlightName() }}</p>
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="text-lg font-semibold text-foreground">Player Assignments</h3>
+            <p class="text-xs text-muted-foreground mt-1" *ngIf="selectedFlightId">{{ getSelectedFlightName() }}</p>
+          </div>
+          <div class="min-w-0 ml-4" *ngIf="selectedSeasonId && availableSessions.length > 1">
+            <label class="block text-xs font-medium text-foreground mb-1">Viewing Session:</label>
+            <select
+              class="text-xs border border-border rounded px-2 py-1 bg-background focus:border-primary focus:ring-1 focus:ring-primary/20"
+              [(ngModel)]="selectedSessionInfo" (ngModelChange)="selectSession($event)">
+              <option *ngFor="let session of availableSessions" [ngValue]="session">
+                {{ getSessionDisplayName(session) }}
+              </option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div class="flex-1 overflow-y-auto">
@@ -687,15 +742,42 @@
           <h4 class="text-md font-medium text-foreground mb-4">Assign Player</h4>
           <div class="space-y-3">
             <div>
-              <label class="block text-sm font-medium text-foreground mb-1">Player</label>
+              <label class="block text-sm font-medium text-foreground mb-1">Session</label>
               <select
                 class="w-full p-3 lg:p-2 border border-border rounded text-base lg:text-sm focus:border-primary focus:ring-2 focus:ring-primary/20"
-                [(ngModel)]="selectedPlayerId" (ngModelChange)="onPlayerSelected()">
-                <option [ngValue]="null">-- Select Player --</option>
-                <option *ngFor="let player of getAvailablePlayers()" [ngValue]="player.id">
-                  {{ player.firstName }} {{ player.lastName }}
+                [(ngModel)]="selectedSessionInfo" (ngModelChange)="selectSession($event)">
+                <option *ngFor="let session of availableSessions" [ngValue]="session">
+                  {{ getSessionDisplayName(session) }}
                 </option>
               </select>
+              <p class="text-xs text-muted-foreground mt-1" *ngIf="selectedSessionInfo">
+                Players will be assigned to {{ getSessionDisplayName(selectedSessionInfo) }}
+              </p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-foreground mb-1">Player</label>
+              <div class="relative">
+                <input type="text" [(ngModel)]="playerSearchTerm" (input)="onPlayerSearchChange()"
+                  (focus)="onPlayerSearchFocus()" (blur)="onPlayerSearchBlur()"
+                  class="w-full p-3 lg:p-2 border border-border rounded text-base lg:text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 pr-10"
+                  placeholder="Search for a player..." autocomplete="off">
+                <button type="button" *ngIf="selectedPlayerId" (click)="clearPlayerSearch()"
+                  class="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  <i class="fas fa-times text-sm"></i>
+                </button>
+                <!-- Dropdown -->
+                <div *ngIf="showPlayerDropdown && filteredPlayers.length > 0"
+                  class="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  <div *ngFor="let player of filteredPlayers" (click)="selectPlayerFromSearch(player)"
+                    class="px-3 py-2 hover:bg-muted cursor-pointer text-base lg:text-sm">
+                    {{ player.firstName }} {{ player.lastName }}
+                  </div>
+                  <div *ngIf="filteredPlayers.length === 0 && playerSearchTerm.trim() !== ''"
+                    class="px-3 py-2 text-muted-foreground text-base lg:text-sm">
+                    No players found
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="grid grid-cols-1 gap-3 lg:gap-2">
               <div>
@@ -726,7 +808,11 @@
             <button (click)="assignPlayerToFlight()"
               class="w-full bg-primary text-primary-foreground px-4 py-3 lg:px-3 lg:py-2 rounded-md text-base lg:text-sm font-medium transition-colors hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               [disabled]="!selectedPlayerId || isLoading">
-              Assign to Flight
+              <span *ngIf="!isLoading">Assign to Flight</span>
+              <span *ngIf="isLoading" class="flex items-center justify-center">
+                <i class="fas fa-spinner fa-spin mr-2"></i>
+                Assigning...
+              </span>
             </button>
           </div>
         </div>

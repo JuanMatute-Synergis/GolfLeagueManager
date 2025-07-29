@@ -219,9 +219,12 @@ namespace GolfLeagueManager.Controllers
 
             // Get all flights for the season
             var flights = await _flightService.GetFlightsBySeasonIdAsync(seasonId);
-            var assignments = _flightAssignmentService.GetAllAssignments()
-                .Where(a => a.Flight != null && a.Flight.SeasonId == seasonId)
+            
+            // Get assignments for the current session only
+            var assignments = _flightAssignmentService.GetAssignmentsBySession(seasonId, sessionStartWeekNumber)
+                .Where(a => a.Flight != null)
                 .ToList();
+            
             var players = await _playerService.GetAllPlayersAsync();
 
             // Get all matchups for the session
@@ -328,11 +331,18 @@ namespace GolfLeagueManager.Controllers
                     var handicapUpToWeek = await _handicapService.GetPlayerHandicapUpToWeekAsync(
                         player.Id, seasonId, currentWeekNumber);
 
+                    // Create display name that handles suffixes like "JR"
+                    var displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.";
+                    if (player.LastName.ToUpper().EndsWith(" JR"))
+                    {
+                        displayName = $"{player.FirstName} {player.LastName.Substring(0, player.LastName.Length - 3).Substring(0, 1)}. JR";
+                    }
+
                     playerStats.Add(new
                     {
                         id = player.Id,
-                        name = $"{player.FirstName} {player.LastName.Substring(0, 1)}.",
-                        displayName = $"{player.FirstName} {player.LastName.Substring(0, 1)}.",
+                        name = displayName,
+                        displayName = displayName,
                         handicap = handicapUpToWeek,
                         averageScore = averageScore,
                         grossScore = grossScore ?? 0,

@@ -143,6 +143,20 @@ namespace GolfLeagueManager
                     .WithMany()
                     .HasForeignKey(e => e.FlightId)
                     .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.Season)
+                    .WithMany()
+                    .HasForeignKey(e => e.SeasonId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Create a unique constraint to prevent duplicate assignments for the same player/session
+                entity.HasIndex(e => new { e.PlayerId, e.SeasonId, e.SessionStartWeekNumber })
+                    .IsUnique()
+                    .HasDatabaseName("IX_PlayerFlightAssignment_PlayerSeasonSession");
+
+                entity.Property(e => e.AssignmentDate)
+                    .HasConversion(
+                        v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
             });
             // Configure ScoreEntry entity
             modelBuilder.Entity<ScoreEntry>(entity =>

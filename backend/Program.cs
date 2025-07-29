@@ -61,6 +61,7 @@ namespace GolfLeagueManager
             builder.Services.AddScoped<FlightService>();
             builder.Services.AddScoped<SeasonService>();
             builder.Services.AddScoped<PlayerFlightAssignmentService>();
+            builder.Services.AddScoped<FlightAssignmentMigrationService>();
             builder.Services.AddScoped<WeekService>();
             builder.Services.AddScoped<ScoreEntryService>();
             builder.Services.AddScoped<MatchupService>();

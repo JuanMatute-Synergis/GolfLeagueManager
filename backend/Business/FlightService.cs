@@ -60,6 +60,10 @@ namespace GolfLeagueManager
 
             if (flight.MaxPlayers <= 0)
                 throw new ArgumentException("Max players must be greater than 0.");
+
+            // Session-based flights should be associated with a season
+            if (flight.SeasonId == null || flight.SeasonId == Guid.Empty)
+                throw new ArgumentException("Season ID is required for flight assignments.");
         }
     }
 }

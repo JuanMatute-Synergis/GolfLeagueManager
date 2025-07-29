@@ -34,11 +34,51 @@ namespace GolfLeagueManager
             return Ok(assignments);
         }
 
+        [HttpGet("flight/{flightId}/session")]
+        public ActionResult<IEnumerable<PlayerFlightAssignment>> GetAssignmentsByFlightAndSession(Guid flightId, [FromQuery] Guid seasonId, [FromQuery] int sessionStartWeekNumber)
+        {
+            if (seasonId == Guid.Empty || sessionStartWeekNumber <= 0)
+                return BadRequest("Valid seasonId and sessionStartWeekNumber are required.");
+
+            var assignments = _service.GetAssignmentsByFlightAndSession(flightId, seasonId, sessionStartWeekNumber);
+            return Ok(assignments);
+        }
+
         [HttpGet("player/{playerId}")]
         public ActionResult<IEnumerable<PlayerFlightAssignment>> GetAssignmentsByPlayer(Guid playerId)
         {
             var assignments = _service.GetAssignmentsByPlayer(playerId);
             return Ok(assignments);
+        }
+
+        [HttpGet("player/{playerId}/season/{seasonId}")]
+        public ActionResult<IEnumerable<PlayerFlightAssignment>> GetAssignmentsByPlayerAndSeason(Guid playerId, Guid seasonId)
+        {
+            var assignments = _service.GetAssignmentsByPlayerAndSeason(playerId, seasonId);
+            return Ok(assignments);
+        }
+
+        [HttpGet("session")]
+        public ActionResult<IEnumerable<PlayerFlightAssignment>> GetAssignmentsBySession([FromQuery] Guid seasonId, [FromQuery] int sessionStartWeekNumber)
+        {
+            if (seasonId == Guid.Empty || sessionStartWeekNumber <= 0)
+                return BadRequest("Valid seasonId and sessionStartWeekNumber are required.");
+
+            var assignments = _service.GetAssignmentsBySession(seasonId, sessionStartWeekNumber);
+            return Ok(assignments);
+        }
+
+        [HttpGet("player/{playerId}/session")]
+        public ActionResult<PlayerFlightAssignment> GetPlayerAssignmentForSession(Guid playerId, [FromQuery] Guid seasonId, [FromQuery] int sessionStartWeekNumber)
+        {
+            if (seasonId == Guid.Empty || sessionStartWeekNumber <= 0)
+                return BadRequest("Valid seasonId and sessionStartWeekNumber are required.");
+
+            var assignment = _service.GetPlayerAssignmentForSession(playerId, seasonId, sessionStartWeekNumber);
+            if (assignment == null)
+                return NotFound();
+
+            return Ok(assignment);
         }
 
         [HttpGet("{id}")]

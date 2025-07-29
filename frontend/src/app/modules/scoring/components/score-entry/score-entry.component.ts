@@ -17,6 +17,9 @@ import { ScorecardData } from '../../models/scorecard.model';
 import { HoleScoreBackend } from '../../services/scorecard.service';
 import { DateUtilService } from '../../../../core/services/date-util.service';
 import { HttpClient } from '@angular/common/http';
+import { SessionService } from '../../../settings/services/session.service';
+import { PlayerFlightAssignmentService } from '../../../settings/services/player-flight-assignment.service';
+import { FlightService } from '../../../settings/services/flight.service';
 
 interface MatchupWithDetails extends Matchup {
   playerAName?: string;
@@ -102,7 +105,10 @@ export class ScoreEntryComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private dateUtil: DateUtilService,
-    private http: HttpClient
+    private http: HttpClient,
+    private sessionService: SessionService,
+    private playerFlightAssignmentService: PlayerFlightAssignmentService,
+    private flightService: FlightService
   ) { }
 
   ngOnInit() {
@@ -266,38 +272,85 @@ export class ScoreEntryComponent implements OnInit {
     });
   }
 
+  // Get players with session-aware flight assignments
+  private async getPlayersWithSessionFlightAssignments(): Promise<PlayerWithFlight[]> {
+    if (!this.selectedSeasonId || !this.selectedWeekId || !this.selectedWeek) {
+      throw new Error('Season, week, and selected week are required');
+    }
+
+    // Get session start week number for the selected week
+    const sessionStartWeekNumber = await firstValueFrom(
+      this.sessionService.getSessionStartWeekForWeek(this.selectedSeasonId, this.selectedWeek.weekNumber)
+    );
+
+    console.log('Getting session-aware flight assignments for session starting at week:', sessionStartWeekNumber);
+
+    // Get session-specific flight assignments
+    const assignments = await firstValueFrom(
+      this.playerFlightAssignmentService.getAssignmentsBySession(this.selectedSeasonId, sessionStartWeekNumber)
+    );
+
+    // Get all players
+    const allPlayers = await firstValueFrom(this.scoringService.getPlayers());
+
+    // Get all flights to map flight IDs to names
+    const allFlights = await firstValueFrom(this.flightService.getFlightsBySeason(this.selectedSeasonId));
+
+    // Combine players with their flight assignments
+    const playersWithFlights: PlayerWithFlight[] = assignments.map(assignment => {
+      const player = allPlayers.find(p => p.id === assignment.playerId);
+      const flight = allFlights.find(f => f.id === assignment.flightId);
+      
+      if (!player) {
+        console.warn('Player not found for assignment:', assignment.playerId);
+        return null;
+      }
+
+      return {
+        ...player,
+        flightId: assignment.flightId,
+        flightName: flight?.name || 'Unknown Flight',
+        handicapAtAssignment: assignment.handicapAtAssignment,
+        isFlightLeader: assignment.isFlightLeader
+      };
+    }).filter(p => p !== null) as PlayerWithFlight[];
+
+    console.log('Found players with session-aware flight assignments:', playersWithFlights.length);
+    return playersWithFlights;
+  }
+
   // Load both players and matchups simultaneously to avoid timing issues
   async loadPlayersAndMatchups() {
     if (!this.selectedSeasonId || !this.selectedWeekId) return;
 
     this.isLoadingData = true;
-    console.log('Loading players and matchups simultaneously');
+    console.log('Loading players and matchups with session-aware flight assignments');
 
-    forkJoin({
-      players: this.scoringService.getPlayersInFlights(this.selectedSeasonId),
-      matchups: this.matchupService.getMatchupsByWeek(this.selectedWeekId)
-    }).subscribe({
-      next: async ({ players, matchups }) => {
-        console.log('Loaded:', players.length, 'players and', matchups.length, 'matchups');
+    try {
+      // Get session-aware players with flight assignments
+      const players = await this.getPlayersWithSessionFlightAssignments();
+      
+      // Get matchups for the week
+      const matchups = await firstValueFrom(this.matchupService.getMatchupsByWeek(this.selectedWeekId));
+      
+      console.log('Loaded:', players.length, 'players and', matchups.length, 'matchups');
 
-        // Set players first
-        this.players = players;
+      // Set players first
+      this.players = players;
 
-        // Then enrich matchups with player details
-        this.matchups = this.sortMatchupsByFlight(matchups.map(matchup => this.enrichMatchupWithDetails(matchup)));
+      // Then enrich matchups with player details
+      this.matchups = this.sortMatchupsByFlight(matchups.map(matchup => this.enrichMatchupWithDetails(matchup)));
 
-        // Pre-load player averages and handicaps for all players in matchups
-        this.preLoadPlayerAverages();
+      // Pre-load player averages and handicaps for all players in matchups
+      this.preLoadPlayerAverages();
 
-        // Load hole scores
-        this.loadHoleScoresForMatchups();
-        this.isLoadingData = false;
-      },
-      error: (error) => {
-        console.error('Error loading players and matchups:', error);
-        this.isLoadingData = false;
-      }
-    });
+      // Load hole scores
+      this.loadHoleScoresForMatchups();
+      this.isLoadingData = false;
+    } catch (error) {
+      console.error('Error loading players and matchups:', error);
+      this.isLoadingData = false;
+    }
   }
 
   // Helper method to refresh hole scores for a specific matchup

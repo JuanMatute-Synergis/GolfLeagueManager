@@ -6,6 +6,7 @@ import { PlayerFlightAssignmentService, PlayerFlightAssignment } from '../../ser
 import { PlayerSeasonStatsService, PlayerSeasonRecord } from '../../services/player-season-stats.service';
 import { PlayerService, Player } from '../../services/player.service';
 import { SeasonService, Season } from '../../services/season.service';
+import { SessionService, SessionInfo } from '../../services/session.service';
 
 @Component({
   selector: 'app-seasons-settings',
@@ -52,6 +53,16 @@ export class SeasonsSettingsComponent implements OnInit {
   initialHandicap: number | null = null;
   initialAverageScore: number | null = null;
 
+  // Player search functionality
+  playerSearchTerm: string = '';
+  showPlayerDropdown: boolean = false;
+  filteredPlayers: Player[] = [];
+
+  // Session information
+  currentSessionInfo: SessionInfo | null = null;
+  availableSessions: SessionInfo[] = [];
+  selectedSessionInfo: SessionInfo | null = null;
+
   get selectedSeason(): Season | undefined {
     return this.seasons.find(season => season.id === this.selectedSeasonId);
   }
@@ -62,7 +73,8 @@ export class SeasonsSettingsComponent implements OnInit {
     private playerService: PlayerService,
     private playerFlightAssignmentService: PlayerFlightAssignmentService,
     private seasonService: SeasonService,
-    private playerSeasonStatsService: PlayerSeasonStatsService
+    private playerSeasonStatsService: PlayerSeasonStatsService,
+    private sessionService: SessionService
   ) {
     this.seasonForm = this.fb.group({
       name: ['', Validators.required],
@@ -119,6 +131,7 @@ export class SeasonsSettingsComponent implements OnInit {
           // Use the first active season
           this.selectedSeasonId = activeSeasons[0].id;
           this.loadSeasonFlights(activeSeasons[0].id);
+          this.loadCurrentSessionInfo(activeSeasons[0].id);
         } else {
           // No active seasons, find the most recent one
           this.selectMostRecentSeason(seasons);
@@ -142,6 +155,7 @@ export class SeasonsSettingsComponent implements OnInit {
 
     this.selectedSeasonId = sortedSeasons[0].id;
     this.loadSeasonFlights(this.selectedSeasonId);
+    this.loadCurrentSessionInfo(this.selectedSeasonId);
   }
 
   // Season Management
@@ -235,6 +249,69 @@ export class SeasonsSettingsComponent implements OnInit {
   selectSeason(season: Season) {
     this.selectedSeasonId = season.id;
     this.loadSeasonFlights(season.id);
+    this.loadCurrentSessionInfo(season.id);
+  }
+
+  private loadCurrentSessionInfo(seasonId: string) {
+    // Load available sessions first
+    this.sessionService.getAvailableSessions(seasonId).subscribe({
+      next: (sessions) => {
+        this.availableSessions = sessions;
+        // Auto-select the current session or the first available session
+        if (sessions.length > 0) {
+          this.selectedSessionInfo = sessions[0]; // Default to first session
+        }
+      },
+      error: (error) => {
+        console.error('Error loading available sessions:', error);
+        this.availableSessions = [];
+        // Provide a default session
+        this.selectedSessionInfo = {
+          sessionNumber: 1,
+          sessionStartWeekNumber: 1,
+          currentWeekNumber: 1
+        };
+      }
+    });
+
+    // Load current session info
+    this.sessionService.getCurrentSession(seasonId).subscribe({
+      next: (sessionInfo) => {
+        this.currentSessionInfo = sessionInfo;
+        // If no session selected yet, use current session
+        if (!this.selectedSessionInfo) {
+          this.selectedSessionInfo = sessionInfo;
+        }
+        // Reload assignments with session context
+        if (this.seasonFlights.length > 0) {
+          this.loadAllSeasonAssignments(seasonId);
+        }
+        // If a flight is selected, reload its assignments
+        if (this.selectedFlightId) {
+          this.loadFlightAssignments(this.selectedFlightId);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading session info:', error);
+        // Fallback to session 1, week 1
+        this.currentSessionInfo = {
+          sessionNumber: 1,
+          sessionStartWeekNumber: 1,
+          currentWeekNumber: 1
+        };
+        // If no session selected yet, use fallback
+        if (!this.selectedSessionInfo) {
+          this.selectedSessionInfo = this.currentSessionInfo;
+        }
+        // Still reload assignments with fallback session info
+        if (this.seasonFlights.length > 0) {
+          this.loadAllSeasonAssignments(seasonId);
+        }
+        if (this.selectedFlightId) {
+          this.loadFlightAssignments(this.selectedFlightId);
+        }
+      }
+    });
   }
 
   resetSeasonForm() {
@@ -375,39 +452,82 @@ export class SeasonsSettingsComponent implements OnInit {
     this.error = null;
 
     this.selectedPlayerId = null;
+    this.playerSearchTerm = '';
+    this.showPlayerDropdown = false;
+    this.filteredPlayers = [];
     this.isFlightLeader = false;
     this.playerHandicap = null;
     this.initialHandicap = null;
     this.initialAverageScore = null;
 
-    this.playerFlightAssignmentService.getAssignmentsByFlight(flightId).subscribe({
-      next: (assignments: PlayerFlightAssignment[]) => {
-        this.flightAssignments = assignments;
-        this.isLoading = false;
-      },
-      error: (error: any) => {
-        console.error('Error loading flight assignments:', error);
-        this.error = 'Failed to load flight assignments. Please try again.';
-        this.isLoading = false;
-      }
-    });
+    // Use selected session info if available, otherwise fall back to current session
+    const sessionInfoToUse = this.selectedSessionInfo || this.currentSessionInfo;
+
+    if (sessionInfoToUse && this.selectedSeasonId) {
+      this.playerFlightAssignmentService.getAssignmentsByFlightAndSession(
+        flightId,
+        this.selectedSeasonId,
+        sessionInfoToUse.sessionStartWeekNumber
+      ).subscribe({
+        next: (assignments: PlayerFlightAssignment[]) => {
+          this.flightAssignments = assignments;
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading flight assignments for session:', error);
+          this.error = 'Failed to load flight assignments for current session. Please try again.';
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Fallback to loading all assignments for the flight
+      this.playerFlightAssignmentService.getAssignmentsByFlight(flightId).subscribe({
+        next: (assignments: PlayerFlightAssignment[]) => {
+          this.flightAssignments = assignments;
+          this.isLoading = false;
+        },
+        error: (error: any) => {
+          console.error('Error loading flight assignments:', error);
+          this.error = 'Failed to load flight assignments. Please try again.';
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
   loadAllSeasonAssignments(seasonId: string) {
-    // Get all assignments and filter by season flights
-    this.playerFlightAssignmentService.getAllAssignments().subscribe({
-      next: (allAssignments: PlayerFlightAssignment[]) => {
-        // Filter assignments to only include those for flights in the current season
-        const seasonFlightIds = this.seasonFlights.map(flight => flight.id!);
-        this.allSeasonAssignments = allAssignments.filter(assignment =>
-          seasonFlightIds.includes(assignment.flightId)
-        );
-      },
-      error: (error: any) => {
-        console.error('Error loading season assignments:', error);
-        this.error = 'Failed to load season assignments. Please try again.';
-      }
-    });
+    // Use selected session info if available, otherwise fall back to current session
+    const sessionInfoToUse = this.selectedSessionInfo || this.currentSessionInfo;
+
+    if (sessionInfoToUse) {
+      this.playerFlightAssignmentService.getAssignmentsBySession(
+        seasonId,
+        sessionInfoToUse.sessionStartWeekNumber
+      ).subscribe({
+        next: (sessionAssignments: PlayerFlightAssignment[]) => {
+          this.allSeasonAssignments = sessionAssignments;
+        },
+        error: (error: any) => {
+          console.error('Error loading session assignments:', error);
+          this.error = 'Failed to load session assignments. Please try again.';
+        }
+      });
+    } else {
+      // Fallback: Get all assignments and filter by season flights
+      this.playerFlightAssignmentService.getAllAssignments().subscribe({
+        next: (allAssignments: PlayerFlightAssignment[]) => {
+          // Filter assignments to only include those for flights in the current season
+          const seasonFlightIds = this.seasonFlights.map(flight => flight.id!);
+          this.allSeasonAssignments = allAssignments.filter(assignment =>
+            seasonFlightIds.includes(assignment.flightId)
+          );
+        },
+        error: (error: any) => {
+          console.error('Error loading season assignments:', error);
+          this.error = 'Failed to load season assignments. Please try again.';
+        }
+      });
+    }
   }
 
   onPlayerSelected() {
@@ -417,6 +537,57 @@ export class SeasonsSettingsComponent implements OnInit {
       this.initialAverageScore = null;
     }
     // Let the user enter the values manually
+  }
+
+  // Player search methods
+  onPlayerSearchChange() {
+    const searchTerm = this.playerSearchTerm.toLowerCase();
+    const availablePlayers = this.getAvailablePlayers();
+
+    if (searchTerm.trim() === '') {
+      this.filteredPlayers = availablePlayers;
+    } else {
+      this.filteredPlayers = availablePlayers.filter(player =>
+        `${player.firstName} ${player.lastName}`.toLowerCase().includes(searchTerm) ||
+        player.firstName.toLowerCase().includes(searchTerm) ||
+        player.lastName.toLowerCase().includes(searchTerm)
+      );
+    }
+
+    this.showPlayerDropdown = true;
+  }
+
+  selectPlayerFromSearch(player: Player) {
+    this.selectedPlayerId = player.id!;
+    this.playerSearchTerm = `${player.firstName} ${player.lastName}`;
+    this.showPlayerDropdown = false;
+    this.onPlayerSelected();
+  }
+
+  clearPlayerSearch() {
+    this.selectedPlayerId = null;
+    this.playerSearchTerm = '';
+    this.showPlayerDropdown = false;
+    this.filteredPlayers = [];
+    this.onPlayerSelected();
+  }
+
+  onPlayerSearchFocus() {
+    this.filteredPlayers = this.getAvailablePlayers();
+    this.showPlayerDropdown = true;
+  }
+
+  onPlayerSearchBlur() {
+    // Delay hiding dropdown to allow for click events
+    setTimeout(() => {
+      this.showPlayerDropdown = false;
+    }, 200);
+  }
+
+  getSelectedPlayerName(): string {
+    if (!this.selectedPlayerId) return '';
+    const player = this.players.find(p => p.id === this.selectedPlayerId);
+    return player ? `${player.firstName} ${player.lastName}` : '';
   }
 
   getSelectedFlightName(): string {
@@ -441,11 +612,20 @@ export class SeasonsSettingsComponent implements OnInit {
   assignPlayerToFlight() {
     if (!this.selectedPlayerId || !this.selectedFlightId || !this.selectedSeasonId) return;
 
+    // Ensure we have session information
+    const sessionInfoToUse = this.selectedSessionInfo || this.currentSessionInfo;
+    if (!sessionInfoToUse) {
+      this.error = 'Session information not loaded. Please select a season first.';
+      return;
+    }
+
     this.isLoading = true;
 
     const assignment: PlayerFlightAssignment = {
       playerId: this.selectedPlayerId,
       flightId: this.selectedFlightId,
+      seasonId: this.selectedSeasonId,
+      sessionStartWeekNumber: sessionInfoToUse.sessionStartWeekNumber,
       isFlightLeader: this.isFlightLeader,
       handicapAtAssignment: this.playerHandicap || 0
     };
@@ -479,6 +659,9 @@ export class SeasonsSettingsComponent implements OnInit {
 
         // Reset form
         this.selectedPlayerId = null;
+        this.playerSearchTerm = '';
+        this.showPlayerDropdown = false;
+        this.filteredPlayers = [];
         this.isFlightLeader = false;
         this.playerHandicap = null;
         this.initialHandicap = null;
@@ -557,5 +740,24 @@ export class SeasonsSettingsComponent implements OnInit {
 
   getFlightAssignmentCount(flightId: string): number {
     return this.flightAssignments.filter(assignment => assignment.flightId === flightId).length;
+  }
+
+  // Session selection methods
+  selectSession(session: SessionInfo) {
+    this.selectedSessionInfo = session;
+
+    // Reload all assignments for the new session
+    if (this.selectedSeasonId) {
+      this.loadAllSeasonAssignments(this.selectedSeasonId);
+    }
+
+    // Reload current flight assignments if a flight is selected
+    if (this.selectedFlightId) {
+      this.loadFlightAssignments(this.selectedFlightId);
+    }
+  }
+
+  getSessionDisplayName(session: SessionInfo): string {
+    return `Session ${session.sessionNumber} (Week ${session.sessionStartWeekNumber})`;
   }
 }
