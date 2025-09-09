@@ -300,7 +300,7 @@ export class ScoreEntryComponent implements OnInit {
     const playersWithFlights: PlayerWithFlight[] = assignments.map(assignment => {
       const player = allPlayers.find(p => p.id === assignment.playerId);
       const flight = allFlights.find(f => f.id === assignment.flightId);
-      
+
       if (!player) {
         console.warn('Player not found for assignment:', assignment.playerId);
         return null;
@@ -329,10 +329,10 @@ export class ScoreEntryComponent implements OnInit {
     try {
       // Get session-aware players with flight assignments
       const players = await this.getPlayersWithSessionFlightAssignments();
-      
+
       // Get matchups for the week
       const matchups = await firstValueFrom(this.matchupService.getMatchupsByWeek(this.selectedWeekId));
-      
+
       console.log('Loaded:', players.length, 'players and', matchups.length, 'matchups');
 
       // Set players first

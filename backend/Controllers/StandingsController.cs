@@ -219,12 +219,12 @@ namespace GolfLeagueManager.Controllers
 
             // Get all flights for the season
             var flights = await _flightService.GetFlightsBySeasonIdAsync(seasonId);
-            
+
             // Get assignments for the current session only
             var assignments = _flightAssignmentService.GetAssignmentsBySession(seasonId, sessionStartWeekNumber)
                 .Where(a => a.Flight != null)
                 .ToList();
-            
+
             var players = await _playerService.GetAllPlayersAsync();
 
             // Get all matchups for the session

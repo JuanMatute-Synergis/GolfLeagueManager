@@ -88,7 +88,7 @@ export class SessionService {
         return this.http.get<any[]>(`${this.apiUrl}/season/${seasonId}`).pipe(
             map(weeks => {
                 console.log('SessionService: Received weeks data:', weeks);
-                
+
                 // Find all session start weeks
                 const sessionStartWeeks = weeks
                     .filter(w => w.sessionStart === true)
@@ -102,7 +102,7 @@ export class SessionService {
                     sessionStartWeekNumber: sessionWeek.weekNumber,
                     currentWeekNumber: sessionWeek.weekNumber // Default to start week
                 }));
-                
+
                 console.log('SessionService: Generated sessions:', sessions);
                 return sessions;
             }),

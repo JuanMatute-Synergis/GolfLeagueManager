@@ -2,6 +2,9 @@ tunnel: 64746180-e8db-4616-abfb-0433703b2645
 credentials-file: /etc/cloudflared/credentials.json
 
 ingress:
+  # Football pool application
+  - hostname: footballpool.golfleaguemanager.app
+    service: http://host.docker.internal:3001
   # Support wildcard subdomains for multi-tenancy
   - hostname: "*.golfleaguemanager.app"
     service: http://frontend:80
