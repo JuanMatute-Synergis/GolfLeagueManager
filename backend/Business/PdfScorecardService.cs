@@ -75,7 +75,15 @@ namespace GolfLeagueManager.Business
                 .Count();
             if (sessionNumber == 0) sessionNumber = 1;
 
-            var assignments = _flightAssignmentService.GetAllAssignments().ToList();
+            // Calculate the session start week number for the current week to get session-aware flight assignments
+            var sessionStartWeek = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= week.WeekNumber && w.SessionStart)
+                .OrderByDescending(w => w.WeekNumber)
+                .FirstOrDefault();
+            int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
+
+            // Get session-specific flight assignments instead of all assignments
+            var assignments = _flightAssignmentService.GetAssignmentsBySession(seasonId, sessionStartWeekNumber).ToList();
             var flights = await _context.Flights.ToListAsync();
             var course = await _context.Courses.Include(c => c.CourseHoles).FirstOrDefaultAsync();
             if (course == null) throw new ArgumentException("No course found.");
@@ -121,7 +129,7 @@ namespace GolfLeagueManager.Business
 
             // Sort flights by name (assuming names are numbers or can be sorted as 1-4)
             var orderedFlights = flights.OrderBy(f => f.Name).ToList();
-            // Group matchups by flight (using PlayerA's assignment for the season)
+            // Group matchups by flight (using PlayerA's assignment for the current session)
             var matchupsByFlight = orderedFlights
                 .Select(flight => new
                 {
@@ -211,12 +219,20 @@ namespace GolfLeagueManager.Business
             // Get league name from settings
             var leagueName = await GetLeagueNameAsync(seasonId);
 
-            var assignments = _flightAssignmentService.GetAllAssignments().ToList();
+            // Calculate the session start week number for the current week to get session-aware flight assignments
+            var sessionStartWeek = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= week.WeekNumber && w.SessionStart)
+                .OrderByDescending(w => w.WeekNumber)
+                .FirstOrDefault();
+            int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
+
+            // Get session-specific flight assignments instead of all assignments
+            var assignments = _flightAssignmentService.GetAssignmentsBySession(seasonId, sessionStartWeekNumber).ToList();
             var flights = await _context.Flights.ToListAsync();
 
             // Sort flights by name (assuming names are numbers or can be sorted as 1-4)
             var orderedFlights = flights.OrderBy(f => f.Name).ToList();
-            // Group matchups by flight (using PlayerA's assignment for the season)
+            // Group matchups by flight (using PlayerA's assignment for the current session)
             var matchupsByFlight = orderedFlights
                 .Select(flight => new
                 {
@@ -232,15 +248,15 @@ namespace GolfLeagueManager.Business
 
             var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
 
-            // Pre-calculate handicaps for all players in all matchups (using scoring handicap method)
+            // Pre-calculate handicaps for all players in all matchups (including current week's score for summary)
             var allPlayerIds = matchups.SelectMany(m => new[] { m.PlayerAId, m.PlayerBId }).Distinct().ToList();
             var handicapData = new Dictionary<Guid, decimal>();
             foreach (var playerId in allPlayerIds)
             {
                 try
                 {
-                    // Use scoring handicap - the handicap as it was at the start of the week
-                    var handicap = await _handicapService.GetPlayerScoringHandicapAsync(playerId, seasonId, week.WeekNumber);
+                    // Use session handicap - includes the current week's score for summary report
+                    var handicap = await _handicapService.GetPlayerSessionHandicapAsync(playerId, seasonId, week.WeekNumber);
                     handicapData[playerId] = handicap;
                 }
                 catch
@@ -822,8 +838,15 @@ namespace GolfLeagueManager.Business
                 .Where(m => m.WeekId == nextWeek.Id)
                 .ToList();
 
-            // Filter matchups to only include those for this flight
-            var assignments = _flightAssignmentService.GetAllAssignments().ToList();
+            // Calculate the session start week number for the next week to get session-aware flight assignments
+            var sessionStartWeek = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= nextWeek.WeekNumber && w.SessionStart)
+                .OrderByDescending(w => w.WeekNumber)
+                .FirstOrDefault();
+            int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
+
+            // Filter matchups to only include those for this flight using session-aware assignments
+            var assignments = _flightAssignmentService.GetAssignmentsBySession(seasonId, sessionStartWeekNumber).ToList();
             var nextWeekMatchupsForFlight = allNextWeekMatchups.Where(m =>
             {
                 var playerAAssignment = assignments.FirstOrDefault(a => a.PlayerId == m.PlayerAId && a.Flight != null && a.Flight.SeasonId == seasonId);
