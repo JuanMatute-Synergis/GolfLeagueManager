@@ -248,8 +248,13 @@ namespace GolfLeagueManager.Business
 
             var weekTitle = $"Week {week.WeekNumber} (" + week.Date.ToString("dddd MMMM d yyyy") + ")";
 
-            // Pre-calculate handicaps for all players in all matchups (including current week's score for summary)
-            var allPlayerIds = matchups.SelectMany(m => new[] { m.PlayerAId, m.PlayerBId }).Distinct().ToList();
+            // Pre-calculate handicaps for ALL players in the session's flights (including bye players who have no matchup this week)
+            var allPlayerIdsFromMatchups = matchups.SelectMany(m => new[] { m.PlayerAId, m.PlayerBId }).ToHashSet();
+            var allFlightPlayerIds = _context.PlayerFlightAssignments
+                .Where(pfa => pfa.SeasonId == seasonId && pfa.SessionStartWeekNumber == sessionStartWeekNumber)
+                .Select(pfa => pfa.PlayerId)
+                .ToList();
+            var allPlayerIds = allFlightPlayerIds.Union(allPlayerIdsFromMatchups).Distinct().ToList();
             var handicapData = new Dictionary<Guid, decimal>();
             foreach (var playerId in allPlayerIds)
             {
@@ -678,18 +683,37 @@ namespace GolfLeagueManager.Business
 
         private void CreateFlightSummaryTable(IContainer container, Flight flight, List<Matchup> matchupsInFlight, Week currentWeek, Guid seasonId, Dictionary<Guid, decimal> handicapData)
         {
-            // Get all players in this flight for the season
-            var playerIds = matchupsInFlight
-                .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
+            var weekNumber = currentWeek.WeekNumber;
+
+            // Determine the session start week number to get session-aware flight assignments
+            var sessionStartWeekForPlayers = _context.Weeks
+                .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber && w.SessionStart)
+                .OrderByDescending(w => w.WeekNumber)
+                .FirstOrDefault();
+            int sessionStartWeekNumberForPlayers = sessionStartWeekForPlayers?.WeekNumber ?? 1;
+
+            // Get ALL players in this flight for the current session (including the bye player)
+            var playerIds = _context.PlayerFlightAssignments
+                .Where(pfa => pfa.FlightId == flight.Id && pfa.SeasonId == seasonId && pfa.SessionStartWeekNumber == sessionStartWeekNumberForPlayers)
+                .Select(pfa => pfa.PlayerId)
                 .Distinct()
                 .ToList();
+
+            // Fall back to matchup-derived players if no flight assignments found
+            if (!playerIds.Any())
+            {
+                playerIds = matchupsInFlight
+                    .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
+                    .Distinct()
+                    .ToList();
+            }
+
             var players = _context.Players.Where(p => playerIds.Contains(p.Id)).ToList();
 
             // Get session data
             var allMatchups = _context.Matchups
                 .Where(m => (playerIds.Contains(m.PlayerAId) || playerIds.Contains(m.PlayerBId)))
                 .ToList();
-            var weekNumber = currentWeek.WeekNumber;
 
             var sessionStartWeek = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber <= weekNumber && w.SessionStart)
