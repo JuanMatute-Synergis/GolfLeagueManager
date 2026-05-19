@@ -15,6 +15,7 @@ interface Player {
   thisWeekPoints: number;
   sessionTotal: number;
   isAbsent: boolean;
+  isBye: boolean;
 }
 
 interface Flight {
@@ -203,6 +204,7 @@ export class LeagueSummaryComponent implements OnInit {
               thisWeekPoints: player.thisWeekPoints || 0,
               sessionTotal: player.sessionTotal || 0,
               isAbsent: player.isAbsent,
+              isBye: player.isBye,
               rank: index + 1
             }))
           })),

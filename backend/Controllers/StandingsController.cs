@@ -308,6 +308,7 @@ namespace GolfLeagueManager.Controllers
                     var thisWeekMatchup = thisWeekMatchups.FirstOrDefault(m => m.PlayerAId == player.Id || m.PlayerBId == player.Id);
                     int? grossScore = null;
                     bool isAbsent = false;
+                    bool isBye = thisWeekMatchup == null;
 
                     if (thisWeekMatchup != null)
                     {
@@ -348,7 +349,8 @@ namespace GolfLeagueManager.Controllers
                         grossScore = grossScore ?? 0,
                         thisWeekPoints = thisWeekPoints,
                         sessionTotal = sessionTotal,
-                        isAbsent = isAbsent
+                        isAbsent = isAbsent,
+                        isBye = isBye
                     });
                 }
 

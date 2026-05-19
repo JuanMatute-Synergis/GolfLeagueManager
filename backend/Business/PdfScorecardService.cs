@@ -802,6 +802,7 @@ namespace GolfLeagueManager.Business
                     int gross = 0, thisWeekMpPoints = 0;
                     bool isAbsent = false;
                     bool isAbsentWithNotice = false;
+                    bool isBye = matchup == null;
                     if (matchup != null)
                     {
                         if (matchup.PlayerAId == player.Id)
@@ -839,7 +840,7 @@ namespace GolfLeagueManager.Business
                     table.Cell().Background(rowColor).Padding(3).Text(hcp.ToString("0.#")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(avg.ToString("0.00")).FontSize(6).AlignCenter().FontColor(Colors.Black);
                     table.Cell().Background(rowColor).Padding(3).Text(gross > 0 ? gross.ToString() : (isAbsent ? "ABS" : "-")).FontSize(6).AlignCenter().FontColor(Colors.Black);
-                    table.Cell().Background(rowColor).Padding(3).Text(thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-").FontSize(6).AlignCenter().FontColor(Colors.Black);
+                    table.Cell().Background(rowColor).Padding(3).Text(isBye ? "BYE" : (thisWeekMpPoints > 0 ? thisWeekMpPoints.ToString() : "-")).FontSize(6).AlignCenter().FontColor(Colors.Black);
 
                     var sessionTotalColor = accumScore > 0 ? Colors.Grey.Lighten2 : rowColor;
                     table.Cell().Background(sessionTotalColor).Padding(3).Text(accumScore > 0 ? accumScore.ToString() : "-").FontSize(6).Bold().AlignCenter().FontColor(Colors.Black);
@@ -1027,19 +1028,30 @@ namespace GolfLeagueManager.Business
             var flight = flightGroup.Flight;
             var matchupsInFlight = (List<Matchup>)flightGroup.Matchups;
 
-            // Get all player IDs in this flight
-            var playerIds = matchupsInFlight
-                .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
-                .Distinct()
-                .ToList();
-            var players = _context.Players.Where(p => playerIds.Contains(p.Id)).ToList();
-
             // Get session data
             var sessionStartWeek = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber <= currentWeek.WeekNumber && w.SessionStart)
                 .OrderByDescending(w => w.WeekNumber)
                 .FirstOrDefault();
             int sessionStartWeekNumber = sessionStartWeek?.WeekNumber ?? 1;
+            Guid flightId = flight.Id;
+
+            // Get all player IDs in this flight for the current session, including players on a bye
+            var playerIds = _context.PlayerFlightAssignments
+                .Where(pfa => pfa.FlightId == flightId && pfa.SeasonId == seasonId && pfa.SessionStartWeekNumber == sessionStartWeekNumber)
+                .Select(pfa => pfa.PlayerId)
+                .Distinct()
+                .ToList();
+
+            // Fall back to matchup-derived players if no session flight assignments exist
+            if (!playerIds.Any())
+            {
+                playerIds = matchupsInFlight
+                    .SelectMany(m => new[] { m.PlayerAId, m.PlayerBId })
+                    .Distinct()
+                    .ToList();
+            }
+            var players = _context.Players.Where(p => playerIds.Contains(p.Id)).ToList();
 
             var weeksInSession = _context.Weeks
                 .Where(w => w.SeasonId == seasonId && w.WeekNumber >= sessionStartWeekNumber && w.WeekNumber <= currentWeek.WeekNumber)
@@ -1182,6 +1194,7 @@ namespace GolfLeagueManager.Business
                             {
                                 var matchup = allMatchups.FirstOrDefault(m => m.WeekId == week.Id &&
                                     (m.PlayerAId == player.Id || m.PlayerBId == player.Id));
+                                bool isBye = matchup == null;
 
                                 int weekPoints = 0;
                                 int? grossScore = null;
@@ -1218,7 +1231,20 @@ namespace GolfLeagueManager.Business
                                     }
                                 }
 
-                                if (isAbsent)
+                                if (isBye)
+                                {
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text("-").FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text("-").FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text("-").FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    table.Cell().Background(rowColor).Padding(0.5f)
+                                        .Text("BYE").FontSize(5).AlignCenter().FontColor(Colors.Black);
+                                    // Week separator
+                                    table.Cell().Background(Colors.Grey.Darken1).Padding(0);
+                                }
+                                else if (isAbsent)
                                 {
                                     // Create separate cells for each data type when absent
                                     table.Cell().Background(rowColor).Padding(0.5f)
